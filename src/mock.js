@@ -1,13 +1,13 @@
 
 const mock = {
-    conversationList : [
-        {user:'Test',lastMessage:'Hello',lastTime:'23121',userAvatar:'../public/Avatar/矩形.png'},
-        {user:'Test2',lastMessage:'Hi~',lastTime:'231421',userAvatar:'../public/Avatar/矩形5.png'},
-        {user:'Test3',lastMessage:'1',lastTime:'23121',userAvatar:'../public/Avatar/矩形.png'},
-        {user:'Test4',lastMessage:'2~',lastTime:'231421',userAvatar:'../public/Avatar/矩形5.png'},
-        {user:'Test5',lastMessage:'3',lastTime:'23121',userAvatar:'../public/Avatar/矩形.png'},
-        {user:'Test6',lastMessage:'4~',lastTime:'231421',userAvatar:'../public/Avatar/矩形5.png'},
-    ],
+    // conversationList : [
+    //     {user:'Test',lastMessage:'Hello',lastTime:'23121',userAvatar:'../public/Avatar/矩形.png'},
+    //     {user:'Test2',lastMessage:'Hi~',lastTime:'231421',userAvatar:'../public/Avatar/矩形5.png'},
+    //     {user:'Test3',lastMessage:'1',lastTime:'23121',userAvatar:'../public/Avatar/矩形.png'},
+    //     {user:'Test4',lastMessage:'2~',lastTime:'231421',userAvatar:'../public/Avatar/矩形5.png'},
+    //     {user:'Test5',lastMessage:'3',lastTime:'23121',userAvatar:'../public/Avatar/矩形.png'},
+    //     {user:'Test6',lastMessage:'4~',lastTime:'231421',userAvatar:'../public/Avatar/矩形5.png'},
+    // ],
 
     props:{
        appkey: '41351358#427351',

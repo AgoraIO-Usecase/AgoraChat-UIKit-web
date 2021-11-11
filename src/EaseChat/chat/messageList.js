@@ -2,16 +2,16 @@ import React, { memo, useRef, useEffect, useState, useCallback } from 'react';
 import ReactDOM from 'react-dom'
 import { makeStyles } from "@material-ui/styles";
 import './index.css'
-import { useDispatch } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
+
 import MessageActions from '../../redux/message'
 import RetractedMessage from './messages/retractedMessage';
 import FileMessage from './messages/fileMessage';
 import ImgMessage from './messages/imageMessage';
 import AudioMessage from './messages/audioMessage';
 import TextMessage from './messages/textMessage';
-// import { useParams } from "react-router-dom";
-const to = ''
-const chatType =''
+import i18next from 'i18next';
+
 const useStyles = makeStyles((theme) => ({
     root: {
         width: '100%',
@@ -21,16 +21,16 @@ const useStyles = makeStyles((theme) => ({
         bottom: '0',
         top: '0',
         overflow: 'hidden',
-        // flexDirection:'column-reverse'
     },
 }))
 
 const PAGE_NUM = 20
-function MessageList({ messageList }) {
+function MessageList({ messageList,showByselfAvatar }) {
     const classes = useStyles();
     const dispatch = useDispatch()
-    // const { to, chatType } = useParams()
-    console.log('** Render MessageList **')
+    const globalProps = useSelector(( state )=> state.global.globalProps )
+    const { to, chatType } = globalProps
+    console.log('** Render MessageList **',messageList)
     const scrollEl = useRef(null)
     const [isPullingDown, setIsPullingDown] = useState(false)
     const [isLoaded, setIsLoaded] = useState(false)
@@ -68,38 +68,38 @@ function MessageList({ messageList }) {
     }
     return (
         <div className={classes.root}>
-            <div ref={scrollEl} className="pulldown-wrapper" onScroll={handleScroll}>
-                <div className="pulldown-tips">
-                    <div style={{ display: isLoaded ? 'block' : 'none' }}>
-                        <span>loaded</span>
-                    </div>
-                    <div style={{ display: isPullingDown ? 'block' : 'none' }}>
-                        <span>Loading...</span>
-                    </div>
+        <div ref={scrollEl} className="pulldown-wrapper" onScroll={handleScroll}>
+            <div className="pulldown-tips">
+                <div style={{ display: isLoaded ? 'block' : 'none' }}>
+                    <span style={{ fontSize: '12px' }}>{i18next.t('no more messages')}</span>
                 </div>
-                <ul className="pulldown-list">
-                    {messageList.map((msg) => {
-                        if (msg.body.type === 'txt') {
-                            return <TextMessage message={msg} key={msg.id}  onRecallMessage={handleRecallMsg} />
-                        }
-                        else if (msg.body.type === 'file') {
-                            return <FileMessage message={msg} key={msg.id} onRecallMessage={handleRecallMsg} />
-                        }
-                        else if (msg.body.type === 'img') {
-                            return <ImgMessage message={msg} key={msg.id} onRecallMessage={handleRecallMsg} />
-                        }
-                        else if (msg.body.type === 'audio') {
-                            <AudioMessage message={msg} key={msg.id} />
-                        }
-                        else if (msg.body.type === 'recall') {
-                            return <RetractedMessage message={msg} key={msg.id} />
-                        } else {
-                            return null
-                        }
-                    })}
-                </ul>
+                <div style={{ display: isPullingDown ? 'block' : 'none' }}>
+                    <span>Loading...</span>
+                </div>
             </div>
+            <ul className="pulldown-list">
+                {messageList.length ? messageList.map((msg, index) => {
+                    if (msg.body.type === 'txt') {
+                        return <TextMessage message={msg} key={msg.id + index} onRecallMessage={handleRecallMsg} showByselfAvatar={showByselfAvatar}/>
+                    }
+                    else if (msg.body.type === 'file') {
+                        return <FileMessage message={msg} key={msg.id + index} onRecallMessage={handleRecallMsg} />
+                    }
+                    else if (msg.body.type === 'img') {
+                        return <ImgMessage message={msg} key={msg.id + index} onRecallMessage={handleRecallMsg} />
+                    }
+                    else if (msg.body.type === 'audio') {
+                        return <AudioMessage message={msg} key={msg.id + index} />
+                    }
+                    else if (msg.body.type === 'recall') {
+                        return <RetractedMessage message={msg} key={msg.id + index} />
+                    } else {
+                        return null
+                    }
+                }) : null}
+            </ul>
         </div>
+    </div>
     );
 }
 

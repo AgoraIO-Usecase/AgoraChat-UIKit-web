@@ -8,12 +8,18 @@ const { Types, Creators } = createActions({
     setCurrentSession: ['userId'],
     topSession: ['sessionId', 'sessionType'],
     deleteSession: ['sessionId'],
+    pushSession:['session'],
     getSessionList: () => {
         return (dispatch, getState) => {
             AppDB.getSessionList().then((res) => {
                 console.log('获取会话列表', res)
                 dispatch(Creators.setSessionList(res))
             })
+        }
+    },
+    _pushSession: (session) =>{
+        return (dispatch) =>{
+            dispatch(Creators.pushSession(session))
         }
     }
 })
@@ -53,10 +59,17 @@ export const deleteSession = (state, { sessionId }) => {
     return state.setIn(['sessionList'], sessionList)
 }
 
+export const pushSession = (state, {session}) =>{
+    let ary = state.sessionList.asMutable()
+    let newSessionList = _.concat(ary,session)
+    return state.setIn(['sessionList'],newSessionList)
+}
+
 /* ------------- Hookup Reducers To Types ------------- */
 export const sessionReducer = createReducer(INITIAL_STATE, {
     [Types.SET_SESSION_LIST]: setSessionList,
     [Types.SET_CURRENT_SESSION]: setCurrentSession,
     [Types.TOP_SESSION]: topSession,
-    [Types.DELETE_SESSION]: deleteSession
+    [Types.DELETE_SESSION]: deleteSession,
+    [Types.PUSH_SESSION]:pushSession
 })

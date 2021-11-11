@@ -1,7 +1,7 @@
 import React, { memo, useState } from 'react'
 import { makeStyles } from "@material-ui/styles";
 import Avatar from '@material-ui/core/Avatar';
-import clsx from 'clsx';
+// import clsx from 'clsx';
 import i18next from "i18next";
 import { IconButton, Icon, Menu, MenuItem } from '@material-ui/core';
 import { renderTime } from '../../../utils';
@@ -97,7 +97,8 @@ function FileMessage({ message, onRecallMessage }) {
             <Avatar></Avatar>
             <div className={classes.fileCard} onContextMenu={handleClick}>
                 <div className={classes.fileIcon}>
-                    <Icon className={clsx(classes.icon, 'iconfont icon-fujian')}></Icon>
+                    {/* <Icon className={clsx(classes.icon, 'iconfont icon-fujian')}></Icon> */}
+                    fujian
                 </div>
                 <div className={classes.fileInfo}>
                     <p>{message.filename}</p>

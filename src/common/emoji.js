@@ -1,5 +1,5 @@
 export const emoji = {
-    path: '../assets/faces/',
+    path: '../common/faces/',
     map: {
         '[):]': 'ee_1.png',
         '[:D]': 'ee_2.png',

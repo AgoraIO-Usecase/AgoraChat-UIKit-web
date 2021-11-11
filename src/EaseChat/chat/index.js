@@ -11,8 +11,8 @@ import store from "../../redux/index";
 import GlobalPropsActions from "../../redux/globalProps";
 import createListen from "../../utils/WebIMListen";
 import _ from "lodash";
-import '../../i18n'
-import "../../assets/iconfont.css";
+import "../../i18n";
+import "../../common/iconfont.css";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,12 +29,14 @@ const useStyles = makeStyles((theme) => ({
 const Chat = (props) => {
   const dispatch = useDispatch();
   useEffect(() => {
-    if (!props.sdkConnection) {
-      initIMSDK(props.appkey);
+    if (props.appkey && props.username) {
+      if (props.sdkConnection === undefined) {
+        initIMSDK(props.appkey);
+        login()
+      }
+      createListen();
     }
-    createListen();
     dispatch(GlobalPropsActions.saveGlobalProps(props));
-    props.agoraToken && props.username && login();
   }, []);
 
   const login = () => {
@@ -47,18 +49,23 @@ const Chat = (props) => {
       });
   };
   const classes = useStyles();
+
   const messageList =
-    useSelector((state) =>
-      _.get(state, ["message", "singleChat", "tom"], [])
-    ) || [];
+    useSelector((state) => {
+      const to = state.global.globalProps.to;
+      const chatType = state.global.globalProps.chatType;
+      return _.get(state, ["message", chatType, to], []);
+    }) || [];
+
   return (
     <div className={classes.root}>
       <MessageBar />
-      <MessageList messageList={messageList} />
+      <MessageList messageList={messageList} showByselfAvatar={props.showByselfAvatar}/>
       <SendBox />
     </div>
   );
 };
+
 const ChatWrapper = (props) => {
   return (
     <Provider store={store}>
@@ -71,19 +78,15 @@ const ChatWrapper = (props) => {
 ChatWrapper.getSdk = () => WebIM;
 export default ChatWrapper;
 
-
 ChatWrapper.propTypes = {
   appkey: PropTypes.string.isRequired,
-  username:PropTypes.string.isRequired,
-  agoraToken:PropTypes.string.isRequired,
-  chatType:PropTypes.string.isRequired,
+  username: PropTypes.string.isRequired,
+  agoraToken: PropTypes.string.isRequired,
+  chatType: PropTypes.string.isRequired,
+
   // TODO 接收人
-  to:PropTypes.string.isRequired,
-};
-ChatWrapper.defaultProps = {
-  appkey:'41351358#427351',
-  username:'jack',
-  agoraToken:"007eJxTYKgpYly0fILfMkkDI8u0H6mhmaUBCYEmE9P6pb/mefk9mafAYGFukWJqYJpiZmRkYWJkaZKYmJKWmphimWhhaZFqmJI2d1dzYkMgI4OMH28sIwMrAyMQgvgqDCmJqYaGqakGusZGqcm6QGayblKigZGucZpJspmJmXmSsbkRAJxrJZs=",
-  chatType:'singleChat',
-  to:'tom'
+  to: PropTypes.string,
+  sdkConnection:PropTypes.object,
+
+  showByselfAvatar:PropTypes.bool,  //是否展示自己聊天头像
 };
