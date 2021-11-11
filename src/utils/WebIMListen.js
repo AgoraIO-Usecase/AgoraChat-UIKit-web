@@ -3,7 +3,7 @@ import WebIM from "../utils/WebIM";
 import AppDB from "../utils/AppDB";
 
 import MessageActions from "../redux/message";
-import SessionActions from "../redux/session"
+import SessionActions from "../redux/session";
 const sessionType = {
   chat: "singleChat",
   groupchat: "groupChat",
@@ -11,8 +11,8 @@ const sessionType = {
 };
 // TODO createListen 语义化
 export default function createListen() {
-  WebIM.conn.listen({
-    onOpened: (msg) => {
+  WebIM.conn.addEventHandler('EaseChat',{
+    onConnected: (msg) => {
       const username = store.getState().global.globalProps.username;
       console.log("登录成功");
 
@@ -29,7 +29,7 @@ export default function createListen() {
       const { type, from, to } = message;
       const sessionId = type === "chat" ? from : to;
       store.dispatch(MessageActions.addMessage(message, "txt"));
-      // store.dispatch(SessionActions.topSession(sessionId, sessionType[type]))
+      store.dispatch(SessionActions.topSession(sessionId, sessionType[type]))
     },
     onFileMessage: (message) => {
       console.log("onFileMessage", message);
@@ -40,12 +40,38 @@ export default function createListen() {
       const { type, from, to } = message;
       const sessionId = type === "chat" ? from : to;
       store.dispatch(MessageActions.addMessage(message, "img"));
-      // store.dispatch(SessionActions.topSession(sessionId, sessionType[type]))
+      store.dispatch(SessionActions.topSession(sessionId, sessionType[type]))
+    },
+
+    onAudioMessage: (message) => {
+      console.log("onAudioMessage", message);
+      const { type, from, to } = message;
+      const sessionId = type === "chat" ? from : to;
+      store.dispatch(MessageActions.addAudioMessage(message, "audio"));
     },
 
     onRecallMessage: (message) => {
-      console.log("onRecallMessage", message);
+      // When log in, have received the Recall message before get Message from db. so retract after 2 seconds
+      if (!store.getState().message.byId[message.mid]) {
+        setTimeout(() => {
+          store.dispatch(MessageActions.deleteMessage(message));
+        }, 2000);
+        return;
+      }
       store.dispatch(MessageActions.deleteMessage(message));
+    },
+    // The other has read the message
+    onReadMessage: (message) => {
+      console.log("onReadMessage", message);
+      store.dispatch(MessageActions.updateMessageStatus(message, "read"));
+    },
+
+    onReceivedMessage: function (message) {
+      const { id, mid } = message;
+      store.dispatch(MessageActions.updateMessageMid(id, mid));
+    },
+    onDeliveredMessage: function (message) {
+      store.dispatch(MessageActions.updateMessageStatus(message, "received"));
     },
 
     onContactInvited: function (msg) {
@@ -56,15 +82,7 @@ export default function createListen() {
     onContactRefuse: function () {},
     onContactAgreed: function () {},
 
-    onPresence: (msg) => {
-      // switch (msg.type) {
-      //     case 'joinGroupNotifications':
-      //         store.dispatch(NoticeActions.addGroupRequest(msg))
-      //         break;
-      //     default:
-      //         break
-      // }
-    },
+    onPresence: (msg) => {},
     onError: (err) => {
       console.log("error");
       console.error(err);

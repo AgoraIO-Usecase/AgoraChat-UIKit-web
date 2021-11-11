@@ -15,10 +15,10 @@ import PropTypes from "prop-types";
 import i18next from "i18next";
 import WebIM from "../../utils/WebIM";
 
-// import sender from "../../assets/images/sender@2x.png";
-import icon_emoji from "../../assets/icons/emoji@2x.png";
-import icon_yuyin from "../../assets/icons/voice@2x.png";
-import attachment from "../../assets/icons/attachment@2x.png";
+import Recorder from "./messages/recorder";
+import icon_emoji from "../../common/icons/emoji@2x.png";
+import icon_yuyin from "../../common/icons/voice@2x.png";
+import attachment from "../../common/icons/attachment@2x.png";
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -26,8 +26,8 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     background: "#fff",
     borderRadius: "2px",
-    position: 'absolute',
-    bottom: 0
+    position: "absolute",
+    bottom: 0,
   },
   emitter: {
     display: "flex",
@@ -68,7 +68,6 @@ function SendBox(props) {
   const classes = useStyles();
   const globalProps = useSelector((state) => state.global.globalProps);
   const { chatType, to } = globalProps;
-  // let { chatType, to } = useParams();
   const emojiRef = useRef(null);
   const fileEl = useRef(null);
   const [emojiVisible, setEmojiVisible] = useState(null);
@@ -77,6 +76,7 @@ function SendBox(props) {
   const inputValueRef = useRef(null);
   const imageEl = useRef(null);
   const [sessionEl, setSessionEl] = useState(null);
+  const [showRecorder, setShowRecorder] = useState(false)
   inputValueRef.current = inputValue;
   const handleClickEmoji = (e) => {
     setEmojiVisible(e.currentTarget);
@@ -85,7 +85,7 @@ function SendBox(props) {
     setEmojiVisible(null);
   };
   const handleEmojiSelected = (emoji) => {
-    if (!emoji) return
+    if (!emoji) return;
     setEmojiVisible(null);
     setInputValue((value) => value + emoji);
     setTimeout(() => {
@@ -100,15 +100,13 @@ function SendBox(props) {
     setInputValue(e.target.value);
   };
   const sendMessage = useCallback(() => {
-    if (!inputValue) return;
-    dispatch(
-      MessageActions.sendText(to, chatType, {
-        msg: inputValue,
-      })
-    );
-    setInputValue("");
-    inputRef.current.focus();
-  }, [inputValue, to, chatType, dispatch]);
+    if (!inputValue) return
+    dispatch(MessageActions.sendTxtMessage(to, chatType, {
+        msg: inputValue
+    }))
+    setInputValue('')
+    inputRef.current.focus()
+}, [inputValue, to, chatType, dispatch])
 
   const onKeyDownEvent = useCallback(
     (e) => {
@@ -170,7 +168,7 @@ function SendBox(props) {
       default:
         break;
     }
-    setSessionEl(null)
+    setSessionEl(null);
   };
 
   /*------------ ui-menu ----------*/
@@ -229,36 +227,22 @@ function SendBox(props) {
   }
   return (
     <Box className={classes.root}>
-      {/* <Box className={classes.toolbar}>
-        <IconButton className="iconfont icon-luyin icon">录音</IconButton>
-        <IconButton
-          className="iconfont icon-tupian icon"
-          onClick={handleImageClick}
-        >
-          <input
-            type="file"
-            accept="image/gif,image/jpeg,image/jpg,image/png,image/svg"
-            ref={imageEl}
-            onChange={handleImageChange}
-            className={classes.hide}
-          />
-          {i18next.t("图片")}
-        </IconButton>
-
-        <IconButton onClick={handleFileClick}>
-          <input
-            ref={fileEl}
-            onChange={handleFileChange}
-            type="file"
-            className={classes.hide}
-          />
-          文件
-        </IconButton>
-      </Box> */}
       <Box className={classes.emitter}>
-        <IconButton>
-          <img alt="" className={classes.iconStyle} src={icon_yuyin} />
-        </IconButton>
+        {window.location.protocol === "https:" && (
+          <IconButton
+            onClick={() => {
+              setShowRecorder(true);
+            }}
+          >
+            <img alt="" className={classes.iconStyle} src={icon_yuyin} />
+          </IconButton>
+        )}
+        <Recorder
+          open={showRecorder}
+          onClose={() => {
+            setShowRecorder(false);
+          }}
+        />
         <TextareaAutosize
           className={classes.input}
           minRows={2}
@@ -267,9 +251,6 @@ function SendBox(props) {
           onChange={handleInputChange}
           ref={inputRef}
         ></TextareaAutosize>
-        {/* <IconButton onClick={sendMessage}>
-                    <img src={sender} alt="send" className={classes.senderBar} />
-                </IconButton> */}
 
         <IconButton ref={emojiRef} onClick={handleClickEmoji}>
           <img alt="" className={classes.iconStyle} src={icon_emoji} />

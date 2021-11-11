@@ -1,16 +1,24 @@
 import React, { Component } from "react";
 import { render } from "react-dom";
 
-import { EaseChat } from "../../src/index";
+// import { EaseChat, EaseApp } from "../../src/index";
 
 export default class Demo extends Component {
+  onClickSession = () => {
+    let session = {
+      sessionType: "singleChat",
+      sessionId: "qw10",
+    };
+    EaseApp.onClickSession(session);
+  };
   render() {
     return (
       <div>
-        <h1>es-uikit Demo</h1>
-        <div style={{width:'700px',height:'700px'}}>
-        <EaseChat />
+        <h3>EaseApp</h3>
+        <div style={{ width: "100%", height: "500px" }}>
+          {/* <EaseApp/> */}
         </div>
+        <button onClick={this.onClickSession}>1111</button>
       </div>
     );
   }

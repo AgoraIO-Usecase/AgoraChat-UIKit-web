@@ -1,0 +1,77 @@
+.box {
+    display: flex;
+    align-items: center;
+}
+
+.wifi-symbol {
+    width: 38px;
+    height: 38px;
+    box-sizing: border-box;
+    position: relative;
+    /*必须，否则苹果overflow失效*/
+    overflow: hidden;
+    transform: rotate(135deg);
+    left: 25px;
+}
+
+.reverse {
+    transform: rotate(-45deg);
+    left: -25px;
+}
+
+.wifi-circle {
+    border: 3px solid rgb(35, 195, 129);
+    border-radius: 50%;
+    position: absolute;
+}
+
+.reverseColor {
+    border: 3px solid #fff !important;
+}
+
+.first {
+    width: 5px;
+    height: 5px;
+    background: rgb(35, 195, 129);
+    top: 33px;
+    left: 33px;
+}
+
+.first .reverse {
+    background: #fff;
+}
+
+.second {
+    width: 25px;
+    height: 25px;
+    top: 25px;
+    left: 25px;
+}
+
+.secondPlay {
+    animation: fadeInOut 1s infinite 0.2s;
+}
+
+.third {
+    width: 40px;
+    height: 40px;
+    top: 18px;
+    left: 18px;
+
+}
+
+.thirdPlay {
+    animation: fadeInOut 1s infinite 0.4s;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        /*初始状态 透明度为0*/
+    }
+
+    100% {
+        opacity: 1;
+        /*结尾状态 透明度为1*/
+    }
+}

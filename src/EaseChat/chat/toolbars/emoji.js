@@ -40,7 +40,7 @@ function Emoji({ anchorEl, onClose, onSelected }) {
                         }}
                     >
                         <img
-                            src={require(`../../../assets/faces/${v}`).default}
+                            src={require(`../../../common/faces/${v}`).default}
                             alt={k}
                             width={emojiWidth}
                             height={emojiWidth}
