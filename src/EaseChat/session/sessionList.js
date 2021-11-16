@@ -6,7 +6,7 @@ import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import Avatar from "@material-ui/core/Avatar";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "../../EaseApp/index";
 import { renderTime } from "../../utils/index";
 import groupIcon from "../../common/images/group@2x.png";
 import chatRoomIcon from "../../common/images/chatroom@2x.png";
@@ -15,11 +15,9 @@ const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
     height: "100%",
-    backgroundColor: "rgba(206, 211, 217, 0.3)",
-    margin: 0,
-    padding: 0,
-    minHeight: '20px',
-    overflowY:'scroll'
+    margin: '0 !important',
+    padding: '0 !important',
+    overflowY:'scroll',
   },
   listItem: {
     // height: theme.spacing(18),

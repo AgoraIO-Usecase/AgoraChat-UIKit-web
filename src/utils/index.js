@@ -143,12 +143,9 @@ export function formatServerMessage(message = {}, messageType) {
     const ext = message.ext || {}
     const formatMsg = Object.assign(msgTpl.base, message)
     const body = Object.assign(msgTpl[messageType], message)
-    let chatType = message.type
-    if (chatType === 'chat') chatType = 'singleChat';
-    if (chatType === 'groupchat') chatType = 'groupChat'
-    if (chatType === 'chatroom') chatType = 'chatRoom'
+    let chatType = message.chatType
     if (messageType === 'txt') {
-        body.msg = message.data;
+        body.msg = message.msg;
         body.type = 'txt'
     } else if (messageType === 'file') {
         body.type = 'file'

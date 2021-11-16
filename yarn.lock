@@ -5491,10 +5491,10 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
-easemob-websdk@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.npmjs.org/easemob-websdk/-/easemob-websdk-4.0.0.tgz"
-  integrity sha512-UXcaS65VRpvP/j0AC1VKE+rXjpZKPCHLmGW8L5HqSOO7HRYMl4ujmaQ3mdLj1Odw/a9LZnh/ZM3j/8iQw5Xwxg==
+easemob-websdk@^4.0.1-beta2:
+  version "4.0.1-beta2"
+  resolved "https://registry.npmmirror.com/easemob-websdk/download/easemob-websdk-4.0.1-beta2.tgz?cache=0&sync_timestamp=1636970110782&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Feasemob-websdk%2Fdownload%2Feasemob-websdk-4.0.1-beta2.tgz#4b4eaa50a20b8b8bcdcb808dee5ee2a2ba0967af"
+  integrity sha512-IZRLI3I1siwBPZe2in7JrF9ezot7JI8NKOvwLa6LsIgy92nncCFLLU8Almxou5WNWL4XL1jJLAFfjZv3gY7JmA==
 
 ecc-jsbn@~0.1.1:
   version "0.1.2"

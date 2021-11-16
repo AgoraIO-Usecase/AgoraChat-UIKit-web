@@ -32,6 +32,7 @@ const { Types, Creators } = createActions({
     updateMessageMid: ['id', 'mid'],
     // -async-
     sendTxtMessage: (to, chatType, message = {}) => {
+        if (!to || !chatType) return
         return (dispatch, getState) => {
             const formatMsg = formatLocalMessage(to, chatType, message, 'txt')
             const { body, id } = formatMsg
@@ -226,7 +227,7 @@ const { Types, Creators } = createActions({
 
 /* ------------- Reducers ------------- */
 export const addMessage = (state, { message, messageType = 'txt' }) => {
-    const rootState = store.getState()
+    const rootState = uikit_store.getState()
     !message.status && (message = formatServerMessage(message, messageType))
     const username = WebIM.conn.context.userId
     const { id, to, status } = message

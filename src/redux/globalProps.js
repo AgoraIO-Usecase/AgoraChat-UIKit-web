@@ -31,11 +31,9 @@ export const updateGlobalProps = (state, { options }) => {
 };
 
 export const updateGlobalProps2 = (state, { options }) => {
-  console.log('state>>>',state);
-  console.log('state.getIn',state.getIn(['globalProps']));
-  state = state.setIn(['globalProps','to'], options.to)
-  state = state.setIn(['globalProps','chatType'], options.chatType)
-   return state
+  state = state.setIn(["globalProps", "to"], options.to);
+  state = state.setIn(["globalProps", "chatType"], options.chatType);
+  return state;
 };
 
 /* ------------- Hookup Reducers To Types ------------- */

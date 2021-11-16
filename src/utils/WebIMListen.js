@@ -4,32 +4,33 @@ import AppDB from "../utils/AppDB";
 
 import MessageActions from "../redux/message";
 import SessionActions from "../redux/session";
-const sessionType = {
-  chat: "singleChat",
-  groupchat: "groupChat",
-  chatroom: "chatRoom",
-};
+import GlobalPropsActions from "../redux/globalProps"
 // TODO createListen 语义化
 export default function createListen() {
   WebIM.conn.addEventHandler('EaseChat',{
     onConnected: (msg) => {
-      const username = store.getState().global.globalProps.username;
       console.log("登录成功");
-
-      // init DB
-      AppDB.init(username);
+        // init DB
+        AppDB.init(WebIM.conn.context.userId);
 
       // get session list
       store.dispatch(SessionActions.getSessionList());
+
+      const options = {
+        appKey:WebIM.conn.context.appKey,
+        username:WebIM.conn.context.userId
+      }
+      store.dispatch(GlobalPropsActions.saveGlobalProps(options));
+      
     },
 
     onTextMessage: (message) => {
       console.log("onTextMessage", message);
       console.log("store>>", store);
-      const { type, from, to } = message;
-      const sessionId = type === "chat" ? from : to;
+      const { chatType, from, to} = message;
+      const sessionId = chatType === "singleChat" ? from : to;
       store.dispatch(MessageActions.addMessage(message, "txt"));
-      store.dispatch(SessionActions.topSession(sessionId, sessionType[type]))
+      store.dispatch(SessionActions.topSession(sessionId, chatType))
     },
     onFileMessage: (message) => {
       console.log("onFileMessage", message);
@@ -37,22 +38,22 @@ export default function createListen() {
     },
     onPictureMessage: (message) => {
       console.log("onPictureMessage", message);
-      const { type, from, to } = message;
-      const sessionId = type === "chat" ? from : to;
+      const { chatType, from, to } = message;
+      const sessionId = chatType === "singleChat" ? from : to;
       store.dispatch(MessageActions.addMessage(message, "img"));
-      store.dispatch(SessionActions.topSession(sessionId, sessionType[type]))
+      store.dispatch(SessionActions.topSession(sessionId, chatType))
     },
 
     onAudioMessage: (message) => {
       console.log("onAudioMessage", message);
-      const { type, from, to } = message;
-      const sessionId = type === "chat" ? from : to;
+      const { chatType, from, to } = message;
+      const sessionId = chatType === "singleChat" ? from : to;
       store.dispatch(MessageActions.addAudioMessage(message, "audio"));
     },
 
     onRecallMessage: (message) => {
       // When log in, have received the Recall message before get Message from db. so retract after 2 seconds
-      if (!store.getState().message.byId[message.mid]) {
+      if (!uikit_store.getState().message.byId[message.mid]) {
         setTimeout(() => {
           store.dispatch(MessageActions.deleteMessage(message));
         }, 2000);

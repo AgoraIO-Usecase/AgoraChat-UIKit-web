@@ -3,17 +3,18 @@ import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/styles";
 import MessageList from "./messageList";
 import MessageBar from "./messageBar/index";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "../../EaseApp/index";
 import { Provider } from "react-redux";
 import SendBox from "./sendBox";
 import WebIM, { initIMSDK } from "../../utils/WebIM";
 import store from "../../redux/index";
 import GlobalPropsActions from "../../redux/globalProps";
+import SessionActions from "../../redux/session";
 import createListen from "../../utils/WebIMListen";
 import _ from "lodash";
+import AppDB from "../../utils/AppDB";
 import "../../i18n";
 import "../../common/iconfont.css";
-
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
@@ -27,16 +28,18 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Chat = (props) => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   useEffect(() => {
-    if (props.appkey && props.username) {
-      if (props.sdkConnection === undefined) {
-        initIMSDK(props.appkey);
-        login()
-      }
+    if (
+      props.appkey &&
+      props.username &&
+      props.agoraToken &&
+      WebIM.conn.logOut
+    ) {
+      initIMSDK(props.appkey);
       createListen();
+      login();
     }
-    dispatch(GlobalPropsActions.saveGlobalProps(props));
   }, []);
 
   const login = () => {
@@ -57,11 +60,22 @@ const Chat = (props) => {
       return _.get(state, ["message", chatType, to], []);
     }) || [];
 
+  const to = useSelector((state) => state.global.globalProps.to)
+
   return (
     <div className={classes.root}>
-      <MessageBar />
-      <MessageList messageList={messageList} showByselfAvatar={props.showByselfAvatar}/>
-      <SendBox />
+      {to? (
+        <>
+          <MessageBar />
+          <MessageList
+            messageList={messageList}
+            showByselfAvatar={props.showByselfAvatar}
+          />
+          <SendBox />
+        </>
+      ) : (
+        "NO Message"
+      )}
     </div>
   );
 };
@@ -75,18 +89,21 @@ const ChatWrapper = (props) => {
     </Provider>
   );
 };
-ChatWrapper.getSdk = () => WebIM;
+ChatWrapper.getSdk = (props) => {
+  initIMSDK(props.appkey);
+  createListen();
+  return WebIM;
+};
 export default ChatWrapper;
 
 ChatWrapper.propTypes = {
-  appkey: PropTypes.string.isRequired,
-  username: PropTypes.string.isRequired,
-  agoraToken: PropTypes.string.isRequired,
-  chatType: PropTypes.string.isRequired,
+  appkey: PropTypes.string,
+  username: PropTypes.string,
+  agoraToken: PropTypes.string,
+  chatType: PropTypes.string,
 
   // TODO 接收人
   to: PropTypes.string,
-  sdkConnection:PropTypes.object,
-
-  showByselfAvatar:PropTypes.bool,  //是否展示自己聊天头像
+  sdkConnection: PropTypes.object,
+  showByselfAvatar: PropTypes.bool, //是否展示自己聊天头像
 };

@@ -14,7 +14,7 @@ const middlewares = [thunk, logger]
 const enhancers = []
 enhancers.push(applyMiddleware(...middlewares))
 
-const store = createStore(rootReducer, compose(...enhancers))
-window.store = store;
+const uikit_store = createStore(rootReducer, compose(...enhancers))
+window.uikit_store = uikit_store;
 
-export default store;
+export default uikit_store;

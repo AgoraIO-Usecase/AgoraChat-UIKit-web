@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "../../../EaseApp/index";
 import { Menu, MenuItem, IconButton, Icon, InputBase } from "@material-ui/core";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
@@ -11,6 +11,7 @@ import i18next from "i18next";
 
 import MessageActions from "../../../redux/message";
 import SessionActions from "../../../redux/session";
+import GlobalPropsActions from "../../../redux/globalProps"
 import WebIM from "../../../utils/WebIM";
 
 const useStyles = makeStyles((theme) => {
@@ -52,6 +53,7 @@ const MessageBar = () => {
     const handleClickDeleteSession = () => {
       dispatch(MessageActions.clearMessage(chatType, to));
       dispatch(SessionActions.deleteSession(to));
+      dispatch(GlobalPropsActions.setGlobalProps({to:null}))
     };
 
     return (

@@ -1,6 +1,6 @@
 {
   "name": "es-uikit",
-  "version": "1.0.12",
+  "version": "1.0.34",
   "description": "es-uikit React component",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -73,7 +73,7 @@
     "dexie": "^3.0.3",
     "dotenv": "8.2.0",
     "dotenv-expand": "5.1.0",
-    "easemob-websdk": "^4.0.0",
+    "easemob-websdk": "^4.0.1-beta2",
     "es-uikit": "^0.1.2",
     "eslint": "^7.11.0",
     "eslint-config-react-app": "^6.0.0",
