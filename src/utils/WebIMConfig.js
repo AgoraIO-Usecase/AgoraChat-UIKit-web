@@ -1,7 +1,6 @@
 
 var config = {
     Host: 'easemob.com',
-    https: true,
     isHttpDNS: true,
     isMultiLoginSessions: true,
     isSandBox: false, //内部测试环境，集成时设为false

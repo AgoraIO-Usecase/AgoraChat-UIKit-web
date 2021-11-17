@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     margin: '0 !important',
     padding: '0 !important',
-    overflowY:'scroll',
+    overflowY:'auto',
   },
   listItem: {
     // height: theme.spacing(18),

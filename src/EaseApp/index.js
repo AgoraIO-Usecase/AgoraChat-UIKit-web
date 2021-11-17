@@ -69,7 +69,7 @@ const EaseApp = (props) => {
           display: "flex",
           position: "absolute",
           width: "100%",
-          height: "calc(100% - 100px)",
+          height: "calc(100%)",
         }}
       >
         <Grid
@@ -81,7 +81,7 @@ const EaseApp = (props) => {
           md={3}
           className={classes.grid}
         >
-          <div style={{height:'100%',overflowY:'scroll',display:'flex',flexDirection:'column'}}>
+          <div style={{height:'100%',overflowY:'auto',display:'flex',flexDirection:'column'}}>
             <div>{props.header}</div>
             <SessionList onClickItem={handleClickItem} />
           </div>
@@ -137,8 +137,8 @@ EaseAppWrapper.propTypes = {
   onClickSession: PropTypes.func,
 };
 EaseAppWrapper.defaultProps = {
-  appkey: "61308276#489779",
-  username: "qwk123",
-  agoraToken:
-    "007eJxTYGjxXqL817dBvIXL4tm61Af+FQbH3j6/lTNfOOhJ2mKZXf4KDEYWaQZmponGqUmJZiZGBhZJ5imJhomGhiYpFkaWZhZJGwwnJzYEMjKouJ1cysjAysAIhGA+g2WKkWlampmBromZpYmuoWFqsm6ShVmiLtDApEQDY/PUxLQ0AJGLKCI=",
+  // appkey: "61308276#489779",
+  // username: "qwk123",
+  // agoraToken:
+  //   "007eJxTYGjxXqL817dBvIXL4tm61Af+FQbH3j6/lTNfOOhJ2mKZXf4KDEYWaQZmponGqUmJZiZGBhZJ5imJhomGhiYpFkaWZhZJGwwnJzYEMjKouJ1cysjAysAIhGA+g2WKkWlampmBromZpYmuoWFqsm6ShVmiLtDApEQDY/PUxLQ0AJGLKCI=",
 };

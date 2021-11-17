@@ -1,6 +1,6 @@
 {
   "name": "es-uikit",
-  "version": "1.0.34",
+  "version": "1.0.37",
   "description": "es-uikit React component",
   "main": "lib/index.js",
   "module": "es/index.js",
