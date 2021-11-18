@@ -109,18 +109,17 @@ EaseAppWrapper.onClickSession = (session) => {
   if (session && Object.keys(session).length > 0) {
     const { sessionType, sessionId } = session;
     const { dispatch } = store;
-    if (!session.lastMessage) {
-      dispatch(MessageActions.fetchMessage(sessionId, sessionType));
+    const storeSessionList = store.getState().session
+    const {sessionList} = storeSessionList
+    const isNewSession = _.findIndex(sessionList,(v)=>{
+      return v.sessionId === session.sessionId
+    })
+    if (isNewSession === -1) {
+      dispatch(SessionActions._pushSession(session));
     }
-    dispatch(SessionActions._pushSession(session));
     dispatch(SessionActions.setCurrentSession(sessionId));
     dispatch(SessionActions.topSession(sessionId, sessionType));
-    dispatch(
-      GlobalPropsActions.setGlobalProps({
-        to: sessionId,
-        chatType: sessionType,
-      })
-    );
+    dispatch(GlobalPropsActions.setGlobalProps({to: sessionId,chatType: sessionType,}));
     dispatch(MessageActions.clearUnreadAsync(sessionType, sessionId));
   }
 };
@@ -137,8 +136,8 @@ EaseAppWrapper.propTypes = {
   onClickSession: PropTypes.func,
 };
 EaseAppWrapper.defaultProps = {
-  // appkey: "61308276#489779",
-  // username: "qwk123",
-  // agoraToken:
-  //   "007eJxTYGjxXqL817dBvIXL4tm61Af+FQbH3j6/lTNfOOhJ2mKZXf4KDEYWaQZmponGqUmJZiZGBhZJ5imJhomGhiYpFkaWZhZJGwwnJzYEMjKouJ1cysjAysAIhGA+g2WKkWlampmBromZpYmuoWFqsm6ShVmiLtDApEQDY/PUxLQ0AJGLKCI=",
+  appkey: "61117440#460199",
+  username: "qwk235",
+  agoraToken:
+    "007eJxTYPiy7ei3LSaMIUqSZcELZ9XeS2BZ9f1mq4NQ9kypq9H7pJcpMFiYmppaGJqnpaWZp5qkmJgnmRmlpKaZWpoYWaQZJyWZMUtMS2wIZGT4IZZ2mZGBlYERCEF8FQZDo0SL1FQLA10TC5M0XUPD1GRdy8TkJF0TSwszo9Q0C5Nkg1QAhugntQ==",
 };

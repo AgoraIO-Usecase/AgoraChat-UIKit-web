@@ -42,22 +42,23 @@ export default class Demo extends Component {
   onClickSession = () => {
     let session = {
       sessionType: "singleChat",
-      sessionId: "qw10",
+      sessionId: "qw12",
     };
     EaseApp.onClickSession(session);
+    WebIM.conn.close('logout')
+
   };
   render() {
     console.log("this.state.token>>", this.state.token);
     return (
       <div>
+          <button onClick={this.onClickSession}> 测试 </button>
         <h3>EaseApp</h3>
         <div>
-        <EaseApp header={<div style={{height:'100px'}}>222</div>}/>
+          <EaseApp header={<div style={{ height: "100px" }}>222</div>} />
         </div>
 
-        {/* <button onClick={() => this.setState({ token: "1" })}>
-          加载EaseApp
-        </button> */}
+      
       </div>
     );
   }

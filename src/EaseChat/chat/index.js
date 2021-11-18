@@ -15,6 +15,7 @@ import _ from "lodash";
 import AppDB from "../../utils/AppDB";
 import "../../i18n";
 import "../../common/iconfont.css";
+import noMessage from "../../common/images/nomessage.png";
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
@@ -30,15 +31,12 @@ const useStyles = makeStyles((theme) => ({
 const Chat = (props) => {
   // const dispatch = useDispatch();
   useEffect(() => {
-    if (
-      props.appkey &&
-      props.username &&
-      props.agoraToken &&
-      WebIM.conn.logOut
-    ) {
+    if (props.appkey && props.username && props.agoraToken) {
       initIMSDK(props.appkey);
       createListen();
-      login();
+      if (WebIM.conn.logOut) {
+        login();
+      }
     }
   }, []);
 
@@ -60,22 +58,20 @@ const Chat = (props) => {
       return _.get(state, ["message", chatType, to], []);
     }) || [];
 
-  const to = useSelector((state) => state.global.globalProps.to)
+  const to = useSelector((state) => state.global.globalProps.to);
 
-  return (
+  return to ? (
     <div className={classes.root}>
-      {to? (
-        <>
-          <MessageBar />
-          <MessageList
-            messageList={messageList}
-            showByselfAvatar={props.showByselfAvatar}
-          />
-          <SendBox />
-        </>
-      ) : (
-        "NO Message"
-      )}
+      <MessageBar />
+      <MessageList
+        messageList={messageList}
+        showByselfAvatar={props.showByselfAvatar}
+      />
+      <SendBox />
+    </div>
+  ) : (
+    <div style={{ width: "100%", height: "100%",display:'flex',alignItems:'center',justifyContent:'center' }}>
+      <img src={noMessage} alt="" style={{ height: "200px", width: "200px" }} />
     </div>
   );
 };

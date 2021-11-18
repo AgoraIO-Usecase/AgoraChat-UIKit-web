@@ -91,5 +91,8 @@ export default function createListen() {
     onClosed: (msg) => {
       console.warn("onClosed", msg);
     },
+    onDisconnected: () => {
+      AppDB.db = undefined
+    }
   });
 }
