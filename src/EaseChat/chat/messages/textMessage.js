@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
     },
     textBodyBox: {
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'inherit',
         maxWidth: '65%',
     },
     textBody: {
@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
         props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
       padding: "15px",
       maxWidth: "65%",
-      overflowWrap: "break-word",
+      wordBreak:'break-all'
     },
     time: {
         position: 'absolute',

@@ -19,7 +19,7 @@ import noMessage from "../../common/images/nomessage.png";
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
-    height: "100%",
+    height: "calc(100% - 20px)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
