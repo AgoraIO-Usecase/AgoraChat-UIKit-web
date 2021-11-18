@@ -136,8 +136,8 @@ EaseAppWrapper.propTypes = {
   onClickSession: PropTypes.func,
 };
 EaseAppWrapper.defaultProps = {
-  appkey: "61117440#460199",
-  username: "qwk235",
-  agoraToken:
-    "007eJxTYPiy7ei3LSaMIUqSZcELZ9XeS2BZ9f1mq4NQ9kypq9H7pJcpMFiYmppaGJqnpaWZp5qkmJgnmRmlpKaZWpoYWaQZJyWZMUtMS2wIZGT4IZZ2mZGBlYERCEF8FQZDo0SL1FQLA10TC5M0XUPD1GRdy8TkJF0TSwszo9Q0C5Nkg1QAhugntQ==",
+  // appkey: "61117440#460199",
+  // username: "qwk235",
+  // agoraToken:
+  //   "007eJxTYPiy7ei3LSaMIUqSZcELZ9XeS2BZ9f1mq4NQ9kypq9H7pJcpMFiYmppaGJqnpaWZp5qkmJgnmRmlpKaZWpoYWaQZJyWZMUtMS2wIZGT4IZZ2mZGBlYERCEF8FQZDo0SL1FQLA10TC5M0XUPD1GRdy8TkJF0TSwszo9Q0C5Nkg1QAhugntQ==",
 };

@@ -44,6 +44,7 @@ const useStyles = makeStyles((theme) => ({
     resize: "none",
     backgroundColor: "#efefef",
     borderRadius: "10px",
+    padding:'5px'
   },
   senderBar: {
     height: "12px",

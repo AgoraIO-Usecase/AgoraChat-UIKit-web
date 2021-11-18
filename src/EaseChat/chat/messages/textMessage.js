@@ -27,8 +27,9 @@ const useStyles = makeStyles((theme) => ({
     },
     textBodyBox: {
         display: 'flex',
-        flexDirection: 'inherit',
+        flexDirection: props => props.bySelf ? 'inherit' :'column',
         maxWidth: '65%',
+        alignItems:props => props.bySelf ? 'inherit' :'unset'
     },
     textBody: {
       display: "flex",
@@ -127,11 +128,11 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
                 <div className={classes.textBody} onContextMenu={handleClick}>
                     {renderTxt(message.body.msg)}
                 </div>
+                {message.bySelf && <MessageStatus status={message.status} style={{ marginTop: message.chatType === 'singleChat' ? '0' : '22px' }} />}
             </div>
             <div className={classes.time}>
                 {renderTime(message.time)}
             </div>
-            {message.bySelf && <MessageStatus status={message.status} style={{ marginTop: message.chatType === 'singleChat' ? '0' : '22px' }} />}
             {message.status === 'read' ? <div className={classes.read}>{i18next.t('Read')}</div> : null}
 
             {message.bySelf ?
