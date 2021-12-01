@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
         height: '34px',
         background: props => props.bySelf ? 'linear-gradient(124deg, rgb(201, 19, 223) 20%, rgb(21, 77, 254) 90%)' : 'rgb(242, 242, 242)',
         borderRadius: props => props.bySelf ? '16px 16px 4px' : '16px 16px 16px 4px',
-        color: props => props.bySelf ? '#fff' : 'rgb(35, 195, 129)',
+        color: props => props.bySelf ? '#fff' : 'rgb(0, 0, 0)',
         textAlign: props => props.bySelf ? 'left' : 'right',
         flexDirection: props => props.bySelf ? 'row' : 'row-reverse',
         alignItems:'center',
@@ -54,7 +54,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }))
 
-function AudioMessage({ message }) {
+function AudioMessage({ message ,showByselfAvatar}) {
     const classes = useStyles({ bySelf: message.bySelf, duration: Math.round(message.body.length) });
     const url = message.body.url
     const audioRef = useRef(null)
@@ -71,11 +71,12 @@ function AudioMessage({ message }) {
 
     return (
         <li className={classes.pulldownListItem}>
-            <Avatar></Avatar>
+            {!message.bySelf && <Avatar></Avatar>} 
+               {showByselfAvatar && message.bySelf && <Avatar></Avatar>} 
             <div className={classes.audioBox} onClick={play}>
                 <AudioPlayer play={isPlaying} reverse={message.bySelf} />
                 <span className={classes.duration}>
-                    {Math.round(message.body.length) + "''"}
+                    {Math.round(message.body.duration) + "''"}
                 </span>
                 <audio src={url} ref={audioRef} />
             </div>

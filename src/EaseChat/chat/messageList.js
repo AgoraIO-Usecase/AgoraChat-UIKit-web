@@ -102,6 +102,7 @@ function MessageList({ messageList, showByselfAvatar }) {
                       message={msg}
                       key={msg.id + index}
                       onRecallMessage={handleRecallMsg}
+                      showByselfAvatar={showByselfAvatar}
                     />
                   );
                 } else if (msg.body.type === "img") {
@@ -110,13 +111,14 @@ function MessageList({ messageList, showByselfAvatar }) {
                       message={msg}
                       key={msg.id + index}
                       onRecallMessage={handleRecallMsg}
+                      showByselfAvatar={showByselfAvatar}
                     />
                   );
                 } else if (msg.body.type === "audio") {
-                  return <AudioMessage message={msg} key={msg.id + index} />;
+                  return <AudioMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}/>;
                 } else if (msg.body.type === "recall") {
                   return (
-                    <RetractedMessage message={msg} key={msg.id + index} />
+                    <RetractedMessage message={msg} key={msg.id + index}/>
                   );
                 } else {
                   return null;

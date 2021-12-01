@@ -35,7 +35,7 @@ const initialState = {
     mouseX: null,
     mouseY: null,
 };
-function ImgMessage({ message, onRecallMessage }) {
+function ImgMessage({ message, onRecallMessage ,showByselfAvatar}) {
     const classes = useStyles({ bySelf: message.bySelf });
     const [state, setState] = useState(initialState);
     const handleClose = () => {
@@ -54,7 +54,8 @@ function ImgMessage({ message, onRecallMessage }) {
     };
     return (
         <li className={classes.pulldownListItem}>
-            <Avatar></Avatar>
+            {!message.bySelf && <Avatar></Avatar>} 
+               {showByselfAvatar && message.bySelf && <Avatar></Avatar>} 
             <div className={classes.imgBox} onContextMenu={handleClick}>
                 <img src={message.url} alt='img message'></img>
             </div>

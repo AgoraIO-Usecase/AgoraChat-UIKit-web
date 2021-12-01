@@ -10,4 +10,7 @@ module.exports = {
       react: path.resolve('./node_modules/react'),
     },
   },
+  devServer: {
+    https: true
+  }
 };

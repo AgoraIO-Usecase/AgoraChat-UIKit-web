@@ -75,7 +75,7 @@ const initialState = {
     mouseX: null,
     mouseY: null,
 };
-function FileMessage({ message, onRecallMessage }) {
+function FileMessage({ message, onRecallMessage ,showByselfAvatar}) {
     const classes = useStyles({ bySelf: message.bySelf });
     const [state, setState] = useState(initialState);
     const handleClose = () => {
@@ -94,7 +94,8 @@ function FileMessage({ message, onRecallMessage }) {
     };
     return (
         <li className={classes.pulldownListItem}>
-            <Avatar></Avatar>
+              {!message.bySelf && <Avatar></Avatar>} 
+               {showByselfAvatar && message.bySelf && <Avatar></Avatar>} 
             <div className={classes.fileCard} onContextMenu={handleClick}>
                 <div className={classes.fileIcon}>
                     {/* <Icon className={clsx(classes.icon, 'iconfont icon-fujian')}></Icon> */}

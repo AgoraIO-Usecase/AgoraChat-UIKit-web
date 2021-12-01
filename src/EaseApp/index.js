@@ -1,7 +1,6 @@
 import React, { useEffect, useCallback, memo, useRef } from "react";
 import PropTypes from "prop-types";
 import { makeStyles, styled } from "@material-ui/styles";
-// import { useSelector, useDispatch } from "react-redux";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
@@ -23,7 +22,6 @@ import "../common/iconfont.css";
 
 import SessionList from "../EaseChat/session/sessionList";
 import EaseChat from "../EaseChat/chat/index";
-
 const uikit_store = React.createContext(null);
 export const useDispatch = createDispatchHook(uikit_store);
 export const useSelector = createSelectorHook(uikit_store);
@@ -137,7 +135,7 @@ EaseAppWrapper.propTypes = {
 };
 EaseAppWrapper.defaultProps = {
   // appkey: "61117440#460199",
-  // username: "qwk235",
+  // username: "qq1",
   // agoraToken:
-  //   "007eJxTYPiy7ei3LSaMIUqSZcELZ9XeS2BZ9f1mq4NQ9kypq9H7pJcpMFiYmppaGJqnpaWZp5qkmJgnmRmlpKaZWpoYWaQZJyWZMUtMS2wIZGT4IZZ2mZGBlYERCEF8FQZDo0SL1FQLA10TC5M0XUPD1GRdy8TkJF0TSwszo9Q0C5Nkg1QAhugntQ==",
+  //   "007eJxTYFhqW8hb93TrBe5pdROerDXvS+d//e7j94PmLTyBbTn7Hy5TYLAwNTW1MDRPS0szTzVJMTFPMjNKSU0ztTQxskgzTkoyW2k4P7EhkJEhzVXpIiMDKwMjEIL4KgwGBikmaUlGBromSSYmuoaGqcm6lmnmFrqmxmam5gZGxomp5oYARF8o1w==",
 };

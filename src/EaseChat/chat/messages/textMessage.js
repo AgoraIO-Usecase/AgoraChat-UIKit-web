@@ -46,7 +46,8 @@ const useStyles = makeStyles((theme) => ({
         props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
       padding: "15px",
       maxWidth: "65%",
-      wordBreak:'break-all'
+      wordBreak:'break-all',
+      textAlign:'initial'
     },
     time: {
         position: 'absolute',
@@ -117,10 +118,15 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 
         return rnTxt
     }
+    // const onAvatarChange = val =>{
+    //     console.log('val>>',val);
+    // }
     return (
         <li className={classes.pulldownListItem}>
             <div>
-               {!message.bySelf && <Avatar></Avatar>} 
+               {!message.bySelf && <Avatar 
+            //    onClick={()=>onAvatarChange(message)}
+               ></Avatar>} 
                {showByselfAvatar && message.bySelf && <Avatar></Avatar>} 
             </div>
             <div className={classes.textBodyBox}>

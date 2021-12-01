@@ -20,7 +20,6 @@ const useStyles = makeStyles((theme) => ({
     overflowY:'auto',
   },
   listItem: {
-    // height: theme.spacing(18),
     padding: "0 14px",
   },
   itemBox: {
@@ -85,10 +84,11 @@ const useStyles = makeStyles((theme) => ({
 export default function SessionList(props) {
   const classes = useStyles();
   const sessionList = useSelector((state) => state.session?.sessionList) || [];
+  const to = useSelector((state) => state.global.globalProps.to);
   const message = useSelector((state) => state.message);
   const { unread } = message;
   const currentSession = useSelector((state) => state.session?.currentSession);
-  let currentSessionIndex = '';
+  let currentSessionIndex = null;
 
   // dealwith notice unread num
   const notices = useSelector((state) => state.notice?.notices) || [];
@@ -132,7 +132,6 @@ export default function SessionList(props) {
       if (!b?.lastMessage?.time) return -1;
       return b?.lastMessage?.time - a?.lastMessage?.time;
     });
-    console.log('renderSessionList>>',renderSessionList);
   renderSessionList.forEach((element, index) => {
     if (element.sessionId === currentSession) {
       currentSessionIndex = index;
@@ -140,7 +139,7 @@ export default function SessionList(props) {
   });
 
   const handleListItemClick = (event, index, session) => {
-    if (currentSessionIndex !== index) {
+    if (currentSessionIndex !== index || !to) {
       props.onClickItem(session);
     }
   };

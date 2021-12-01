@@ -3,16 +3,13 @@ import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/styles";
 import MessageList from "./messageList";
 import MessageBar from "./messageBar/index";
-import { useSelector, useDispatch } from "../../EaseApp/index";
+import { useSelector } from "../../EaseApp/index";
 import { Provider } from "react-redux";
 import SendBox from "./sendBox";
 import WebIM, { initIMSDK } from "../../utils/WebIM";
 import store from "../../redux/index";
-import GlobalPropsActions from "../../redux/globalProps";
-import SessionActions from "../../redux/session";
 import createListen from "../../utils/WebIMListen";
 import _ from "lodash";
-import AppDB from "../../utils/AppDB";
 import "../../i18n";
 import "../../common/iconfont.css";
 import noMessage from "../../common/images/nomessage.png";
@@ -29,7 +26,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Chat = (props) => {
-  // const dispatch = useDispatch();
   useEffect(() => {
     if (props.appkey && props.username && props.agoraToken) {
       initIMSDK(props.appkey);
