@@ -99,7 +99,7 @@ function FileMessage({ message, onRecallMessage ,showByselfAvatar}) {
             <div className={classes.fileCard} onContextMenu={handleClick}>
                 <div className={classes.fileIcon}>
                     {/* <Icon className={clsx(classes.icon, 'iconfont icon-fujian')}></Icon> */}
-                    fujian
+                    {i18next.t('file')}
                 </div>
                 <div className={classes.fileInfo}>
                     <p>{message.filename}</p>

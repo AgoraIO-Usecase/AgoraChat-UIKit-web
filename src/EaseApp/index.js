@@ -135,7 +135,7 @@ EaseAppWrapper.propTypes = {
 };
 EaseAppWrapper.defaultProps = {
   // appkey: "61117440#460199",
-  // username: "qq1",
+  // username: "lizg2",
   // agoraToken:
-  //   "007eJxTYFhqW8hb93TrBe5pdROerDXvS+d//e7j94PmLTyBbTn7Hy5TYLAwNTW1MDRPS0szTzVJMTFPMjNKSU0ztTQxskgzTkoyW2k4P7EhkJEhzVXpIiMDKwMjEIL4KgwGBikmaUlGBromSSYmuoaGqcm6lmnmFrqmxmam5gZGxomp5oYARF8o1w==",
+  //   "007eJxTYFjJa3x2xmS5sPX2b6w9F/yb1n5WTFMqyGpymECwaUWl00UFBgtTU1MLQ/O0tDTzVJMUE/MkM6OU1DRTSxMjizTjpCQzx96ViQ2BjAwN7FzNjAysDIxACOKrMJgZpRmmpJkb6JpYmBjrGhqmJusmmVqm6BqbJgENMk1NNE0zBgCEkST2",
 };
