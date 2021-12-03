@@ -76,7 +76,7 @@ const { Types, Creators } = createActions({
                 },
                 onFileUploadComplete: function (data) {
                     let url = data.uri + '/' + data.entities[0].uuid
-                    formatMsg.url = url
+                    formatMsg.url = formatMsg.body.url = url
                     formatMsg.status = 'sent'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
                 },
@@ -86,7 +86,7 @@ const { Types, Creators } = createActions({
             })
 
             WebIM.conn.send(msgObj.body)
-            dispatch(Creators.addMessage(formatMsg, 'file'))
+            // dispatch(Creators.addMessage(formatMsg, 'file'))
         }
     },
 
@@ -109,7 +109,7 @@ const { Types, Creators } = createActions({
                 },
                 onFileUploadComplete: function (data) {
                     let url = data.uri + '/' + data.entities[0].uuid
-                    formatMsg.url = url
+                    formatMsg.url = formatMsg.body.url = url
                     formatMsg.status = 'sent'
                     dispatch(Creators.addMessage(formatMsg, 'img'))
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
@@ -119,7 +119,7 @@ const { Types, Creators } = createActions({
                 },
             })
             WebIM.conn.send(msgObj.body)
-            dispatch(Creators.addMessage(formatMsg, 'img'))
+            // dispatch(Creators.addMessage(formatMsg, 'img'))
         }
     },
 

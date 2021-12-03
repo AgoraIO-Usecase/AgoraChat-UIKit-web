@@ -36,8 +36,8 @@ export default function createListen() {
       console.log("onFileMessage", message);
       store.dispatch(MessageActions.addMessage(message, "file"));
     },
-    onPictureMessage: (message) => {
-      console.log("onPictureMessage", message);
+    onImageMessage: (message) => {
+      console.log("onImageMessage", message);
       const { chatType, from, to } = message;
       const sessionId = chatType === "singleChat" ? from : to;
       store.dispatch(MessageActions.addMessage(message, "img"));
