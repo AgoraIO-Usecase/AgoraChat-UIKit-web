@@ -5493,7 +5493,7 @@ duplexify@^3.4.2, duplexify@^3.6.0:
 
 easemob-websdk@4.0.1-beta5:
   version "4.0.1-beta5"
-  resolved "https://registry.npmmirror.com/easemob-websdk/download/easemob-websdk-4.0.1-beta5.tgz?cache=0&sync_timestamp=1637230768096&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Feasemob-websdk%2Fdownload%2Feasemob-websdk-4.0.1-beta5.tgz#94f1dfce4cb120420197a5b0680501d55695a21f"
+  resolved "https://registry.npmjs.org/easemob-websdk/-/easemob-websdk-4.0.1-beta5.tgz"
   integrity sha512-bov8ktRl9KDx4loEWBln+YsJ9TPjiVqKgO8lBMYAv3+J8/6L+kPUpARrAldrPHM8SaC/UVzFsQSVm0rXCWSIaw==
 
 ecc-jsbn@~0.1.1:

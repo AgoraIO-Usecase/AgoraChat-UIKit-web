@@ -66,6 +66,7 @@ const useStyles = makeStyles((theme) => ({
     color: "rgba(1, 1, 1, .6)",
     width: "calc(100% - 18px)",
     fontSize: "14px",
+    wordBreak:'break-all'
   },
   unreadNum: {
     color: "#fff",

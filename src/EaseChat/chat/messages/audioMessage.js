@@ -55,6 +55,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 function AudioMessage({ message ,showByselfAvatar}) {
+    console.log('message>>>',message);
     const classes = useStyles({ bySelf: message.bySelf, duration: Math.round(message.body.length) });
     const url = message.body.url
     const audioRef = useRef(null)

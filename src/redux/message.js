@@ -79,6 +79,7 @@ const { Types, Creators } = createActions({
                     formatMsg.url = formatMsg.body.url = url
                     formatMsg.status = 'sent'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
+                    dispatch(Creators.addMessage(formatMsg, 'file'))
                 },
                 fail: function () {
                     dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
@@ -124,6 +125,7 @@ const { Types, Creators } = createActions({
     },
 
     sendRecorder: (to, chatType, file) => {
+        console.log('file>>>',file);
         return (dispatch, getState) => {
             const formatMsg = formatLocalMessage(to, chatType, file, 'audio')
             const { id } = formatMsg
@@ -131,7 +133,9 @@ const { Types, Creators } = createActions({
             msgObj.set({
                 ext: {
                     file_length: file.data.size,
-                    file_type: file.data.type
+                    file_type: file.data.type,
+                    length: file.length,
+                    duration: file.duration
                 },
                 file: file,
                 to,
@@ -155,6 +159,7 @@ const { Types, Creators } = createActions({
 
             WebIM.conn.send(msgObj.body)
             dispatch(Creators.addMessage(formatMsg, 'audio'))
+            console.log('msgObj>>>',msgObj);
         }
     },
 
@@ -213,7 +218,7 @@ const { Types, Creators } = createActions({
                 },
                 onFileDownloadComplete: function (response) {
                     let objectUrl = WebIM.utils.parseDownloadResponse.call(WebIM.conn, response)
-                    message.audioSrcUrl = message.url
+                    message.audioSrcUrl = message.url + '?origin-file=true'
                     message.url = objectUrl
                     dispatch(Creators.addMessage(message, bodyType))
                 },
