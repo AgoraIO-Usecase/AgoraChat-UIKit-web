@@ -137,5 +137,5 @@ EaseAppWrapper.defaultProps = {
   // appkey: "61117440#460199",
   // username: "lizg2",
   // agoraToken:
-  // "007eJxTYJh8YtvcLKO6mVnON172aPtKlX5tvyRir1YUUnrnQtXCjbMUGCxMTU0tDM3T0tLMU01STMyTzIxSUtNMLU2MLNKMk5LMHMo2JDYEMjLMZ040YWRgZWAEQhBfhcHMKM0wJc3cQNfEwsRY19AwNVk3ydQyRdfYNAlokGlqommaMQC6wCfZ"
+  // "007eJxTYJDiuGDztHtLqkuRzDrbOSlCWQl1bldnmFXwJpb9X3S7b6sCg4WpqamFoXlaWpp5qkmKiXmSmVFKapqppYmRRZpxUpLZwcztiQ2BjAyrVmx5zMjAysAIhCC+CoOZUZphSpq5ga6JhYmxrqFharJukqlliq6xaRLQINPURNM0YwBkuChi"
 };

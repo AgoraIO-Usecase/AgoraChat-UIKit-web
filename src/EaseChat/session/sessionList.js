@@ -8,16 +8,23 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import { useSelector, useDispatch } from "../../EaseApp/index";
 import { renderTime } from "../../utils/index";
-import groupIcon from "../../common/images/group@2x.png";
+import _ from 'lodash'
+import groupIcon from "../../common/images/groupAvatar.png";
 import chatRoomIcon from "../../common/images/chatroom@2x.png";
 import noticeIcon from "../../common/images/notice@2x.png";
+import avatarIcon1 from '../../common/images/avatar1.png'
+import avatarIcon2 from '../../common/images/avatar2.png'
+import avatarIcon3 from '../../common/images/avatar3.png'
+
+
+
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
     height: "100%",
     margin: '0 !important',
     padding: '0 !important',
-    overflowY:'auto',
+    overflowY: 'auto',
   },
   listItem: {
     padding: "0 14px",
@@ -28,10 +35,12 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     alignItems: "center",
     boxSizing: "border-box",
+    padding:'5px 0'
   },
   avatar: {
-    height: "50px",
-    width: "50px",
+    height: "40px !important",
+    width: "40px !important",
+    overflow: "inherit !important",
   },
   MuiListItemTextSecondary: {
     color: "red",
@@ -66,7 +75,7 @@ const useStyles = makeStyles((theme) => ({
     color: "rgba(1, 1, 1, .6)",
     width: "calc(100% - 18px)",
     fontSize: "14px",
-    wordBreak:'break-all'
+    wordBreak: 'break-all'
   },
   unreadNum: {
     color: "#fff",
@@ -145,11 +154,21 @@ export default function SessionList(props) {
     }
   };
 
+  let userAvatars = {
+    1: avatarIcon1,
+    2: avatarIcon2,
+    3: avatarIcon3
+  }
+
   return (
     <List dense className={classes.root}>
       {renderSessionList.map((session, index) => {
+        let usersInfoData = JSON.parse(localStorage.getItem("usersInfo_1.0"))
         let avatarSrc = "";
-        if (session.sessionType === "groupChat") {
+        if (session.sessionType === "singleChat") {
+          let findIndex =  _.find(usersInfoData, { username: session.sessionId })
+          avatarSrc = userAvatars[findIndex.userAvatar]
+        }else if (session.sessionType === "groupChat") {
           avatarSrc = groupIcon;
         } else if (session.sessionType === "chatRoom") {
           avatarSrc = chatRoomIcon;
@@ -167,15 +186,15 @@ export default function SessionList(props) {
             <Box className={classes.itemBox}>
               <ListItemAvatar>
                 <Avatar
-                  className={classes.avatar}
-                  alt={`session.sessionId`}
+                  // className={classes.avatar}
+                  style={{ borderRadius: `${session.sessionType}` === "singleChat" ? "50%" : 'inherit'}}
+                  alt={`${session.sessionId}`}
                   src={avatarSrc}
                 />
               </ListItemAvatar>
               <Box className={classes.itemRightBox}>
                 <Typography className={classes.itemName}>
                   <span>{session.sessionId}</span>
-
                   <span className={classes.time}>
                     {renderTime(session?.lastMessage?.time)}
                   </span>
