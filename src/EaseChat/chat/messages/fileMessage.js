@@ -5,6 +5,7 @@ import Avatar from '@material-ui/core/Avatar';
 import i18next from "i18next";
 import { IconButton, Icon, Menu, MenuItem } from '@material-ui/core';
 import { renderTime } from '../../../utils';
+
 const useStyles = makeStyles((theme) => ({
     pulldownListItem: {
         padding: '10px 0',
@@ -13,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
         position: 'relative',
         display: 'flex',
         flexDirection: props => props.bySelf ? 'row-reverse' : 'row',
-        alignItems:'center'
+        alignItems: 'center'
     },
     fileCard: {
         width: '252px',
@@ -75,7 +76,7 @@ const initialState = {
     mouseX: null,
     mouseY: null,
 };
-function FileMessage({ message, onRecallMessage ,showByselfAvatar}) {
+function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
     const classes = useStyles({ bySelf: message.bySelf });
     const [state, setState] = useState(initialState);
     const handleClose = () => {
@@ -92,10 +93,11 @@ function FileMessage({ message, onRecallMessage ,showByselfAvatar}) {
             mouseY: event.clientY - 4,
         });
     };
+
     return (
         <li className={classes.pulldownListItem}>
-              {!message.bySelf && <Avatar></Avatar>} 
-               {showByselfAvatar && message.bySelf && <Avatar></Avatar>} 
+            {!message.bySelf && <Avatar></Avatar>}
+            {showByselfAvatar && message.bySelf && <Avatar></Avatar>}
             <div className={classes.fileCard} onContextMenu={handleClick}>
                 <div className={classes.fileIcon}>
                     {/* <Icon className={clsx(classes.icon, 'iconfont icon-fujian')}></Icon> */}

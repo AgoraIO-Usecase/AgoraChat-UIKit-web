@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "../../../EaseApp/index";
 import { Menu, MenuItem, IconButton, Icon, InputBase } from "@material-ui/core";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -13,6 +13,12 @@ import MessageActions from "../../../redux/message";
 import SessionActions from "../../../redux/session";
 import GlobalPropsActions from "../../../redux/globalProps"
 import WebIM from "../../../utils/WebIM";
+
+import _ from 'lodash'
+import avatarIcon1 from '../../../common/images/avatar1.png'
+import avatarIcon2 from '../../../common/images/avatar2.png'
+import avatarIcon3 from '../../../common/images/avatar3.png'
+import groupAvatarIcon from '../../../common/images/groupAvatar.png'
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -87,11 +93,29 @@ const MessageBar = () => {
   const handleSessionInfoClick = (e) => {
     setSessionEl(e.currentTarget);
   };
+
+  let userAvatars = {
+    1: avatarIcon1,
+    2: avatarIcon2,
+    3: avatarIcon3
+  }
+  const [userAvatarIndex, setUserAvatarIndex] = useState([])
+  const [usersInfoData, setUsersInfoData] = useState([])
+  useEffect(() => {
+    let newwInfoData = usersInfoData.length > 0 ? usersInfoData : JSON.parse(localStorage.getItem("usersInfo_1.0"))
+    setUsersInfoData(newwInfoData)
+    setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar)
+  }, [to])
+
+
   return (
     <div className={classes.root}>
       <Box position="static" className={classes.leftBar}>
         {/* // TODO nickname 可配置 */}
-        <Avatar className={classes.avatar}></Avatar>
+        <Avatar className={classes.avatar} 
+        src={chatType === "singleChat" ? userAvatars[userAvatarIndex] : groupAvatarIcon}
+          style={{ borderRadius: chatType === "singleChat" ? "50%" : 'inherit'}}
+        ></Avatar>
         {to}
       </Box>
       <Box position="static">

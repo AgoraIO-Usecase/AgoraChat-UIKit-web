@@ -1900,6 +1900,24 @@
     "@types/yargs" "^16.0.0"
     chalk "^4.0.0"
 
+"@material-ui/core@^4.12.3":
+  version "4.12.3"
+  resolved "https://registry.yarnpkg.com/@material-ui/core/-/core-4.12.3.tgz#80d665caf0f1f034e52355c5450c0e38b099d3ca"
+  integrity sha512-sdpgI/PL56QVsEJldwEe4FFaFTLUqN+rd7sSZiRCdx2E/C7z5yK0y/khAWVBH24tXwto7I1hCzNWfJGZIYJKnw==
+  dependencies:
+    "@babel/runtime" "^7.4.4"
+    "@material-ui/styles" "^4.11.4"
+    "@material-ui/system" "^4.12.1"
+    "@material-ui/types" "5.1.0"
+    "@material-ui/utils" "^4.11.2"
+    "@types/react-transition-group" "^4.2.0"
+    clsx "^1.0.4"
+    hoist-non-react-statics "^3.3.2"
+    popper.js "1.16.1-lts"
+    prop-types "^15.7.2"
+    react-is "^16.8.0 || ^17.0.0"
+    react-transition-group "^4.4.0"
+
 "@material-ui/core@^5.0.0-beta.5":
   version "5.0.0-beta.5"
   resolved "https://registry.nlark.com/@material-ui/core/download/@material-ui/core-5.0.0-beta.5.tgz?cache=0&sync_timestamp=1630621413652&other_urls=https%3A%2F%2Fregistry.nlark.com%2F%40material-ui%2Fcore%2Fdownload%2F%40material-ui%2Fcore-5.0.0-beta.5.tgz"
@@ -1925,6 +1943,17 @@
   integrity sha1-s6c1MmZRnNdDtkYa6f38sbJetMU=
   dependencies:
     "@babel/runtime" "^7.4.4"
+
+"@material-ui/lab@^4.0.0-alpha.60":
+  version "4.0.0-alpha.60"
+  resolved "https://registry.yarnpkg.com/@material-ui/lab/-/lab-4.0.0-alpha.60.tgz#5ad203aed5a8569b0f1753945a21a05efa2234d2"
+  integrity sha512-fadlYsPJF+0fx2lRuyqAuJj7hAS1tLDdIEEdov5jlrpb5pp4b+mRDUqQTUxi4inRZHS1bEXpU8QWUhO6xX88aA==
+  dependencies:
+    "@babel/runtime" "^7.4.4"
+    "@material-ui/utils" "^4.11.2"
+    clsx "^1.0.4"
+    prop-types "^15.7.2"
+    react-is "^16.8.0 || ^17.0.0"
 
 "@material-ui/private-theming@5.0.0-beta.5":
   version "5.0.0-beta.5"
@@ -1978,6 +2007,16 @@
     "@material-ui/utils" "5.0.0-beta.5"
     clsx "^1.0.4"
     csstype "^3.0.2"
+    prop-types "^15.7.2"
+
+"@material-ui/system@^4.12.1":
+  version "4.12.1"
+  resolved "https://registry.yarnpkg.com/@material-ui/system/-/system-4.12.1.tgz#2dd96c243f8c0a331b2bb6d46efd7771a399707c"
+  integrity sha512-lUdzs4q9kEXZGhbN7BptyiS1rLNHe6kG9o8Y307HCvF4sQxbCgpL2qi+gUk+yI8a2DNk48gISEQxoxpgph0xIw==
+  dependencies:
+    "@babel/runtime" "^7.4.4"
+    "@material-ui/utils" "^4.11.2"
+    csstype "^2.5.2"
     prop-types "^15.7.2"
 
 "@material-ui/types@5.1.0":
@@ -5493,7 +5532,7 @@ duplexify@^3.4.2, duplexify@^3.6.0:
 
 easemob-websdk@4.0.1-beta5:
   version "4.0.1-beta5"
-  resolved "https://registry.npmmirror.com/easemob-websdk/download/easemob-websdk-4.0.1-beta5.tgz?cache=0&sync_timestamp=1637230768096&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Feasemob-websdk%2Fdownload%2Feasemob-websdk-4.0.1-beta5.tgz#94f1dfce4cb120420197a5b0680501d55695a21f"
+  resolved "https://registry.npmjs.org/easemob-websdk/-/easemob-websdk-4.0.1-beta5.tgz"
   integrity sha512-bov8ktRl9KDx4loEWBln+YsJ9TPjiVqKgO8lBMYAv3+J8/6L+kPUpARrAldrPHM8SaC/UVzFsQSVm0rXCWSIaw==
 
 ecc-jsbn@~0.1.1:
@@ -10633,6 +10672,11 @@ pnp-webpack-plugin@1.6.4:
   integrity sha1-yXEaxNxIpoXauvyG+Lbdn434QUk=
   dependencies:
     ts-pnp "^1.1.6"
+
+popper.js@1.16.1-lts:
+  version "1.16.1-lts"
+  resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.16.1-lts.tgz#cf6847b807da3799d80ee3d6d2f90df8a3f50b05"
+  integrity sha512-Kjw8nKRl1m+VrSFCoVGPph93W/qrSO7ZkqPpTf7F4bk/sqcfWK019dWBUpE/fBOsOQY1dks/Bmcbfn1heM/IsA==
 
 portfinder@^1.0.26:
   version "1.0.28"

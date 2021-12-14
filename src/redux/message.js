@@ -5,6 +5,10 @@ import _ from 'lodash'
 // import store from '../redux/index'
 import WebIM from '../utils/WebIM';
 import AppDB from '../utils/AppDB';
+import i18next from "i18next";
+import { message } from '../EaseChat/common/alert'
+
+
 
 /* ------------- Initial State ------------- */
 export const INITIAL_STATE = Immutable({
@@ -30,6 +34,8 @@ const { Types, Creators } = createActions({
     clearUnread: ["chatType", "sessionId"],
     updateMessages: ["chatType", "sessionId", "messages"],
     updateMessageMid: ['id', 'mid'],
+    
+
     // -async-
     sendTxtMessage: (to, chatType, message = {}) => {
         if (!to || !chatType) return
@@ -58,6 +64,10 @@ const { Types, Creators } = createActions({
 
     sendFileMessage: (to, chatType, file) => {
         return (dispatch, getState) => {
+            if (file.data.size > (1024 * 1024 * 10)) {
+                message.error(i18next.t('The file exceeds the upper limit'))
+                return
+            }
             const formatMsg = formatLocalMessage(to, chatType, file, 'file')
             const { id } = formatMsg
             const msgObj = new WebIM.message('file', id)
@@ -70,7 +80,7 @@ const { Types, Creators } = createActions({
                 to,
                 chatType,
                 onFileUploadError: function (error) {
-                    console.log(error)
+                    console.log('onFileUploadError>>>',error)
                     formatMsg.status = 'fail'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
                 },
@@ -79,19 +89,23 @@ const { Types, Creators } = createActions({
                     formatMsg.url = formatMsg.body.url = url
                     formatMsg.status = 'sent'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
+                    dispatch(Creators.updateMessages(chatType, to, formatMsg))
                 },
                 fail: function () {
                     dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
                 },
             })
-
             WebIM.conn.send(msgObj.body)
-            // dispatch(Creators.addMessage(formatMsg, 'file'))
+            dispatch(Creators.addMessage(formatMsg, 'file'))
         }
     },
 
     sendImgMessage: (to, chatType, file) => {
         return (dispatch, getState) => {
+            if (file.data.size > (1024 * 1024 * 10)) {
+                message.error(i18next.t('The file exceeds the upper limit'))
+                return
+            }
             const formatMsg = formatLocalMessage(to, chatType, file, 'img')
             const { id } = formatMsg
             const msgObj = new WebIM.message('img', id)
@@ -111,7 +125,7 @@ const { Types, Creators } = createActions({
                     let url = data.uri + '/' + data.entities[0].uuid
                     formatMsg.url = formatMsg.body.url = url
                     formatMsg.status = 'sent'
-                    dispatch(Creators.addMessage(formatMsg, 'img'))
+                    dispatch(Creators.updateMessages(chatType, to, formatMsg ))
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
                 },
                 fail: function () {
@@ -119,19 +133,25 @@ const { Types, Creators } = createActions({
                 },
             })
             WebIM.conn.send(msgObj.body)
-            // dispatch(Creators.addMessage(formatMsg, 'img'))
+            dispatch(Creators.addMessage(formatMsg, 'img'))
         }
     },
 
     sendRecorder: (to, chatType, file) => {
         return (dispatch, getState) => {
+            if (file.data.size > (1024 * 1024 * 10)) {
+                message.error(i18next.t('The file exceeds the upper limit'))
+                return
+            }
             const formatMsg = formatLocalMessage(to, chatType, file, 'audio')
             const { id } = formatMsg
             const msgObj = new WebIM.message('audio', id)
             msgObj.set({
                 ext: {
                     file_length: file.data.size,
-                    file_type: file.data.type
+                    file_type: file.data.type,
+                    length: file.length,
+                    duration: file.duration
                 },
                 file: file,
                 to,
@@ -147,6 +167,7 @@ const { Types, Creators } = createActions({
                     formatMsg.url = url
                     formatMsg.status = 'sent'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
+                    dispatch(Creators.updateMessages(chatType, to, formatMsg))
                 },
                 fail: function () {
                     dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
@@ -155,6 +176,7 @@ const { Types, Creators } = createActions({
 
             WebIM.conn.send(msgObj.body)
             dispatch(Creators.addMessage(formatMsg, 'audio'))
+            console.log('msgObj>>>',msgObj);
         }
     },
 
@@ -213,7 +235,7 @@ const { Types, Creators } = createActions({
                 },
                 onFileDownloadComplete: function (response) {
                     let objectUrl = WebIM.utils.parseDownloadResponse.call(WebIM.conn, response)
-                    message.audioSrcUrl = message.url
+                    message.audioSrcUrl = message.url + '?origin-file=true'
                     message.url = objectUrl
                     dispatch(Creators.addMessage(message, bodyType))
                 },
@@ -366,7 +388,15 @@ export const clearMessage = (state, { chatType, id }) => {
 }
 
 export const updateMessages = (state, { chatType, sessionId, messages }) => {
-    return state.setIn([chatType, sessionId], messages)
+    let messagesArr = state.getIn([chatType, sessionId]).asMutable({ deep: true })
+    messagesArr.forEach((msg) => {
+        if (msg.id === messages.id){
+            msg = messages
+            AppDB.updateMessageUrl(msg.id, messages.url)
+        }
+
+    })
+    return state.setIn([chatType, sessionId], messagesArr)
 }
 
 export const updateMessageMid = (state, { id, mid }) => {

@@ -110,6 +110,16 @@ const AppDB = {
                 .then(res => console.log('res', res))
         })
     },
+    
+    updateMessageUrl(id, url){
+        const $_TABLE = this.$_TABLE
+        return this.exec(resolve => {
+            $_TABLE.where('id')
+                .equals(id)
+                .modify({ 'url': url })
+                .then(res => console.log('res', res))
+        })
+    },
 
     // add a message to the database
     addMessage(message, isUnread = 0) {

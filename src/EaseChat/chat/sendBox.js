@@ -28,6 +28,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "2px",
     position: "absolute",
     bottom: 0,
+    padding:'10px 0'
   },
   emitter: {
     display: "flex",
@@ -44,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
     resize: "none",
     backgroundColor: "#efefef",
     borderRadius: "10px",
-    padding:'5px'
+    padding: '5px'
   },
   senderBar: {
     height: "12px",
@@ -103,11 +104,11 @@ function SendBox(props) {
   const sendMessage = useCallback(() => {
     if (!inputValue) return
     dispatch(MessageActions.sendTxtMessage(to, chatType, {
-        msg: inputValue
+      msg: inputValue
     }))
     setInputValue('')
     inputRef.current.focus()
-}, [inputValue, to, chatType, dispatch])
+  }, [inputValue, to, chatType, dispatch])
 
   const onKeyDownEvent = useCallback(
     (e) => {
@@ -244,15 +245,14 @@ function SendBox(props) {
             setShowRecorder(false);
           }}
         />
-        <TextareaAutosize
-          className={classes.input}
-          minRows={2}
-          maxRows={4}
-          value={inputValue}
-          onChange={handleInputChange}
-          ref={inputRef}
-        ></TextareaAutosize>
-
+          <TextareaAutosize
+            className={classes.input}
+            minRows={2}
+            maxRows={3}
+            value={inputValue}
+            onChange={handleInputChange}
+            ref={inputRef}
+          ></TextareaAutosize>
         <IconButton ref={emojiRef} onClick={handleClickEmoji}>
           <img alt="" className={classes.iconStyle} src={icon_emoji} />
         </IconButton>
