@@ -235,7 +235,7 @@ const { Types, Creators } = createActions({
                 },
                 onFileDownloadComplete: function (response) {
                     let objectUrl = WebIM.utils.parseDownloadResponse.call(WebIM.conn, response)
-                    message.audioSrcUrl = message.url + '?origin-file=true'
+                    message.audioSrcUrl = message.url
                     message.url = objectUrl
                     dispatch(Creators.addMessage(message, bodyType))
                 },
