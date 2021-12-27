@@ -1,4 +1,11 @@
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useContext,
+} from "react";
 import { makeStyles } from "@material-ui/styles";
 import Typography from "@material-ui/core/Typography";
 import {
@@ -14,6 +21,7 @@ import MessageActions from "../../redux/message";
 import PropTypes from "prop-types";
 import i18next from "i18next";
 import WebIM from "../../utils/WebIM";
+import { EaseChatContext } from "./index";
 
 import Recorder from "./messages/recorder";
 import icon_emoji from "../../common/icons/emoji@2x.png";
@@ -28,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "2px",
     position: "absolute",
     bottom: 0,
-    padding:'10px 0'
+    padding: "10px 0",
   },
   emitter: {
     display: "flex",
@@ -45,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
     resize: "none",
     backgroundColor: "#efefef",
     borderRadius: "10px",
-    padding: '5px'
+    padding: "5px",
   },
   senderBar: {
     height: "12px",
@@ -66,6 +74,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function SendBox(props) {
+  let easeChatProps = useContext(EaseChatContext);
+  const { easeInputMenu } = easeChatProps;
   const dispatch = useDispatch();
   const classes = useStyles();
   const globalProps = useSelector((state) => state.global.globalProps);
@@ -78,7 +88,7 @@ function SendBox(props) {
   const inputValueRef = useRef(null);
   const imageEl = useRef(null);
   const [sessionEl, setSessionEl] = useState(null);
-  const [showRecorder, setShowRecorder] = useState(false)
+  const [showRecorder, setShowRecorder] = useState(false);
   inputValueRef.current = inputValue;
   const handleClickEmoji = (e) => {
     setEmojiVisible(e.currentTarget);
@@ -102,13 +112,15 @@ function SendBox(props) {
     setInputValue(e.target.value);
   };
   const sendMessage = useCallback(() => {
-    if (!inputValue) return
-    dispatch(MessageActions.sendTxtMessage(to, chatType, {
-      msg: inputValue
-    }))
-    setInputValue('')
-    inputRef.current.focus()
-  }, [inputValue, to, chatType, dispatch])
+    if (!inputValue) return;
+    dispatch(
+      MessageActions.sendTxtMessage(to, chatType, {
+        msg: inputValue,
+      })
+    );
+    setInputValue("");
+    inputRef.current.focus();
+  }, [inputValue, to, chatType, dispatch]);
 
   const onKeyDownEvent = useCallback(
     (e) => {
@@ -174,7 +186,7 @@ function SendBox(props) {
   };
 
   /*------------ ui-menu ----------*/
-  function renderMenu() {
+  const renderMenu = () => {
     return (
       <Menu
         id="simple-menu"
@@ -226,10 +238,11 @@ function SendBox(props) {
         })}
       </Menu>
     );
-  }
-  return (
-    <Box className={classes.root}>
-      <Box className={classes.emitter}>
+  };
+
+  const renderRecorder = () => {
+    return (
+      <>
         {window.location.protocol === "https:" && (
           <IconButton
             onClick={() => {
@@ -245,29 +258,93 @@ function SendBox(props) {
             setShowRecorder(false);
           }}
         />
-          <TextareaAutosize
-            className={classes.input}
-            minRows={2}
-            maxRows={3}
-            value={inputValue}
-            onChange={handleInputChange}
-            ref={inputRef}
-          ></TextareaAutosize>
+      </>
+    );
+  };
+
+  const renderTextarea = () => {
+    return (
+      <TextareaAutosize
+        className={classes.input}
+        minRows={2}
+        maxRows={3}
+        value={inputValue}
+        onChange={handleInputChange}
+        ref={inputRef}
+      ></TextareaAutosize>
+    );
+  };
+
+  const renderEmoji = () => {
+    return (
+      <>
         <IconButton ref={emojiRef} onClick={handleClickEmoji}>
           <img alt="" className={classes.iconStyle} src={icon_emoji} />
         </IconButton>
+        <Emoji
+          anchorEl={emojiVisible}
+          onSelected={handleEmojiSelected}
+          onClose={handleEmojiClose}
+        ></Emoji>
+      </>
+    );
+  };
 
+  const renderMoreFeatures = () => {
+    return (
+      <>
         <IconButton onClick={handleClickMenu}>
           <img alt="" className={classes.iconStyle} src={attachment} />
         </IconButton>
-      </Box>
+        {renderMenu()}
+      </>
+    );
+  };
 
-      <Emoji
-        anchorEl={emojiVisible}
-        onSelected={handleEmojiSelected}
-        onClose={handleEmojiClose}
-      ></Emoji>
-      {renderMenu()}
+  const renderConditionModule = () => {
+    switch (easeInputMenu) {
+      case "all":
+        return (
+          <>
+            {renderRecorder()}
+            {renderTextarea()}
+            {renderEmoji()}
+            {renderMoreFeatures()}
+          </>
+        );
+      case "noAudio":
+        return (
+          <>
+            {renderTextarea()}
+            {renderEmoji()}
+            {renderMoreFeatures()}
+          </>
+        );
+      case "noEmoji":
+        return (
+          <>
+            {renderRecorder()}
+            {renderTextarea()}
+            {renderMoreFeatures()}
+          </>
+        );
+      case "noAudioAndEmoji":
+        return (
+          <>
+            {renderTextarea()}
+            {renderMoreFeatures()}
+          </>
+        );
+      case "onlyText":
+        return <>{renderTextarea()}</>;
+      default:
+        break;
+    }
+  };
+
+  return (
+    <Box className={classes.root}>
+      <Box className={classes.emitter}>{renderConditionModule()}</Box>
     </Box>
   );
 }

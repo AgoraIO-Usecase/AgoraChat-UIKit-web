@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -8,6 +8,7 @@ import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import { useSelector, useDispatch } from "../../EaseApp/index";
 import { renderTime } from "../../utils/index";
+import {EaseAppContext} from '../../EaseApp/index'
 import _ from 'lodash'
 import groupIcon from "../../common/images/groupAvatar.png";
 import chatRoomIcon from "../../common/images/chatroom@2x.png";
@@ -92,6 +93,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function SessionList(props) {
+  let easeAppProps = useContext(EaseAppContext)
+  const {isShowUnread,unreadType} = easeAppProps
   const classes = useStyles();
   const sessionList = useSelector((state) => state.session?.sessionList) || [];
   const to = useSelector((state) => state.global.globalProps.to);
@@ -205,14 +208,16 @@ export default function SessionList(props) {
                     {session?.lastMessage?.body?.msg}
                   </span>
 
-                  <span
+                  {isShowUnread &&
+                    <span
                     className={classes.unreadNum}
                     style={{
                       display: session.unreadNum ? "inline-block" : "none",
                     }}
                   >
-                    {session.unreadNum}
+                    {unreadType ?session.unreadNum:null}
                   </span>
+                  }
                 </Typography>
               </Box>
             </Box>

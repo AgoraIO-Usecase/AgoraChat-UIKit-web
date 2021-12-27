@@ -1,4 +1,4 @@
-import React, { useEffect, memo } from "react";
+import React, { useEffect, memo, createContext } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/styles";
 import MessageList from "./messageList";
@@ -13,6 +13,8 @@ import _ from "lodash";
 import "../../i18n";
 import "../../common/iconfont.css";
 import noMessage from "../../common/images/nomessage.png";
+
+export const EaseChatContext = createContext();
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
@@ -58,15 +60,25 @@ const Chat = (props) => {
 
   return to ? (
     <div className={classes.root}>
-      <MessageBar />
-      <MessageList
-        messageList={messageList}
-        showByselfAvatar={props.showByselfAvatar}
-      />
-      <SendBox />
+      <EaseChatContext.Provider value={props}>
+        <MessageBar />
+        <MessageList
+          messageList={messageList}
+          showByselfAvatar={props.showByselfAvatar}
+        />
+        <SendBox />
+      </EaseChatContext.Provider>
     </div>
   ) : (
-    <div style={{ width: "100%", height: "100%",display:'flex',alignItems:'center',justifyContent:'center' }}>
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <img src={noMessage} alt="" style={{ height: "200px", width: "200px" }} />
     </div>
   );
@@ -94,8 +106,13 @@ ChatWrapper.propTypes = {
   agoraToken: PropTypes.string,
   chatType: PropTypes.string,
 
-  // TODO 接收人
   to: PropTypes.string,
   sdkConnection: PropTypes.object,
-  showByselfAvatar: PropTypes.bool, //是否展示自己聊天头像
+  showByselfAvatar: PropTypes.bool,
+  easeInputMenu:PropTypes.string
+};
+
+ChatWrapper.defaultProps = {
+  showByselfAvatar:false,
+  easeInputMenu:'all'
 };

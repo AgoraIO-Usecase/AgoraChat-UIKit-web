@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, memo, useRef } from "react";
+import React, { useCallback ,createContext} from "react";
 import PropTypes from "prop-types";
 import { makeStyles, styled } from "@material-ui/styles";
 import Box from "@material-ui/core/Box";
@@ -22,10 +22,10 @@ import "../common/iconfont.css";
 
 import SessionList from "../EaseChat/session/sessionList";
 import EaseChat from "../EaseChat/chat/index";
-const uikit_store = React.createContext(null);
+const uikit_store = React.createContext();
 export const useDispatch = createDispatchHook(uikit_store);
 export const useSelector = createSelectorHook(uikit_store);
-
+export const EaseAppContext = createContext()
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
@@ -39,7 +39,8 @@ const useStyles = makeStyles((theme) => ({
 const Item = styled(Grid)(({ theme }) => ({}));
 
 const EaseApp = (props) => {
-  const dispatch = useDispatch();
+
+  const dispatch = useDispatch(null);
   const classes = useStyles();
   const handleClickItem = useCallback(
     (session) => {
@@ -81,7 +82,10 @@ const EaseApp = (props) => {
         >
           <div style={{height:'100%',overflowY:'auto',display:'flex',flexDirection:'column'}}>
             <div>{props.header}</div>
+            <EaseAppContext.Provider value={props}>
             <SessionList onClickItem={handleClickItem} />
+            </EaseAppContext.Provider>
+          
           </div>
         </Grid>
         <Grid item xs={6} md={9}>
@@ -96,7 +100,7 @@ const EaseAppWrapper = (props) => {
   return (
     <Provider context={uikit_store} store={store}>
       <React.StrictMode>
-        <EaseApp {...props} />
+          <EaseApp {...props} />
       </React.StrictMode>
     </Provider>
   );
@@ -132,10 +136,15 @@ EaseAppWrapper.propTypes = {
   sdkConnection: PropTypes.object,
   header: PropTypes.node,
   addSessionItem: PropTypes.func,
-  appkey: PropTypes.string
+  appkey: PropTypes.string,
+  isShowUnread:PropTypes.bool,
+  unreadType:PropTypes.bool
 };
 EaseAppWrapper.defaultProps = {
+  isShowUnread:true,
+  unreadType:false,
+
   // appkey: "41117440#383391",
-  // username: "30",
-  // agoraToken:"007eJxTYFBUuXry99rd2StOVWV9vTX9Xc+NAMbUprMxH4/N1dYUyrypwJBmmJJsbm6RlJKSbGZilphikWZkZmBpbpacaJRiYGianLDvYKKCDAPDhgdWTowMrAyMQAjiqzBYGKUlmacYGuiaGZka6xoapibrJiUbJ+qamBqYW5hamhqYGKQAAK4oKUo="
+  // username: "33",
+  // agoraToken:"007eJxTYPiSZeTHcl6s0vfAdvPlSdqTrNSnfIn7EuDl38jB4yz0bI4CQ5phSrK5uUVSSkqymYlZYopFmpGZgaW5WXKiUYqBoWmy74GTiQoyDAxeqdzljAysDIxACOKrMJimmBqZWCYb6JqZG1rqGhqmJusmmhml6VpYpiSlGhqYWRqZGgAAck4j6g=="
 };
