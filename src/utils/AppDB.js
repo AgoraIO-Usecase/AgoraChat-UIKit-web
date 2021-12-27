@@ -1,4 +1,5 @@
 import Dexie from 'dexie'
+import _ from 'lodash'
 
 const DB_VERSION = '1'
 const TABLE_NAME = 'IM_message'
@@ -179,30 +180,14 @@ const AppDB = {
                     let sessionObj = {}
                     res.forEach(element => {
                         if (!sessionObj[element.session]) {
-                            sessionObj[element.session] = element.session
                             sessionList.push({
-                                sessionId: element.session,
+                                sessionId:element.chatType === 'singleChat'? element.session : element.to,
                                 sessionType: element.chatType
                             })
                         }
                     });
-                    // if (!sessionObj.Abigail) {
-                    //     sessionList.push({
-                    //         sessionType: 'singleChat',
-                    //         sessionId: 'Abigail'
-                    //     })
-                    // }
-                    // if (!sessionObj.Isabella) {
-                    //     sessionList.push({
-                    //         sessionType: 'singleChat',
-                    //         sessionId: 'Isabella'
-                    //     })
-                    // }
-                    // sessionList.push({
-                    //     sessionType: 'notice',
-                    //     sessionId: 'notice'
-                    // })
-                    resolve(sessionList)
+                    let _sessionList =  _.uniqBy(sessionList,'sessionId')
+                    resolve(_sessionList)
                 })
         })
     }

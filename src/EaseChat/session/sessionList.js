@@ -166,7 +166,7 @@ export default function SessionList(props) {
         let usersInfoData = JSON.parse(localStorage.getItem("usersInfo_1.0"))
         let avatarSrc = "";
         if (session.sessionType === "singleChat") {
-          let findIndex =  _.find(usersInfoData, { username: session.sessionId })
+          let findIndex =  _.find(usersInfoData, { username: session.sessionId }) || ''
           avatarSrc = userAvatars[findIndex.userAvatar]
         }else if (session.sessionType === "groupChat") {
           avatarSrc = groupIcon;

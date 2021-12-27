@@ -39,12 +39,12 @@ export default class Demo extends Component {
     }).then((response) => response.json());
   };
 
-  onClickSession = () => {
+  addSessionItem = () => {
     let session = {
       sessionType: "singleChat",
       sessionId: "qw12",
     };
-    EaseApp.onClickSession(session);
+    EaseApp.addSessionItem(session);
     WebIM.conn.close('logout')
 
   };
@@ -52,7 +52,7 @@ export default class Demo extends Component {
     console.log("this.state.token>>", this.state.token);
     return (
       <div>
-          <button onClick={this.onClickSession}> 测试 </button>
+          <button onClick={this.addSessionItem}> 测试 </button>
         <h3>EaseApp</h3>
         <div>
           <EaseApp header={<div style={{ height: "100px" }}>222</div>} />

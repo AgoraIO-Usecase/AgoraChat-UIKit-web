@@ -103,7 +103,7 @@ const EaseAppWrapper = (props) => {
 };
 export default EaseAppWrapper;
 
-EaseAppWrapper.onClickSession = (session) => {
+EaseAppWrapper.addSessionItem = (session) => {
   if (session && Object.keys(session).length > 0) {
     const { sessionType, sessionId } = session;
     const { dispatch } = store;
@@ -131,11 +131,11 @@ EaseAppWrapper.propTypes = {
   agoraToken: PropTypes.string,
   sdkConnection: PropTypes.object,
   header: PropTypes.node,
-  onClickSession: PropTypes.func,
+  addSessionItem: PropTypes.func,
+  appkey: PropTypes.string
 };
 EaseAppWrapper.defaultProps = {
-  // appkey: "61117440#460199",
-  // username: "lizg2",
-  // agoraToken:
-  // "007eJxTYJDiuGDztHtLqkuRzDrbOSlCWQl1bldnmFXwJpb9X3S7b6sCg4WpqamFoXlaWpp5qkmKiXmSmVFKapqppYmRRZpxUpLZwcztiQ2BjAyrVmx5zMjAysAIhCC+CoOZUZphSpq5ga6JhYmxrqFharJukqlliq6xaRLQINPURNM0YwBkuChi"
+  // appkey: "41117440#383391",
+  // username: "30",
+  // agoraToken:"007eJxTYFBUuXry99rd2StOVWV9vTX9Xc+NAMbUprMxH4/N1dYUyrypwJBmmJJsbm6RlJKSbGZilphikWZkZmBpbpacaJRiYGianLDvYKKCDAPDhgdWTowMrAyMQAjiqzBYGKUlmacYGuiaGZka6xoapibrJiUbJ+qamBqYW5hamhqYGKQAAK4oKUo="
 };

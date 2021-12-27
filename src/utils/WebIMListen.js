@@ -26,7 +26,6 @@ export default function createListen() {
 
     onTextMessage: (message) => {
       console.log("onTextMessage", message);
-      console.log("store>>", store);
       const { chatType, from, to} = message;
       const sessionId = chatType === "singleChat" ? from : to;
       store.dispatch(MessageActions.addMessage(message, "txt"));
