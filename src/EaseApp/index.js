@@ -44,7 +44,7 @@ const EaseApp = (props) => {
   const classes = useStyles();
   const handleClickItem = useCallback(
     (session) => {
-      console.log("handleClickItem", session);
+      props.currentSessionClick && props.currentSessionClick(session)
       const { sessionType, sessionId } = session;
       if (!session.lastMessage) {
         dispatch(MessageActions.fetchMessage(sessionId, sessionType));
@@ -138,13 +138,14 @@ EaseAppWrapper.propTypes = {
   addSessionItem: PropTypes.func,
   appkey: PropTypes.string,
   isShowUnread:PropTypes.bool,
-  unreadType:PropTypes.bool
+  unreadType:PropTypes.bool,
+  currentSessionClick:PropTypes.func
 };
 EaseAppWrapper.defaultProps = {
   isShowUnread:true,
   unreadType:false,
 
-  // appkey: "41117440#383391",
-  // username: "33",
-  // agoraToken:"007eJxTYPiSZeTHcl6s0vfAdvPlSdqTrNSnfIn7EuDl38jB4yz0bI4CQ5phSrK5uUVSSkqymYlZYopFmpGZgaW5WXKiUYqBoWmy74GTiQoyDAxeqdzljAysDIxACOKrMJimmBqZWCYb6JqZG1rqGhqmJusmmhml6VpYpiSlGhqYWRqZGgAAck4j6g=="
+  appkey: "41117440#383391",
+  username: "33",
+  agoraToken:"007eJxTYJD+y+exRknq38ozG+qrF/UFVUk9CO33ipOXWuN8sJpH1UqBIc0wJdnc3CIpJSXZzMQsMcUizcjMwNLcLDnRKMXA0DQ5f8epRAUZBobf0jbCjAysDIxACOKrMJimmBqZWCYb6JqZG1rqGhqmJusmmhml6VpYpiSlGhqYWRqZGgAApxIkbA=="
 };

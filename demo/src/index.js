@@ -55,7 +55,7 @@ export default class Demo extends Component {
           <button onClick={this.addSessionItem}> 测试 </button>
         <h3>EaseApp</h3>
         <div>
-          <EaseApp header={<div style={{ height: "100px" }}>222</div>} />
+          <EaseApp header={<div style={{ height: "100px" }}>TestHeader</div>} />
         </div>
 
       
