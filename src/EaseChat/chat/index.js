@@ -84,7 +84,7 @@ const Chat = (props) => {
   );
 };
 
-const ChatWrapper = (props) => {
+const EaseChatProvider = (props) => {
   return (
     <Provider store={store}>
       <React.StrictMode>
@@ -93,14 +93,14 @@ const ChatWrapper = (props) => {
     </Provider>
   );
 };
-ChatWrapper.getSdk = (props) => {
+EaseChatProvider.getSdk = (props) => {
   initIMSDK(props.appkey);
   createListen();
   return WebIM;
 };
-export default ChatWrapper;
+export default EaseChatProvider;
 
-ChatWrapper.propTypes = {
+EaseChatProvider.propTypes = {
   appkey: PropTypes.string,
   username: PropTypes.string,
   agoraToken: PropTypes.string,
@@ -114,7 +114,7 @@ ChatWrapper.propTypes = {
   handleMenuItem:PropTypes.func
 };
 
-ChatWrapper.defaultProps = {
+EaseChatProvider.defaultProps = {
   showByselfAvatar:false,
   easeInputMenu:'all',
   menuList: [

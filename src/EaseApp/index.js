@@ -96,7 +96,7 @@ const EaseApp = (props) => {
   );
 };
 
-const EaseAppWrapper = (props) => {
+const EaseAppProvider = (props) => {
   return (
     <Provider context={uikit_store} store={store}>
       <React.StrictMode>
@@ -105,9 +105,9 @@ const EaseAppWrapper = (props) => {
     </Provider>
   );
 };
-export default EaseAppWrapper;
+export default EaseAppProvider;
 
-EaseAppWrapper.addSessionItem = (session) => {
+EaseAppProvider.addSessionItem = (session) => {
   if (session && Object.keys(session).length > 0) {
     const { sessionType, sessionId } = session;
     const { dispatch } = store;
@@ -125,12 +125,12 @@ EaseAppWrapper.addSessionItem = (session) => {
     dispatch(MessageActions.clearUnreadAsync(sessionType, sessionId));
   }
 };
-EaseAppWrapper.getSdk = (props) => {
+EaseAppProvider.getSdk = (props) => {
   initIMSDK(props.appkey);
   createListen();
   return WebIM;
 };
-EaseAppWrapper.propTypes = {
+EaseAppProvider.propTypes = {
   username: PropTypes.string,
   agoraToken: PropTypes.string,
   sdkConnection: PropTypes.object,
@@ -141,11 +141,12 @@ EaseAppWrapper.propTypes = {
   unreadType:PropTypes.bool,
   currentSessionClick:PropTypes.func
 };
-EaseAppWrapper.defaultProps = {
+EaseAppProvider.defaultProps = {
   isShowUnread:true,
   unreadType:false,
 
-  appkey: "41117440#383391",
-  username: "33",
-  agoraToken:"007eJxTYJD+y+exRknq38ozG+qrF/UFVUk9CO33ipOXWuN8sJpH1UqBIc0wJdnc3CIpJSXZzMQsMcUizcjMwNLcLDnRKMXA0DQ5f8epRAUZBobf0jbCjAysDIxACOKrMJimmBqZWCYb6JqZG1rqGhqmJusmmhml6VpYpiSlGhqYWRqZGgAApxIkbA=="
+  // test user
+  // appkey: "41117440#383391",
+  // username: "33",
+  // agoraToken:"007eJxTYJD+y+exRknq38ozG+qrF/UFVUk9CO33ipOXWuN8sJpH1UqBIc0wJdnc3CIpJSXZzMQsMcUizcjMwNLcLDnRKMXA0DQ5f8epRAUZBobf0jbCjAysDIxACOKrMJimmBqZWCYb6JqZG1rqGhqmJusmmhml6VpYpiSlGhqYWRqZGgAApxIkbA=="
 };
