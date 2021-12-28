@@ -89,7 +89,7 @@ const EaseApp = (props) => {
           </div>
         </Grid>
         <Grid item xs={6} md={9}>
-          <EaseChat {...props} />
+          <EaseChat {...props}/>
         </Grid>
       </div>
     </Box>

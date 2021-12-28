@@ -109,10 +109,16 @@ ChatWrapper.propTypes = {
   to: PropTypes.string,
   sdkConnection: PropTypes.object,
   showByselfAvatar: PropTypes.bool,
-  easeInputMenu:PropTypes.string
+  easeInputMenu:PropTypes.string,
+  menuList:PropTypes.array,
+  handleMenuItem:PropTypes.func
 };
 
 ChatWrapper.defaultProps = {
   showByselfAvatar:false,
-  easeInputMenu:'all'
+  easeInputMenu:'all',
+  menuList: [
+    { name: "发送图片", value: "img", key: "1" },
+    { name: "发送文件", value: "file", key: "2" },
+  ],
 };

@@ -75,7 +75,7 @@ const useStyles = makeStyles((theme) => ({
 
 function SendBox(props) {
   let easeChatProps = useContext(EaseChatContext);
-  const { easeInputMenu } = easeChatProps;
+  const { easeInputMenu,menuList,handleMenuItem } = easeChatProps;
   const dispatch = useDispatch();
   const classes = useStyles();
   const globalProps = useSelector((state) => state.global.globalProps);
@@ -171,7 +171,8 @@ function SendBox(props) {
     setSessionEl(e.currentTarget);
   };
 
-  const handleMenuItem = (v) => (e) => {
+  const onClickMenuItem = (v) => (e) => {
+    handleMenuItem && handleMenuItem(v,e)
     switch (v) {
       case 0:
         handleImageClick();
@@ -203,15 +204,15 @@ function SendBox(props) {
           horizontal: "right",
         }}
       >
-        {props.menuList.map((option, index) => {
+        {menuList && menuList.map((option, index) => {
           return (
-            <MenuItem onClick={handleMenuItem(index)} key={index}>
+            <MenuItem onClick={onClickMenuItem(index)} key={index}>
               <Box className={classes.menuItemIconBox}>
-                <img
+                {/* <img
                   alt=""
                   className={classes.iconStyle}
                   src={option.icon}
-                ></img>
+                ></img> */}
               </Box>
               <Typography variant="inherit" noWrap>
                 {i18next.t(option.name)}
@@ -349,14 +350,3 @@ function SendBox(props) {
   );
 }
 export default memo(SendBox);
-
-/*-------- props ------*/
-SendBox.propTypes = {
-  menuList: PropTypes.array,
-};
-SendBox.defaultProps = {
-  menuList: [
-    { name: "发送图片", value: "img", icon: attachment, key: "1" },
-    { name: "发送文件", value: "file", icon: icon_yuyin, key: "2" },
-  ],
-};
