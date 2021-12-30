@@ -8,7 +8,7 @@ import { Provider } from "react-redux";
 import SendBox from "./sendBox";
 import WebIM, { initIMSDK } from "../../utils/WebIM";
 import store from "../../redux/index";
-import createListen from "../../utils/WebIMListen";
+import createlistener from "../../utils/WebIMListen";
 import _ from "lodash";
 import "../../i18n";
 import "../../common/iconfont.css";
@@ -31,7 +31,7 @@ const Chat = (props) => {
   useEffect(() => {
     if (props.appkey && props.username && props.agoraToken) {
       initIMSDK(props.appkey);
-      createListen();
+      createlistener();
       if (WebIM.conn.logOut) {
         login();
       }
@@ -95,7 +95,7 @@ const EaseChatProvider = (props) => {
 };
 EaseChatProvider.getSdk = (props) => {
   initIMSDK(props.appkey);
-  createListen();
+  createlistener();
   return WebIM;
 };
 export default EaseChatProvider;
@@ -105,9 +105,8 @@ EaseChatProvider.propTypes = {
   username: PropTypes.string,
   agoraToken: PropTypes.string,
   chatType: PropTypes.string,
-
   to: PropTypes.string,
-  sdkConnection: PropTypes.object,
+
   showByselfAvatar: PropTypes.bool,
   easeInputMenu:PropTypes.string,
   menuList:PropTypes.array,

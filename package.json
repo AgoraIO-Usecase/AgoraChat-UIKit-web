@@ -1,7 +1,7 @@
 {
-  "name": "es-uikit",
+  "name": "chat-uikit",
   "version": "1.0.46",
-  "description": "es-uikit React component",
+  "description": "chat-uikit React component",
   "main": "lib/index.js",
   "module": "es/index.js",
   "files": [
@@ -75,7 +75,6 @@
     "dotenv": "8.2.0",
     "dotenv-expand": "5.1.0",
     "easemob-websdk": "4.0.1-beta5",
-    "es-uikit": "^0.1.2",
     "eslint": "^7.11.0",
     "eslint-config-react-app": "^6.0.0",
     "eslint-plugin-flowtype": "^5.2.0",

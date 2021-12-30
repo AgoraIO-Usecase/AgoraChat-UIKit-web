@@ -102,7 +102,7 @@ const MessageBar = () => {
   const [userAvatarIndex, setUserAvatarIndex] = useState([])
   const [usersInfoData, setUsersInfoData] = useState([])
   useEffect(() => {
-    let newwInfoData = usersInfoData.length > 0 ? usersInfoData : JSON.parse(localStorage.getItem("usersInfo_1.0"))
+    let newwInfoData =usersInfoData && usersInfoData.length > 0 ? usersInfoData : localStorage.getItem("usersInfo_1.0")
     setUsersInfoData(newwInfoData)
     setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar)
   }, [to])
@@ -111,7 +111,6 @@ const MessageBar = () => {
   return (
     <div className={classes.root}>
       <Box position="static" className={classes.leftBar}>
-        {/* // TODO nickname 可配置 */}
         <Avatar className={classes.avatar} 
         src={chatType === "singleChat" ? userAvatars[userAvatarIndex] : groupAvatarIcon}
           style={{ borderRadius: chatType === "singleChat" ? "50%" : 'inherit'}}

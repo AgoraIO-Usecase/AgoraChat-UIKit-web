@@ -5,8 +5,7 @@ import AppDB from "../utils/AppDB";
 import MessageActions from "../redux/message";
 import SessionActions from "../redux/session";
 import GlobalPropsActions from "../redux/globalProps"
-// TODO createListen 语义化
-export default function createListen() {
+export default function createlistener() {
   WebIM.conn.addEventHandler('EaseChat',{
     onConnected: (msg) => {
       console.log("登录成功");

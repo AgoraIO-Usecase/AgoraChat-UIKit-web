@@ -13,7 +13,7 @@ import {
 import WebIM, { initIMSDK } from "../utils/WebIM";
 import store from "../redux/index";
 import GlobalPropsActions from "../redux/globalProps";
-import createListen from "../utils/WebIMListen";
+import createlistener from "../utils/WebIMListen";
 import MessageActions from "../redux/message";
 import SessionActions from "../redux/session";
 import _ from "lodash";
@@ -44,7 +44,7 @@ const EaseApp = (props) => {
   const classes = useStyles();
   const handleClickItem = useCallback(
     (session) => {
-      props.currentSessionClick && props.currentSessionClick(session)
+      props.onConversationClick && props.onConversationClick(session)
       const { sessionType, sessionId } = session;
       if (!session.lastMessage) {
         dispatch(MessageActions.fetchMessage(sessionId, sessionType));
@@ -107,46 +107,50 @@ const EaseAppProvider = (props) => {
 };
 export default EaseAppProvider;
 
-EaseAppProvider.addSessionItem = (session) => {
+EaseAppProvider.addConversationItem = (session) => {
   if (session && Object.keys(session).length > 0) {
-    const { sessionType, sessionId } = session;
+    const { conversationType, conversationId } = session;
     const { dispatch } = store;
     const storeSessionList = store.getState().session
     const {sessionList} = storeSessionList
     const isNewSession = _.findIndex(sessionList,(v)=>{
-      return v.sessionId === session.sessionId
+      return v.sessionId === session.conversationId
     })
     if (isNewSession === -1) {
-      dispatch(SessionActions._pushSession(session));
+      dispatch(SessionActions._pushSession({sessionType:session.conversationType,sessionId:session.conversationId}));
     }
-    dispatch(SessionActions.setCurrentSession(sessionId));
-    dispatch(SessionActions.topSession(sessionId, sessionType));
-    dispatch(GlobalPropsActions.setGlobalProps({to: sessionId,chatType: sessionType,}));
-    dispatch(MessageActions.clearUnreadAsync(sessionType, sessionId));
+    dispatch(SessionActions.setCurrentSession(conversationId));
+    dispatch(SessionActions.topSession(conversationId, conversationType));
+    dispatch(GlobalPropsActions.setGlobalProps({to: conversationId,chatType: conversationType,}));
+    dispatch(MessageActions.clearUnreadAsync(conversationType, conversationId));
   }
 };
 EaseAppProvider.getSdk = (props) => {
   initIMSDK(props.appkey);
-  createListen();
+  createlistener();
   return WebIM;
 };
 EaseAppProvider.propTypes = {
   username: PropTypes.string,
   agoraToken: PropTypes.string,
-  sdkConnection: PropTypes.object,
-  header: PropTypes.node,
-  addSessionItem: PropTypes.func,
   appkey: PropTypes.string,
+
+  header: PropTypes.node,
+  addConversationItem: PropTypes.func,
   isShowUnread:PropTypes.bool,
   unreadType:PropTypes.bool,
-  currentSessionClick:PropTypes.func
+  onConversationClick:PropTypes.func,
+  showByselfAvatar: PropTypes.bool,
+  easeInputMenu:PropTypes.string,
+  menuList:PropTypes.array,
+  handleMenuItem:PropTypes.func
 };
 EaseAppProvider.defaultProps = {
   isShowUnread:true,
   unreadType:false,
 
   // test user
-  // appkey: "41117440#383391",
-  // username: "33",
-  // agoraToken:"007eJxTYJD+y+exRknq38ozG+qrF/UFVUk9CO33ipOXWuN8sJpH1UqBIc0wJdnc3CIpJSXZzMQsMcUizcjMwNLcLDnRKMXA0DQ5f8epRAUZBobf0jbCjAysDIxACOKrMJimmBqZWCYb6JqZG1rqGhqmJusmmhml6VpYpiSlGhqYWRqZGgAApxIkbA=="
+  appkey: "41117440#383391",
+  username: "33",
+  agoraToken:"007eJxTYDDu+Pxh/2y9ot9cyypmHJ4covzj5VTDf6uP2mi5lU+wkuFWYEgzTEk2N7dISklJNjMxS0yxSDMyM7A0N0tONEoxMDRNVpp8NlFBhoEh+8b+o4wMrAyMQAjiqzCYppgamVgmG+iamRta6hoapibrJpoZpelaWKYkpRoamFkamRoAAPk4J+Q="
 };

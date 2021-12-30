@@ -41,10 +41,10 @@ export default class Demo extends Component {
 
   addSessionItem = () => {
     let session = {
-      sessionType: "singleChat",
-      sessionId: "qw12",
+      conversationType: "singleChat",
+      conversationId: "qw12",
     };
-    EaseApp.addSessionItem(session);
+    EaseApp.addConversationItem(session);
     WebIM.conn.close('logout')
 
   };

@@ -166,7 +166,7 @@ export default function SessionList(props) {
   return (
     <List dense className={classes.root}>
       {renderSessionList.map((session, index) => {
-        let usersInfoData = JSON.parse(localStorage.getItem("usersInfo_1.0"))
+        let usersInfoData = localStorage.getItem("usersInfo_1.0")
         let avatarSrc = "";
         if (session.sessionType === "singleChat") {
           let findIndex =  _.find(usersInfoData, { username: session.sessionId }) || ''
