@@ -94,9 +94,11 @@ const EaseChatProvider = (props) => {
   );
 };
 EaseChatProvider.getSdk = (props) => {
-  initIMSDK(props.appkey);
-  createlistener();
-  return WebIM;
+  if (!WebIM.conn) {
+    initIMSDK(props.appkey);
+    createlistener();
+  }
+  return WebIM
 };
 export default EaseChatProvider;
 

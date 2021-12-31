@@ -1,4 +1,4 @@
-import React, { useCallback ,createContext} from "react";
+import React, { useCallback, createContext } from "react";
 import PropTypes from "prop-types";
 import { makeStyles, styled } from "@material-ui/styles";
 import Box from "@material-ui/core/Box";
@@ -25,7 +25,7 @@ import EaseChat from "../EaseChat/chat/index";
 const uikit_store = React.createContext();
 export const useDispatch = createDispatchHook(uikit_store);
 export const useSelector = createSelectorHook(uikit_store);
-export const EaseAppContext = createContext()
+export const EaseAppContext = createContext();
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
@@ -39,12 +39,11 @@ const useStyles = makeStyles((theme) => ({
 const Item = styled(Grid)(({ theme }) => ({}));
 
 const EaseApp = (props) => {
-
   const dispatch = useDispatch(null);
   const classes = useStyles();
   const handleClickItem = useCallback(
     (session) => {
-      props.onConversationClick && props.onConversationClick(session)
+      props.onConversationClick && props.onConversationClick(session);
       const { sessionType, sessionId } = session;
       if (!session.lastMessage) {
         dispatch(MessageActions.fetchMessage(sessionId, sessionType));
@@ -80,16 +79,22 @@ const EaseApp = (props) => {
           md={3}
           className={classes.grid}
         >
-          <div style={{height:'100%',overflowY:'auto',display:'flex',flexDirection:'column'}}>
+          <div
+            style={{
+              height: "100%",
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
             <div>{props.header}</div>
             <EaseAppContext.Provider value={props}>
-            <SessionList onClickItem={handleClickItem} />
+              <SessionList onClickItem={handleClickItem} />
             </EaseAppContext.Provider>
-          
           </div>
         </Grid>
         <Grid item xs={6} md={9}>
-          <EaseChat {...props}/>
+          <EaseChat {...props} />
         </Grid>
       </div>
     </Box>
@@ -100,7 +105,7 @@ const EaseAppProvider = (props) => {
   return (
     <Provider context={uikit_store} store={store}>
       <React.StrictMode>
-          <EaseApp {...props} />
+        <EaseApp {...props} />
       </React.StrictMode>
     </Provider>
   );
@@ -111,24 +116,36 @@ EaseAppProvider.addConversationItem = (session) => {
   if (session && Object.keys(session).length > 0) {
     const { conversationType, conversationId } = session;
     const { dispatch } = store;
-    const storeSessionList = store.getState().session
-    const {sessionList} = storeSessionList
-    const isNewSession = _.findIndex(sessionList,(v)=>{
-      return v.sessionId === session.conversationId
-    })
+    const storeSessionList = store.getState().session;
+    const { sessionList } = storeSessionList;
+    const isNewSession = _.findIndex(sessionList, (v) => {
+      return v.sessionId === session.conversationId;
+    });
     if (isNewSession === -1) {
-      dispatch(SessionActions._pushSession({sessionType:session.conversationType,sessionId:session.conversationId}));
+      dispatch(
+        SessionActions._pushSession({
+          sessionType: session.conversationType,
+          sessionId: session.conversationId,
+        })
+      );
     }
     dispatch(SessionActions.setCurrentSession(conversationId));
     dispatch(SessionActions.topSession(conversationId, conversationType));
-    dispatch(GlobalPropsActions.setGlobalProps({to: conversationId,chatType: conversationType,}));
+    dispatch(
+      GlobalPropsActions.setGlobalProps({
+        to: conversationId,
+        chatType: conversationType,
+      })
+    );
     dispatch(MessageActions.clearUnreadAsync(conversationType, conversationId));
   }
 };
 EaseAppProvider.getSdk = (props) => {
-  initIMSDK(props.appkey);
-  createlistener();
-  return WebIM;
+  if (!WebIM.conn) {
+    initIMSDK(props.appkey);
+    createlistener();
+  }
+  return WebIM
 };
 EaseAppProvider.propTypes = {
   username: PropTypes.string,
@@ -137,20 +154,20 @@ EaseAppProvider.propTypes = {
 
   header: PropTypes.node,
   addConversationItem: PropTypes.func,
-  isShowUnread:PropTypes.bool,
-  unreadType:PropTypes.bool,
-  onConversationClick:PropTypes.func,
+  isShowUnread: PropTypes.bool,
+  unreadType: PropTypes.bool,
+  onConversationClick: PropTypes.func,
   showByselfAvatar: PropTypes.bool,
-  easeInputMenu:PropTypes.string,
-  menuList:PropTypes.array,
-  handleMenuItem:PropTypes.func
+  easeInputMenu: PropTypes.string,
+  menuList: PropTypes.array,
+  handleMenuItem: PropTypes.func,
 };
 EaseAppProvider.defaultProps = {
-  isShowUnread:true,
-  unreadType:false,
+  isShowUnread: true,
+  unreadType: false,
 
   // test user
-  appkey: "41117440#383391",
-  username: "33",
-  agoraToken:"007eJxTYDDu+Pxh/2y9ot9cyypmHJ4covzj5VTDf6uP2mi5lU+wkuFWYEgzTEk2N7dISklJNjMxS0yxSDMyM7A0N0tONEoxMDRNVpp8NlFBhoEh+8b+o4wMrAyMQAjiqzCYppgamVgmG+iamRta6hoapibrJpoZpelaWKYkpRoamFkamRoAAPk4J+Q="
+  // appkey: "41117440#383391",
+  // username: "34",
+  // agoraToken:"007eJxTYHi5o+DKRl65C/1GYZcvqPM8dxAo9E6Q3GDbsSZRPHxV1VsFhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9PkP1fPJSrIMDC8iEmoY2RgZWAEQhBfhcE0OdHc0tTYQNfM0sxM19AwNVnXwsjcUNc0zdTSxDTVIjk11RAAbk0nEA=="
 };
