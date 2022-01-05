@@ -5,22 +5,20 @@ import AppDB from "../utils/AppDB";
 import MessageActions from "../redux/message";
 import SessionActions from "../redux/session";
 import GlobalPropsActions from "../redux/globalProps"
-export default function createlistener() {
+export default function createlistener(props) {
   WebIM.conn.addEventHandler('EaseChat',{
     onConnected: (msg) => {
       console.log("登录成功");
         // init DB
         AppDB.init(WebIM.conn.context.userId);
-
       // get session list
       store.dispatch(SessionActions.getSessionList());
-
       const options = {
         appKey:WebIM.conn.context.appKey,
         username:WebIM.conn.context.userId
       }
       store.dispatch(GlobalPropsActions.saveGlobalProps(options));
-      
+      props.successLoginCallback && props.successLoginCallback({isLogin:true})
     },
 
     onTextMessage: (message) => {
@@ -85,6 +83,7 @@ export default function createlistener() {
     onError: (err) => {
       console.log("error");
       console.error(err);
+      props.failCallback && props.failCallback(err)
     },
     onClosed: (msg) => {
       console.warn("onClosed", msg);

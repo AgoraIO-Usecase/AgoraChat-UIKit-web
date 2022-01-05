@@ -33,8 +33,16 @@ export default class Demo extends Component {
   //   WebIM.conn.close('logout')
 
   // };
-  getSdk = () =>{
-    EaseApp.getSdk({appkey:'41117440#383391'})
+
+  // getSdk = () =>{
+  //   EaseApp.getSdk({appkey:'41117440#383391'})
+  // }
+
+  test = (res) =>{
+    console.log('test登录成功',res);
+  }
+  test2 = (err) =>{
+    console.log('登录失败',err)
   }
   render() {
     console.log("this.state.token>>", this.state.token);
@@ -43,7 +51,14 @@ export default class Demo extends Component {
           <button onClick={this.getSdk}> 测试 </button>
         <h3>EaseApp</h3>
         <div>
-          <EaseApp header={<div style={{ height: "100px" }}>TestHeader</div>} />
+          <EaseApp
+            successLoginCallback={this.test}
+            failCallback={this.test2}
+            
+            // appkey= "41117440#383391"
+            // username="38"
+            // agoraToken="007eJxTYPgi6rikq32jpnppza4u3wWtE7k+3Z92j0/Pmc+dndduAqcCQ5phSrK5uUVSSkqymYlZYopFmpGZgaW5WXKiUYqBoWny2f+XExVkGBi2VnJ6MjKwMjACIYivwmCUapZokWZooGuWYpisa2iYmqxrYZhooWuelmqQaJhsYGFobgIAtdYlNg=="
+            header={<div style={{ height: "100px" }}>TestHeader</div>} />
         </div>
 
       

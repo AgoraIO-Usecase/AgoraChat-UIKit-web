@@ -143,7 +143,7 @@ EaseAppProvider.addConversationItem = (session) => {
 EaseAppProvider.getSdk = (props) => {
   if (!WebIM.conn) {
     initIMSDK(props.appkey);
-    createlistener();
+    createlistener(props);
   }
   return WebIM
 };
@@ -165,9 +165,4 @@ EaseAppProvider.propTypes = {
 EaseAppProvider.defaultProps = {
   isShowUnread: true,
   unreadType: false,
-
-  // test user
-  // appkey: "41117440#383391",
-  // username: "34",
-  // agoraToken:"007eJxTYHi5o+DKRl65C/1GYZcvqPM8dxAo9E6Q3GDbsSZRPHxV1VsFhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9PkP1fPJSrIMDC8iEmoY2RgZWAEQhBfhcE0OdHc0tTYQNfM0sxM19AwNVnXwsjcUNc0zdTSxDTVIjk11RAAbk0nEA=="
 };

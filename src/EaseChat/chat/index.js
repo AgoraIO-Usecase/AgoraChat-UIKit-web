@@ -31,7 +31,7 @@ const Chat = (props) => {
   useEffect(() => {
     if (props.appkey && props.username && props.agoraToken) {
       initIMSDK(props.appkey);
-      createlistener();
+      createlistener(props);
       if (WebIM.conn.logOut) {
         login();
       }
@@ -96,7 +96,7 @@ const EaseChatProvider = (props) => {
 EaseChatProvider.getSdk = (props) => {
   if (!WebIM.conn) {
     initIMSDK(props.appkey);
-    createlistener();
+    createlistener(props);
   }
   return WebIM
 };
@@ -112,7 +112,10 @@ EaseChatProvider.propTypes = {
   showByselfAvatar: PropTypes.bool,
   easeInputMenu:PropTypes.string,
   menuList:PropTypes.array,
-  handleMenuItem:PropTypes.func
+  handleMenuItem:PropTypes.func,
+
+  successLoginCallback:PropTypes.func,
+  failCallback:PropTypes.func
 };
 
 EaseChatProvider.defaultProps = {
