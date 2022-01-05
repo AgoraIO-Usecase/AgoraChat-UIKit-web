@@ -12,7 +12,7 @@ chat-uikit 的依赖项是：
 * React DOM 16.8.0 or higher
 
 * 有效的 Agora Chat 开发者账号
-* 创建 Agora Chat 项目并获取 AppKey   // TODO 增加跳转链接
+* 创建 Agora Chat 项目并获取 AppKey   
 
 ## 支持的浏览器
 
@@ -115,7 +115,7 @@ export default App;
 
 <font color='red'>注意：当您使用您自己的appkey时候，由于没有联系人，那么需要您先去添加好友或者加入群组。具体请参考如下文档</font>
 
-TODO：插入添加好友的文档链接地址
+
 
 ```bash
 npm run start
@@ -150,5 +150,4 @@ postData('https://a41.easemob.com/app/chat/user/login', { "userAccount": usernam
         })
 ```
 
-TODO ：详细插入声网token的文档链接
 
