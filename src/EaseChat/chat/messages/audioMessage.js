@@ -1,8 +1,10 @@
-import React, { memo, useEffect, useRef, useState } from 'react'
+import React, { memo, useEffect, useRef, useState,useContext } from 'react'
 import { makeStyles } from '@material-ui/styles';
 import { Avatar, Icon } from '@material-ui/core';
 import { renderTime } from '../../../utils/index';
+import avatar from "../../../common/icons/avatar1.png";
 import AudioPlayer from './audioPlayer/audioPlayer'
+import { EaseChatContext } from "../index";
 const useStyles = makeStyles((theme) => ({
     pulldownListItem: {
         padding: '10px 0',
@@ -56,6 +58,8 @@ const useStyles = makeStyles((theme) => ({
 
 function AudioMessage({ message ,showByselfAvatar}) {
     console.log('message>>>',message);
+    let easeChatProps = useContext(EaseChatContext);
+    const { onAvatarChange } = easeChatProps;
     const classes = useStyles({ bySelf: message.bySelf, duration: Math.round(message.body.length) });
     const url = message.body.url
     const audioRef = useRef(null)
@@ -72,8 +76,8 @@ function AudioMessage({ message ,showByselfAvatar}) {
 
     return (
         <li className={classes.pulldownListItem}>
-            {!message.bySelf && <Avatar></Avatar>} 
-               {showByselfAvatar && message.bySelf && <Avatar></Avatar>} 
+            {!message.bySelf && <Avatar src={avatar} onClick={() => onAvatarChange && onAvatarChange(message)} ></Avatar>} 
+               {showByselfAvatar && message.bySelf && <Avatar src={avatar}></Avatar>} 
             <div className={classes.audioBox} onClick={play}>
                 <AudioPlayer play={isPlaying} reverse={message.bySelf} />
                 <span className={classes.duration}>

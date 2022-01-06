@@ -104,9 +104,8 @@ const MessageBar = () => {
   useEffect(() => {
     let newwInfoData =usersInfoData && usersInfoData.length > 0 ? usersInfoData : localStorage.getItem("usersInfo_1.0")
     setUsersInfoData(newwInfoData)
-    setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar)
+    setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 1)
   }, [to])
-
 
   return (
     <div className={classes.root}>

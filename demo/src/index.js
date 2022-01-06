@@ -44,6 +44,9 @@ export default class Demo extends Component {
   test2 = (err) =>{
     console.log('登录失败',err)
   }
+  test3 = (res) =>{
+    console.log('res>>',res);
+  }
   render() {
     console.log("this.state.token>>", this.state.token);
     return (
@@ -54,10 +57,11 @@ export default class Demo extends Component {
           <EaseApp
             successLoginCallback={this.test}
             failCallback={this.test2}
+            onAvatarChange={this.test3}
             
-            // appkey= "41117440#383391"
-            // username="38"
-            // agoraToken="007eJxTYPgi6rikq32jpnppza4u3wWtE7k+3Z92j0/Pmc+dndduAqcCQ5phSrK5uUVSSkqymYlZYopFmpGZgaW5WXKiUYqBoWny2f+XExVkGBi2VnJ6MjKwMjACIYivwmCUapZokWZooGuWYpisa2iYmqxrYZhooWuelmqQaJhsYGFobgIAtdYlNg=="
+            appkey= "41117440#383391"
+            username="40"
+            agoraToken="007eJxTYOhT++o4heGkcKNSo8ukvoKf14/Lzr2Vw2n/+ntEnPWJmHcKDGmGKcnm5hZJKSnJZiZmiSkWaUZmBpbmZsmJRikGhqbJPUuuJSrIMDAwBT7oZWRgZWAEQhBfhcHczMLc2MzQQNcsNdlC19AwNVk3MTnRXNfE0sLAzNDSPMXE0AQAnfcnBg=="
             header={<div style={{ height: "100px" }}>TestHeader</div>} />
         </div>
 
