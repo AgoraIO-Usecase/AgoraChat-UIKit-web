@@ -53,8 +53,8 @@ export default class Demo extends Component {
             onAvatarChange={this.test3}
             
             appkey= "41117440#383391"
-            username="3135"
-            agoraToken="007eJxTYPi059byYv6KBfMWRU8I0GRxWFQj/k373mJL6238B2ZdrZ+pwJBmmJJsbm6RlJKSbGZilphikWZkZmBpbpacaJRiYGiavObFk0QFGQaGa/e2qDMysDIwAiGIr8JgkmxmmmhsaKBrbm5iqWtomJqsm2RiZqhrYZxkDpRJMkhMtAAA9PAogw=="
+            username="qw15"
+            agoraToken="007eJxTYOAJ/7N6e9TmelbrhbWz5328yi98cXp2b53cAiuG1x8lps5QYEgzTEk2N7dISklJNjMxS0yxSDMyM7A0N0tONEoxMDRNnvnmSaKCDAODkdaqr4wMrAyMQAjiqzAkGpsZpSQmGuiam5sk6RoapibrWqSYWuoamBqZmplbmJskJ6cCALh6J9c="
             header={<div style={{ height: "100px" }}>TestHeader</div>} />
         </div>
 
