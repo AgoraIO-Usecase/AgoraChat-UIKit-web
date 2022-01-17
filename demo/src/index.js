@@ -23,21 +23,14 @@ export default class Demo extends Component {
       referrer: "no-referrer",
     }).then((response) => response.json());
   };
+    addSessionItem = () => {
+    let session = {
+      conversationType: "singleChat",
+      conversationId: "qw12",
+    };
+    EaseApp.addConversationItem(session);
 
-  // addSessionItem = () => {
-  //   let session = {
-  //     conversationType: "singleChat",
-  //     conversationId: "qw12",
-  //   };
-  //   EaseApp.addConversationItem(session);
-  //   WebIM.conn.close('logout')
-
-  // };
-
-  // getSdk = () =>{
-  //   EaseApp.getSdk({appkey:'41117440#383391'})
-  // }
-
+  };
   test = (res) =>{
     console.log('test登录成功',res);
   }
@@ -51,7 +44,7 @@ export default class Demo extends Component {
     console.log("this.state.token>>", this.state.token);
     return (
       <div>
-          <button onClick={this.getSdk}> 测试 </button>
+          <button onClick={this.addSessionItem}> 测试 </button>
         <h3>EaseApp</h3>
         <div>
           <EaseApp
@@ -60,8 +53,8 @@ export default class Demo extends Component {
             onAvatarChange={this.test3}
             
             appkey= "41117440#383391"
-            username="40"
-            agoraToken="007eJxTYOhT++o4heGkcKNSo8ukvoKf14/Lzr2Vw2n/+ntEnPWJmHcKDGmGKcnm5hZJKSnJZiZmiSkWaUZmBpbmZsmJRikGhqbJPUuuJSrIMDAwBT7oZWRgZWAEQhBfhcHczMLc2MzQQNcsNdlC19AwNVk3MTnRXNfE0sLAzNDSPMXE0AQAnfcnBg=="
+            username="3135"
+            agoraToken="007eJxTYPi059byYv6KBfMWRU8I0GRxWFQj/k373mJL6238B2ZdrZ+pwJBmmJJsbm6RlJKSbGZilphikWZkZmBpbpacaJRiYGiavObFk0QFGQaGa/e2qDMysDIwAiGIr8JgkmxmmmhsaKBrbm5iqWtomJqsm2RiZqhrYZxkDpRJMkhMtAAA9PAogw=="
             header={<div style={{ height: "100px" }}>TestHeader</div>} />
         </div>
 

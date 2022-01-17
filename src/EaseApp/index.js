@@ -164,5 +164,5 @@ EaseAppProvider.propTypes = {
 };
 EaseAppProvider.defaultProps = {
   isShowUnread: true,
-  unreadType: false,
+  unreadType: true,
 };
