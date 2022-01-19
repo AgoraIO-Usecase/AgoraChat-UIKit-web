@@ -5,6 +5,7 @@ import _ from "lodash";
 const { Types, Creators } = createActions({
   updateGlobalProps: ["options"],
   updateGlobalProps2: ["options"],
+  logout:[],
   saveGlobalProps: (options) => {
     return (dispatch, getState) => {
       dispatch(Creators.updateGlobalProps(options));
@@ -30,6 +31,10 @@ export const updateGlobalProps = (state, { options }) => {
   });
 };
 
+export const logout = (state = INITIAL_STATE) => {
+  return state.merge({ username: null, password: null })
+}
+
 export const updateGlobalProps2 = (state, { options }) => {
   state = state.setIn(["globalProps", "to"], options.to);
   state = state.setIn(["globalProps", "chatType"], options.chatType);
@@ -40,6 +45,7 @@ export const updateGlobalProps2 = (state, { options }) => {
 export const globalPropsReducer = createReducer(INITIAL_STATE, {
   [Types.UPDATE_GLOBAL_PROPS]: updateGlobalProps,
   [Types.UPDATE_GLOBAL_PROPS2]: updateGlobalProps2,
+  [Types.LOGOUT]: logout
 });
 
 export default Creators;

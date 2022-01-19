@@ -89,7 +89,9 @@ export default function createlistener(props) {
       console.warn("onClosed", msg);
     },
     onDisconnected: () => {
+      console.log('退出成功');
       AppDB.db = undefined
+      store.dispatch(GlobalPropsActions.logout())
     }
   });
 }

@@ -5439,10 +5439,10 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
-easemob-websdk@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.npmmirror.com/easemob-websdk/download/easemob-websdk-4.0.2.tgz#72bbda1d7c3791a5bdbcb41a95e3cbd4f9571d48"
-  integrity sha512-fd8YysshhjWUSVkbM/gdGwarwV4HV+yp1oXf9UfzTgpnhpjnLE5bnKugDhV8gqAroXq2VqOoDUKjHXfWZ0umSw==
+easemob-websdk@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.npmmirror.com/easemob-websdk/download/easemob-websdk-4.0.3.tgz#b8dfede7664b7bc0662c80514587d95b6693ec13"
+  integrity sha512-M7dN5lXt7di7EA+7WQ/A7fe+uxeUALufouTnEttVgx3cpPlGj2BTL+4JntxJHIu716W5j8jXlXNh9ZOOTQigUA==
 
 ecc-jsbn@~0.1.1:
   version "0.1.2"
@@ -11505,7 +11505,7 @@ react-app-polyfill@^2.0.0:
 
 react-audio-analyser@^0.3.1:
   version "0.3.1"
-  resolved "https://registry.npmmirror.com/react-audio-analyser/download/react-audio-analyser-0.3.1.tgz"
+  resolved "https://registry.npmmirror.com/react-audio-analyser/download/react-audio-analyser-0.3.1.tgz#938af685da7059cc63475f4dde9812978d3cd8b5"
   integrity sha1-k4r2hdpwWcxjR19N3pgSl4082LU=
 
 react-dev-utils@^11.0.3:

@@ -157,14 +157,14 @@ function SendBox(props) {
     if (!file.filename) {
       return false;
     }
-    dispatch(MessageActions.sendFileMessage(to, chatType, file));
+    dispatch(MessageActions.sendFileMessage(to, chatType, file,fileEl));
   };
   const handleImageChange = (e) => {
     let file = WebIM.utils.getFileUrl(e.target);
     if (!file.filename) {
       return false;
     }
-    dispatch(MessageActions.sendImgMessage(to, chatType, file));
+    dispatch(MessageActions.sendImgMessage(to, chatType, file,imageEl));
   };
 
   const handleClickMenu = (e) => {

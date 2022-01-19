@@ -30,8 +30,10 @@ export const INITIAL_STATE = Immutable({
 })
 /* ------------- Reducers ------------- */
 export const setSessionList = (state, { sessionList }) => {
-    console.log('sessionList ------', sessionList)
-    return state.merge({ sessionList })
+    let stateSession = state.sessionList?state.sessionList:[]
+    let concatSession = _.concat(stateSession,sessionList)
+    let newConcatSession=  _.uniqBy(concatSession,'sessionId')
+    return state.merge({ sessionList:newConcatSession })
 }
 
 export const setCurrentSession = (state, { userId }) => {

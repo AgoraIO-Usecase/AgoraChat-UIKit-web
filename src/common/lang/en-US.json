@@ -33,6 +33,7 @@
         "groupBlockSingle": "Block member to group blacklist",
         "removeSingleGroupMember": "Remove member from group",
         "Numbers": "Numbers",
-        "nickname": "nickname"
+        "nickname": "nickname",
+        "Click to start recording":"Click to start recording"
     }
 }

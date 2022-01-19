@@ -57,7 +57,6 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 function AudioMessage({ message ,showByselfAvatar}) {
-    console.log('message>>>',message);
     let easeChatProps = useContext(EaseChatContext);
     const { onAvatarChange } = easeChatProps;
     const classes = useStyles({ bySelf: message.bySelf, duration: Math.round(message.body.length) });
@@ -81,7 +80,7 @@ function AudioMessage({ message ,showByselfAvatar}) {
             <div className={classes.audioBox} onClick={play}>
                 <AudioPlayer play={isPlaying} reverse={message.bySelf} />
                 <span className={classes.duration}>
-                    {Math.round(message.body.duration) + "''"}
+                    {Math.floor(message.body.length) + "''"}
                 </span>
                 <audio src={url} ref={audioRef} />
             </div>

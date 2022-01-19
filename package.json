@@ -1,6 +1,6 @@
 {
   "name": "chat-uikit",
-  "version": "1.0.75",
+  "version": "1.0.80",
   "description": "chat-uikit React component",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -74,7 +74,7 @@
     "dexie": "^3.0.3",
     "dotenv": "8.2.0",
     "dotenv-expand": "5.1.0",
-    "easemob-websdk": "^4.0.2",
+    "easemob-websdk": "^4.0.3",
     "eslint": "^7.11.0",
     "eslint-config-react-app": "^6.0.0",
     "eslint-plugin-flowtype": "^5.2.0",

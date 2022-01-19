@@ -62,7 +62,7 @@ const { Types, Creators } = createActions({
         }
     },
 
-    sendFileMessage: (to, chatType, file) => {
+    sendFileMessage: (to, chatType, file,fileEl) => {
         return (dispatch, getState) => {
             if (file.data.size > (1024 * 1024 * 10)) {
                 message.error(i18next.t('The file exceeds the upper limit'))
@@ -80,9 +80,9 @@ const { Types, Creators } = createActions({
                 to,
                 chatType,
                 onFileUploadError: function (error) {
-                    console.log('onFileUploadError>>>',error)
                     formatMsg.status = 'fail'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
+                    fileEl.current.value =''
                 },
                 onFileUploadComplete: function (data) {
                     let url = data.uri + '/' + data.entities[0].uuid
@@ -90,9 +90,11 @@ const { Types, Creators } = createActions({
                     formatMsg.status = 'sent'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
                     dispatch(Creators.updateMessages(chatType, to, formatMsg))
+                    fileEl.current.value =''
                 },
                 fail: function () {
                     dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
+                    fileEl.current.value =''
                 },
             })
             WebIM.conn.send(msgObj.body)
@@ -100,7 +102,7 @@ const { Types, Creators } = createActions({
         }
     },
 
-    sendImgMessage: (to, chatType, file) => {
+    sendImgMessage: (to, chatType, file,imageEl) => {
         return (dispatch, getState) => {
             if (file.data.size > (1024 * 1024 * 10)) {
                 message.error(i18next.t('The file exceeds the upper limit'))
@@ -120,6 +122,7 @@ const { Types, Creators } = createActions({
                 onFileUploadError: function (error) {
                     formatMsg.status = 'fail'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
+                    imageEl.current.value = ''
                 },
                 onFileUploadComplete: function (data) {
                     let url = data.uri + '/' + data.entities[0].uuid
@@ -127,9 +130,11 @@ const { Types, Creators } = createActions({
                     formatMsg.status = 'sent'
                     dispatch(Creators.updateMessages(chatType, to, formatMsg ))
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
+                    imageEl.current.value = ''
                 },
                 fail: function () {
                     dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
+                    imageEl.current.value = ''
                 },
             })
             WebIM.conn.send(msgObj.body)
@@ -154,6 +159,8 @@ const { Types, Creators } = createActions({
                     duration: file.duration
                 },
                 file: file,
+                length:file.length,
+                file_length:file.data.size,
                 to,
                 chatType,
                 onFileUploadError: function (error) {
@@ -176,7 +183,6 @@ const { Types, Creators } = createActions({
 
             WebIM.conn.send(msgObj.body)
             dispatch(Creators.addMessage(formatMsg, 'audio'))
-            console.log('msgObj>>>',msgObj);
         }
     },
 

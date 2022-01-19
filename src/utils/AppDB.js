@@ -179,15 +179,23 @@ const AppDB = {
                     let sessionList = []
                     let sessionObj = {}
                     res.forEach(element => {
-                        if (!sessionObj[element.session]) {
+                        if(element.chatType === 'singleChat' && !sessionObj[element.session]){
+                            sessionObj[element.session] = true
                             sessionList.push({
-                                sessionId:element.chatType === 'singleChat'? element.session : element.to,
+                                sessionId:element.session,
+                                sessionType: element.chatType
+                            })
+                        }
+                        else if(!sessionObj[element.to]){
+                            sessionObj[element.to] = true
+                            sessionList.push({
+                                sessionId:element.to,
                                 sessionType: element.chatType
                             })
                         }
                     });
-                    let _sessionList =  _.uniqBy(sessionList,'sessionId')
-                    resolve(_sessionList)
+                    // let _sessionList =  _.uniqBy(sessionList,'sessionId')
+                    resolve(sessionList)
                 })
         })
     }
