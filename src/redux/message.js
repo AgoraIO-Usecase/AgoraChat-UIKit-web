@@ -348,14 +348,13 @@ export const deleteMessage = (state, { msgId, to, chatType }) => {
     let byId = state.getIn(['byId', msgId])
     let sessionType, chatId
     if (!byId) {
-        sessionType = chatType
-        chatId = to
+        return state
     } else {
         sessionType = byId.chatType
         chatId = byId.chatId
     }
 
-    let messages = state.getIn([sessionType, chatId]).asMutable()
+    let messages = state.getIn([sessionType, chatId]).asMutable() || []
     let targetMsg = _.find(messages, { id: msgId })
     const index = messages.indexOf(targetMsg)
     messages.splice(index, 1, {
