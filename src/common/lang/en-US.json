@@ -34,6 +34,8 @@
         "removeSingleGroupMember": "Remove member from group",
         "Numbers": "Numbers",
         "nickname": "nickname",
-        "Click to start recording":"Click to start recording"
+        "Click to start recording":"Click to start recording",
+        "send img":"send img",
+        "send file":"send file"
     }
 }

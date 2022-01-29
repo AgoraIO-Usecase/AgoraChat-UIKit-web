@@ -13,6 +13,7 @@ import _ from "lodash";
 import "../../i18n";
 import "../../common/iconfont.css";
 import noMessage from "../../common/images/nomessage.png";
+import i18next from "i18next";
 
 export const EaseChatContext = createContext();
 const useStyles = makeStyles((theme) => ({
@@ -122,7 +123,7 @@ EaseChatProvider.defaultProps = {
   showByselfAvatar:false,
   easeInputMenu:'all',
   menuList: [
-    { name: "发送图片", value: "img", key: "1" },
-    { name: "发送文件", value: "file", key: "2" },
+    { name: i18next.t("send img"), value: "img", key: "1" },
+    { name: i18next.t("send file"), value: "file", key: "2" },
   ],
 };
