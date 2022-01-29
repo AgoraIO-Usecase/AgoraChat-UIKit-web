@@ -102,7 +102,7 @@ export default function SessionList(props) {
   const { unread } = message;
   const currentSession = useSelector((state) => state.session?.currentSession);
   let currentSessionIndex = null;
-
+  const joinedGroups = useSelector((state) => state.session?.joinedGroups);
   // dealwith notice unread num
   const notices = useSelector((state) => state.notice?.notices) || [];
   let noticeUnreadNum = 0;
@@ -173,6 +173,11 @@ export default function SessionList(props) {
           avatarSrc = userAvatars[findIndex.userAvatar] || avatarIcon1
         }else if (session.sessionType === "groupChat") {
           avatarSrc = groupIcon;
+          joinedGroups.forEach((item) => {
+            if(item.groupid === session.sessionId){
+              session.name = item.groupname
+            }
+          })
         } else if (session.sessionType === "chatRoom") {
           avatarSrc = chatRoomIcon;
         } else if (session.sessionType === "notice") {
@@ -191,13 +196,13 @@ export default function SessionList(props) {
                 <Avatar
                   // className={classes.avatar}
                   style={{ borderRadius: `${session.sessionType}` === "singleChat" ? "50%" : 'inherit'}}
-                  alt={`${session.sessionId}`}
+                  alt={`${session.name || session.sessionId}`}
                   src={avatarSrc}
                 />
               </ListItemAvatar>
               <Box className={classes.itemRightBox}>
                 <Typography className={classes.itemName}>
-                  <span>{session.sessionId}</span>
+                  <span>{session.name || session.sessionId}</span>
                   <span className={classes.time}>
                     {renderTime(session?.lastMessage?.time)}
                   </span>
