@@ -123,7 +123,7 @@ EaseChatProvider.defaultProps = {
   showByselfAvatar:false,
   easeInputMenu:'all',
   menuList: [
-    { name: i18next.t("send img"), value: "img", key: "1" },
-    { name: i18next.t("send file"), value: "file", key: "2" },
+    { name: i18next.t('send-image'), value: "img", key: "1" },
+    { name: i18next.t('send-file'), value: "file", key: "2" },
   ],
 };

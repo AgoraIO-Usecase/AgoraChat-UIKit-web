@@ -8,7 +8,6 @@ import GlobalPropsActions from "../redux/globalProps"
 export default function createlistener(props) {
   WebIM.conn.addEventHandler('EaseChat',{
     onConnected: (msg) => {
-      console.log("登录成功");
         // init DB
         AppDB.init(WebIM.conn.context.userId);
       // get session list
@@ -17,6 +16,7 @@ export default function createlistener(props) {
         appKey:WebIM.conn.context.appKey,
         username:WebIM.conn.context.userId
       }
+      store.dispatch(SessionActions.getJoinedGroupList())
       store.dispatch(GlobalPropsActions.saveGlobalProps(options));
       props.successLoginCallback && props.successLoginCallback({isLogin:true})
     },
@@ -71,14 +71,6 @@ export default function createlistener(props) {
       store.dispatch(MessageActions.updateMessageStatus(message, "received"));
     },
 
-    onContactInvited: function (msg) {
-      // store.dispatch(NoticeActions.addFriendRequest(msg))
-    },
-    onContactDeleted: function () {},
-    onContactAdded: function () {},
-    onContactRefuse: function () {},
-    onContactAgreed: function () {},
-
     onPresence: (msg) => {},
     onError: (err) => {
       console.log("error");
@@ -89,9 +81,22 @@ export default function createlistener(props) {
       console.warn("onClosed", msg);
     },
     onDisconnected: () => {
-      console.log('退出成功');
       AppDB.db = undefined
       store.dispatch(GlobalPropsActions.logout())
+    },
+    onGroupChange: (event) => {
+      if(event.type === 'direct_joined'){
+        store.dispatch(SessionActions.getJoinedGroupList())
+      }else if(event.type === 'joinPublicGroupSuccess'){
+        const joinedGroup = store.getState().session.joinedGroups;
+        const result = joinedGroup.find((item) => {
+          item.groupid === event.gid
+        })
+        if(!result){
+          store.dispatch(SessionActions.getJoinedGroupList())
+        }
+      }
     }
+
   });
 }
