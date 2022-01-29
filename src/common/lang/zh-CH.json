@@ -40,6 +40,8 @@
         "User-Setting": "设置",
         "UserSetting-about": "关于",
         "nickname": "昵称",
-        "Click to start recording":"点击开始录音"
+        "Click to start recording":"点击开始录音",
+        "send-image": "图片",
+        "send-file": "文件"
     }
 }
