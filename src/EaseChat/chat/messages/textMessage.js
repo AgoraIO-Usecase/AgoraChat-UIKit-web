@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
   },
   textBody: {
-    display: "flex",
+    // display: "flex",
     margin: (props) => (props.bySelf ? "0 10px 10px 0" : "0 0 10px 10px"),
     lineHeight: "20px",
     fontSize: "14px",
