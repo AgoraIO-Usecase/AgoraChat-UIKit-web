@@ -28,230 +28,233 @@ export const INITIAL_STATE = Immutable({
 
 /* -------- Types and Action Creators -------- */
 const { Types, Creators } = createActions({
-    addMessage: ['message', 'messageType'],
-    deleteMessage: ['msgId', 'to', 'chatType'],
-    updateMessageStatus: ['message', 'status'],
-    clearUnread: ["chatType", "sessionId"],
-    updateMessages: ["chatType", "sessionId", "messages"],
-    updateMessageMid: ['id', 'mid'],
-    
+	addMessage: ["message", "messageType"],
+	deleteMessage: ["msgId", "to", "chatType"],
+	updateMessageStatus: ["message", "status"],
+	clearUnread: ["chatType", "sessionId"],
+	updateMessages: ["chatType", "sessionId", "messages"],
+	updateMessageMid: ["id", "mid"],
+	addReactions: ["message", "reaction"],
+    deleteReaction: ["message","reaction"],
 
-    // -async-
-    sendTxtMessage: (to, chatType, message = {}) => {
-        if (!to || !chatType) return
-        return (dispatch, getState) => {
-            const formatMsg = formatLocalMessage(to, chatType, message, 'txt')
-            const { body, id } = formatMsg
-            const { msg } = body
-            const msgObj = new WebIM.message('txt', id)
-            msgObj.set({
-                to,
-                msg,
-                chatType,
-                ext: message.ext,
-                success: () => {
-                    dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
-                },
-                fail: (e) => {
-                    console.error("Send private text error", e);
-                    dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
-                }
-            })
-            WebIM.conn.send(msgObj.body)
-            dispatch(Creators.addMessage(formatMsg))
-        }
-    },
+	// -async-
+	sendTxtMessage: (to, chatType, message = {}) => {
+		if (!to || !chatType) return;
+		return (dispatch, getState) => {
+			const formatMsg = formatLocalMessage(to, chatType, message, "txt");
+			const { body, id } = formatMsg;
+			const { msg } = body;
+			const msgObj = new WebIM.message("txt", id);
+			msgObj.set({
+				to,
+				msg,
+				chatType,
+				ext: message.ext,
+				success: () => {
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
+				},
+				fail: (e) => {
+					console.error("Send private text error", e);
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+				},
+			});
+			WebIM.conn.send(msgObj.body);
+			dispatch(Creators.addMessage(formatMsg));
+		};
+	},
 
-    sendFileMessage: (to, chatType, file,fileEl) => {
-        return (dispatch, getState) => {
-            if (file.data.size > (1024 * 1024 * 10)) {
-                message.error(i18next.t('The file exceeds the upper limit'))
-                return
-            }
-            const formatMsg = formatLocalMessage(to, chatType, file, 'file')
-            const { id } = formatMsg
-            const msgObj = new WebIM.message('file', id)
-            msgObj.set({
-                ext: {
-                    file_length: file.data.size,
-                    file_type: file.data.type
-                },
-                file: file,
-                to,
-                chatType,
-                onFileUploadError: function (error) {
-                    formatMsg.status = 'fail'
-                    dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
-                    fileEl.current.value =''
-                },
-                onFileUploadComplete: function (data) {
-                    let url = data.uri + '/' + data.entities[0].uuid
-                    formatMsg.url = formatMsg.body.url = url
-                    formatMsg.status = 'sent'
-                    dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
-                    dispatch(Creators.updateMessages(chatType, to, formatMsg))
-                    fileEl.current.value =''
-                },
-                fail: function () {
-                    dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
-                    fileEl.current.value =''
-                },
-            })
-            WebIM.conn.send(msgObj.body)
-            dispatch(Creators.addMessage(formatMsg, 'file'))
-        }
-    },
+	sendFileMessage: (to, chatType, file, fileEl) => {
+		return (dispatch, getState) => {
+			if (file.data.size > 1024 * 1024 * 10) {
+				message.error(i18next.t("The file exceeds the upper limit"));
+				return;
+			}
+			const formatMsg = formatLocalMessage(to, chatType, file, "file");
+			const { id } = formatMsg;
+			const msgObj = new WebIM.message("file", id);
+			msgObj.set({
+				ext: {
+					file_length: file.data.size,
+					file_type: file.data.type,
+				},
+				file: file,
+				to,
+				chatType,
+				onFileUploadError: function (error) {
+					formatMsg.status = "fail";
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					fileEl.current.value = "";
+				},
+				onFileUploadComplete: function (data) {
+					let url = data.uri + "/" + data.entities[0].uuid;
+					formatMsg.url = formatMsg.body.url = url;
+					formatMsg.status = "sent";
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
+					dispatch(Creators.updateMessages(chatType, to, formatMsg));
+					fileEl.current.value = "";
+				},
+				fail: function () {
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					fileEl.current.value = "";
+				},
+			});
+			WebIM.conn.send(msgObj.body);
+			dispatch(Creators.addMessage(formatMsg, "file"));
+		};
+	},
 
-    sendImgMessage: (to, chatType, file,imageEl) => {
-        return (dispatch, getState) => {
-            if (file.data.size > (1024 * 1024 * 10)) {
-                message.error(i18next.t('The file exceeds the upper limit'))
-                return
-            }
-            const formatMsg = formatLocalMessage(to, chatType, file, 'img')
-            const { id } = formatMsg
-            const msgObj = new WebIM.message('img', id)
-            msgObj.set({
-                ext: {
-                    file_length: file.data.size,
-                    file_type: file.data.type
-                },
-                file: file,
-                to,
-                chatType,
-                onFileUploadError: function (error) {
-                    formatMsg.status = 'fail'
-                    dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
-                    imageEl.current.value = ''
-                },
-                onFileUploadComplete: function (data) {
-                    let url = data.uri + '/' + data.entities[0].uuid
-                    formatMsg.url = formatMsg.body.url = url
-                    formatMsg.status = 'sent'
-                    dispatch(Creators.updateMessages(chatType, to, formatMsg ))
-                    dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
-                    imageEl.current.value = ''
-                },
-                fail: function () {
-                    dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
-                    imageEl.current.value = ''
-                },
-            })
-            WebIM.conn.send(msgObj.body)
-            dispatch(Creators.addMessage(formatMsg, 'img'))
-        }
-    },
+	sendImgMessage: (to, chatType, file, imageEl) => {
+		return (dispatch, getState) => {
+			if (file.data.size > 1024 * 1024 * 10) {
+				message.error(i18next.t("The file exceeds the upper limit"));
+				return;
+			}
+			const formatMsg = formatLocalMessage(to, chatType, file, "img");
+			const { id } = formatMsg;
+			const msgObj = new WebIM.message("img", id);
+			msgObj.set({
+				ext: {
+					file_length: file.data.size,
+					file_type: file.data.type,
+				},
+				file: file,
+				to,
+				chatType,
+				onFileUploadError: function (error) {
+					formatMsg.status = "fail";
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					imageEl.current.value = "";
+				},
+				onFileUploadComplete: function (data) {
+					let url = data.uri + "/" + data.entities[0].uuid;
+					formatMsg.url = formatMsg.body.url = url;
+					formatMsg.status = "sent";
+					dispatch(Creators.updateMessages(chatType, to, formatMsg));
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
+					imageEl.current.value = "";
+				},
+				fail: function () {
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					imageEl.current.value = "";
+				},
+			});
+			WebIM.conn.send(msgObj.body);
+			dispatch(Creators.addMessage(formatMsg, "img"));
+		};
+	},
 
-    sendRecorder: (to, chatType, file) => {
-        return (dispatch, getState) => {
-            if (file.data.size > (1024 * 1024 * 10)) {
-                message.error(i18next.t('The file exceeds the upper limit'))
-                return
-            }
-            const formatMsg = formatLocalMessage(to, chatType, file, 'audio')
-            const { id } = formatMsg
-            const msgObj = new WebIM.message('audio', id)
-            msgObj.set({
-                ext: {
-                    file_length: file.data.size,
-                    file_type: file.data.type,
-                    length: file.length,
-                    duration: file.duration
-                },
-                file: file,
-                length:file.length,
-                file_length:file.data.size,
-                to,
-                chatType,
-                onFileUploadError: function (error) {
-                    console.log(error)
-                    // dispatch(Creators.updateMessageStatus(pMessage, "fail"))
-                    formatMsg.status = 'fail'
-                    dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
-                },
-                onFileUploadComplete: function (data) {
-                    let url = data.uri + '/' + data.entities[0].uuid
-                    formatMsg.url = url
-                    formatMsg.status = 'sent'
-                    dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
-                    dispatch(Creators.updateMessages(chatType, to, formatMsg))
-                },
-                fail: function () {
-                    dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
-                },
-            })
+	sendRecorder: (to, chatType, file) => {
+		return (dispatch, getState) => {
+			if (file.data.size > 1024 * 1024 * 10) {
+				message.error(i18next.t("The file exceeds the upper limit"));
+				return;
+			}
+			const formatMsg = formatLocalMessage(to, chatType, file, "audio");
+			const { id } = formatMsg;
+			const msgObj = new WebIM.message("audio", id);
+			msgObj.set({
+				ext: {
+					file_length: file.data.size,
+					file_type: file.data.type,
+					length: file.length,
+					duration: file.duration,
+				},
+				file: file,
+				length: file.length,
+				file_length: file.data.size,
+				to,
+				chatType,
+				onFileUploadError: function (error) {
+					console.log(error);
+					// dispatch(Creators.updateMessageStatus(pMessage, "fail"))
+					formatMsg.status = "fail";
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+				},
+				onFileUploadComplete: function (data) {
+					let url = data.uri + "/" + data.entities[0].uuid;
+					formatMsg.url = url;
+					formatMsg.status = "sent";
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
+					dispatch(Creators.updateMessages(chatType, to, formatMsg));
+				},
+				fail: function () {
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+				},
+			});
 
-            WebIM.conn.send(msgObj.body)
-            dispatch(Creators.addMessage(formatMsg, 'audio'))
-        }
-    },
+			WebIM.conn.send(msgObj.body);
+			dispatch(Creators.addMessage(formatMsg, "audio"));
+		};
+	},
 
-    recallMessage: (to, chatType, msg) => {
-        return (dispatch, getState) => {
-            const { id, toJid, mid } = msg
-            WebIM.conn.recallMessage({
-                to: to,
-                mid: toJid || mid, // message id
-                type: chatType,
-                success: () => {
-                    dispatch(Creators.deleteMessage(id, to, chatType))
-                },
-                fail: (err) => {
-                    console.log(err)
-                }
-            })
-        }
-    },
+	recallMessage: (to, chatType, msg) => {
+		return (dispatch, getState) => {
+			const { id, toJid, mid } = msg;
+			WebIM.conn.recallMessage({
+				to: to,
+				mid: toJid || mid, // message id
+				type: chatType,
+				success: () => {
+					dispatch(Creators.deleteMessage(id, to, chatType));
+				},
+				fail: (err) => {
+					console.log(err);
+				},
+			});
+		};
+	},
 
-    clearUnreadAsync: (chatType, sessionId) => {
-        return (dispatch) => {
-            dispatch({ 'type': 'CLEAR_UNREAD', chatType, sessionId })
-            AppDB.readMessage(chatType, sessionId)
-        }
-    },
-    fetchMessage: (to, chatType, offset, cb) => {
-        return (dispatch) => {
-            AppDB.fetchMessage(to, chatType, offset).then(res => {
-                if (res.length) {
-                    dispatch({
-                        'type': 'FETCH_MESSAGE',
-                        'chatType': chatType,
-                        'to': to,
-                        'messages': res
-                    })
-                }
-                cb && cb(res.length)
-            })
-        }
-    },
+	clearUnreadAsync: (chatType, sessionId) => {
+		return (dispatch) => {
+			dispatch({ type: "CLEAR_UNREAD", chatType, sessionId });
+			AppDB.readMessage(chatType, sessionId);
+		};
+	},
+	fetchMessage: (to, chatType, offset, cb) => {
+		return (dispatch) => {
+			AppDB.fetchMessage(to, chatType, offset).then((res) => {
+				if (res.length) {
+					dispatch({
+						type: "FETCH_MESSAGE",
+						chatType: chatType,
+						to: to,
+						messages: res,
+					});
+				}
+				cb && cb(res.length);
+			});
+		};
+	},
 
-    clearMessage: (chatType, id) => {
-        return (dispatch) => {
-            dispatch({ 'type': 'CLEAR_MESSAGE', 'chatType': chatType, 'id': id })
-            AppDB.clearMessage(chatType, id).then(res => { })
-        }
-    },
+	clearMessage: (chatType, id) => {
+		return (dispatch) => {
+			dispatch({ type: "CLEAR_MESSAGE", chatType: chatType, id: id });
+			AppDB.clearMessage(chatType, id).then((res) => {});
+		};
+	},
 
-    addAudioMessage: (message, bodyType) => {
-        return (dispatch, getState) => {
-            let options = {
-                url: message.url,
-                headers: {
-                    Accept: 'audio/mp3'
-                },
-                onFileDownloadComplete: function (response) {
-                    let objectUrl = WebIM.utils.parseDownloadResponse.call(WebIM.conn, response)
-                    message.audioSrcUrl = message.url
-                    message.url = objectUrl
-                    dispatch(Creators.addMessage(message, bodyType))
-                },
-                onFileDownloadError: function () {
-                }
-            }
-            WebIM.utils.download.call(WebIM.conn, options)
-        }
-    },
-})
+	addAudioMessage: (message, bodyType) => {
+		return (dispatch, getState) => {
+			let options = {
+				url: message.url,
+				headers: {
+					Accept: "audio/mp3",
+				},
+				onFileDownloadComplete: function (response) {
+					let objectUrl = WebIM.utils.parseDownloadResponse.call(
+						WebIM.conn,
+						response
+					);
+					message.audioSrcUrl = message.url;
+					message.url = objectUrl;
+					dispatch(Creators.addMessage(message, bodyType));
+				},
+				onFileDownloadError: function () {},
+			};
+			WebIM.utils.download.call(WebIM.conn, options);
+		};
+	},
+});
 
 /* ------------- Reducers ------------- */
 export const addMessage = (state, { message, messageType = 'txt' }) => {
@@ -421,17 +424,90 @@ export const updateMessageMid = (state, { id, mid }) => {
     return state.setIn(['byMid', mid], { id })
 }
 
+export const addReactions = (state, { message, reaction }) => {
+    let { id ,to, from, bySelf} = message;
+    let sessionId = WebIM.conn.context.userId === to ? from : to;
+    if (!id) id = state.getIn(['byMid', message.mid, 'id'])
+    let mids = state.getIn(['byMid']) || {}
+    let mid
+    for (var i in mids) {
+        if (mids[i].id === id) {
+            mid = i
+        }
+    }
+    const byId = state.getIn(['byId', id])
+    if (!_.isEmpty(byId)) {
+        const { chatType } = byId
+        let messages = state.getIn([chatType, sessionId]).asMutable();
+        let found = _.find(messages, { id: id })
+        let reactionList = [];
+        found.setIn(["meta"], reactionList);
+        if (found?.meta?.length > 0) {
+			if (_.find(found.meta, { reaction: reaction })) return state
+            reactionList = bySelf
+				? _.concat(
+						[
+							{
+								reaction: reaction,
+								userList: [WebIM.conn.context.userId],
+							},
+						],
+						found.meta
+				  )
+				: _.concat(found.meta, [
+						{
+							reaction: reaction,
+							userList: [WebIM.conn.context.userId],
+						},
+				  ]);
+		}else{
+            reactionList = [
+				{
+					reaction: reaction,
+					userList: [WebIM.conn.context.userId],
+				},
+			];
+        }
+        let msg = {
+			...found,
+			meta: reactionList,
+		};
+        messages.splice(messages.indexOf(found), 1, msg);
+        AppDB.updateMessageReaction(id, msg.meta).then((res) => {});
+
+        return state.setIn([chatType, sessionId], messages);
+    }
+    return state
+}
+
+export const deleteReaction = (state, {message, reaction }) => {
+    let {id,to,from,chatType} = message
+    let sessionId = WebIM.conn.context.userId === to ? from : to;
+	let messages = state.getIn([chatType, sessionId]).asMutable() || [];
+    let found = _.find(messages, { id: id });
+    const index = messages.indexOf(found);
+    let meta = found.meta.filter((item) => item.reaction !== reaction); 
+    messages.splice(index, 1, {
+		...found,
+		meta: meta
+	});
+    state = state.setIn([chatType, sessionId], messages);
+	AppDB.deleteReactions(id, meta);
+	return state;
+};
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const messageReducer = createReducer(INITIAL_STATE, {
-    [Types.ADD_MESSAGE]: addMessage,
-    [Types.DELETE_MESSAGE]: deleteMessage,
-    [Types.CLEAR_UNREAD]: clearUnread,
-    [Types.FETCH_MESSAGE]: fetchMessage,
-    [Types.CLEAR_MESSAGE]: clearMessage,
-    [Types.UPDATE_MESSAGES]: updateMessages,
-    [Types.UPDATE_MESSAGE_MID]: updateMessageMid,
-    [Types.UPDATE_MESSAGE_STATUS]: updateMessageStatus,
-})
+	[Types.ADD_MESSAGE]: addMessage,
+	[Types.DELETE_MESSAGE]: deleteMessage,
+	[Types.CLEAR_UNREAD]: clearUnread,
+	[Types.FETCH_MESSAGE]: fetchMessage,
+	[Types.CLEAR_MESSAGE]: clearMessage,
+	[Types.UPDATE_MESSAGES]: updateMessages,
+	[Types.UPDATE_MESSAGE_MID]: updateMessageMid,
+	[Types.UPDATE_MESSAGE_STATUS]: updateMessageStatus,
+	[Types.ADD_REACTIONS]: addReactions,
+	[Types.DELETE_REACTION]: deleteReaction,
+});
 
 export default Creators

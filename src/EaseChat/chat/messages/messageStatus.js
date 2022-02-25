@@ -20,13 +20,13 @@ const useStyles = makeStyles((theme) => ({
         marginRight:'5px'
     }
 }))
-function SedndingStatus({ status, style = {} }) {
+function SedndingStatus({ status, style = {},hoverReaction }) {
     const classes = useStyles();
     let statusIcon = ''
     console.log('status>>',status);
     switch (status) {
         case 'sent':
-            statusIcon = <img src={send} alt="" className={classes.imgStyle}></img>
+            statusIcon = <img src={!hoverReaction ? send : null} alt="" className={classes.imgStyle}></img>
             break;
         case 'sending':
             statusIcon = <svg className={classes.MuiCircularProgressSvg} viewBox="22 22 44 44" style={style}><circle className="MuiCircularProgress-circle MuiCircularProgress-circleIndeterminate" cx="44" cy="44" r="20.2" fill="none" strokeWidth="3.6"></circle></svg>

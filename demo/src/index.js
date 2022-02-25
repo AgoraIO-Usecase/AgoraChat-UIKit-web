@@ -43,24 +43,22 @@ export default class Demo extends Component {
   render() {
     console.log("this.state.token>>", this.state.token);
     return (
-      <div>
-          <button onClick={this.addSessionItem}> 测试 </button>
-        <h3>EaseApp</h3>
-        <div>
-          <EaseApp
-            successLoginCallback={this.test}
-            failCallback={this.test2}
-            onAvatarChange={this.test3}
-            
-            appkey= "41117440#383391"
-            username="test0001"
-            agoraToken="007eJxTYNDx92Fqf35CjT194rFDe+x+bT0dcN3yJM+05l13Nx7Z/V5RgSHNMCXZ3NwiKSUl2czELDHFIs3IzMDS3Cw50SjFwNA0+d6GL4kKMgwM8t933WJkYGVgBEIQX4XB3DDRwswwzUDXwiDJUNfQMDVZNzHZNFHXMs3Y2MLU2NDQxNAMAGn7Ka8="
-            header={<div style={{ height: "100px" }}>TestHeader</div>} />
-        </div>
-
-      
-      </div>
-    );
+		<div>
+			<button onClick={this.addSessionItem}> 测试 </button>
+			<h3>EaseApp</h3>
+			<div>
+				<EaseApp
+					successLoginCallback={this.test}
+					failCallback={this.test2}
+					onAvatarChange={this.test3}
+					appkey="41117440#383391"
+					username="99994"
+					agoraToken="007eJxTYOjbyKgufVXr+pHj2SVW9yvv8Ll+YjKfWsKmwyaj8vZ9da4CQ5phSrK5uUVSSkqymYlZYopFmpGZgaW5WXKiUYqBoWmysZl4koIMA0Psq8VTGRlYGRiBEMRXYUgzNUxKSksz0LU0NTbWNTRMTdZNtLSw1E0yNjVItDBJMU8ySwUAoVYlBg=="
+					header={<div style={{ height: "100px" }}>TestHeader</div>}
+				/>
+			</div>
+		</div>
+	);
   }
 }
 
