@@ -71,9 +71,6 @@ const EaseApp = (props) => {
         }}
       >
         <Grid
-          direction="row"
-          justifyContent="flex-start"
-          alignItems="flex-start"
           item
           xs={6}
           md={3}
