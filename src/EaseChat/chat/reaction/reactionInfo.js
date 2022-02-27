@@ -9,12 +9,18 @@ import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import { Icon } from "@material-ui/core";
+import deleteReactionIcon from "../../../common/icons/reaction_delete@2x.png";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
 		height: "300px",
 		width: "540px",
+	},
+	infoTitle: {
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "space-between",
+		padding: "0px 15px",
 	},
 	text: {
 		Font: "SF Compact Text",
@@ -22,17 +28,26 @@ const useStyles = makeStyles((theme) => ({
 		fontStyle: "normal",
 		fontSize: "18px",
 		LineHeight: "28px",
+		blend: "Pass through",
 		padding: "8px",
+	},
+	close: {
+		width: "14px",
+		height: "14px",
+		blend: "Pass through",
+		cursor: "pointer",
 	},
 	deleteIcon: {
 		position: "absolute",
+		width: "20px",
+		height: "20px",
 		right: "50px",
-		top: "20px",
-        cursor:'pointer'
+		top: "25px",
+		cursor: "pointer",
 	},
-    tabPanelItem:{
-         position: "relative"
-    }
+	tabPanelItem: {
+		position: "relative",
+	},
 }));
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -67,7 +82,7 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 	const handleChange = (event, newValue) => {
 		setValue(newValue);
 	};
-    const handleDeleteReaction = (reaction) => {
+	const handleDeleteReaction = (reaction) => {
 		store.dispatch(MessageActions.deleteReaction(message, reaction));
 	};
 	return (
@@ -87,7 +102,12 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 				horizontal: "right",
 			}}
 		>
-			<div className={classes.text}>Reactions</div>
+			<div className={classes.infoTitle}>
+				<span className={classes.text}>Reactions</span>
+				<span className={classes.close} onClick={onClose}>
+					X
+				</span>
+			</div>
 			<hr />
 			<div className={classes.root}>
 				<AppBar position="static">
@@ -116,9 +136,14 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 								className={classes.tabPanelItem}
 							>
 								{item.userList}
-								<span className={classes.deleteIcon} onClick={()=> handleDeleteReaction(item.reaction)}>
-									<Icon className="iconfont icon-qingkongxiaoxi"></Icon>
-								</span>
+								<img
+									src={deleteReactionIcon}
+									alt=""
+									className={classes.deleteIcon}
+									onClick={() =>
+										handleDeleteReaction(item.reaction)
+									}
+								/>
 							</TabPanel>
 						</div>
 					);

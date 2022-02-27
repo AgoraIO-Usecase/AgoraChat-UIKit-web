@@ -7,76 +7,97 @@ import { IconButton, Icon, Menu, MenuItem } from "@material-ui/core";
 import { renderTime } from "../../../utils";
 import { EaseChatContext } from "../index";
 
+import Reaction from "../reaction";
+import RenderReactions from "../reaction/renderReaction";
+
 const useStyles = makeStyles((theme) => ({
-  pulldownListItem: {
-    padding: "10px 0",
-    listStyle: "none",
-    marginBottom: "26px",
+	pulldownListItem: {
+		padding: "10px 0",
+		listStyle: "none",
+		marginBottom: "26px",
+		position: "relative",
+		display: "flex",
+		flexDirection: (props) => (props.bySelf ? "row-reverse" : "row"),
+		alignItems: "center",
+	},
+	fileCard: {
+		width: "252px",
+		height: "72px",
+		backgroundColor: "#fff",
+		display: "flex",
+		alignItems: "center",
+		marginLeft: "10px",
+		marginBottom: "26px",
+	},
+	fileIcon: {
+		width: "59px",
+		height: "59px",
+		background: "rgba(35, 195, 129, 0.06)",
+		borderRadius: "4px",
+		border: "1px solid rgba(35, 195, 129, 0.06)",
+		textAlign: "center",
+		lineHeight: "59px",
+		margin: "0 7px 0 7px",
+		flexShrink: 0,
+	},
+	fileInfo: {
+		"& p": {
+			overflow: "hidden",
+			whiteSpace: "nowrap",
+			textOverflow: "ellipsis",
+			width: "126px",
+			margin: "0",
+		},
+		"& span": {
+			fontSize: "12px",
+			color: "#010101",
+			lineHeight: "16px",
+		},
+	},
+	icon: {
+		color: "rgba(35, 195, 129, 1)",
+		fontWeight: "bold",
+		fontSize: "38px",
+	},
+	download: {
+		fontSize: "16px",
+		color: "rgba(0,0,0,.6)",
+		fontWeight: "bold",
+		cursor: "pointer",
     position: "relative",
-    display: "flex",
-    flexDirection: (props) => (props.bySelf ? "row-reverse" : "row"),
-    alignItems: "center",
-  },
-  fileCard: {
-    width: "252px",
-    height: "72px",
-    backgroundColor: "#fff",
-    display: "flex",
-    alignItems: "center",
-    marginLeft: "10px",
-    marginBottom: "26px",
-  },
-  fileIcon: {
-    width: "59px",
-    height: "59px",
-    background: "rgba(35, 195, 129, 0.06)",
-    borderRadius: "4px",
-    border: "1px solid rgba(35, 195, 129, 0.06)",
-    textAlign: "center",
-    lineHeight: "59px",
-    margin: "0 7px 0 7px",
-    flexShrink: 0,
-  },
-  fileInfo: {
-    "& p": {
-      overflow: "hidden",
-      whiteSpace: "nowrap",
-      textOverflow: "ellipsis",
-      width: "126px",
-      margin: "0",
-    },
-    "& span": {
-      fontSize: "12px",
-      color: "#010101",
-      lineHeight: "16px",
-    },
-  },
-  icon: {
-    color: "rgba(35, 195, 129, 1)",
-    fontWeight: "bold",
-    fontSize: "38px",
-  },
-  download: {
-    fontSize: "16px",
-    color: "rgba(0,0,0,.6)",
-    fontWeight: "bold",
-    cursor: "pointer",
-  },
-  time: {
-    position: "absolute",
-    fontSize: "11px",
-    height: "16px",
-    color: "rgba(1, 1, 1, .2)",
-    lineHeight: "16px",
-    textAlign: "center",
-    top: "-18px",
-    width: "100%",
-  },
-  avatarStyle: {
-    height: "40px",
-    width: "40px",
-    borderRadius: "50%",
-  },
+	},
+	time: {
+		position: "absolute",
+		fontSize: "11px",
+		height: "16px",
+		color: "rgba(1, 1, 1, .2)",
+		lineHeight: "16px",
+		textAlign: "center",
+		top: "-18px",
+		width: "100%",
+	},
+	avatarStyle: {
+		height: "40px",
+		width: "40px",
+		borderRadius: "50%",
+	},
+	textReaction: {
+		position: "absolute",
+		right: (props) => (props.bySelf ? "" : "-50px"),
+		bottom: (props) => (props.bySelf ? "-15px" : "-5px"),
+		left: (props) => (props.bySelf ? "-245px" : ""),
+		marginRight: "5px",
+	},
+	reactionBox: {
+		position: "absolute",
+		top: (props) => (props.bySelf ? "-15px" : "-10px"),
+		right: (props) => (props.bySelf ? "0px" : ""),
+		left: (props) => (props.bySelf ? "" : "0px"),
+		background: "#F2F2F2",
+		borderRadius: "17.5px",
+		padding: "3px",
+		border: "solid 2px #fff",
+	},
 }));
 const initialState = {
   mouseX: null,
@@ -87,6 +108,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
   const { onAvatarChange } = easeChatProps;
   const classes = useStyles({ bySelf: message.bySelf });
   const [state, setState] = useState(initialState);
+  const [hoverReaction, setHoverReaction] = useState(false);
   const handleClose = () => {
     setState(initialState);
   };
@@ -103,49 +125,63 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
   };
 
   return (
-    <li className={classes.pulldownListItem}>
-      {!message.bySelf && (
-        <img
-          className={classes.avatarStyle}
-          src={avatar}
-          onClick={() => onAvatarChange && onAvatarChange(message)}
-        ></img>
-      )}
-      {showByselfAvatar && message.bySelf && (
-        <img className={classes.avatarStyle} src={avatar}></img>
-      )}
-      <div className={classes.fileCard} onContextMenu={handleClick}>
-        <div className={classes.fileIcon}>
-          {/* <Icon className={clsx(classes.icon, 'iconfont icon-fujian')}></Icon> */}
-          {i18next.t("file")}
-        </div>
-        <div className={classes.fileInfo}>
-          <p>{message.filename}</p>
-          <span>{Math.floor(message.body.size / 1024) + "kb"}</span>
-        </div>
-        <div className={classes.download}>
-          <a href={message.body.url} download={message.filename}>
-            <IconButton className="iconfont icon-xiazai"></IconButton>
-          </a>
-        </div>
-      </div>
-      <div className={classes.time}>{renderTime(message.time)}</div>
-      {message.bySelf ? (
-        <Menu
-          keepMounted
-          open={state.mouseY !== null}
-          onClose={handleClose}
-          anchorReference="anchorPosition"
-          anchorPosition={
-            state.mouseY !== null && state.mouseX !== null
-              ? { top: state.mouseY, left: state.mouseX }
-              : undefined
-          }
-        >
-          <MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
-        </Menu>
-      ) : null}
-    </li>
+		<li
+			className={classes.pulldownListItem}
+			onMouseOver={() => setHoverReaction(true)}
+			onMouseLeave={() => setHoverReaction(false)}
+		>
+			{!message.bySelf && (
+				<img
+					className={classes.avatarStyle}
+					src={avatar}
+					onClick={() => onAvatarChange && onAvatarChange(message)}
+				></img>
+			)}
+			{showByselfAvatar && message.bySelf && (
+				<img className={classes.avatarStyle} src={avatar}></img>
+			)}
+			<div className={classes.fileCard} onContextMenu={handleClick}>
+				<div className={classes.fileIcon}>
+					{/* <Icon className={clsx(classes.icon, 'iconfont icon-fujian')}></Icon> */}
+					{i18next.t("file")}
+				</div>
+				<div className={classes.fileInfo}>
+					<p>{message.filename}</p>
+					<span>{Math.floor(message.body.size / 1024) + "kb"}</span>
+				</div>
+				<div className={classes.download}>
+					<a href={message.body.url} download={message.filename}>
+						<IconButton className="iconfont icon-xiazai"></IconButton>
+					</a>
+					<div className={classes.textReaction}>
+						{hoverReaction && <Reaction message={message} />}
+					</div>
+					{message?.meta?.length > 0 ? (
+						<div className={classes.reactionBox}>
+							<RenderReactions message={message} />
+						</div>
+					) : null}
+				</div>
+			</div>
+			<div className={classes.time}>{renderTime(message.time)}</div>
+			{message.bySelf ? (
+				<Menu
+					keepMounted
+					open={state.mouseY !== null}
+					onClose={handleClose}
+					anchorReference="anchorPosition"
+					anchorPosition={
+						state.mouseY !== null && state.mouseX !== null
+							? { top: state.mouseY, left: state.mouseX }
+							: undefined
+					}
+				>
+					<MenuItem onClick={recallMessage}>
+						{i18next.t("withdraw")}
+					</MenuItem>
+				</Menu>
+			) : null}
+		</li>
   );
 }
 

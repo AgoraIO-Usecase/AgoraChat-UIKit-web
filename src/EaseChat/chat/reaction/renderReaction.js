@@ -14,16 +14,17 @@ const useStyles = makeStyles((theme) => ({
 		marginLeft: "3px",
         cursor:"pointer"
 	},
-	reactionLingtg: {
-		Font: "SF Compact Text",
-		Weight: "400",
-		Style: "normal",
-		Size: "14px",
-		LineHeight: "20px",
-		Align: "Center",
+	reactionLingth: {
+		font: "SF Compact Text",
+		fontWeight: "400",
+		fontStyle: "normal",
+		fontSize: "14px",
+		lineHeight: "20px",
+		textAlign: "Center",
 		color: "#000000",
 		marginLeft: "5px",
-        width: "20px"
+        width: "20px",
+		height:"20px"
 	},
 }));
 
@@ -36,7 +37,7 @@ const RenderReactions = ({ message }) => {
 	return (
 		<div className={classes.reaction}>
 			{message.meta.map((item, i) => {
-				console.log("item", item);
+				if (i > 3) return;
 				return (
 					<div
 						key={i}
@@ -47,7 +48,12 @@ const RenderReactions = ({ message }) => {
 					</div>
 				);
 			})}
-			<span className={classes.reactionLingtg}>{message.meta.length}</span>
+			{message.meta.length > 4 && (
+				<span className={classes.reactionLingth}>...</span>
+			)}
+			<span className={classes.reactionLingth}>
+				{message.meta.length}
+			</span>
 		</div>
 	);
 };

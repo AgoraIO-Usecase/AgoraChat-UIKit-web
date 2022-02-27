@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { makeStyles } from "@material-ui/styles";
-import { reactionEmoji } from "../../../common/reactionEmoji";
+import { reactionEmoji, defaultReactions } from "../../../common/reactionEmoji";
 import { Button } from "@material-ui/core";
 import Popover from "@material-ui/core/Popover";
 
@@ -14,11 +14,16 @@ const useStyles = makeStyles((theme) => ({
 		letterSpacing: "0px",
 		textAlign: "left",
 		color: "#999999",
-		padding:"8px",
+		padding: "8px",
 	},
 	emojiBox: {
 		width: (props) => props.width + "px",
 		height: (props) => props.height + "px",
+		display: "flex",
+		flexWrap: "wrap",
+	},
+	defaultEmojiBox: {
+		width: (props) => props.width + "px",
 		display: "flex",
 		flexWrap: "wrap",
 	},
@@ -32,9 +37,46 @@ const ReactionIcon = ({ anchorEl, onClose, onSelected }) => {
 	const width = (emojiWidth + 2 * emojiPadding) * lineNum;
 	const height = (emojiWidth + 2 * emojiPadding) * rows;
 	const classes = useStyles({ width, height });
-	function renderEmoji() {
+	function renderReaction() {
 		return Object.keys(reactionEmoji.map).map((k) => {
 			const v = reactionEmoji.map[k];
+			return (
+				<div>
+					<Button
+						style={{
+							width: "35px",
+							height: "35px",
+							minHeight: "0",
+							minWidth: "0",
+						}}
+						key={k}
+					>
+						<div
+							style={{
+								width: emojiWidth,
+								height: emojiWidth,
+								padding: emojiPadding,
+							}}
+						>
+							<img
+								src={
+									require(`../../../common/reactions/${v}`)
+										.default
+								}
+								alt={k}
+								width={emojiWidth}
+								height={emojiWidth}
+							/>
+						</div>
+					</Button>
+				</div>
+			);
+		});
+	}
+
+	function defaultReaction() {
+		return Object.keys(defaultReactions.map).map((k) => {
+			const v = defaultReactions.map[k];
 			return (
 				<div>
 					<Button
@@ -73,6 +115,8 @@ const ReactionIcon = ({ anchorEl, onClose, onSelected }) => {
 		const emoji = e.target.alt || e.target.children[0].alt;
 		onSelected(emoji);
 	};
+
+
 	return (
 		<Popover
 			keepMounted
@@ -90,10 +134,13 @@ const ReactionIcon = ({ anchorEl, onClose, onSelected }) => {
 			}}
 		>
 			<div className={classes.text}>Frequently</div>
+			<div className={classes.defaultEmojiBox} onClick={handleEmojiClick}>
+				{defaultReaction()}
+			</div>
 			<hr />
 			<div className={classes.text}>All Emojis</div>
 			<div className={classes.emojiBox} onClick={handleEmojiClick}>
-				{renderEmoji()}
+				{renderReaction()}
 			</div>
 		</Popover>
 	);

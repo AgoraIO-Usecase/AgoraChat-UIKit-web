@@ -52,3 +52,16 @@ export const reactionEmoji = {
 		"[emoji_49]": "ee_49.png",
 	},
 };
+
+export const defaultReactions = {
+	path: "../common/reactions/",
+	map: {
+	"[emoji_40]": "ee_40.png",
+	"[emoji_43]": "ee_43.png",
+	"[emoji_37]": "ee_37.png",
+	"[emoji_36]": "ee_36.png",
+	"[emoji_15]": "ee_15.png",
+	"[emoji_10]": "ee_10.png",
+	"[emoji_2]": "ee_2.png",
+	}
+};

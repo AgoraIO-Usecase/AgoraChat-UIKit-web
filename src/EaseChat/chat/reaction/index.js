@@ -4,7 +4,6 @@ import store from "../../../redux/index";
 import MessageActions from "../../../redux/message";
 import ReactionIcon from "./renderReactionIcon";
 import ReactionInfo from "./reactionInfo";
-import Popover from "@material-ui/core/Popover";
 import addReactionIcon from "../../../common/icons/add_reaction@2x.png";
 import moreReactionIcon from '../../../common/icons/more@2x.png'
 const useStyles = makeStyles((theme) => ({
@@ -36,12 +35,13 @@ const Reaction = ({ message }) => {
 	};
 
 	const handleClickReactionInfo = (e) => {
-		setReactionInfoVisible(e.currentTarget)
+		message.meta.length > 0 && setReactionInfoVisible(e.currentTarget);
 	}
 
 	const handleReactionInfoClose = () => {
 		setReactionInfoVisible(null);
 	};
+
 
 	return (
 		<div>
@@ -58,13 +58,13 @@ const Reaction = ({ message }) => {
 				alt="reaction"
 				className={classes.iconStyley}
 				onClick={handleClickEmoji}
-				title="Add Reactions"
 			/>
 			<ReactionIcon
 				anchorEl={reactionVisible}
 				onSelected={handleEmojiSelected}
 				onClose={handleEmojiClose}
 			/>
+			
 			{message?.meta?.length > 0 ? (
 				<ReactionInfo
 					anchorEl={reactionInfoVisible}
