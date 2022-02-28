@@ -48,6 +48,13 @@ const useStyles = makeStyles((theme) => ({
 	tabPanelItem: {
 		position: "relative",
 	},
+	reactionNumLabel: {
+		display: 'flex', 
+		justifyContent: 'center',
+		'& span': {
+			margin: '0 10px'
+		}
+	}
 }));
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -118,9 +125,10 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 						aria-label="simple tabs example"
 					>
 						{message.meta.map((item, i) => {
+							let label = <div className={classes.reactionNumLabel}>{rnReactionEmoji(item.reaction)} <span>{item.userList.length}</span></div>
 							return (
 								<Tab
-									label={rnReactionEmoji(item.reaction)}
+									label={label}
 									{...a11yProps(i)}
 								/>
 							);
