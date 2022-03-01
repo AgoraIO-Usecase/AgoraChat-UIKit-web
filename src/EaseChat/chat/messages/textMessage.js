@@ -59,8 +59,9 @@ const useStyles = makeStyles((theme) => ({
 	textReaction: {
 		position: "absolute",
 		right: (props) => (props.bySelf ? "" : "-50px"),
-		bottom: (props) => (props.bySelf ? "-10px" : "-5px"),
-		left: (props) => (props.bySelf ? "-45px" : ""),
+		bottom: (props) => (props.bySelf ? "0" : "-5px"),
+		left: (props) =>
+			props.bySelf ? (props.hoverReaction ? "-50px" : "-25px") : "",
 		marginRight: "5px",
 	},
 	reactionBox: {
@@ -72,6 +73,7 @@ const useStyles = makeStyles((theme) => ({
 		borderRadius: "17.5px",
 		padding: "3px",
 		border: "solid 2px #fff",
+		boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
 	},
 	time: {
 		position: "absolute",
@@ -95,69 +97,91 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 const initialState = {
-  mouseX: null,
-  mouseY: null,
+	mouseX: null,
+	mouseY: null,
 };
 
 function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
-  let easeChatProps = useContext(EaseChatContext);
-  const { onAvatarChange } = easeChatProps;
-  const classes = useStyles({
-    bySelf: message.bySelf,
-    chatType: message.chatType,
-  });
-  const [state, setState] = useState(initialState);
-  const [hoverReaction, setHoverReaction] = useState(false)
-  const handleClick = (event) => {
-    event.preventDefault();
-    setState({
-      mouseX: event.clientX - 2,
-      mouseY: event.clientY - 4,
-    });
-  };
-  const handleClose = () => {
-    setState(initialState);
-  };
-  const recallMessage = () => {
-    onRecallMessage(message);
-    handleClose();
-  };
-  const renderTxt = (txt) => {
-    if (txt === undefined) {
-      return [];
-    }
-    let rnTxt = [];
-    let match = null;
-    const regex = /(\[.*?\])/g;
-    let start = 0;
-    let index = 0;
-    while ((match = regex.exec(txt))) {
-      index = match.index;
-      if (index > start) {
-        rnTxt.push(txt.substring(start, index));
-      }
-      if (match[1] in emoji.map) {
-        const v = emoji.map[match[1]];
-        rnTxt.push(
-          <img
-            key={v}
-            alt={v}
-            src={require(`../../../common/faces/${v}`).default}
-            width={20}
-            height={20}
-          />
-        );
-      } else {
-        rnTxt.push(match[1]);
-      }
-      start = index + match[1].length;
-    }
-    rnTxt.push(txt.substring(start, txt.length));
+	let easeChatProps = useContext(EaseChatContext);
+	const { onAvatarChange } = easeChatProps;
+	const [hoverReaction, setHoverReaction] = useState(false);
+	const reactionMsg = message?.reactions || [];
 
-    return rnTxt;
-  };
+	const classes = useStyles({
+		bySelf: message.bySelf,
+		chatType: message.chatType,
+		hoverReaction: hoverReaction,
+	});
+	const [state, setState] = useState(initialState);
+	// const [hoverReaction, setHoverReaction] = useState(false);
+	const handleClick = (event) => {
+		event.preventDefault();
+		setState({
+			mouseX: event.clientX - 2,
+			mouseY: event.clientY - 4,
+		});
+	};
+	const handleClose = () => {
+		setState(initialState);
+	};
+	const recallMessage = () => {
+		onRecallMessage(message);
+		handleClose();
+	};
+	const renderTxt = (txt) => {
+		if (txt === undefined) {
+			return [];
+		}
+		let rnTxt = [];
+		let match = null;
+		const regex = /(\[.*?\])/g;
+		let start = 0;
+		let index = 0;
+		while ((match = regex.exec(txt))) {
+			index = match.index;
+			if (index > start) {
+				rnTxt.push(txt.substring(start, index));
+			}
+			if (match[1] in emoji.map) {
+				const v = emoji.map[match[1]];
+				rnTxt.push(
+					<img
+						key={v}
+						alt={v}
+						src={require(`../../../common/faces/${v}`).default}
+						width={20}
+						height={20}
+					/>
+				);
+			} else {
+				rnTxt.push(match[1]);
+			}
+			start = index + match[1].length;
+		}
+		rnTxt.push(txt.substring(start, txt.length));
 
-  return (
+		return rnTxt;
+	};
+
+	const mySelf = () => {
+		return (
+			<div>
+				{message.bySelf && (
+					<MessageStatus
+						status={message.status}
+						style={{
+							marginTop:
+								message.chatType === "singleChat"
+									? "0"
+									: "22px",
+						}}
+					/>
+				)}
+			</div>
+		);
+	};
+
+	return (
 		<li
 			className={classes.pulldownListItem}
 			onMouseOver={() => setHoverReaction(true)}
@@ -185,27 +209,20 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 					id={message.id}
 				>
 					{renderTxt(message.body.msg)}
-					<div className={classes.textReaction}>
-						{hoverReaction && <Reaction message={message} />}
-					</div>
-					{message?.meta?.length > 0 ? (
+
+					{reactionMsg.length > 0 && (
 						<div className={classes.reactionBox}>
 							<RenderReactions message={message} />
 						</div>
-					) : null}
+					)}
+					<div className={classes.textReaction}>
+						{hoverReaction ? (
+							<Reaction message={message} />
+						) : (
+							mySelf()
+						)}
+					</div>
 				</div>
-				{message.bySelf && (
-					<MessageStatus
-						status={message.status}
-						style={{
-							marginTop:
-								message.chatType === "singleChat"
-									? "0"
-									: "22px",
-						}}
-						hoverReaction={hoverReaction}
-					/>
-				)}
 			</div>
 			<div className={classes.time}>{renderTime(message.time)}</div>
 			{message.status === "read" ? (
@@ -230,7 +247,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 				</Menu>
 			) : null}
 		</li>
-  );
+	);
 }
 
 export default memo(TextMessage);

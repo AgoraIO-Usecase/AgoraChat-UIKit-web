@@ -13,8 +13,9 @@ import deleteReactionIcon from "../../../common/icons/reaction_delete@2x.png";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
-		height: "300px",
-		width: "540px",
+		height: "248px",
+		width: "480px",
+		flexGrow: 1,
 	},
 	infoTitle: {
 		display: "flex",
@@ -56,6 +57,7 @@ const useStyles = makeStyles((theme) => ({
 		}
 	}
 }));
+
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
 
@@ -63,8 +65,8 @@ function TabPanel(props) {
 		<div
 			role="tabpanel"
 			hidden={value !== index}
-			id={`simple-tabpanel-${index}`}
-			aria-labelledby={`simple-tab-${index}`}
+			id={`scrollable-force-tabpanel-${index}`}
+			aria-labelledby={`scrollable-force-tab-${index}`}
 			{...other}
 		>
 			{value === index && (
@@ -78,8 +80,8 @@ function TabPanel(props) {
 
 function a11yProps(index) {
 	return {
-		id: `simple-tab-${index}`,
-		"aria-controls": `simple-tabpanel-${index}`,
+		id: `scrollable-force-tab-${index}`,
+		"aria-controls": `scrollable-force-tabpanel-${index}`,
 	};
 }
 
@@ -117,15 +119,19 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 			</div>
 			<hr />
 			<div className={classes.root}>
-				<AppBar position="static">
+				<AppBar position="static" color="default">
 					<Tabs
 						value={value}
 						onChange={handleChange}
-						fullWidth={true}
-						aria-label="simple tabs example"
+						variant="scrollable"
+						scrollButtons="on"
+						indicatorColor="primary"
+						textColor="primary"
+						aria-label="scrollable force tabs example"
 					>
+
 						{message.meta.map((item, i) => {
-							let label = <div className={classes.reactionNumLabel}>{rnReactionEmoji(item.reaction)} <span>{item.userList.length}</span></div>
+						let label = <div className={classes.reactionNumLabel}>{rnReactionEmoji(item.reaction)} <span>{item.userList.length}</span></div>
 							return (
 								<Tab
 									label={label}
@@ -135,7 +141,7 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 						})}
 					</Tabs>
 				</AppBar>
-				{message.meta.map((item, i) => {
+				{message.reactions.map((item, i) => {
 					return (
 						<div>
 							<TabPanel

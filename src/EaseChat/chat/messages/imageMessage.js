@@ -54,30 +54,32 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 const initialState = {
-  mouseX: null,
-  mouseY: null,
+	mouseX: null,
+	mouseY: null,
 };
 function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
-  let easeChatProps = useContext(EaseChatContext);
-  const { onAvatarChange } = easeChatProps;
-  const classes = useStyles({ bySelf: message.bySelf });
-  const [state, setState] = useState(initialState);
-  const [hoverReaction, setHoverReaction] = useState(false);
-  const handleClose = () => {
-    setState(initialState);
-  };
-  const recallMessage = () => {
-    onRecallMessage(message);
-    handleClose();
-  };
-  const handleClick = (event) => {
-    event.preventDefault();
-    setState({
-      mouseX: event.clientX - 2,
-      mouseY: event.clientY - 4,
-    });
-  };
-  return (
+	let easeChatProps = useContext(EaseChatContext);
+	const { onAvatarChange } = easeChatProps;
+	const classes = useStyles({ bySelf: message.bySelf });
+	const [state, setState] = useState(initialState);
+	const [hoverReaction, setHoverReaction] = useState(false);
+	const reactionMsg = message?.reactions || [];
+
+	const handleClose = () => {
+		setState(initialState);
+	};
+	const recallMessage = () => {
+		onRecallMessage(message);
+		handleClose();
+	};
+	const handleClick = (event) => {
+		event.preventDefault();
+		setState({
+			mouseX: event.clientX - 2,
+			mouseY: event.clientY - 4,
+		});
+	};
+	return (
 		<li
 			className={classes.pulldownListItem}
 			onMouseOver={() => setHoverReaction(true)}
@@ -97,11 +99,11 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
 				<div className={classes.imgReaction}>
 					{hoverReaction && <Reaction message={message} />}
 				</div>
-				{message?.meta?.length > 0 ? (
+				{reactionMsg.length > 0 && (
 					<div className={classes.reactionBox}>
 						<RenderReactions message={message} />
 					</div>
-				) : null}
+				)}
 			</div>
 			<div className={classes.time}>{renderTime(message.time)}</div>
 			{message.bySelf ? (
@@ -122,7 +124,7 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
 				</Menu>
 			) : null}
 		</li>
-  );
+	);
 }
 
 export default memo(ImgMessage);

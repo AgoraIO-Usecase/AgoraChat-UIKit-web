@@ -6,22 +6,27 @@ import fail from '../../../common/icons/failed@3x.png'
 import read from '../../../common/icons/read@3x.png'
 import received from '../../../common/icons/received@3x.png'
 const useStyles = makeStyles((theme) => ({
-    'MuiCircularProgressSvg': {
-        width: '15px',
-        height: '15px',
-        color: '#e0e0e0',
-        margin: '0 4px'
-    },
-    failIcon: {
-        color: 'red'
-    },
-    imgStyle:{
-        height:'20px',
-        marginRight:'5px'
-    }
-}))
+	MuiCircularProgressSvg: {
+		width: "15px",
+		height: "15px",
+		color: "#e0e0e0",
+		margin: "0 4px",
+	},
+	failIcon: {
+		color: "red",
+	},
+	imgStyle: {
+		height: "20px",
+		marginRight: "5px",
+	},
+	hoverStyle: {
+		marginRight: "25px",
+	},
+}));
 function SedndingStatus({ status, style = {},hoverReaction }) {
-    const classes = useStyles();
+    const classes = useStyles({
+		hoverReaction: hoverReaction,
+	});
     let statusIcon = ''
     console.log('status>>',status);
     switch (status) {

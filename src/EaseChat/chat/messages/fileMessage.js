@@ -84,15 +84,15 @@ const useStyles = makeStyles((theme) => ({
 	textReaction: {
 		position: "absolute",
 		right: (props) => (props.bySelf ? "" : "-50px"),
-		bottom: (props) => (props.bySelf ? "-15px" : "-5px"),
-		left: (props) => (props.bySelf ? "-245px" : ""),
+		bottom: (props) => (props.bySelf ? "-15px" : "-15px"),
+		left: (props) => (props.bySelf ? "-245px" : "-194"),
 		marginRight: "5px",
 	},
 	reactionBox: {
 		position: "absolute",
-		top: (props) => (props.bySelf ? "-15px" : "-10px"),
+		top: (props) => (props.bySelf ? "-15px" : "-15px"),
 		right: (props) => (props.bySelf ? "0px" : ""),
-		left: (props) => (props.bySelf ? "" : "0px"),
+		left: (props) => (props.bySelf ? "" : "-195px"),
 		background: "#F2F2F2",
 		borderRadius: "17.5px",
 		padding: "3px",
@@ -109,6 +109,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
   const classes = useStyles({ bySelf: message.bySelf });
   const [state, setState] = useState(initialState);
   const [hoverReaction, setHoverReaction] = useState(false);
+	const reactionMsg = message?.reactions || [];
   const handleClose = () => {
     setState(initialState);
   };
@@ -156,11 +157,11 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
 					<div className={classes.textReaction}>
 						{hoverReaction && <Reaction message={message} />}
 					</div>
-					{message?.meta?.length > 0 ? (
+					{reactionMsg.length > 0 && (
 						<div className={classes.reactionBox}>
 							<RenderReactions message={message} />
 						</div>
-					) : null}
+					)}
 				</div>
 			</div>
 			<div className={classes.time}>{renderTime(message.time)}</div>

@@ -30,30 +30,30 @@ const useStyles = makeStyles((theme) => ({
 
 const RenderReactions = ({ message }) => {
 	const classes = useStyles();
-
+	console.log("RenderReactions>>>",message);
+	const reactionMsg = message.reactions || [];
 	const deleteReaction = (reaction) => {
 		store.dispatch(MessageActions.deleteReaction(message,reaction));
 	};
 	return (
 		<div className={classes.reaction}>
-			{message.meta.map((item, i) => {
-				if (i > 3) return;
-				return (
-					<div
-						key={i}
-						className={classes.reactionItem}
-						onClick={() => deleteReaction(item.reaction)}
-					>
-						{rnReactionEmoji(item.reaction)}
-					</div>
-				);
-			})}
-			{message.meta.length > 4 && (
+			{reactionMsg.length > 0 &&
+				reactionMsg.map((item, i) => {
+					if (i > 3) return;
+					return (
+						<div
+							key={i}
+							className={classes.reactionItem}
+							onClick={() => deleteReaction(item.reaction)}
+						>
+							{rnReactionEmoji(item.reaction)}
+						</div>
+					);
+				})}
+			{reactionMsg.length > 4 && (
 				<span className={classes.reactionLingth}>...</span>
 			)}
-			<span className={classes.reactionLingth}>
-				{message.meta.length}
-			</span>
+			<span className={classes.reactionLingth}>{reactionMsg.length}</span>
 		</div>
 	);
 };

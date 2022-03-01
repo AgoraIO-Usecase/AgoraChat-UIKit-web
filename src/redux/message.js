@@ -34,7 +34,7 @@ const { Types, Creators } = createActions({
 	clearUnread: ["chatType", "sessionId"],
 	updateMessages: ["chatType", "sessionId", "messages"],
 	updateMessageMid: ["id", "mid"],
-	addReactions: ["message", "reaction"],
+	addReactions: ["message","type","reaction"],
     deleteReaction: ["message","reaction"],
 
 	// -async-
@@ -424,27 +424,28 @@ export const updateMessageMid = (state, { id, mid }) => {
     return state.setIn(['byMid', mid], { id })
 }
 
-export const addReactions = (state, { message, reaction }) => {
-    let { id ,to, from, bySelf} = message;
-    let sessionId = WebIM.conn.context.userId === to ? from : to;
-    if (!id) id = state.getIn(['byMid', message.mid, 'id'])
-    let mids = state.getIn(['byMid']) || {}
-    let mid
-    for (var i in mids) {
-        if (mids[i].id === id) {
-            mid = i
-        }
-    }
-    const byId = state.getIn(['byId', id])
-    if (!_.isEmpty(byId)) {
-        const { chatType } = byId
-        let messages = state.getIn([chatType, sessionId]).asMutable();
-        let found = _.find(messages, { id: id })
-        let reactionList = [];
-        found.setIn(["meta"], reactionList);
-        if (found?.meta?.length > 0) {
-			if (_.find(found.meta, { reaction: reaction })) return state
-            reactionList = bySelf
+export const addReactions = (state, { message, type, reaction }) => {
+	let { id, to, from, bySelf } = message;
+	let sessionId = WebIM.conn.context.userId === to ? from : to;
+	if (!id) id = state.getIn(["byMid", message.mid, "id"]);
+	let mids = state.getIn(["byMid"]) || {};
+	let mid;
+	for (var i in mids) {
+		if (mids[i].id === id) {
+			mid = i;
+		}
+	}
+	const byId = state.getIn(["byId", id]);
+	if (!_.isEmpty(byId)) {
+		const { chatType } = byId;
+		let messages = state.getIn([chatType, sessionId]).asMutable();
+		let found = _.find(messages, { id: id });
+		let reactionMsgs = found?.reactions || [];
+		let reactionList = [];
+		found.setIn(["reactions"], reactionList);
+		if (reactionMsgs.length > 0) {
+			if (_.find(found.reactions, { reaction: reaction })) return state;
+			reactionList = bySelf
 				? _.concat(
 						[
 							{
@@ -452,33 +453,33 @@ export const addReactions = (state, { message, reaction }) => {
 								userList: [WebIM.conn.context.userId],
 							},
 						],
-						found.meta
+						found.reactions
 				  )
-				: _.concat(found.meta, [
+				: _.concat(found.reactions, [
 						{
 							reaction: reaction,
 							userList: [WebIM.conn.context.userId],
 						},
 				  ]);
-		}else{
-            reactionList = [
+		} else {
+			reactionList = [
 				{
 					reaction: reaction,
 					userList: [WebIM.conn.context.userId],
 				},
 			];
-        }
-        let msg = {
+		}
+		let msg = {
 			...found,
-			meta: reactionList,
+			reactions: reactionList,
 		};
-        messages.splice(messages.indexOf(found), 1, msg);
-        AppDB.updateMessageReaction(id, msg.meta).then((res) => {});
+		messages.splice(messages.indexOf(found), 1, msg);
+		AppDB.updateMessageReaction(id, msg.reactions).then((res) => {});
 
-        return state.setIn([chatType, sessionId], messages);
-    }
-    return state
-}
+		return state.setIn([chatType, sessionId], messages);
+	}
+	return state;
+};
 
 export const deleteReaction = (state, {message, reaction }) => {
     let {id,to,from,chatType} = message
@@ -486,13 +487,13 @@ export const deleteReaction = (state, {message, reaction }) => {
 	let messages = state.getIn([chatType, sessionId]).asMutable() || [];
     let found = _.find(messages, { id: id });
     const index = messages.indexOf(found);
-    let meta = found.meta.filter((item) => item.reaction !== reaction); 
+    let reactionMsg = found.reactions.filter((item) => item.reaction !== reaction); 
     messages.splice(index, 1, {
 		...found,
-		meta: meta
+		reactions: reactionMsg,
 	});
     state = state.setIn([chatType, sessionId], messages);
-	AppDB.deleteReactions(id, meta);
+	AppDB.deleteReactions(id, reactionMsg);
 	return state;
 };
 /* ------------- Hookup Reducers To Types ------------- */

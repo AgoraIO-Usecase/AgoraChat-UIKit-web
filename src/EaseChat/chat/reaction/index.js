@@ -31,11 +31,11 @@ const Reaction = ({ message }) => {
 	};
 	const handleEmojiSelected = (emoji) => {
 		if (!emoji) return;
-		store.dispatch(MessageActions.addReactions(message,emoji));
+		store.dispatch(MessageActions.addReactions(message,'send',emoji));
 	};
 
 	const handleClickReactionInfo = (e) => {
-		message.meta.length > 0 && setReactionInfoVisible(e.currentTarget);
+		message?.reactions?.length > 0 && setReactionInfoVisible(e.currentTarget);
 	}
 
 	const handleReactionInfoClose = () => {
@@ -64,8 +64,8 @@ const Reaction = ({ message }) => {
 				onSelected={handleEmojiSelected}
 				onClose={handleEmojiClose}
 			/>
-			
-			{message?.meta?.length > 0 ? (
+
+			{message?.reactions?.length > 0 ? (
 				<ReactionInfo
 					anchorEl={reactionInfoVisible}
 					onSelected={handleEmojiSelected}

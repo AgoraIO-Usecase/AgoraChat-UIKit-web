@@ -68,16 +68,24 @@ const useStyles = makeStyles((theme) => ({
 		position: "absolute",
 		right: (props) =>
 			props.bySelf
-				? `calc(208.5px * ${props.duration / 15} + ${props.duration > 2 ? "18px" : "32px"})`
-				: "-50px",
-		bottom: (props) => (props.bySelf ? "25px" : "-5px"),
+				? `calc(208.5px * ${props.duration / 15} + ${
+						props.duration > 2 ? "18px" : "32px"
+				  })`
+				: "",
+		left: (props) =>
+			props.bySelf
+				? ""
+				: `calc(208.5px * ${props.duration / 15} + ${
+						props.duration > 2 ? "55px" : "32px"
+				  })`,
+		bottom: (props) => (props.bySelf ? "25px" : "25px"),
 		marginRight: "5px",
 	},
 	reactionBox: {
 		position: "absolute",
 		top: (props) => (props.bySelf ? "-10px" : "-10px"),
 		right: (props) => (props.bySelf ? "0px" : ""),
-		left: (props) => (props.bySelf ? "" : "0px"),
+		left: (props) => (props.bySelf ? "" : "50px"),
 		background: "#F2F2F2",
 		borderRadius: "17.5px",
 		padding: "3px",
@@ -93,7 +101,7 @@ function AudioMessage({ message ,showByselfAvatar}) {
     const audioRef = useRef(null)
     const [isPlaying, setIsPlaying] = useState(false)
     const [hoverReaction, setHoverReaction] = useState(false);
-
+	const reactionMsg = message?.reactions || [];
     const play = () => {
         setIsPlaying(true)
         audioRef.current.play()
@@ -128,11 +136,11 @@ function AudioMessage({ message ,showByselfAvatar}) {
 			<div className={classes.textReaction}>
 				{hoverReaction && <Reaction message={message} />}
 			</div>
-			{message?.meta?.length > 0 ? (
+			{reactionMsg.length > 0 && (
 				<div className={classes.reactionBox}>
 					<RenderReactions message={message} />
 				</div>
-			) : null}
+			)}
 			<div className={classes.time}>{renderTime(message.time)}</div>
 		</li>
 	);
