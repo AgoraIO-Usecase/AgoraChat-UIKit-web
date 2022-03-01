@@ -31,7 +31,7 @@ const Reaction = ({ message }) => {
 	};
 	const handleEmojiSelected = (emoji) => {
 		if (!emoji) return;
-		store.dispatch(MessageActions.addReactions(message,'send',emoji));
+		store.dispatch(MessageActions.addReactions(message,emoji));
 	};
 
 	const handleClickReactionInfo = (e) => {

@@ -230,7 +230,7 @@ const AppDB = {
 		});
 	},
 
-	updateMessageReaction(id, meta) {
+	updateMessageReaction(id, reactions) {
 		const $_TABLE = this.$_TABLE;
 		return this.exec((resolve) => {
             const $_TABLE = this.$_TABLE;
@@ -238,7 +238,7 @@ const AppDB = {
 				$_TABLE
 					.where("id")
 					.equals(id)
-					.modify({ meta: meta })
+					.modify({ reactions: reactions })
 					.then((res) => {
 						console.log("updateMessageReaction", res);
 					});

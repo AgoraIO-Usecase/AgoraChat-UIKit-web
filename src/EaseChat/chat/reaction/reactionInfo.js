@@ -130,7 +130,7 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 						aria-label="scrollable force tabs example"
 					>
 
-						{message.meta.map((item, i) => {
+						{message.reactions.map((item, i) => {
 						let label = <div className={classes.reactionNumLabel}>{rnReactionEmoji(item.reaction)} <span>{item.userList.length}</span></div>
 							return (
 								<Tab

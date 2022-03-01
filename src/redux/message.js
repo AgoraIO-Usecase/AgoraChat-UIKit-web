@@ -34,7 +34,7 @@ const { Types, Creators } = createActions({
 	clearUnread: ["chatType", "sessionId"],
 	updateMessages: ["chatType", "sessionId", "messages"],
 	updateMessageMid: ["id", "mid"],
-	addReactions: ["message","type","reaction"],
+	addReactions: ["message","reaction"],
     deleteReaction: ["message","reaction"],
 
 	// -async-
@@ -424,7 +424,7 @@ export const updateMessageMid = (state, { id, mid }) => {
     return state.setIn(['byMid', mid], { id })
 }
 
-export const addReactions = (state, { message, type, reaction }) => {
+export const addReactions = (state, { message, reaction }) => {
 	let { id, to, from, bySelf } = message;
 	let sessionId = WebIM.conn.context.userId === to ? from : to;
 	if (!id) id = state.getIn(["byMid", message.mid, "id"]);
