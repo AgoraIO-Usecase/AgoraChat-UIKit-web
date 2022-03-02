@@ -17,6 +17,7 @@ import avatarIcon1 from '../../common/images/avatar1.png'
 import avatarIcon2 from '../../common/images/avatar2.png'
 import avatarIcon3 from '../../common/images/avatar3.png'
 
+import i18next from "i18next";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -117,7 +118,18 @@ export default function SessionList(props) {
       const chatMsgs =
         message?.[session.sessionType]?.[session.sessionId] || [];
       if (chatMsgs.length > 0) {
-        session.lastMessage = chatMsgs[chatMsgs.length - 1];
+        let lastMessage = chatMsgs[chatMsgs.length - 1];
+        let val = lastMessage.body || ''
+        if (val && val.type === 'recall') {
+          session.lastMessage = {
+            time: lastMessage.time,
+            body: {
+              msg: lastMessage.chatType === 'singleChat' && lastMessage.bySelf? i18next.t("you retracted a message"):`${lastMessage.from}${i18next.t("retracted a message")}`,
+            },
+          }
+        }else{
+          session.lastMessage = lastMessage
+        }
         session.unreadNum = unread[session.sessionType][session.sessionId];
       }
       if (session.sessionType === "notice") {
