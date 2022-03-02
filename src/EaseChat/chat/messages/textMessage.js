@@ -163,7 +163,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
           />
         )}
       </div>
-      <div className={classes.time}>{renderTime(message.time)}</div>
+      <div className={classes.time}>{renderTime(message.body.time || message.time)}</div>
       {message.status === "read" ? (
         <div className={classes.read}>{i18next.t("Read")}</div>
       ) : null}
