@@ -30,7 +30,6 @@ const useStyles = makeStyles((theme) => ({
 
 const RenderReactions = ({ message }) => {
 	const classes = useStyles();
-	console.log("RenderReactions>>>",message);
 	const reactionMsg = message.reactions || [];
 	const deleteReaction = (reaction) => {
 		store.dispatch(MessageActions.deleteReaction(message,reaction));

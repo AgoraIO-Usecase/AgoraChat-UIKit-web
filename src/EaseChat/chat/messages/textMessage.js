@@ -58,10 +58,9 @@ const useStyles = makeStyles((theme) => ({
 	},
 	textReaction: {
 		position: "absolute",
-		right: (props) => (props.bySelf ? "" : "-50px"),
+		right: (props) => (props.bySelf ? "" : "-30px"),
 		bottom: (props) => (props.bySelf ? "0" : "-5px"),
-		left: (props) =>
-			props.bySelf ? (props.hoverReaction ? "-50px" : "-25px") : "",
+		left: (props) => (props.bySelf ? "-25px" : ""),
 		marginRight: "5px",
 	},
 	reactionBox: {
@@ -113,7 +112,6 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 		hoverReaction: hoverReaction,
 	});
 	const [state, setState] = useState(initialState);
-	// const [hoverReaction, setHoverReaction] = useState(false);
 	const handleClick = (event) => {
 		event.preventDefault();
 		setState({

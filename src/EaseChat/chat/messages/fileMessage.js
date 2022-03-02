@@ -64,7 +64,7 @@ const useStyles = makeStyles((theme) => ({
 		color: "rgba(0,0,0,.6)",
 		fontWeight: "bold",
 		cursor: "pointer",
-    position: "relative",
+		position: "relative",
 	},
 	time: {
 		position: "absolute",
@@ -97,6 +97,7 @@ const useStyles = makeStyles((theme) => ({
 		borderRadius: "17.5px",
 		padding: "3px",
 		border: "solid 2px #fff",
+		boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
 	},
 }));
 const initialState = {

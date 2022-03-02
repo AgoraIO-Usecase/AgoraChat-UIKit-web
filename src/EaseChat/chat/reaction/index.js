@@ -5,7 +5,7 @@ import MessageActions from "../../../redux/message";
 import ReactionIcon from "./renderReactionIcon";
 import ReactionInfo from "./reactionInfo";
 import addReactionIcon from "../../../common/icons/add_reaction@2x.png";
-import moreReactionIcon from '../../../common/icons/more@2x.png'
+import moreReactionIcon from "../../../common/icons/more@2x.png";
 const useStyles = makeStyles((theme) => ({
 	hoverMySelfReaction: {
 		position: "absolute",
@@ -17,12 +17,23 @@ const useStyles = makeStyles((theme) => ({
 		width: "24px",
 		cursor: "pointer",
 	},
+	infoStyle: {
+		position: "absolute",
+		left: (props) => (props.bySelf ? "" : "20px"),
+		right: (props) => (props.bySelf ? "20px" : ""),
+		height: "24px",
+		width: "24px",
+		cursor: "pointer",
+	},
 }));
 
 const Reaction = ({ message }) => {
-	const classes = useStyles();
+	const classes = useStyles({
+		bySelf: message.bySelf,
+	});
 	const [reactionVisible, setReactionVisible] = useState(null);
-	const [reactionInfoVisible,setReactionInfoVisible] = useState(null);
+	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
+	const reactionMsg = message.reactions || [];
 	const handleClickEmoji = (e) => {
 		setReactionVisible(e.currentTarget);
 	};
@@ -31,28 +42,26 @@ const Reaction = ({ message }) => {
 	};
 	const handleEmojiSelected = (emoji) => {
 		if (!emoji) return;
-		store.dispatch(MessageActions.addReactions(message,emoji));
+		store.dispatch(MessageActions.addReactions(message, emoji));
 	};
 
 	const handleClickReactionInfo = (e) => {
-		message?.reactions?.length > 0 && setReactionInfoVisible(e.currentTarget);
-	}
+		message?.reactions?.length > 0 &&
+			setReactionInfoVisible(e.currentTarget);
+	};
 
 	const handleReactionInfoClose = () => {
 		setReactionInfoVisible(null);
 	};
 
-
 	return (
 		<div>
-			{message.bySelf && (
-				<img
-					src={moreReactionIcon}
-					alt="more reaction"
-					className={classes.iconStyley}
-					onClick={handleClickReactionInfo}
-				/>
-			)}
+			<img
+				src={moreReactionIcon}
+				alt="more reaction"
+				className={classes.infoStyle}
+				onClick={handleClickReactionInfo}
+			/>
 			<img
 				src={addReactionIcon}
 				alt="reaction"
@@ -65,22 +74,13 @@ const Reaction = ({ message }) => {
 				onClose={handleEmojiClose}
 			/>
 
-			{message?.reactions?.length > 0 ? (
+			{reactionMsg.length > 0 && 
 				<ReactionInfo
 					anchorEl={reactionInfoVisible}
 					onSelected={handleEmojiSelected}
 					onClose={handleReactionInfoClose}
 					message={message}
-				/>
-			) : null}
-			{!message.bySelf && (
-				<img
-					src={moreReactionIcon}
-					alt="more reaction"
-					className={classes.iconStyley}
-					onClick={handleClickReactionInfo}
-				/>
-			)}
+				/>}
 		</div>
 	);
 };

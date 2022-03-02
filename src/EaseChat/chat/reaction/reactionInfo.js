@@ -88,6 +88,7 @@ function a11yProps(index) {
 const ReactionInfo = ({ anchorEl, onClose, message }) => {
 	const classes = useStyles();
 	const [value, setValue] = useState(0);
+	const reactionMsg = message.reactions || [];
 	const handleChange = (event, newValue) => {
 		setValue(newValue);
 	};
@@ -129,19 +130,18 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 						textColor="primary"
 						aria-label="scrollable force tabs example"
 					>
-
-						{message.reactions.map((item, i) => {
-						let label = <div className={classes.reactionNumLabel}>{rnReactionEmoji(item.reaction)} <span>{item.userList.length}</span></div>
-							return (
-								<Tab
-									label={label}
-									{...a11yProps(i)}
-								/>
+						{reactionMsg.map((item, i) => {
+							let label = (
+								<div className={classes.reactionNumLabel}>
+									{rnReactionEmoji(item.reaction)}{" "}
+									<span>{item.userList.length}</span>
+								</div>
 							);
+							return <Tab label={label} {...a11yProps(i)} />;
 						})}
 					</Tabs>
 				</AppBar>
-				{message.reactions.map((item, i) => {
+				{reactionMsg.map((item, i) => {
 					return (
 						<div>
 							<TabPanel
