@@ -37,7 +37,7 @@ const ReactionIcon = ({ anchorEl, onClose, onSelected }) => {
 	const width = (emojiWidth + 2 * emojiPadding) * lineNum;
 	const height = (emojiWidth + 2 * emojiPadding) * rows;
 	const classes = useStyles({ width, height });
-	function renderReactions() {
+	function renderReaction() {
 		return Object.keys(reactionEmoji.map).map((k) => {
 			const v = reactionEmoji.map[k];
 			return (
@@ -74,7 +74,7 @@ const ReactionIcon = ({ anchorEl, onClose, onSelected }) => {
 		});
 	}
 
-	function defaultReactions() {
+	function defaultReaction() {
 		return Object.keys(defaultReactions.map).map((k) => {
 			const v = defaultReactions.map[k];
 			return (
@@ -97,7 +97,8 @@ const ReactionIcon = ({ anchorEl, onClose, onSelected }) => {
 						>
 							<img
 								src={
-									require(`../../../common/reactions/${v}`).default
+									require(`../../../common/reactions/${v}`)
+										.default
 								}
 								alt={k}
 								width={emojiWidth}
@@ -134,12 +135,12 @@ const ReactionIcon = ({ anchorEl, onClose, onSelected }) => {
 		>
 			<div className={classes.text}>Frequently</div>
 			<div className={classes.defaultEmojiBox} onClick={handleEmojiClick}>
-				{defaultReactions()}
+				{defaultReaction()}
 			</div>
 			<hr />
 			<div className={classes.text}>All Emojis</div>
 			<div className={classes.emojiBox} onClick={handleEmojiClick}>
-				{renderReactions()}
+				{renderReaction()}
 			</div>
 		</Popover>
 	);
