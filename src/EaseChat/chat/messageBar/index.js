@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "../../../EaseApp/index";
-import { Menu, MenuItem, IconButton, Icon, InputBase } from "@material-ui/core";
+import { Menu, MenuItem, IconButton, Icon, InputBase, Tooltip } from "@material-ui/core";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles, fade } from "@material-ui/styles";
@@ -20,6 +20,13 @@ import avatarIcon2 from '../../../common/images/avatar2.png'
 import avatarIcon3 from '../../../common/images/avatar3.png'
 import groupAvatarIcon from '../../../common/images/groupAvatar.png'
 
+import offlineImg from '../../../common/images/Offline.png'
+import onlineIcon from '../../../common/images/Online.png'
+import busyIcon from '../../../common/images/Busy.png'
+import donotdisturbIcon from '../../../common/images/Do_not_Disturb.png'
+import customIcon from '../../../common/images/custom.png'
+import leaveIcon from '../../../common/images/leave.png'
+
 const useStyles = makeStyles((theme) => {
   return {
     root: {
@@ -36,9 +43,21 @@ const useStyles = makeStyles((theme) => {
     leftBar: {
       display: "flex",
       alignItems: "center",
+      position: 'relative'
     },
     avatar: {
       margin: "0 20px 0 16px",
+    },
+    imgStyle: {
+      width: '18px',
+      height: '18px',
+      borderRadius: '50%',
+      cursor: 'pointer',
+      verticalAlign: 'middle',
+      position: 'absolute',
+      bottom: '0px',
+      left: '45px',
+      zIndex: 1
     },
   };
 });
@@ -47,7 +66,7 @@ const MessageBar = () => {
   const dispatch = useDispatch();
   const groupById = useSelector((state) => state.group?.group.byId) || {};
   const globalProps = useSelector((state) => state.global.globalProps);
-
+  const sessionList = useSelector((state) => state.session?.sessionList) || [];
   const [sessionEl, setSessionEl] = useState(null);
 
   const { chatType, to, username } = globalProps;
@@ -93,7 +112,24 @@ const MessageBar = () => {
   const handleSessionInfoClick = (e) => {
     setSessionEl(e.currentTarget);
   };
-
+  let ext = ''
+  sessionList.forEach(val => {
+    if (val.presence) {
+      if (val.sessionId === to) {
+        ext = val.presence.ext
+      }
+    }
+  })
+  console.log(sessionList, 'sessionList')
+  console.log('%c sessionList', 'color:red;font-size:20px;', ext)
+  const getUserOnlineStatus = {
+    'Offline': offlineImg,
+    'Online': onlineIcon,
+    'Busy': busyIcon,
+    'Do not Disturb': donotdisturbIcon,
+    'Leave': leaveIcon,
+    '': onlineIcon
+  }
   let userAvatars = {
     1: avatarIcon1,
     2: avatarIcon2,
@@ -106,7 +142,7 @@ const MessageBar = () => {
     setUsersInfoData(newwInfoData)
     setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 1)
   }, [to])
-
+ 
   return (
     <div className={classes.root}>
       <Box position="static" className={classes.leftBar}>
@@ -114,6 +150,12 @@ const MessageBar = () => {
         src={chatType === "singleChat" ? userAvatars[userAvatarIndex] : groupAvatarIcon}
           style={{ borderRadius: chatType === "singleChat" ? "50%" : 'inherit'}}
         ></Avatar>
+          {
+            chatType === "singleChat" ?
+            <Tooltip title={ext} placement="bottom-end">
+              <img alt="" src={getUserOnlineStatus[ext] ? getUserOnlineStatus[ext] : customIcon} className={classes.imgStyle} />
+            </Tooltip> : null
+          }
         {to}
       </Box>
       <Box position="static">

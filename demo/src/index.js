@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { render } from "react-dom";
-
-import { EaseChat, EaseApp } from "../../src/index";
+import { EaseChat, EaseApp, EasePresence } from "../../src/index";
 // import WebIM from "./WebIM";
 import val from "./comm";
 // import initListen from "./WebIMListen";
+
 export default class Demo extends Component {
   state = {
     token: val,
@@ -51,11 +51,13 @@ export default class Demo extends Component {
             successLoginCallback={this.test}
             failCallback={this.test2}
             onAvatarChange={this.test3}
-            
-            appkey= "41117440#383391"
-            username="test0001"
-            agoraToken="007eJxTYNDx92Fqf35CjT194rFDe+x+bT0dcN3yJM+05l13Nx7Z/V5RgSHNMCXZ3NwiKSUl2czELDHFIs3IzMDS3Cw50SjFwNA0+d6GL4kKMgwM8t933WJkYGVgBEIQX4XB3DDRwswwzUDXwiDJUNfQMDVZNzHZNFHXMs3Y2MLU2NDQxNAMAGn7Ka8="
-            header={<div style={{ height: "100px" }}>TestHeader</div>} />
+            appkey="5101220107132865#test"
+            username="lu1"
+            password="1"
+            // appkey= "41117440#383391"
+            // username="test0001"
+            // agoraToken="007eJxTYNDx92Fqf35CjT194rFDe+x+bT0dcN3yJM+05l13Nx7Z/V5RgSHNMCXZ3NwiKSUl2czELDHFIs3IzMDS3Cw50SjFwNA0+d6GL4kKMgwM8t933WJkYGVgBEIQX4XB3DDRwswwzUDXwiDJUNfQMDVZNzHZNFHXMs3Y2MLU2NDQxNAMAGn7Ka8="
+            header={<div style={{ height: "100px", position: 'relative' }}>TestHeader <EasePresence style={{position: 'absolute', top: '0px', left: '90px'}}  /></div>} />
         </div>
 
       
