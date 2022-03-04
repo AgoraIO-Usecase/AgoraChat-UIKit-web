@@ -40,6 +40,9 @@ export default class Demo extends Component {
   test3 = (res) =>{
     console.log('res>>',res);
   }
+  test4 = () =>{
+    console.log('qwk');
+  }
   render() {
     console.log("this.state.token>>", this.state.token);
     return (
@@ -51,10 +54,11 @@ export default class Demo extends Component {
             successLoginCallback={this.test}
             failCallback={this.test2}
             onAvatarChange={this.test3}
+            onChatAvatarClick={this.test4}
             
             appkey= "41117440#383391"
             username="test0001"
-            agoraToken="007eJxTYNDx92Fqf35CjT194rFDe+x+bT0dcN3yJM+05l13Nx7Z/V5RgSHNMCXZ3NwiKSUl2czELDHFIs3IzMDS3Cw50SjFwNA0+d6GL4kKMgwM8t933WJkYGVgBEIQX4XB3DDRwswwzUDXwiDJUNfQMDVZNzHZNFHXMs3Y2MLU2NDQxNAMAGn7Ka8="
+            agoraToken="007eJxTYJh1lElAP/Ojhn7L/DaWK9c9I68vXv/vtxzTJofovXUGInoKDGmGKcnm5hZJKSnJZiZmiSkWaUZmBpbmZsmJRikGhqbJOzoUkxRkGBiEXzP0MzKwMjACIYivwmBumGhhZphmoGthkGSoa2iYmqybmGyaqGuZZmxsYWpsaGhiaAYA1tkktA=="
             header={<div style={{ height: "100px" }}>TestHeader</div>} />
         </div>
 
