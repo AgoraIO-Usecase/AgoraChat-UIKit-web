@@ -96,6 +96,11 @@ export default function createlistener(props) {
           store.dispatch(SessionActions.getJoinedGroupList())
         }
       }
+    },
+    onContactDeleted:(msg)=>{
+      store.dispatch(MessageActions.clearMessage('singleChat', msg.from));
+      store.dispatch(SessionActions.deleteSession(msg.from));
+      store.dispatch(GlobalPropsActions.setGlobalProps({to:null}))
     }
 
   });

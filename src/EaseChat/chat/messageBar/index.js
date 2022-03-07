@@ -112,7 +112,7 @@ const MessageBar = () => {
   return (
     <div className={classes.root}>
       <Box position="static" className={classes.leftBar}>
-        <Avatar className={classes.avatar} onClick={onChatAvatarClick}
+        <Avatar className={classes.avatar} onClick={() => onChatAvatarClick && onChatAvatarClick({chatType, to})}
         src={chatType === "singleChat" ? userAvatars[userAvatarIndex] : groupAvatarIcon}
           style={{ borderRadius: chatType === "singleChat" ? "50%" : 'inherit'}}
         ></Avatar>

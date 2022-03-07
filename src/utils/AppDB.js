@@ -147,7 +147,7 @@ const AppDB = {
             $_TABLE.where('chatType')
                 .equals(chatType)
                 .filter(item => {
-                    if (chatType === 'chat') {
+                    if (chatType === 'singleChat') {
                         return item.from === id || item.to === id
                     } else {
                         return item.to === id
