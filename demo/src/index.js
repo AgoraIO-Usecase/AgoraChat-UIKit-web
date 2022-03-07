@@ -40,6 +40,9 @@ export default class Demo extends Component {
   test3 = (res) =>{
     console.log('res>>',res);
   }
+  test4 = (val) =>{
+    console.log('val',val);
+  }
   render() {
     console.log("this.state.token>>", this.state.token);
     return (
@@ -51,6 +54,7 @@ export default class Demo extends Component {
             successLoginCallback={this.test}
             failCallback={this.test2}
             onAvatarChange={this.test3}
+            onChatAvatarClick={this.test4}
             appkey="5101220107132865#test"
             username="lu1"
             password="1"
@@ -59,8 +63,6 @@ export default class Demo extends Component {
             // agoraToken="007eJxTYNDx92Fqf35CjT194rFDe+x+bT0dcN3yJM+05l13Nx7Z/V5RgSHNMCXZ3NwiKSUl2czELDHFIs3IzMDS3Cw50SjFwNA0+d6GL4kKMgwM8t933WJkYGVgBEIQX4XB3DDRwswwzUDXwiDJUNfQMDVZNzHZNFHXMs3Y2MLU2NDQxNAMAGn7Ka8="
             header={<div style={{ height: "100px", position: 'relative' }}>TestHeader <EasePresence style={{position: 'absolute', top: '0px', left: '90px'}}  /></div>} />
         </div>
-
-      
       </div>
     );
   }

@@ -159,6 +159,7 @@ EaseAppProvider.propTypes = {
   easeInputMenu: PropTypes.string,
   menuList: PropTypes.array,
   handleMenuItem: PropTypes.func,
+  onChatAvatarClick:PropTypes.func,
 };
 EaseAppProvider.defaultProps = {
   isShowUnread: true,

@@ -25,6 +25,8 @@ import donotdisturbIcon from '../../common/images/Do_not_Disturb.png'
 import customIcon from '../../common/images/custom.png'
 import leaveIcon from '../../common/images/leave.png'
 
+import i18next from "i18next";
+
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
@@ -134,7 +136,18 @@ export default function SessionList(props) {
       const chatMsgs =
         message?.[session.sessionType]?.[session.sessionId] || [];
       if (chatMsgs.length > 0) {
-        session.lastMessage = chatMsgs[chatMsgs.length - 1];
+        let lastMessage = chatMsgs[chatMsgs.length - 1];
+        let val = lastMessage.body || ''
+        if (val && val.type === 'recall') {
+          session.lastMessage = {
+            time: lastMessage.time,
+            body: {
+              msg: lastMessage.chatType === 'singleChat' && lastMessage.bySelf? i18next.t("you retracted a message"):`${lastMessage.from}${i18next.t("retracted a message")}`,
+            },
+          }
+        }else{
+          session.lastMessage = lastMessage
+        }
         session.unreadNum = unread[session.sessionType][session.sessionId];
       }
       if (session.sessionType === "notice") {
