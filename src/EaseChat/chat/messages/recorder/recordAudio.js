@@ -200,7 +200,7 @@ HZRecorder.get = function(callback, config){
                 { audio: true } // 只启用音频
                 ).then((suc)=>{
                     let rec = new HZRecorder(suc, config)
-                    callback(rec,suc)
+                    callback(rec)
                 }).catch((error)=>{
                     switch(error.code || error.name){
                         case 'PERMISSION_DENIED':

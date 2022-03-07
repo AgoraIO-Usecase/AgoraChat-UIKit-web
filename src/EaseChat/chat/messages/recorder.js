@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: '20px'
   }
 }));
-let MediaStream
+
 function Recorder({ open, onClose }) {
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -75,10 +75,8 @@ function Recorder({ open, onClose }) {
     setStartTime(_startTime);
     clearTimer();
 
-    recording.get((rec,val) => {
+    recording.get((rec) => {
       setRecorderObj(rec);
-      console.log('recrecrecrecrec', rec,val.getTracks())
-      MediaStream = val
       if (rec) {
         let _interval = setInterval(() => {
           if (num <= 0 && mounted) {
@@ -106,7 +104,6 @@ function Recorder({ open, onClose }) {
     let _endTime = new Date().getTime();
     let duration = (_endTime - startTime) / 1000;
     if (recorderObj) {
-      console.log('recorderObj>>',recording);
       recorderObj.stop();
       // 重置说话时间
       setNum(60);
@@ -124,7 +121,6 @@ function Recorder({ open, onClose }) {
         };
         dispatch(MessageActions.sendRecorder(to, chatType, uri));
         onClose();
-        MediaStream.getTracks()[0].stop()
       }
     }
   };

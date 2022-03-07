@@ -61,7 +61,7 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
       {!message.bySelf && (
         <Avatar
           src={avatar}
-          onClick={(e) => onAvatarChange && onAvatarChange(e,message)}
+          onClick={() => onAvatarChange && onAvatarChange(message)}
         ></Avatar>
       )}
       {showByselfAvatar && message.bySelf && <Avatar src={avatar}></Avatar>}

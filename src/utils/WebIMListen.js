@@ -114,10 +114,5 @@ export default function createlistener(props) {
         store.dispatch(PresenceActions.changeImg(message[0].ext))
       }
     }, // 发布者发布新的状态时，订阅者触发该回调
-    onContactDeleted:(msg)=>{
-      store.dispatch(MessageActions.clearMessage('singleChat', msg.from));
-      store.dispatch(SessionActions.deleteSession(msg.from));
-      store.dispatch(GlobalPropsActions.setGlobalProps({to:null}))
-    }
   });
 }
