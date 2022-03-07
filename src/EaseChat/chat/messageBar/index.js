@@ -120,7 +120,7 @@ const MessageBar = () => {
       }
     }
   })
-  console.log(sessionList, 'sessionList')
+  console.log(sessionList, 'sessionList', ext)
   console.log('%c sessionList', 'color:red;font-size:20px;', ext)
   const getUserOnlineStatus = {
     'Offline': offlineImg,

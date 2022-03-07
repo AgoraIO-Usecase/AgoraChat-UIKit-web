@@ -12,7 +12,7 @@ const { Types, Creators } = createActions({
     pushSession:['session'],
     setJoinedGroups: ["joinedGroups"],
     setNewSessionList: ['sessionList'],
-    getSessionList: () => { 
+    getSessionList: () => {
         return (dispatch, getState) => {
             AppDB.getSessionList().then((res) => {
                 console.log('获取会话列表', res)
