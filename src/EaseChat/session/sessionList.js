@@ -1,10 +1,13 @@
-import React, { useContext } from "react";
+import React, { useContext ,useState} from "react";
 import { makeStyles } from "@material-ui/styles";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import Avatar from "@material-ui/core/Avatar";
+import SearchIcon from '@material-ui/icons/Search';
 import Box from "@material-ui/core/Box";
+import {IconButton,InputBase} from "@material-ui/core"
+import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import { useSelector, useDispatch } from "../../EaseApp/index";
 import { renderTime } from "../../utils/index";
@@ -27,6 +30,15 @@ const useStyles = makeStyles((theme) => ({
     margin: '0 !important',
     padding: '0 !important',
     overflowY: 'auto',
+  },
+  paper:{
+    margin:'5px',
+    paddingRight:'20px',
+    borderRadius:'20px',
+    display:'flex'
+  },
+  inputBase:{
+    width:'100%'
   },
   listItem: {
     padding: "0 14px",
@@ -106,6 +118,7 @@ export default function SessionList(props) {
   const joinedGroups = useSelector((state) => state.session?.joinedGroups);
   // dealwith notice unread num
   const notices = useSelector((state) => state.notice?.notices) || [];
+  const [searchAry,setSearchAry] = useState([])
   let noticeUnreadNum = 0;
   notices.forEach((item) => {
     if (!item.disabled) {
@@ -115,6 +128,13 @@ export default function SessionList(props) {
   const renderSessionList = sessionList
     .asMutable({ deep: true })
     .map((session) => {
+      /******* --sessionId replaces the group name-- *******/
+      joinedGroups.length>0 && joinedGroups.forEach((item) => {
+        if(item.groupid === session.sessionId){
+          session.name = item.groupname
+        }
+      })
+
       const chatMsgs =
         message?.[session.sessionType]?.[session.sessionId] || [];
       if (chatMsgs.length > 0) {
@@ -169,79 +189,106 @@ export default function SessionList(props) {
     }
   };
 
+  const searchSession = (e) =>{
+    let ary = []
+    if (e.target.value) {
+      renderSessionList.map((val,key)=>{
+        let isIncludeAry = val.sessionType === 'groupChat'? val.name : val.sessionId
+        let isIncludeVal = _.includes(_.toLower(isIncludeAry),_.toLower(e.target.value))
+        if (isIncludeVal) {
+          ary.push(val)
+        }
+        setSearchAry(_.uniq(ary))
+      })
+    }else{
+      setSearchAry(renderSessionList)
+    }
+  }
+
   let userAvatars = {
     1: avatarIcon1,
     2: avatarIcon2,
     3: avatarIcon3
   }
-
+ let renderSession = searchAry.length>0?searchAry:renderSessionList
   return (
-    <List dense className={classes.root}>
-      {renderSessionList.map((session, index) => {
-        let usersInfoData = localStorage.getItem("usersInfo_1.0")
-        let avatarSrc = "";
-        if (session.sessionType === "singleChat") {
-          let findIndex =  _.find(usersInfoData, { username: session.sessionId }) || ''
-          avatarSrc = userAvatars[findIndex.userAvatar] || avatarIcon1
-        }else if (session.sessionType === "groupChat") {
-          avatarSrc = groupIcon;
-          joinedGroups.forEach((item) => {
-            if(item.groupid === session.sessionId){
-              session.name = item.groupname
-            }
-          })
-        } else if (session.sessionType === "chatRoom") {
-          avatarSrc = chatRoomIcon;
-        } else if (session.sessionType === "notice") {
-          avatarSrc = noticeIcon;
-        }
-        return (
-          <ListItem
-            key={session.sessionId}
-            selected={currentSessionIndex === index}
-            onClick={(event) => handleListItemClick(event, index, session)}
-            button
-            className={classes.listItem}
-          >
-            <Box className={classes.itemBox}>
-              <ListItemAvatar>
-                <Avatar
-                  // className={classes.avatar}
-                  style={{ borderRadius: `${session.sessionType}` === "singleChat" ? "50%" : 'inherit'}}
-                  alt={`${session.name || session.sessionId}`}
-                  src={avatarSrc}
-                />
-              </ListItemAvatar>
-              <Box className={classes.itemRightBox}>
-                <Typography className={classes.itemName}>
-                  <span>{session.name || session.sessionId}</span>
-                  <span className={classes.time}>
-                    {renderTime(session?.lastMessage?.time)}
-                  </span>
-                </Typography>
+    <>
+    <Paper component="form" className={classes.paper}
+      sx={{ p: '2px 4px', display: 'flex', alignItems: 'center'}}>
+      <IconButton type="submit" sx={{ p: '10px' }} aria-label="search">
+        <SearchIcon />
+      </IconButton>
+      <InputBase
+        className={classes.inputBase}
+        sx={{ ml: 1, flex: 2 }}
+        placeholder="Search"
+        inputProps={{ 'aria-label': 'search google maps' }}
+        onChange={searchSession}
+      />
+    </Paper>
 
-                <Typography className={classes.itemMsgBox}>
-                  <span className={classes.itemMsg}>
-                    {session?.lastMessage?.body?.msg}
-                  </span>
+      <List dense className={classes.root}>
+        {renderSession.map((session, index) => {
+          let usersInfoData = localStorage.getItem("usersInfo_1.0")
+          let avatarSrc = "";
+          if (session.sessionType === "singleChat") {
+            let findIndex =  _.find(usersInfoData, { username: session.sessionId }) || ''
+            avatarSrc = userAvatars[findIndex.userAvatar] || avatarIcon1
+          }else if (session.sessionType === "groupChat") {
+            avatarSrc = groupIcon;
+          } else if (session.sessionType === "chatRoom") {
+            avatarSrc = chatRoomIcon;
+          } else if (session.sessionType === "notice") {
+            avatarSrc = noticeIcon;
+          }
+          return (
+            <ListItem
+              key={session.sessionId}
+              selected={currentSessionIndex === index}
+              onClick={(event) => handleListItemClick(event, index, session)}
+              button
+              className={classes.listItem}
+            >
+              <Box className={classes.itemBox}>
+                <ListItemAvatar>
+                  <Avatar
+                    // className={classes.avatar}
+                    style={{ borderRadius: `${session.sessionType}` === "singleChat" ? "50%" : 'inherit'}}
+                    alt={`${session.name || session.sessionId}`}
+                    src={avatarSrc}
+                  />
+                </ListItemAvatar>
+                <Box className={classes.itemRightBox}>
+                  <Typography className={classes.itemName}>
+                    <span>{session.name || session.sessionId}</span>
+                    <span className={classes.time}>
+                      {renderTime(session?.lastMessage?.time)}
+                    </span>
+                  </Typography>
 
-                  {isShowUnread &&
-                    <span
-                    className={classes.unreadNum}
-                    style={{
-                      display: session.unreadNum ? "inline-block" : "none",
-                    }}
-                  >
-                    {unreadType ?session.unreadNum:null}
-                  </span>
-                  }
-                </Typography>
+                  <Typography className={classes.itemMsgBox}>
+                    <span className={classes.itemMsg}>
+                      {session?.lastMessage?.body?.msg}
+                    </span>
+
+                    {isShowUnread &&
+                      <span
+                      className={classes.unreadNum}
+                      style={{
+                        display: session.unreadNum ? "inline-block" : "none",
+                      }}
+                    >
+                      {unreadType ?session.unreadNum:null}
+                    </span>
+                    }
+                  </Typography>
+                </Box>
               </Box>
-            </Box>
-          </ListItem>
-        );
-      })}
-    </List>
+            </ListItem>
+          );
+        })}
+      </List>
+      </>
   );
 }
 
