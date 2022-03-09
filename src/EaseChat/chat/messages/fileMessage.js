@@ -20,6 +20,22 @@ const useStyles = makeStyles((theme) => ({
 		flexDirection: (props) => (props.bySelf ? "row-reverse" : "row"),
 		alignItems: "center",
 	},
+	userName: {
+		padding: "0 10px 4px",
+		color: "#8797A4",
+		fontSize: "14px",
+		display: (props) =>
+			props.chatType !== "singleChat" && !props.bySelf
+				? "inline-block"
+				: "none",
+		textAlign: (props) => (props.bySelf ? "right" : "left"),
+	},
+	textBodyBox: {
+		display: "flex",
+		flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
+		maxWidth: "65%",
+		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
+	},
 	fileCard: {
 		width: "252px",
 		height: "72px",
@@ -64,7 +80,6 @@ const useStyles = makeStyles((theme) => ({
 		color: "rgba(0,0,0,.6)",
 		fontWeight: "bold",
 		cursor: "pointer",
-		position: "relative",
 	},
 	time: {
 		position: "absolute",
@@ -101,32 +116,32 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 const initialState = {
-  mouseX: null,
-  mouseY: null,
+	mouseX: null,
+	mouseY: null,
 };
 function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
-  let easeChatProps = useContext(EaseChatContext);
-  const { onAvatarChange } = easeChatProps;
-  const classes = useStyles({ bySelf: message.bySelf });
-  const [state, setState] = useState(initialState);
-  const [hoverReaction, setHoverReaction] = useState(false);
+	let easeChatProps = useContext(EaseChatContext);
+	const { onAvatarChange } = easeChatProps;
+	const classes = useStyles({ bySelf: message.bySelf });
+	const [state, setState] = useState(initialState);
+	const [hoverReaction, setHoverReaction] = useState(false);
 	const reactionMsg = message?.reactions || [];
-  const handleClose = () => {
-    setState(initialState);
-  };
-  const recallMessage = () => {
-    onRecallMessage(message);
-    handleClose();
-  };
-  const handleClick = (event) => {
-    event.preventDefault();
-    setState({
-      mouseX: event.clientX - 2,
-      mouseY: event.clientY - 4,
-    });
-  };
+	const handleClose = () => {
+		setState(initialState);
+	};
+	const recallMessage = () => {
+		onRecallMessage(message);
+		handleClose();
+	};
+	const handleClick = (event) => {
+		event.preventDefault();
+		setState({
+			mouseX: event.clientX - 2,
+			mouseY: event.clientY - 4,
+		});
+	};
 
-  return (
+	return (
 		<li
 			className={classes.pulldownListItem}
 			onMouseOver={() => setHoverReaction(true)}
@@ -136,35 +151,43 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
 				<img
 					className={classes.avatarStyle}
 					src={avatar}
-					onClick={() => onAvatarChange && onAvatarChange(message)}
+					onClick={(e) =>
+						onAvatarChange && onAvatarChange(e, message)
+					}
 				></img>
 			)}
 			{showByselfAvatar && message.bySelf && (
 				<img className={classes.avatarStyle} src={avatar}></img>
 			)}
-			<div className={classes.fileCard} onContextMenu={handleClick}>
-				<div className={classes.fileIcon}>
-					{/* <Icon className={clsx(classes.icon, 'iconfont icon-fujian')}></Icon> */}
-					{i18next.t("file")}
-				</div>
-				<div className={classes.fileInfo}>
-					<p>{message.filename}</p>
-					<span>{Math.floor(message.body.size / 1024) + "kb"}</span>
-				</div>
-				<div className={classes.download}>
-					<a href={message.body.url} download={message.filename}>
-						<IconButton className="iconfont icon-xiazai"></IconButton>
-					</a>
-					<div className={classes.textReaction}>
-						{hoverReaction && <Reaction message={message} />}
+			<div className={classes.textBodyBox}>
+				<span className={classes.userName}>{message.from}</span>
+				<div className={classes.fileCard} onContextMenu={handleClick}>
+					<div className={classes.fileIcon}>
+						{/* <Icon className={clsx(classes.icon, 'iconfont icon-fujian')}></Icon> */}
+						{i18next.t("file")}
 					</div>
-					{reactionMsg.length > 0 && (
-						<div className={classes.reactionBox}>
-							<RenderReactions message={message} />
+					<div className={classes.fileInfo}>
+						<p>{message.filename}</p>
+						<span>
+							{Math.floor(message.body.size / 1024) + "kb"}
+						</span>
+					</div>
+					<div className={classes.download}>
+						<a href={message.body.url} download={message.filename}>
+							<IconButton className="iconfont icon-xiazai"></IconButton>
+						</a>
+						<div className={classes.textReaction}>
+							{hoverReaction && <Reaction message={message} />}
 						</div>
-					)}
+						{reactionMsg.length > 0 && (
+							<div className={classes.reactionBox}>
+								<RenderReactions message={message} />
+							</div>
+						)}
+					</div>
 				</div>
 			</div>
+
 			<div className={classes.time}>{renderTime(message.time)}</div>
 			{message.bySelf ? (
 				<Menu
@@ -184,7 +207,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
 				</Menu>
 			) : null}
 		</li>
-  );
+	);
 }
 
 export default memo(FileMessage);

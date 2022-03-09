@@ -4,9 +4,9 @@ import AppDB from "../utils/AppDB";
 
 import MessageActions from "../redux/message";
 import SessionActions from "../redux/session";
-import GlobalPropsActions from "../redux/globalProps"
+import GlobalPropsActions from "../redux/globalProps";
 export default function createlistener(props) {
-  WebIM.conn.addEventHandler("EaseChat", {
+	WebIM.conn.addEventHandler("EaseChat", {
 		onConnected: (msg) => {
 			// init DB
 			AppDB.init(WebIM.conn.context.userId);
@@ -100,8 +100,13 @@ export default function createlistener(props) {
 				}
 			}
 		},
+		onContactDeleted: (msg) => {
+			store.dispatch(MessageActions.clearMessage("singleChat", msg.from));
+			store.dispatch(SessionActions.deleteSession(msg.from));
+			store.dispatch(GlobalPropsActions.setGlobalProps({ to: null }));
+		},
 		onReactionMessage: (message) => {
-      console.log("onReactionMessage", message);
-    }
-  });
+			console.log("onReactionMessage", message);
+		},
+	});
 }

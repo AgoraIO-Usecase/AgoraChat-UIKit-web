@@ -71,9 +71,6 @@ const EaseApp = (props) => {
         }}
       >
         <Grid
-          direction="row"
-          justifyContent="flex-start"
-          alignItems="flex-start"
           item
           xs={6}
           md={3}
@@ -161,6 +158,7 @@ EaseAppProvider.propTypes = {
   easeInputMenu: PropTypes.string,
   menuList: PropTypes.array,
   handleMenuItem: PropTypes.func,
+  onChatAvatarClick:PropTypes.func,
 };
 EaseAppProvider.defaultProps = {
   isShowUnread: true,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useContext } from "react";
 import { useSelector, useDispatch } from "../../../EaseApp/index";
 import { Menu, MenuItem, IconButton, Icon, InputBase } from "@material-ui/core";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -12,7 +12,7 @@ import i18next from "i18next";
 import MessageActions from "../../../redux/message";
 import SessionActions from "../../../redux/session";
 import GlobalPropsActions from "../../../redux/globalProps"
-import WebIM from "../../../utils/WebIM";
+import { EaseChatContext } from "../index";
 
 import _ from 'lodash'
 import avatarIcon1 from '../../../common/images/avatar1.png'
@@ -43,6 +43,8 @@ const useStyles = makeStyles((theme) => {
   };
 });
 const MessageBar = () => {
+  let easeChatProps = useContext(EaseChatContext);
+  const { onChatAvatarClick } = easeChatProps
   const classes = useStyles();
   const dispatch = useDispatch();
   const groupById = useSelector((state) => state.group?.group.byId) || {};
@@ -110,7 +112,7 @@ const MessageBar = () => {
   return (
     <div className={classes.root}>
       <Box position="static" className={classes.leftBar}>
-        <Avatar className={classes.avatar} 
+        <Avatar className={classes.avatar} onClick={(e) => onChatAvatarClick && onChatAvatarClick(e,{chatType, to})}
         src={chatType === "singleChat" ? userAvatars[userAvatarIndex] : groupAvatarIcon}
           style={{ borderRadius: chatType === "singleChat" ? "50%" : 'inherit'}}
         ></Avatar>

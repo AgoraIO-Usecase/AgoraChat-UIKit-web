@@ -6,7 +6,7 @@ export function renderTime(time) {
     if (!time) return ''
     const localStr = new Date(time)
     const localMoment = moment(localStr)
-    const localFormat = localMoment.format('MM-DD hh:mm')
+    const localFormat = localMoment.format('MM-DD HH:mm')
     return localFormat
 }
 
