@@ -17,6 +17,22 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: (props) => (props.bySelf ? "row-reverse" : "row"),
     alignItems: "center",
   },
+  userName: {
+    padding: "0 10px 4px",
+    color: "#8797A4",
+    fontSize: "14px",
+    display: (props) =>
+      props.chatType !== "singleChat" && !props.bySelf
+        ? "inline-block"
+        : "none",
+    textAlign: (props) => (props.bySelf ? "right" : "left"),
+  },
+  textBodyBox: {
+    display: "flex",
+    flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
+    maxWidth: "65%",
+    alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
+  },
   fileCard: {
     width: "252px",
     height: "72px",
@@ -114,21 +130,25 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
       {showByselfAvatar && message.bySelf && (
         <img className={classes.avatarStyle} src={avatar}></img>
       )}
-      <div className={classes.fileCard} onContextMenu={handleClick}>
-        <div className={classes.fileIcon}>
-          {/* <Icon className={clsx(classes.icon, 'iconfont icon-fujian')}></Icon> */}
-          {i18next.t("file")}
-        </div>
-        <div className={classes.fileInfo}>
-          <p>{message.filename}</p>
-          <span>{Math.floor(message.body.size / 1024) + "kb"}</span>
-        </div>
-        <div className={classes.download}>
-          <a href={message.body.url} download={message.filename}>
-            <IconButton className="iconfont icon-xiazai"></IconButton>
-          </a>
-        </div>
+      <div className={classes.textBodyBox}>
+        <span className={classes.userName}>{message.from}</span>
+        <div className={classes.fileCard} onContextMenu={handleClick}>
+          <div className={classes.fileIcon}>
+            {/* <Icon className={clsx(classes.icon, 'iconfont icon-fujian')}></Icon> */}
+            {i18next.t("file")}
+          </div>
+          <div className={classes.fileInfo}>
+            <p>{message.filename}</p>
+            <span>{Math.floor(message.body.size / 1024) + "kb"}</span>
+          </div>
+          <div className={classes.download}>
+            <a href={message.body.url} download={message.filename}>
+              <IconButton className="iconfont icon-xiazai"></IconButton>
+            </a>
+          </div>
+          </div>
       </div>
+   
       <div className={classes.time}>{renderTime(message.time)}</div>
       {message.bySelf ? (
         <Menu
