@@ -13,6 +13,7 @@ import { useSelector, useDispatch } from "../../EaseApp/index";
 import { renderTime } from "../../utils/index";
 import {EaseAppContext} from '../../EaseApp/index'
 import _ from 'lodash'
+// import { FixedSizeList } from 'react-window';
 import groupIcon from "../../common/images/groupAvatar.png";
 import chatRoomIcon from "../../common/images/chatroom@2x.png";
 import noticeIcon from "../../common/images/notice@2x.png";
@@ -28,8 +29,9 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     height: "100%",
     margin: '0 !important',
-    padding: '0 !important',
+    padding: '0 5px !important',
     overflowY: 'auto',
+    boxSizing:'border-box'
   },
   paper:{
     margin:'5px',
@@ -42,6 +44,10 @@ const useStyles = makeStyles((theme) => ({
   },
   listItem: {
     padding: "0 14px",
+    borderRadius:'20px',
+    '& .Mui-selected':{
+      backgroundColor: 'rgba(255, 255, 255, 1) !important'
+    }
   },
   itemBox: {
     display: "flex",
@@ -193,6 +199,7 @@ export default function SessionList(props) {
     let ary = []
     if (e.target.value) {
       renderSessionList.map((val,key)=>{
+        console.log('val>>',val);
         let isIncludeAry = val.sessionType === 'groupChat'? val.name : val.sessionId
         let isIncludeVal = _.includes(_.toLower(isIncludeAry),_.toLower(e.target.value))
         if (isIncludeVal) {
@@ -201,8 +208,16 @@ export default function SessionList(props) {
         setSearchAry(_.uniq(ary))
       })
     }else{
-      setSearchAry(renderSessionList)
+      setSearchAry([])
     }
+  }
+  
+  const test1 = () =>{
+    console.log('1');
+  }
+
+  const test2 = () =>{
+    console.log('2');
   }
 
   let userAvatars = {
@@ -222,11 +237,12 @@ export default function SessionList(props) {
         className={classes.inputBase}
         sx={{ ml: 1, flex: 2 }}
         placeholder="Search"
-        inputProps={{ 'aria-label': 'search google maps' }}
         onChange={searchSession}
       />
     </Paper>
-
+    {/* <FixedSizeList className={classes.root}   itemSize={46}
+        itemCount={200}
+        overscanCount={5}> */}
       <List dense className={classes.root}>
         {renderSession.map((session, index) => {
           let usersInfoData = localStorage.getItem("usersInfo_1.0")
@@ -248,6 +264,8 @@ export default function SessionList(props) {
               onClick={(event) => handleListItemClick(event, index, session)}
               button
               className={classes.listItem}
+
+              onMouseOver={test1} onMouseLeave={test2}
             >
               <Box className={classes.itemBox}>
                 <ListItemAvatar>
@@ -281,6 +299,14 @@ export default function SessionList(props) {
                       {unreadType ?session.unreadNum:null}
                     </span>
                     }
+                    <IconButton
+                      className="iconfont icon-hanbaobao icon"
+                      sx={{
+                        bgcolor:'red',
+                        height:'10px',
+                        width:'10px'
+                      }}
+                    ></IconButton>
                   </Typography>
                 </Box>
               </Box>
@@ -288,6 +314,7 @@ export default function SessionList(props) {
           );
         })}
       </List>
+      {/* </FixedSizeList> */}
       </>
   );
 }
