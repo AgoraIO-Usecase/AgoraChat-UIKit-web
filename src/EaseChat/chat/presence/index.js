@@ -188,10 +188,10 @@ const PresencePopover = (props) => {
   const handlerInput = e => {
     setInputValue(e.currentTarget.value)
   }
-  console.log(store.getState())
-  useEffect(() => {
-    console.log(presenceImg)
-  }, [presenceImg])
+  // console.log(store.getState())
+  // useEffect(() => {
+  //   console.log(presenceImg)
+  // }, [presenceImg])
 
   return (
     <div className={props.className} style={{...props.style}}>

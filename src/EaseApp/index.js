@@ -48,12 +48,15 @@ const EaseApp = (props) => {
       if (!session.lastMessage) {
         dispatch(MessageActions.fetchMessage(sessionId, sessionType));
       }
-      dispatch(
-        GlobalPropsActions.setGlobalProps({
-          to: sessionId,
-          chatType: sessionType,
-        })
-      );
+      WebIM.conn.getPresenceStatus({usernames: [sessionId]}).then(res => {
+        dispatch(
+          GlobalPropsActions.setGlobalProps({
+            to: sessionId,
+            chatType: sessionType,
+            ext: res.result[0].ext
+          })
+        );
+      });
       dispatch(SessionActions.setCurrentSession(sessionId));
       dispatch(MessageActions.clearUnreadAsync(sessionType, sessionId));
     },
@@ -111,7 +114,7 @@ export default EaseAppProvider;
 
 EaseAppProvider.addConversationItem = (session) => {
   if (session && Object.keys(session).length > 0) {
-    const { conversationType, conversationId } = session;
+    const { conversationType, conversationId, ext } = session;
     const { dispatch } = store;
     const storeSessionList = store.getState().session;
     const { sessionList } = storeSessionList;
@@ -132,10 +135,18 @@ EaseAppProvider.addConversationItem = (session) => {
       GlobalPropsActions.setGlobalProps({
         to: conversationId,
         chatType: conversationType,
+        presenceExt: ext
       })
     );
     dispatch(MessageActions.clearUnreadAsync(conversationType, conversationId));
   }
+};
+EaseAppProvider.changePresenceStatus = (ext) => {
+  dispatch(
+    GlobalPropsActions.setGlobalProps({
+      presenceExt: ext
+    })
+  )
 };
 EaseAppProvider.getSdk = (props) => {
   if (!WebIM.conn) {

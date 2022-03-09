@@ -236,13 +236,13 @@ export default function SessionList(props) {
                   alt={`${session.name || session.sessionId}`}
                   src={avatarSrc}
                 />
-                {
+                {/* {
                   session.sessionType === "singleChat" &&  session.presence ?
                   <Tooltip title={session.presence.ext} placement="bottom-end">
                     <img alt="" src={getUserOnlineStatus[session.presence.ext] ? getUserOnlineStatus[session.presence.ext] : customIcon} className={classes.imgStyle} />
                   </Tooltip>
                   : null
-                }
+                } */}
               </div>
               <Box className={classes.itemRightBox}>
                 <Typography className={classes.itemName}>

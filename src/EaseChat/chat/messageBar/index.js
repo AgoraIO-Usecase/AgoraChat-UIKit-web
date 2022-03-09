@@ -71,7 +71,7 @@ const MessageBar = () => {
   const sessionList = useSelector((state) => state.session?.sessionList) || [];
   const [sessionEl, setSessionEl] = useState(null);
 
-  const { chatType, to, username } = globalProps;
+  const { chatType, to, username, presenceExt } = globalProps;
   const renderSessionInfoMenu = () => {
     const handleClickClearMessage = () => {
       dispatch(MessageActions.clearMessage(chatType, to));
@@ -154,8 +154,8 @@ const MessageBar = () => {
         ></Avatar>
           {
             chatType === "singleChat" ?
-            <Tooltip title={ext} placement="bottom-end">
-              <img alt="" src={getUserOnlineStatus[ext] ? getUserOnlineStatus[ext] : customIcon} className={classes.imgStyle} />
+            <Tooltip title={presenceExt || ext} placement="bottom-end">
+              <img alt="" src={getUserOnlineStatus[presenceExt] || getUserOnlineStatus[ext] || customIcon} className={classes.imgStyle} />
             </Tooltip> : null
           }
         {to}

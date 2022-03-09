@@ -38,6 +38,7 @@ export const logout = (state = INITIAL_STATE) => {
 export const updateGlobalProps2 = (state, { options }) => {
   state = state.setIn(["globalProps", "to"], options.to);
   state = state.setIn(["globalProps", "chatType"], options.chatType);
+  state = state.setIn(["globalProps", "presenceExt"], options.ext);
   return state;
 };
 
