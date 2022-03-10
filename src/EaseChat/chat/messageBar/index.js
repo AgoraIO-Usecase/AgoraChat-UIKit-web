@@ -67,7 +67,7 @@ const MessageBar = () => {
   const dispatch = useDispatch();
   const groupById = useSelector((state) => state.group?.group.byId) || {};
   const globalProps = useSelector((state) => state.global.globalProps);
-  const sessionList = useSelector((state) => state.session?.sessionList) || [];
+
   const [sessionEl, setSessionEl] = useState(null);
 
   const { chatType, to, username, presenceExt } = globalProps;
@@ -114,16 +114,7 @@ const MessageBar = () => {
   const handleSessionInfoClick = (e) => {
     setSessionEl(e.currentTarget);
   };
-  let ext = ''
-  sessionList.forEach(val => {
-    if (val.presence) {
-      if (val.sessionId === to) {
-        ext = val.presence.ext
-      }
-    }
-  })
-  console.log(sessionList, 'sessionList', ext)
-  console.log('%c sessionList', 'color:red;font-size:20px;', ext)
+
   const getUserOnlineStatus = {
     'Offline': offlineImg,
     'Online': onlineIcon,

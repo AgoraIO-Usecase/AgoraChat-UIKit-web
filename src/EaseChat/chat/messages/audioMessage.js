@@ -101,7 +101,7 @@ function AudioMessage({ message, showByselfAvatar }) {
       {!message.bySelf && (
         <Avatar
           src={avatar}
-          onClick={() => onAvatarChange && onAvatarChange(message)}
+          onClick={(e) => onAvatarChange && onAvatarChange(e,message)}
         ></Avatar>
       )}
       {showByselfAvatar && message.bySelf && <Avatar src={avatar}></Avatar>}

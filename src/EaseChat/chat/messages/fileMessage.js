@@ -124,7 +124,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
         <img
           className={classes.avatarStyle}
           src={avatar}
-          onClick={() => onAvatarChange && onAvatarChange(message)}
+          onClick={(e) => onAvatarChange && onAvatarChange(e,message)}
         ></img>
       )}
       {showByselfAvatar && message.bySelf && (
