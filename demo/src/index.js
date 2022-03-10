@@ -40,6 +40,9 @@ export default class Demo extends Component {
   test3 = (res) =>{
     console.log('res>>',res);
   }
+  test4 = (val) =>{
+    console.log('val',val);
+  }
   render() {
     console.log("this.state.token>>", this.state.token);
     return (
@@ -51,6 +54,7 @@ export default class Demo extends Component {
             successLoginCallback={this.test}
             failCallback={this.test2}
             onAvatarChange={this.test3}
+            onChatAvatarClick={this.test4}
             appkey="5101220107132865#test"
             username="lu1"
             password="1"
