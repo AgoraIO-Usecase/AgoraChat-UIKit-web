@@ -13,6 +13,7 @@ const { Types, Creators } = createActions({
   },
 
   setGlobalProps: (options) => {
+    console.log(options, 'options==setGlobalProps')
     return (dispatch) => {
       dispatch(Creators.updateGlobalProps2(options));
     };
@@ -36,8 +37,10 @@ export const logout = (state = INITIAL_STATE) => {
 }
 
 export const updateGlobalProps2 = (state, { options }) => {
+  console.log(options, 'options==updateGlobalProps2')
   state = state.setIn(["globalProps", "to"], options.to);
   state = state.setIn(["globalProps", "chatType"], options.chatType);
+  state = state.setIn(["globalProps", "presenceExt"], options.presenceExt);
   return state;
 };
 

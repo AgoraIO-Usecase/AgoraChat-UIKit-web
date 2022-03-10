@@ -63,12 +63,14 @@ export const changeImg = (state, { ext }) => {
   console.log(ext, 'ext')
   switch(ext){
     case 'Offline':
-      return state.setIn(['statusImg'], offlineImg);
+      // return state.setIn(['statusImg'], offlineImg);
+      return state.merge({ statusImg: offlineImg })
     case 'Online':
     case '':
       return state.setIn(['statusImg'], onlineIcon);
     case 'Busy':
-      return state.setIn(['statusImg'], busyIcon);
+      return state.merge({ statusImg: busyIcon })
+      // return state.setIn(['statusImg'], busyIcon);
     case 'Do not Disturb':
       return state.setIn(['statusImg'], donotdisturbIcon);
     case 'Leave':

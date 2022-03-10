@@ -135,6 +135,17 @@ export default function SessionList(props) {
         message?.[session.sessionType]?.[session.sessionId] || [];
       if (chatMsgs.length > 0) {
         session.lastMessage = chatMsgs[chatMsgs.length - 1];
+        let val = lastMessage.body || ''
+        if (val && val.type === 'recall') {
+          session.lastMessage = {
+            time: lastMessage.time,
+            body: {
+              msg: lastMessage.chatType === 'singleChat' && lastMessage.bySelf? i18next.t("you retracted a message"):`${lastMessage.from}${i18next.t("retracted a message")}`,
+            },
+          }
+        }else{
+          session.lastMessage = lastMessage
+        }
         session.unreadNum = unread[session.sessionType][session.sessionId];
       }
       if (session.sessionType === "notice") {
@@ -223,13 +234,13 @@ export default function SessionList(props) {
                   alt={`${session.name || session.sessionId}`}
                   src={avatarSrc}
                 />
-                {
+                {/* {
                   session.sessionType === "singleChat" &&  session.presence ?
                   <Tooltip title={session.presence.ext} placement="bottom-end">
                     <img alt="" src={getUserOnlineStatus[session.presence.ext] ? getUserOnlineStatus[session.presence.ext] : customIcon} className={classes.imgStyle} />
                   </Tooltip>
                   : null
-                }
+                } */}
               </div>
               <Box className={classes.itemRightBox}>
                 <Typography className={classes.itemName}>

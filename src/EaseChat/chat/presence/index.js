@@ -1,5 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
+import { useSelector } from "../../../EaseApp/index";
 import i18next from "i18next";
 import { Popover, Button, Box, Modal, Input } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
@@ -121,7 +122,7 @@ const presenceList = [
 
 const PresencePopover = (props) => {
   const useClasses = useStyles();
-  const presenceImg = store.getState().presence.statusImg;
+  const presenceImg = useSelector(state => state.presence?.statusImg)
   const [useOpenModal, setOpenModal] = useState(false);
   const [useInputValue, setInputValue] = useState(null);
   const handleModalOpen = () => setOpenModal(true);
@@ -187,7 +188,11 @@ const PresencePopover = (props) => {
   const handlerInput = e => {
     setInputValue(e.currentTarget.value)
   }
-  console.log(store.getState())
+  // console.log(store.getState())
+  // useEffect(() => {
+  //   console.log(presenceImg)
+  // }, [presenceImg])
+
   return (
     <div className={props.className} style={{...props.style}}>
       <img aria-describedby={id} src={presenceImg} className={useClasses.imgStyle} onClick={handlePopoverClick} alt="" />
