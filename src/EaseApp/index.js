@@ -53,7 +53,7 @@ const EaseApp = (props) => {
           GlobalPropsActions.setGlobalProps({
             to: sessionId,
             chatType: sessionType,
-            ext: res.result[0].ext
+            presenceExt: res.result[0].ext
           })
         );
       });
