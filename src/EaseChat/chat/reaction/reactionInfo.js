@@ -3,6 +3,7 @@ import rnReactionEmoji from "../../../utils/rnReactionEmoji";
 import { makeStyles } from "@material-ui/styles";
 import store from "../../../redux/index";
 import MessageActions from "../../../redux/message";
+import WebIM from "../../../utils/WebIM";
 import Popover from "@material-ui/core/Popover";
 import AppBar from "@material-ui/core/AppBar";
 import Tabs from "@material-ui/core/Tabs";
@@ -12,8 +13,8 @@ import Box from "@material-ui/core/Box";
 import deleteReactionIcon from "../../../common/icons/reaction_delete@2x.png";
 
 const useStyles = makeStyles((theme) => ({
-	root: {
-		height: "248px",
+	infoBox: {
+		height: "360px",
 		width: "480px",
 		flexGrow: 1,
 	},
@@ -22,9 +23,14 @@ const useStyles = makeStyles((theme) => ({
 		alignItems: "center",
 		justifyContent: "space-between",
 		padding: "0px 15px",
+		height: "58px",
+		borderBottom: "2px solid #C4C4C4",
 	},
-	text: {
-		Font: "SF Compact Text",
+	infoReaction: {
+		height: `calc(100% - 60px)`,
+	},
+	textStyle: {
+		fontFamily: "SF Compact Text",
 		fontWeight: "600",
 		fontStyle: "normal",
 		fontSize: "18px",
@@ -32,19 +38,23 @@ const useStyles = makeStyles((theme) => ({
 		blend: "Pass through",
 		padding: "8px",
 	},
-	close: {
+	closeStyle: {
 		width: "14px",
 		height: "14px",
 		blend: "Pass through",
 		cursor: "pointer",
 	},
-	deleteIcon: {
-		position: "absolute",
-		width: "20px",
-		height: "20px",
-		right: "50px",
-		top: "25px",
+	root: {
+		background: "#FFFFFF",
+	},
+	iconStyle: {
+		width: "24px",
+		height: "24px",
 		cursor: "pointer",
+	},
+	reactionItem: {
+		width: "80px !important",
+		minWidth: "0 !important",
 	},
 	tabPanelItem: {
 		position: "relative",
@@ -55,6 +65,18 @@ const useStyles = makeStyles((theme) => ({
 		"& span": {
 			margin: "0 10px",
 		},
+	},
+	reactionUsreItem: {
+		display: "flex",
+		justifyContent: "space-between",
+		alignItems: "center",
+	},
+	reactionUserStyle: {
+		fontFamily: "SF Compact Text",
+		fontWeight: "600",
+		fontStyle: "normal",
+		fontSize: "16px",
+		lineHeight: "20px",
 	},
 }));
 
@@ -89,21 +111,30 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 	const classes = useStyles();
 	const [value, setValue] = useState(0);
 	const reactionMsg = message.reactions || [];
+	const loginUserId = WebIM.conn.context.userId || "";
 	const handleChange = (event, newValue) => {
 		setValue(newValue);
 	};
 	const handleDeleteReaction = (reaction) => {
+		if (reactionMsg.length === 0) {
+			onClose();
+		}
 		store.dispatch(MessageActions.deleteReaction(message, reaction));
 	};
 
 	const reactionUserList = (userList) => {
+		let userName = ''
 		return (
-			<div>
+			<>
 				{userList.map((val, i) => {
-					console.log("val>>>", val);
-					return <span key={i}>{val}</span>;
+					if (val === loginUserId) {
+						userName = "You";
+					}else {
+						userName = val;
+					}
+					return <Typography key={i} className={classes.reactionUserStyle}>{userName}</Typography>;
 				})}
-			</div>
+			</>
 		);
 	};
 
@@ -113,8 +144,6 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 			open={Boolean(anchorEl)}
 			onClose={onClose}
 			anchorEl={anchorEl}
-			className={classes.infoBox}
-			style={{ width: 540, height: 340 }}
 			anchorOrigin={{
 				vertical: "bottom",
 				horizontal: "left",
@@ -124,59 +153,74 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 				horizontal: "left",
 			}}
 		>
-			<div className={classes.infoTitle}>
-				<span className={classes.text}>Reactions</span>
-				<span className={classes.close} onClick={onClose}>
-					X
-				</span>
-			</div>
-			<hr />
-			<div className={classes.root}>
-				<AppBar position="static" color="default">
-					<Tabs
-						value={value}
-						onChange={handleChange}
-						variant="scrollable"
-						scrollButtons="on"
-						indicatorColor="primary"
-						textColor="primary"
-						aria-label="scrollable force tabs example"
+			<Box className={classes.infoBox}>
+				<Box className={classes.infoTitle}>
+					<span className={classes.textStyle}>Reactions</span>
+					<span className={classes.closeStyle} onClick={onClose}>
+						X
+					</span>
+				</Box>
+				<Box className={classes.infoReaction}>
+					<AppBar
+						position="static"
+						color="default"
+						style={{ boxShadow: "none" }}
 					>
-						{reactionMsg.map((item, i) => {
-							let label = (
-								<div className={classes.reactionNumLabel}>
-									{rnReactionEmoji(item.reaction)}{" "}
-									<span>{item.userList.length}</span>
-								</div>
-							);
-							return <Tab label={label} {...a11yProps(i)} />;
-						})}
-					</Tabs>
-				</AppBar>
-				{reactionMsg.map((item, i) => {
-					return (
-						<div>
-							<TabPanel
-								value={value}
-								index={i}
-								className={classes.tabPanelItem}
-							>
-								<div>
-									<div>{reactionUserList(item.userList)}</div>
-									<img
-										src={deleteReactionIcon}
-										alt=""
-										className={classes.deleteIcon}
-										onClick={() =>
-											handleDeleteReaction(item.reaction)
-										}
+						<Tabs
+							value={value}
+							onChange={handleChange}
+							variant="scrollable"
+							scrollButtons="on"
+							indicatorColor="primary"
+							textColor="primary"
+							aria-label="scrollable force tabs example"
+							className={classes.root}
+						>
+							{reactionMsg.map((item, i) => {
+								let label = (
+									<div className={classes.reactionNumLabel}>
+										{rnReactionEmoji(item.reaction)}{" "}
+										<span>{item.userList.length}</span>
+									</div>
+								);
+								return (
+									<Tab
+										label={label}
+										{...a11yProps(i)}
+										className={classes.reactionItem}
+										key={i}
 									/>
-								</div>
-							</TabPanel>
-						</div>
-					);
-				})}
-			</div>
+								);
+							})}
+						</Tabs>
+					</AppBar>
+					{reactionMsg.map((item, i) => {
+						return (
+							<div>
+								<TabPanel
+									value={value}
+									index={i}
+									className={classes.tabPanelItem}
+								>
+									<div className={classes.reactionUsreItem}>
+										{reactionUserList(item.userList)}
+										<img
+											src={deleteReactionIcon}
+											alt=""
+											className={classes.iconStyle}
+											onClick={() =>
+												handleDeleteReaction(
+													item.reaction
+												)
+											}
+										/>
+									</div>
+								</TabPanel>
+							</div>
+						);
+					})}
+				</Box>
+			</Box>
 		</Popover>
 	);
 };

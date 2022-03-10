@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
 		top: "-18px",
 		width: "100%",
 	},
-	imgReaction: {
+	textReaction: {
 		position: "absolute",
 		right: (props) => (props.bySelf ? "" : "-28px"),
 		bottom: "-5px",
@@ -68,7 +68,7 @@ const useStyles = makeStyles((theme) => ({
 		background: "#F2F2F2",
 		borderRadius: "17.5px",
 		padding: "3px",
-		border: "solid 2px #fff",
+		border: "solid 2px #FFFFFF",
 		boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
 	},
 }));
@@ -78,10 +78,10 @@ const initialState = {
 };
 function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
 	let easeChatProps = useContext(EaseChatContext);
-	const { onAvatarChange } = easeChatProps;
+	const { onAvatarChange, isShowReaction } = easeChatProps;
 	const classes = useStyles({ bySelf: message.bySelf });
 	const [state, setState] = useState(initialState);
-	const [hoverReaction, setHoverReaction] = useState(false);
+	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
 	const reactionMsg = message?.reactions || [];
 	const handleClose = () => {
 		setState(initialState);
@@ -105,8 +105,8 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
 	return (
 		<li
 			className={classes.pulldownListItem}
-			onMouseOver={() => setHoverReaction(true)}
-			onMouseLeave={() => setHoverReaction(false)}
+			onMouseOver={() => setHoverDeviceModule(true)}
+			onMouseLeave={() => setHoverDeviceModule(false)}
 		>
 			{!message.bySelf && (
 				<Avatar
@@ -123,8 +123,16 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
 				<span className={classes.userName}>{message.from}</span>
 				<div className={classes.imgBox} onContextMenu={handleClick}>
 					<img src={message.url} alt="img message"></img>
-					<div className={classes.imgReaction}>
-						{hoverReaction && <Reaction message={message} />}
+					<div className={classes.textReaction}>
+						{hoverDeviceModule ? (
+							<div>
+								{isShowReaction && (
+									<Reaction message={message} />
+								)}
+							</div>
+						) : (
+							<></>
+						)}
 					</div>
 					{reactionMsg.length > 0 && (
 						<div

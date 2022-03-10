@@ -10,7 +10,7 @@ const useStyles = makeStyles((theme) => ({
 	reactionItem: {
 		height: "20px",
 		width: "20px",
-		marginLeft: "3px",
+		marginLeft: (props) => props.rnReaction ? "4px" : ""
 	},
 	reactionLingth: {
 		font: "SF Compact Text",
@@ -27,9 +27,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const RenderReactions = ({ message }) => {
-	const classes = useStyles();
 	const reactionMsg = message.reactions || [];
-
+	const classes = useStyles({
+		rnReaction : reactionMsg.length > 1
+	});
 	return (
 		<div className={classes.reaction}>
 			{reactionMsg.length > 0 &&
@@ -44,7 +45,9 @@ const RenderReactions = ({ message }) => {
 			{reactionMsg.length > 4 && (
 				<span className={classes.reactionLingth}>...</span>
 			)}
-			<span className={classes.reactionLingth}>{reactionMsg.length}</span>
+			{reactionMsg.length > 1 && <span className={classes.reactionLingth}>
+				{reactionMsg.length}
+			</span>}
 		</div>
 	);
 };

@@ -36,7 +36,6 @@ const useStyles = makeStyles((theme) => ({
 		flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
 		maxWidth: "65%",
 		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
-		position: "relative",
 	},
 	textBody: {
 		// display: "flex",
@@ -71,8 +70,8 @@ const useStyles = makeStyles((theme) => ({
 		left: (props) => (props.bySelf ? "" : "0px"),
 		background: "#F2F2F2",
 		borderRadius: "17.5px",
-		padding: "3px",
-		border: "solid 2px #fff",
+		padding: (props) => (props.rnReactions ? "4px 8px" : "4px"),
+		border: "solid 2px #FFFFFF",
 		boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
 	},
 	time: {
@@ -103,16 +102,16 @@ const initialState = {
 
 function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 	let easeChatProps = useContext(EaseChatContext);
-	const { onAvatarChange } = easeChatProps;
-	const [hoverReaction, setHoverReaction] = useState(false);
+	const { onAvatarChange,isShowReaction } = easeChatProps;
+	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
+	const reactionMsg = message?.reactions || [];
 	const classes = useStyles({
 		bySelf: message.bySelf,
 		chatType: message.chatType,
-		hoverReaction: hoverReaction,
+		rnReactions: reactionMsg.length > 1,
 	});
 	const [state, setState] = useState(initialState);
 	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
-	const reactionMsg = message?.reactions || [];
 
 	const handleClick = (event) => {
 		event.preventDefault();
@@ -166,7 +165,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 	const handleReaction = (e) => {
 		setReactionInfoVisible(e.currentTarget);
 	};
-	const mySelf = () => {
+	const sentStatus = () => {
 		return (
 			<div>
 				{message.bySelf && (
@@ -187,8 +186,8 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 	return (
 		<li
 			className={classes.pulldownListItem}
-			onMouseOver={() => setHoverReaction(true)}
-			onMouseLeave={() => setHoverReaction(false)}
+			onMouseOver={() => setHoverDeviceModule(true)}
+			onMouseLeave={() => setHoverDeviceModule(false)}
 		>
 			<div>
 				{!message.bySelf && (
@@ -222,10 +221,14 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 						</div>
 					)}
 					<div className={classes.textReaction}>
-						{hoverReaction ? (
-							<Reaction message={message} />
+						{hoverDeviceModule ? (
+							<div>
+								{isShowReaction && (
+									<Reaction message={message} />
+								)}
+							</div>
 						) : (
-							mySelf()
+							sentStatus()
 						)}
 					</div>
 				</div>

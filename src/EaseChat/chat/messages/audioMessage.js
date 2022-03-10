@@ -96,14 +96,14 @@ const useStyles = makeStyles((theme) => ({
 		background: "#F2F2F2",
 		borderRadius: "17.5px",
 		padding: "3px",
-		border: "solid 2px #fff",
+		border: "solid 2px #FFFFFF",
 		boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
 	},
 }));
 
 function AudioMessage({ message, showByselfAvatar }) {
 	let easeChatProps = useContext(EaseChatContext);
-	const { onAvatarChange } = easeChatProps;
+	const { onAvatarChange, isShowReaction } = easeChatProps;
 	const classes = useStyles({
 		bySelf: message.bySelf,
 		duration: Math.round(message.body.length),
@@ -111,7 +111,7 @@ function AudioMessage({ message, showByselfAvatar }) {
 	const url = message.body.url;
 	const audioRef = useRef(null);
 	const [isPlaying, setIsPlaying] = useState(false);
-	const [hoverReaction, setHoverReaction] = useState(false);
+	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
 	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
 	const reactionMsg = message?.reactions || [];
 	const play = () => {
@@ -130,8 +130,8 @@ function AudioMessage({ message, showByselfAvatar }) {
 	return (
 		<li
 			className={classes.pulldownListItem}
-			onMouseOver={() => setHoverReaction(true)}
-			onMouseLeave={() => setHoverReaction(false)}
+			onMouseOver={() => setHoverDeviceModule(true)}
+			onMouseLeave={() => setHoverDeviceModule(false)}
 		>
 			{!message.bySelf && (
 				<Avatar
@@ -152,7 +152,13 @@ function AudioMessage({ message, showByselfAvatar }) {
 					<audio src={url} ref={audioRef} />
 				</div>
 				<div className={classes.textReaction}>
-					{hoverReaction && <Reaction message={message} />}
+					{hoverDeviceModule ? (
+						<div>
+							{isShowReaction && <Reaction message={message} />}
+						</div>
+					) : (
+						<></>
+					)}
 				</div>
 				{reactionMsg.length > 0 && (
 					<div

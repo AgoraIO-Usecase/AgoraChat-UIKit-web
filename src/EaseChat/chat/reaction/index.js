@@ -1,26 +1,12 @@
-import React, { memo, useState } from "react";
+import React, { memo, useState, useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
 import store from "../../../redux/index";
 import MessageActions from "../../../redux/message";
 import ReactionIcon from "./renderReactionIcon";
-import ReactionInfo from "./reactionInfo";
+import { EaseChatContext } from "../index";
 import addReactionIcon from "../../../common/icons/add_reaction@2x.png";
-import moreReactionIcon from "../../../common/icons/more@2x.png";
 const useStyles = makeStyles((theme) => ({
-	hoverMySelfReaction: {
-		position: "absolute",
-		bottom: "5px",
-		left: "115px",
-	},
 	iconStyley: {
-		height: "24px",
-		width: "24px",
-		cursor: "pointer",
-	},
-	infoStyle: {
-		position: "absolute",
-		left: (props) => (props.bySelf ? "" : "20px"),
-		right: (props) => (props.bySelf ? "20px" : ""),
 		height: "24px",
 		width: "24px",
 		cursor: "pointer",
@@ -31,9 +17,9 @@ const Reaction = ({ message }) => {
 	const classes = useStyles({
 		bySelf: message.bySelf,
 	});
+	let easeChatProps = useContext(EaseChatContext);
+	const { isShowReaction } = easeChatProps;
 	const [reactionVisible, setReactionVisible] = useState(null);
-	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
-	const reactionMsg = message.reactions || [];
 	const handleClickEmoji = (e) => {
 		setReactionVisible(e.currentTarget);
 	};
@@ -47,11 +33,6 @@ const Reaction = ({ message }) => {
 
 	return (
 		<div>
-			<img
-				src={moreReactionIcon}
-				alt="more reaction"
-				className={classes.infoStyle}
-			/>
 			<img
 				src={addReactionIcon}
 				alt="reaction"

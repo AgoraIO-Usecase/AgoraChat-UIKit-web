@@ -98,7 +98,7 @@ const useStyles = makeStyles((theme) => ({
 		width: "40px",
 		borderRadius: "50%",
 	},
-	fileReaction: {
+	textReaction: {
 		position: "absolute",
 		right: (props) => (props.bySelf ? "" : "-28px"),
 		bottom: (props) => (props.bySelf ? "25px" : "20px"),
@@ -113,7 +113,7 @@ const useStyles = makeStyles((theme) => ({
 		background: "#F2F2F2",
 		borderRadius: "17.5px",
 		padding: "3px",
-		border: "solid 3px #fff",
+		border: "solid 3px #FFFFFF",
 		boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
 	},
 }));
@@ -123,10 +123,10 @@ const initialState = {
 };
 function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
 	let easeChatProps = useContext(EaseChatContext);
-	const { onAvatarChange } = easeChatProps;
+	const { onAvatarChange, isShowReaction } = easeChatProps;
 	const classes = useStyles({ bySelf: message.bySelf });
 	const [state, setState] = useState(initialState);
-	const [hoverReaction, setHoverReaction] = useState(false);
+	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
 	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
 	const reactionMsg = message?.reactions || [];
 	const handleClose = () => {
@@ -150,8 +150,8 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
 	return (
 		<li
 			className={classes.pulldownListItem}
-			onMouseOver={() => setHoverReaction(true)}
-			onMouseLeave={() => setHoverReaction(false)}
+			onMouseOver={() => setHoverDeviceModule(true)}
+			onMouseLeave={() => setHoverDeviceModule(false)}
 		>
 			{!message.bySelf && (
 				<img
@@ -184,8 +184,14 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
 						</a>
 					</div>
 				</div>
-				<div className={classes.fileReaction}>
-					{hoverReaction && <Reaction message={message} />}
+				<div className={classes.textReaction}>
+					{hoverDeviceModule ? (
+						<div>
+							{isShowReaction && <Reaction message={message} />}
+						</div>
+					) : (
+						<></>
+					)}
 				</div>
 				{reactionMsg.length > 0 && (
 					<div
