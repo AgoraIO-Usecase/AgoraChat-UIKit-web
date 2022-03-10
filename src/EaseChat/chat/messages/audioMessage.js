@@ -75,7 +75,7 @@ function AudioMessage({ message ,showByselfAvatar}) {
 
     return (
         <li className={classes.pulldownListItem}>
-            {!message.bySelf && <Avatar src={avatar} onClick={(e) => onAvatarChange && onAvatarChange(e,message)} ></Avatar>} 
+            {!message.bySelf && <Avatar src={avatar} onClick={() => onAvatarChange && onAvatarChange(message)} ></Avatar>} 
                {showByselfAvatar && message.bySelf && <Avatar src={avatar}></Avatar>} 
             <div className={classes.audioBox} onClick={play}>
                 <AudioPlayer play={isPlaying} reverse={message.bySelf} />
