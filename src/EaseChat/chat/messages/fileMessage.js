@@ -9,6 +9,7 @@ import { EaseChatContext } from "../index";
 
 import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
+import ReactionInfo from "../reaction/reactionInfo";
 
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
@@ -35,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
 		flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
 		maxWidth: "65%",
 		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
+		position: "relative",
 	},
 	fileCard: {
 		width: "252px",
@@ -96,22 +98,22 @@ const useStyles = makeStyles((theme) => ({
 		width: "40px",
 		borderRadius: "50%",
 	},
-	textReaction: {
+	fileReaction: {
 		position: "absolute",
-		right: (props) => (props.bySelf ? "" : "-50px"),
-		bottom: (props) => (props.bySelf ? "-15px" : "-15px"),
-		left: (props) => (props.bySelf ? "-245px" : "-194"),
+		right: (props) => (props.bySelf ? "" : "-28px"),
+		bottom: (props) => (props.bySelf ? "25px" : "20px"),
+		left: (props) => (props.bySelf ? "-15px" : ""),
 		marginRight: "5px",
 	},
 	reactionBox: {
 		position: "absolute",
-		top: (props) => (props.bySelf ? "-15px" : "-15px"),
+		top: (props) => (props.bySelf ? "-15px" : "15px"),
 		right: (props) => (props.bySelf ? "0px" : ""),
-		left: (props) => (props.bySelf ? "" : "-195px"),
+		left: (props) => (props.bySelf ? "" : "5px"),
 		background: "#F2F2F2",
 		borderRadius: "17.5px",
 		padding: "3px",
-		border: "solid 2px #fff",
+		border: "solid 3px #fff",
 		boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
 	},
 }));
@@ -125,6 +127,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
 	const classes = useStyles({ bySelf: message.bySelf });
 	const [state, setState] = useState(initialState);
 	const [hoverReaction, setHoverReaction] = useState(false);
+	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
 	const reactionMsg = message?.reactions || [];
 	const handleClose = () => {
 		setState(initialState);
@@ -141,6 +144,9 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
 		});
 	};
 
+	const handleReaction = (e) => {
+		setReactionInfoVisible(e.currentTarget);
+	};
 	return (
 		<li
 			className={classes.pulldownListItem}
@@ -176,16 +182,19 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
 						<a href={message.body.url} download={message.filename}>
 							<IconButton className="iconfont icon-xiazai"></IconButton>
 						</a>
-						<div className={classes.textReaction}>
-							{hoverReaction && <Reaction message={message} />}
-						</div>
-						{reactionMsg.length > 0 && (
-							<div className={classes.reactionBox}>
-								<RenderReactions message={message} />
-							</div>
-						)}
 					</div>
 				</div>
+				<div className={classes.fileReaction}>
+					{hoverReaction && <Reaction message={message} />}
+				</div>
+				{reactionMsg.length > 0 && (
+					<div
+						className={classes.reactionBox}
+						onClick={handleReaction}
+					>
+						<RenderReactions message={message} />
+					</div>
+				)}
 			</div>
 
 			<div className={classes.time}>{renderTime(message.time)}</div>
@@ -206,6 +215,14 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
 					</MenuItem>
 				</Menu>
 			) : null}
+
+			{reactionMsg.length > 0 && (
+				<ReactionInfo
+					anchorEl={reactionInfoVisible}
+					onClose={() => setReactionInfoVisible(null)}
+					message={message}
+				/>
+			)}
 		</li>
 	);
 }

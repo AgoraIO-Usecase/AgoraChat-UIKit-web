@@ -50,12 +50,12 @@ const useStyles = makeStyles((theme) => ({
 		position: "relative",
 	},
 	reactionNumLabel: {
-		display: 'flex', 
-		justifyContent: 'center',
-		'& span': {
-			margin: '0 10px'
-		}
-	}
+		display: "flex",
+		justifyContent: "center",
+		"& span": {
+			margin: "0 10px",
+		},
+	},
 }));
 
 function TabPanel(props) {
@@ -95,6 +95,18 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 	const handleDeleteReaction = (reaction) => {
 		store.dispatch(MessageActions.deleteReaction(message, reaction));
 	};
+
+	const reactionUserList = (userList) => {
+		return (
+			<div>
+				{userList.map((val, i) => {
+					console.log("val>>>", val);
+					return <span key={i}>{val}</span>;
+				})}
+			</div>
+		);
+	};
+
 	return (
 		<Popover
 			keepMounted
@@ -104,12 +116,12 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 			className={classes.infoBox}
 			style={{ width: 540, height: 340 }}
 			anchorOrigin={{
-				vertical: "top",
+				vertical: "bottom",
 				horizontal: "left",
 			}}
 			transformOrigin={{
-				vertical: "bottom",
-				horizontal: "right",
+				vertical: "top",
+				horizontal: "left",
 			}}
 		>
 			<div className={classes.infoTitle}>
@@ -149,15 +161,17 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 								index={i}
 								className={classes.tabPanelItem}
 							>
-								{item.userList}
-								<img
-									src={deleteReactionIcon}
-									alt=""
-									className={classes.deleteIcon}
-									onClick={() =>
-										handleDeleteReaction(item.reaction)
-									}
-								/>
+								<div>
+									<div>{reactionUserList(item.userList)}</div>
+									<img
+										src={deleteReactionIcon}
+										alt=""
+										className={classes.deleteIcon}
+										onClick={() =>
+											handleDeleteReaction(item.reaction)
+										}
+									/>
+								</div>
 							</TabPanel>
 						</div>
 					);

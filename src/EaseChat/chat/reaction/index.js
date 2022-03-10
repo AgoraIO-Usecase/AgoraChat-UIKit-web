@@ -45,22 +45,12 @@ const Reaction = ({ message }) => {
 		store.dispatch(MessageActions.addReactions(message, emoji));
 	};
 
-	const handleClickReactionInfo = (e) => {
-		message?.reactions?.length > 0 &&
-			setReactionInfoVisible(e.currentTarget);
-	};
-
-	const handleReactionInfoClose = () => {
-		setReactionInfoVisible(null);
-	};
-
 	return (
 		<div>
 			<img
 				src={moreReactionIcon}
 				alt="more reaction"
 				className={classes.infoStyle}
-				onClick={handleClickReactionInfo}
 			/>
 			<img
 				src={addReactionIcon}
@@ -73,14 +63,6 @@ const Reaction = ({ message }) => {
 				onSelected={handleEmojiSelected}
 				onClose={handleEmojiClose}
 			/>
-
-			{reactionMsg.length > 0 && 
-				<ReactionInfo
-					anchorEl={reactionInfoVisible}
-					onSelected={handleEmojiSelected}
-					onClose={handleReactionInfoClose}
-					message={message}
-				/>}
 		</div>
 	);
 };

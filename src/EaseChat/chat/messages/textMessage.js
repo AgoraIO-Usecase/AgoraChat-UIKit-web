@@ -9,6 +9,7 @@ import { renderTime } from "../../../utils";
 import MessageStatus from "./messageStatus";
 import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
+import ReactionInfo from "../reaction/reactionInfo";
 import { EaseChatContext } from "../index";
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
@@ -59,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
 	textReaction: {
 		position: "absolute",
 		right: (props) => (props.bySelf ? "" : "-30px"),
-		bottom: (props) => (props.bySelf ? "0" : "-5px"),
+		bottom: "-10px",
 		left: (props) => (props.bySelf ? "-25px" : ""),
 		marginRight: "5px",
 	},
@@ -104,14 +105,15 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 	let easeChatProps = useContext(EaseChatContext);
 	const { onAvatarChange } = easeChatProps;
 	const [hoverReaction, setHoverReaction] = useState(false);
-	const reactionMsg = message?.reactions || [];
-
 	const classes = useStyles({
 		bySelf: message.bySelf,
 		chatType: message.chatType,
 		hoverReaction: hoverReaction,
 	});
 	const [state, setState] = useState(initialState);
+	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
+	const reactionMsg = message?.reactions || [];
+
 	const handleClick = (event) => {
 		event.preventDefault();
 		setState({
@@ -161,6 +163,9 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 		return rnTxt;
 	};
 
+	const handleReaction = (e) => {
+		setReactionInfoVisible(e.currentTarget);
+	};
 	const mySelf = () => {
 		return (
 			<div>
@@ -209,7 +214,10 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 					{renderTxt(message.body.msg)}
 
 					{reactionMsg.length > 0 && (
-						<div className={classes.reactionBox}>
+						<div
+							className={classes.reactionBox}
+							onClick={handleReaction}
+						>
 							<RenderReactions message={message} />
 						</div>
 					)}
@@ -244,6 +252,14 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 					</MenuItem>
 				</Menu>
 			) : null}
+
+			{reactionMsg.length > 0 && (
+				<ReactionInfo
+					anchorEl={reactionInfoVisible}
+					onClose={() => setReactionInfoVisible(null)}
+					message={message}
+				/>
+			)}
 		</li>
 	);
 }

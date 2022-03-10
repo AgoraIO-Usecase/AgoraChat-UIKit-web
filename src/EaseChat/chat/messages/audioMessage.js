@@ -8,6 +8,8 @@ import { EaseChatContext } from "../index";
 
 import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
+import ReactionInfo from "../reaction/reactionInfo";
+
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
 		padding: "10px 0",
@@ -32,13 +34,14 @@ const useStyles = makeStyles((theme) => ({
 		flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
 		maxWidth: "65%",
 		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
+		position: "relative",
 	},
 
 	audioBox: {
 		margin: (props) => (props.bySelf ? "0 10px 26px 0" : "0 0 26px 10px"),
 		maxWidth: "50%",
 		minWidth: "50px",
-		width: (props) => `calc(208px * ${props.duration / 15})`,
+		// width: (props) => `calc(208px * ${props.duration / 15})`,
 		height: "34px",
 		background: (props) =>
 			props.bySelf
@@ -73,29 +76,23 @@ const useStyles = makeStyles((theme) => ({
 		left: (props) => (props.bySelf ? "-15px" : "15px"),
 	},
 	icon: {
-		transform: (props) => (props.bySelf ? "rotate(0deg)" : "rotate(180deg)"),
+		transform: (props) =>
+			props.bySelf ? "rotate(0deg)" : "rotate(180deg)",
 		display: "block",
 		height: "34px",
-	}, textReaction: {
+	},
+	textReaction: {
 		position: "absolute",
-		right: (props) =>
-			props.bySelf
-				? `calc(208.5px * ${props.duration / 15} + ${props.duration > 2 ? "18px" : "32px"
-				})`
-				: "",
-		left: (props) =>
-			props.bySelf
-				? ""
-				: `calc(208.5px * ${props.duration / 15} + ${props.duration > 2 ? "55px" : "32px"
-				})`,
-		bottom: (props) => (props.bySelf ? "25px" : "25px"),
+		right: (props) => (props.bySelf ? "" : "-20px"),
+		left: (props) => (props.bySelf ? "-15px" : ""),
+		bottom: "18px",
 		marginRight: "5px",
 	},
 	reactionBox: {
 		position: "absolute",
-		top: (props) => (props.bySelf ? "-10px" : "-10px"),
-		right: (props) => (props.bySelf ? "0px" : ""),
-		left: (props) => (props.bySelf ? "" : "50px"),
+		top: (props) => (props.bySelf ? "-15px" : "15px"),
+		right: (props) => (props.bySelf ? "10px" : ""),
+		left: (props) => (props.bySelf ? "" : "10px"),
 		background: "#F2F2F2",
 		borderRadius: "17.5px",
 		padding: "3px",
@@ -115,6 +112,7 @@ function AudioMessage({ message, showByselfAvatar }) {
 	const audioRef = useRef(null);
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [hoverReaction, setHoverReaction] = useState(false);
+	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
 	const reactionMsg = message?.reactions || [];
 	const play = () => {
 		setIsPlaying(true);
@@ -123,6 +121,10 @@ function AudioMessage({ message, showByselfAvatar }) {
 		setTimeout(() => {
 			setIsPlaying(false);
 		}, time + 500);
+	};
+
+	const handleReaction = (e) => {
+		setReactionInfoVisible(e.currentTarget);
 	};
 
 	return (
@@ -153,13 +155,24 @@ function AudioMessage({ message, showByselfAvatar }) {
 					{hoverReaction && <Reaction message={message} />}
 				</div>
 				{reactionMsg.length > 0 && (
-					<div className={classes.reactionBox}>
+					<div
+						className={classes.reactionBox}
+						onClick={handleReaction}
+					>
 						<RenderReactions message={message} />
 					</div>
 				)}
 			</div>
 
 			<div className={classes.time}>{renderTime(message.time)}</div>
+
+			{reactionMsg.length > 0 && (
+				<ReactionInfo
+					anchorEl={reactionInfoVisible}
+					onClose={() => setReactionInfoVisible(null)}
+					message={message}
+				/>
+			)}
 		</li>
 	);
 }

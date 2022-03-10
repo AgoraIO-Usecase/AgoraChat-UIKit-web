@@ -125,12 +125,12 @@ const ReactionIcon = ({ anchorEl, onClose, onSelected }) => {
 			anchorEl={anchorEl}
 			style={{ maxHeight: "500px" }}
 			anchorOrigin={{
-				vertical: "top",
+				vertical: "bottom",
 				horizontal: "left",
 			}}
 			transformOrigin={{
-				vertical: "bottom",
-				horizontal: "right",
+				vertical: "top",
+				horizontal: "left",
 			}}
 		>
 			<div className={classes.text}>Frequently</div>
