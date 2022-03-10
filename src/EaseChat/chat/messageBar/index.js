@@ -52,7 +52,6 @@ const useStyles = makeStyles((theme) => {
       width: '18px',
       height: '18px',
       borderRadius: '50%',
-      cursor: 'pointer',
       verticalAlign: 'middle',
       position: 'absolute',
       bottom: '0px',
@@ -72,6 +71,7 @@ const MessageBar = () => {
   const [sessionEl, setSessionEl] = useState(null);
 
   const { chatType, to, username, presenceExt } = globalProps;
+  console.log(globalProps, 'messagebar')
   const renderSessionInfoMenu = () => {
     const handleClickClearMessage = () => {
       dispatch(MessageActions.clearMessage(chatType, to));
@@ -154,9 +154,7 @@ const MessageBar = () => {
         ></Avatar>
           {
             chatType === "singleChat" ?
-            <Tooltip title={presenceExt || ext} placement="bottom-end">
-              <img alt="" src={getUserOnlineStatus[presenceExt] || getUserOnlineStatus[ext] || customIcon} className={classes.imgStyle} />
-            </Tooltip> : null
+            <img alt="" src={getUserOnlineStatus[presenceExt] || customIcon} className={classes.imgStyle} /> : null
           }
         {to}
       </Box>

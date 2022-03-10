@@ -99,21 +99,21 @@ export default function createlistener(props) {
         }
       }
     },
-    onPresenceStatusChange: function(message){
-      console.log('onPresenceStatusChange', message, WebIM.conn.context.userId)
-      if(WebIM.conn.context.userId != message[0].userId){
-        console.log('SessionActions.setSessionList')
-        let tempArr = [{
-          sessionType: 'singleChat',
-          sessionId: message[0].userId,
-          presence: message[0]
-        }]
-        store.dispatch(SessionActions.setSessionList(tempArr))
-      }
-      else{
-        store.dispatch(PresenceActions.changeImg(message[0].ext))
-      }
-    }, // 发布者发布新的状态时，订阅者触发该回调
+    // onPresenceStatusChange: function(message){
+    //   console.log('onPresenceStatusChange', message, WebIM.conn.context.userId)
+    //   if(WebIM.conn.context.userId != message[0].userId){
+    //     console.log('SessionActions.setSessionList')
+    //     let tempArr = [{
+    //       sessionType: 'singleChat',
+    //       sessionId: message[0].userId,
+    //       presence: message[0]
+    //     }]
+    //     store.dispatch(SessionActions.setSessionList(tempArr))
+    //   }
+    //   else{
+    //     store.dispatch(PresenceActions.changeImg(message[0].ext))
+    //   }
+    // }, // 发布者发布新的状态时，订阅者触发该回调
     onContactDeleted:(msg)=>{
       store.dispatch(MessageActions.clearMessage('singleChat', msg.from));
       store.dispatch(SessionActions.deleteSession(msg.from));

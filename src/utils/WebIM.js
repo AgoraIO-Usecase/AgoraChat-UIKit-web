@@ -22,8 +22,8 @@ export const initIMSDK = (appkey) => {
     //公有云 isHttpDNS 默认配置为true
     // isHttpDNS: WebIM.config.isHttpDNS,
     isHttpDNS: false,
-    url: "http://msync-api-a1-test.easemob.com:8081/ws", // 设置为私有云的websocket server url
-    apiUrl: "http://a1-test.easemob.com:8089", // 设置为私有云的rest server url
+    url: "http://msync-api-a1-test.easemob.com/ws", // 设置为私有云的websocket server url
+    apiUrl: "http://a1-test.easemob.com", // 设置为私有云的rest server url
   };
 
   WebIM.conn = new websdk.connection(options);
