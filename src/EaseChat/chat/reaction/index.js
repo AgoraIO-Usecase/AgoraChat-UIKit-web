@@ -1,9 +1,8 @@
-import React, { memo, useState, useContext } from "react";
+import React, { memo, useState } from "react";
 import { makeStyles } from "@material-ui/styles";
 import store from "../../../redux/index";
 import MessageActions from "../../../redux/message";
 import ReactionIcon from "./renderReactionIcon";
-import { EaseChatContext } from "../index";
 import addReactionIcon from "../../../common/icons/add_reaction@2x.png";
 const useStyles = makeStyles((theme) => ({
 	iconStyley: {
@@ -17,8 +16,6 @@ const Reaction = ({ message }) => {
 	const classes = useStyles({
 		bySelf: message.bySelf,
 	});
-	let easeChatProps = useContext(EaseChatContext);
-	const { isShowReaction } = easeChatProps;
 	const [reactionVisible, setReactionVisible] = useState(null);
 	const handleClickEmoji = (e) => {
 		setReactionVisible(e.currentTarget);
@@ -43,6 +40,7 @@ const Reaction = ({ message }) => {
 				anchorEl={reactionVisible}
 				onSelected={handleEmojiSelected}
 				onClose={handleEmojiClose}
+				message={message}
 			/>
 		</div>
 	);

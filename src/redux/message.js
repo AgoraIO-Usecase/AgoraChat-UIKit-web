@@ -1,30 +1,28 @@
-import { formatLocalMessage, formatServerMessage } from '../utils/index'
-import { createReducer, createActions } from 'reduxsauce'
-import Immutable from 'seamless-immutable'
-import _ from 'lodash'
+import { formatLocalMessage, formatServerMessage } from "../utils/index";
+import { createReducer, createActions } from "reduxsauce";
+import Immutable from "seamless-immutable";
+import _ from "lodash";
 // import store from '../redux/index'
-import WebIM from '../utils/WebIM';
-import AppDB from '../utils/AppDB';
+import WebIM from "../utils/WebIM";
+import AppDB from "../utils/AppDB";
 import i18next from "i18next";
-import { message } from '../EaseChat/common/alert'
-
-
+import { message } from "../EaseChat/common/alert";
 
 /* ------------- Initial State ------------- */
 export const INITIAL_STATE = Immutable({
-    byId: {},
-    singleChat: {},
-    groupChat: {},
-    chatRoom: {},
-    stranger: {},
-    extra: {},
-    unread: {
-        singleChat: {},
-        groupChat: {},
-        chatRoom: {},
-        stranger: {},
-    }
-})
+	byId: {},
+	singleChat: {},
+	groupChat: {},
+	chatRoom: {},
+	stranger: {},
+	extra: {},
+	unread: {
+		singleChat: {},
+		groupChat: {},
+		chatRoom: {},
+		stranger: {},
+	},
+});
 
 /* -------- Types and Action Creators -------- */
 const { Types, Creators } = createActions({
@@ -34,8 +32,8 @@ const { Types, Creators } = createActions({
 	clearUnread: ["chatType", "sessionId"],
 	updateMessages: ["chatType", "sessionId", "messages"],
 	updateMessageMid: ["id", "mid"],
-	addReactions: ["message","reaction"],
-    deleteReaction: ["message","reaction"],
+	addReactions: ["message", "reaction"],
+	deleteReaction: ["message", "reaction"],
 
 	// -async-
 	sendTxtMessage: (to, chatType, message = {}) => {
@@ -257,176 +255,202 @@ const { Types, Creators } = createActions({
 });
 
 /* ------------- Reducers ------------- */
-export const addMessage = (state, { message, messageType = 'txt' }) => {
-    const rootState = uikit_store.getState()
-    !message.status && (message = formatServerMessage(message, messageType))
-    const username = WebIM.conn.context.userId
-    const { id, to, status } = message
-    let { chatType } = message
-    const from = message.from || username
-    const bySelf = from === username
-    let chatId = bySelf || chatType !== 'singleChat' ? to : from
-    const chatData = state.getIn([chatType, chatId], Immutable([])).asMutable()
-    const _message = {
-        ...message,
-        bySelf,
-        time: +new Date(),
-        status: status
-    }
-    if (_message.chatType === 'chatRoom' && bySelf) {
-        const oid = state.getIn(['byMid', _message.id, 'id'])
-        if (oid) {
-            _message.id = oid
-        }
-    }
-    let isPushed = false
-    chatData.forEach(m => {
-        if (m.id === _message.id) {
-            isPushed = true
-        }
-    })
+export const addMessage = (state, { message, messageType = "txt" }) => {
+	const rootState = uikit_store.getState();
+	!message.status && (message = formatServerMessage(message, messageType));
+	const username = WebIM.conn.context.userId;
+	const { id, to, status } = message;
+	let { chatType } = message;
+	const from = message.from || username;
+	const bySelf = from === username;
+	let chatId = bySelf || chatType !== "singleChat" ? to : from;
+	const chatData = state.getIn([chatType, chatId], Immutable([])).asMutable();
+	const _message = {
+		...message,
+		bySelf,
+		time: +new Date(),
+		status: status,
+	};
+	if (_message.chatType === "chatRoom" && bySelf) {
+		const oid = state.getIn(["byMid", _message.id, "id"]);
+		if (oid) {
+			_message.id = oid;
+		}
+	}
+	let isPushed = false;
+	chatData.forEach((m) => {
+		if (m.id === _message.id) {
+			isPushed = true;
+		}
+	});
 
-    !isPushed && chatData.push(_message)
-    // add a message to db, if by myselt, isUnread equals 0
-    !isPushed && AppDB.addMessage(_message, !bySelf ? 1 : 0)
+	!isPushed && chatData.push(_message);
+	// add a message to db, if by myselt, isUnread equals 0
+	!isPushed && AppDB.addMessage(_message, !bySelf ? 1 : 0);
 
-    const maxCacheSize = _.includes(['groupChat', 'chatRoom'], chatType) ? WebIM.config.groupMessageCacheSize : WebIM.config.p2pMessageCacheSize
-    if (chatData.length > maxCacheSize) {
-        const deletedChats = chatData.splice(maxCacheSize, chatData.length - maxCacheSize)
-        let byId = state.getIn(['byId'])
-        byId = _.omit(byId, _.map(deletedChats, 'id'))
-        state = state.setIn(['byId'], byId)
-    }
+	const maxCacheSize = _.includes(["groupChat", "chatRoom"], chatType)
+		? WebIM.config.groupMessageCacheSize
+		: WebIM.config.p2pMessageCacheSize;
+	if (chatData.length > maxCacheSize) {
+		const deletedChats = chatData.splice(
+			maxCacheSize,
+			chatData.length - maxCacheSize
+		);
+		let byId = state.getIn(["byId"]);
+		byId = _.omit(byId, _.map(deletedChats, "id"));
+		state = state.setIn(["byId"], byId);
+	}
 
-    state = state.setIn([chatType, chatId], chatData)
+	state = state.setIn([chatType, chatId], chatData);
 
-    // unread
-    const currentSession = _.get(rootState, ['session', 'currentSession'])
-    const addSingleChatUnread = !bySelf && !isPushed && message.from !== currentSession && (chatType === 'singleChat' || chatType === 'strager')
-    const addGroupUnread = !bySelf && !isPushed && message.to !== currentSession && (chatType === 'groupChat' || chatType === 'chatRoom')
-    if (addSingleChatUnread || addGroupUnread) {
-        let count = state.getIn(['unread', chatType, chatId], 0)
-        state = state.setIn(['unread', chatType, chatId], ++count)
-    }
+	// unread
+	const currentSession = _.get(rootState, ["session", "currentSession"]);
+	const addSingleChatUnread =
+		!bySelf &&
+		!isPushed &&
+		message.from !== currentSession &&
+		(chatType === "singleChat" || chatType === "strager");
+	const addGroupUnread =
+		!bySelf &&
+		!isPushed &&
+		message.to !== currentSession &&
+		(chatType === "groupChat" || chatType === "chatRoom");
+	if (addSingleChatUnread || addGroupUnread) {
+		let count = state.getIn(["unread", chatType, chatId], 0);
+		state = state.setIn(["unread", chatType, chatId], ++count);
+	}
 
-    state = state.setIn(['byId', id], { chatType, chatId })
+	state = state.setIn(["byId", id], { chatType, chatId });
 
-    return state
-}
+	return state;
+};
 
-export const updateMessageStatus = (state, { message, status = '' }) => {
-    let { id } = message
-    if (!id) id = state.getIn(['byMid', message.mid, 'id'])
-    let mids = state.getIn(['byMid']) || {}
-    let mid
-    for (var i in mids) {
-        if (mids[i].id === id) {
-            mid = i
-        }
-    }
-    const byId = state.getIn(['byId', id])
-    if (!_.isEmpty(byId)) {
-        const { chatType, chatId } = byId
-        let messages = state.getIn([chatType, chatId]).asMutable()
-        let found = _.find(messages, { id: id })
-        found.setIn(['status'], status)
-        found.setIn(['toJid'], mid)
-        let msg = {
-            ...found,
-            status: status,
-            toJid: mid
-        }
-        messages.splice(messages.indexOf(found), 1, msg)
-        setTimeout(() => {
-            AppDB.updateMessageStatus(id, status).then(res => { })
-        }, 1000)
+export const updateMessageStatus = (state, { message, status = "" }) => {
+	let { id } = message;
+	if (!id) id = state.getIn(["byMid", message.mid, "id"]);
+	let mids = state.getIn(["byMid"]) || {};
+	let mid;
+	for (var i in mids) {
+		if (mids[i].id === id) {
+			mid = i;
+		}
+	}
+	const byId = state.getIn(["byId", id]);
+	if (!_.isEmpty(byId)) {
+		const { chatType, chatId } = byId;
+		let messages = state.getIn([chatType, chatId]).asMutable();
+		let found = _.find(messages, { id: id });
+		found.setIn(["status"], status);
+		found.setIn(["toJid"], mid);
+		let msg = {
+			...found,
+			status: status,
+			toJid: mid,
+		};
+		messages.splice(messages.indexOf(found), 1, msg);
+		setTimeout(() => {
+			AppDB.updateMessageStatus(id, status).then((res) => {});
+		}, 1000);
 
-        return state.setIn([chatType, chatId], messages)
-    }
-    return state
-}
+		return state.setIn([chatType, chatId], messages);
+	}
+	return state;
+};
 
 export const deleteMessage = (state, { msgId, to, chatType }) => {
-    msgId = msgId.mid || msgId
-    let byId = state.getIn(['byId', msgId])
-    let sessionType, chatId
-    if (!byId) {
-        return state
-    } else {
-        sessionType = byId.chatType
-        chatId = byId.chatId
-    }
+	msgId = msgId.mid || msgId;
+	let byId = state.getIn(["byId", msgId]);
+	let sessionType, chatId;
+	if (!byId) {
+		return state;
+	} else {
+		sessionType = byId.chatType;
+		chatId = byId.chatId;
+	}
 
-    let messages = state.getIn([sessionType, chatId]).asMutable() || []
-    let targetMsg = _.find(messages, { id: msgId })
-    const index = messages.indexOf(targetMsg)
-    messages.splice(index, 1, {
-        ...targetMsg,
-        body: {
-            ...targetMsg.body,
-            type: 'recall'
-        }
-    })
-    state = state.setIn([sessionType, chatId], messages)
-    AppDB.deleteMessage(msgId)
-    return state
-
-}
+	let messages = state.getIn([sessionType, chatId]).asMutable() || [];
+	let targetMsg = _.find(messages, { id: msgId });
+	const index = messages.indexOf(targetMsg);
+	messages.splice(index, 1, {
+		...targetMsg,
+		body: {
+			...targetMsg.body,
+			type: "recall",
+		},
+	});
+	state = state.setIn([sessionType, chatId], messages);
+	AppDB.deleteMessage(msgId);
+	return state;
+};
 
 export const clearUnread = (state, { chatType, sessionId }) => {
-    let data = state['unread'][chatType].asMutable()
-    delete data[sessionId]
-    return state.setIn(['unread', chatType], data)
-}
+	let data = state["unread"][chatType].asMutable();
+	delete data[sessionId];
+	return state.setIn(["unread", chatType], data);
+};
 
 export const fetchMessage = (state, { to, chatType, messages, offset }) => {
-    let data = state[chatType] && state[chatType][to] ? state[chatType][to].asMutable() : []
-    data = messages.concat(data)
-    let historyById = {}
-    messages.forEach((item) => {
-        historyById[item.id] = { chatId: chatType === 'singleChat' ? item.from : item.to, chatType: item.chatType }
-    })
-    state = state.merge({ byId: historyById })
-    state = state.setIn([chatType, to], data)
-    return state
-}
+	let data =
+		state[chatType] && state[chatType][to]
+			? state[chatType][to].asMutable()
+			: [];
+	data = messages.concat(data);
+	let historyById = {};
+	messages.forEach((item) => {
+		historyById[item.id] = {
+			chatId: chatType === "singleChat" ? item.from : item.to,
+			chatType: item.chatType,
+		};
+	});
+	state = state.merge({ byId: historyById });
+	state = state.setIn([chatType, to], data);
+	return state;
+};
 
 export const clearMessage = (state, { chatType, id }) => {
-    return chatType ? state.setIn([chatType, id], []) : state
-}
+	return chatType ? state.setIn([chatType, id], []) : state;
+};
 
 export const updateMessages = (state, { chatType, sessionId, messages }) => {
-    let messagesArr = state.getIn([chatType, sessionId]).asMutable({ deep: true })
-    messagesArr.forEach((msg) => {
-        if (msg.id === messages.id){
-            msg = messages
-            AppDB.updateMessageUrl(msg.id, messages.url)
-        }
-
-    })
-    return state.setIn([chatType, sessionId], messagesArr)
-}
+	let messagesArr = state
+		.getIn([chatType, sessionId])
+		.asMutable({ deep: true });
+	messagesArr.forEach((msg) => {
+		if (msg.id === messages.id) {
+			msg = messages;
+			AppDB.updateMessageUrl(msg.id, messages.url);
+		}
+	});
+	return state.setIn([chatType, sessionId], messagesArr);
+};
 
 export const updateMessageMid = (state, { id, mid }) => {
-    const byId = state.getIn(['byId', id])
-    if (!_.isEmpty(byId)) {
-        const { chatType, chatId } = byId
-        let messages = state.getIn([chatType, chatId]).asMutable({ deep: true })
-        let found = _.find(messages, { id: id })
-        found.toJid = mid
-        found.mid = mid
-        // let msg = found.setIn(['toJid'], mid)
-        messages.splice(messages.indexOf(found), 1, found)
-        state = state.setIn([chatType, chatId], messages)
-    }
+	const byId = state.getIn(["byId", id]);
+	if (!_.isEmpty(byId)) {
+		const { chatType, chatId } = byId;
+		let messages = state
+			.getIn([chatType, chatId])
+			.asMutable({ deep: true });
+		let found = _.find(messages, { id: id });
+		found.toJid = mid;
+		found.mid = mid;
+		// let msg = found.setIn(['toJid'], mid)
+		messages.splice(messages.indexOf(found), 1, found);
+		state = state.setIn([chatType, chatId], messages);
+	}
 
-    setTimeout(() => { AppDB.updateMessageMid(mid, Number(id)) }, 500)
-    return state.setIn(['byMid', mid], { id })
-}
+	setTimeout(() => {
+		AppDB.updateMessageMid(mid, Number(id));
+	}, 500);
+	return state.setIn(["byMid", mid], { id });
+};
 
 export const addReactions = (state, { message, reaction }) => {
-	let { id, to, from, bySelf } = message;
-	let sessionId = WebIM.conn.context.userId === to ? from : to;
+	let { id, to, from } = message;
+	// TODO 回调会提供一个添加 reaction 的 from
+	let addReactionUser = "999222";
+	let currentLoginUser = WebIM.conn.context.userId;
+	let sessionId = currentLoginUser === to ? from : to;
 	if (!id) id = state.getIn(["byMid", message.mid, "id"]);
 	let mids = state.getIn(["byMid"]) || {};
 	let mid;
@@ -441,31 +465,44 @@ export const addReactions = (state, { message, reaction }) => {
 		let messages = state.getIn([chatType, sessionId]).asMutable();
 		let found = _.find(messages, { id: id });
 		let reactionMsgs = found?.reactions || [];
+		
+		let existReaction = _.find(reactionMsgs, { reaction: reaction });
 		let reactionList = [];
 		found.setIn(["reactions"], reactionList);
 		if (reactionMsgs.length > 0) {
-			if (_.find(found.reactions, { reaction: reaction })) return state;
-			reactionList = bySelf
-				? _.concat(
-						[
-							{
-								reaction: reaction,
-								userList: [WebIM.conn.context.userId],
-							},
-						],
-						found.reactions
-				  )
-				: _.concat(found.reactions, [
-						{
-							reaction: reaction,
-							userList: [WebIM.conn.context.userId],
-						},
-				  ]);
+			let newFount = reactionMsgs.filter((item) => item.reaction !== reaction);
+			let { userList } = existReaction || '';
+			let myReaction = userList && userList.includes(currentLoginUser);
+			if (existReaction && myReaction) {
+				reactionList = [...reactionMsgs];
+			} else if (existReaction && !myReaction) {
+				let newUserList = existReaction.userList.concat(currentLoginUser);
+				let newCount = existReaction.count + 1;
+				reactionList = _.concat(newFount, [
+					{
+						reaction: reaction,
+						userList: newUserList,
+						status: true,
+						count: newCount,
+					},
+				]);
+			} else {
+				reactionList = _.concat(newFount, [
+					{
+						reaction: reaction,
+						userList: [currentLoginUser],
+						status: true,
+						count: 1,
+					},
+				]);
+			}
 		} else {
 			reactionList = [
 				{
 					reaction: reaction,
-					userList: [WebIM.conn.context.userId],
+					userList: [currentLoginUser],
+					status: true,
+					count: 1,
 				},
 			];
 		}
@@ -481,19 +518,47 @@ export const addReactions = (state, { message, reaction }) => {
 	return state;
 };
 
-export const deleteReaction = (state, {message, reaction }) => {
-    let {id,to,from,chatType} = message
-    let sessionId = WebIM.conn.context.userId === to ? from : to;
-	let messages = state.getIn([chatType, sessionId]).asMutable() || [];
-    let found = _.find(messages, { id: id });
-    const index = messages.indexOf(found);
-    let reactionMsg = found.reactions.filter((item) => item.reaction !== reaction); 
-    messages.splice(index, 1, {
+export const deleteReaction = (state, { message, reaction }) => {
+	let { id, from, to } = message;
+	let currentLoginUser = WebIM.conn.context.userId;
+	let sessionId = currentLoginUser === to ? from : to;
+	const byId = state.getIn(["byId", id]);
+	const { chatType } = byId;
+	let messages = state.getIn([chatType, sessionId]).asMutable({ deep: true });
+	let found = _.find(messages, { id: id });
+	let reactionMsgs = found.reactions || [];
+	let newFount = reactionMsgs.filter((item) => item.reaction !== reaction);
+	let existReaction = _.find(reactionMsgs, {reaction: reaction,});
+	let reactionList = [];
+	if (reactionMsgs.length > 0) {
+		let { reaction, userList, count } = existReaction;
+		let myReaction = userList.includes(currentLoginUser);
+		if (existReaction && myReaction) {
+			if (count > 1) {
+				reactionList = _.concat(newFount, [
+					{
+						reaction: reaction,
+						userList: userList.filter(
+							(item) => item !== currentLoginUser
+						),
+						status: false,
+						count: count - 1,
+					},
+				]);
+			} else {
+				reactionList = [...newFount];
+			}
+		} else {
+			reactionList = [...newFount];
+		}
+	}
+	const index = messages.indexOf(found);
+	messages.splice(index, 1, {
 		...found,
-		reactions: reactionMsg,
+		reactions: reactionList,
 	});
-    state = state.setIn([chatType, sessionId], messages);
-	AppDB.deleteReactions(id, reactionMsg);
+	state = state.setIn([chatType, sessionId], messages);
+	AppDB.deleteReactions(id, reactionList);
 	return state;
 };
 /* ------------- Hookup Reducers To Types ------------- */
@@ -511,4 +576,4 @@ export const messageReducer = createReducer(INITIAL_STATE, {
 	[Types.DELETE_REACTION]: deleteReaction,
 });
 
-export default Creators
+export default Creators;

@@ -1,8 +1,11 @@
-import React, { memo } from "react";
+import React, { useState, memo } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { reactionEmoji, defaultReactions } from "../../../common/reactionEmoji";
-import { Box,Button } from "@material-ui/core";
+import { Box, Button } from "@material-ui/core";
 import Popover from "@material-ui/core/Popover";
+import WebIM from "../../../utils/WebIM";
+import store from "../../../redux/index";
+import MessageActions from "../../../redux/message";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -38,6 +41,16 @@ const useStyles = makeStyles((theme) => ({
 		minHeight: "0",
 		minWidth: "0",
 		borderRadius: "16px",
+		// background:
+	},
+
+	clickStyle: {
+		width: "34px",
+		height: "34px",
+		minHeight: "0",
+		minWidth: "0",
+		borderRadius: "16px",
+		background: "#E6E6E6",
 	},
 	emojiBox: {
 		width: (props) => props.width + "px",
@@ -54,19 +67,45 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-const ReactionIcon = ({ anchorEl, onClose, onSelected }) => {
+const ReactionIcon = ({ anchorEl, onClose, onSelected, message }) => {
 	const classes = useStyles();
-	function renderReaction() {
-		return Object.keys(reactionEmoji.map).map((k) => {
+	const reactionMsg = message.reactions || [];
+	let currentLoginId = WebIM.conn.context.userId || "";
+	let newStatus = {};
+	const isStatus = (v) => {
+		reactionMsg.length > 0 &&
+			reactionMsg.forEach((val) => {
+				let { reaction, status, userList } = val;
+				if (
+					reactionEmoji.map[reaction]?.includes(v) &&
+					userList.includes(currentLoginId)
+				) {
+					newStatus[v] = status;
+				}
+			});
+		return newStatus[v];
+	};
+	const renderReactions = (type) => {
+		let renderType = type === "default";
+		return Object.keys(
+			(renderType ? defaultReactions : reactionEmoji).map
+		).map((k, i) => {
 			const v = reactionEmoji.map[k];
+			let emojiSrc = require(`../../../common/reactions/${v}`).default;
 			return (
-				<div className={classes.emojiItem}>
-					<Button key={k} className={classes.btnStyle}>
+				<div
+					className={classes.emojiItem}
+					key={i}
+					onClick={isStatus(v) ? handleDelete : handleEmojiClick}
+				>
+					<Button
+						key={k}
+						className={
+							isStatus(v) ? classes.clickStyle : classes.btnStyle
+						}
+					>
 						<img
-							src={
-								require(`../../../common/reactions/${v}`)
-									.default
-							}
+							src={emojiSrc}
 							alt={k}
 							className={classes.emojiStyle}
 						/>
@@ -74,31 +113,18 @@ const ReactionIcon = ({ anchorEl, onClose, onSelected }) => {
 				</div>
 			);
 		});
-	}
-
-	function defaultReaction() {
-		return Object.keys(defaultReactions.map).map((k) => {
-			const v = defaultReactions.map[k];
-			return (
-				<div className={classes.emojiItem}>
-					<Button className={classes.btnStyle} key={k}>
-						<img
-							src={
-								require(`../../../common/reactions/${v}`)
-									.default
-							}
-							alt={k}
-							className={classes.emojiStyle}
-						/>
-					</Button>
-				</div>
-			);
-		});
-	}
+	};
 
 	const handleEmojiClick = (e) => {
 		const emoji = e.target.alt || e.target.children[0].alt;
 		onSelected(emoji);
+		onClose();
+	};
+
+	const handleDelete = (e) => {
+		const emoji = e.target.alt || e.target.children[0].alt;
+		store.dispatch(MessageActions.deleteReaction(message, emoji));
+		onClose();
 	};
 
 	return (
@@ -107,8 +133,6 @@ const ReactionIcon = ({ anchorEl, onClose, onSelected }) => {
 			open={Boolean(anchorEl)}
 			onClose={onClose}
 			anchorEl={anchorEl}
-			// style={{ width: 540, height: 340 }}
-
 			anchorOrigin={{
 				vertical: "bottom",
 				horizontal: "left",
@@ -122,15 +146,13 @@ const ReactionIcon = ({ anchorEl, onClose, onSelected }) => {
 				<div className={classes.text}>Frequently</div>
 				<div
 					className={classes.defaultEmojiBox}
-					onClick={handleEmojiClick}
+					// onClick={handleEmojiClick}
 				>
-					{defaultReaction()}
+					{renderReactions("default")}
 				</div>
 				<hr />
 				<div className={classes.text}>All Emojis</div>
-				<div className={classes.emojiBox} onClick={handleEmojiClick}>
-					{renderReaction()}
-				</div>
+				<div className={classes.emojiBox}>{renderReactions("all")}</div>
 			</Box>
 		</Popover>
 	);

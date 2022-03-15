@@ -222,13 +222,11 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
 				</Menu>
 			) : null}
 
-			{reactionMsg.length > 0 && (
-				<ReactionInfo
-					anchorEl={reactionInfoVisible}
-					onClose={() => setReactionInfoVisible(null)}
-					message={message}
-				/>
-			)}
+			<ReactionInfo
+				anchorEl={reactionInfoVisible}
+				onClose={() => setReactionInfoVisible(null)}
+				message={message}
+			/>
 		</li>
 	);
 }

@@ -62,6 +62,6 @@ export const defaultReactions = {
 		"[emoji_36]": "ee_36.png",
 		"[emoji_15]": "ee_15.png",
 		"[emoji_10]": "ee_10.png",
-		"[emoji_2]": "ee_2.png",
+		"[emoji_12]": "ee_12.png",
 	},
 };

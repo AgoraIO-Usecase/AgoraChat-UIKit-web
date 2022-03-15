@@ -172,13 +172,11 @@ function AudioMessage({ message, showByselfAvatar }) {
 
 			<div className={classes.time}>{renderTime(message.time)}</div>
 
-			{reactionMsg.length > 0 && (
-				<ReactionInfo
-					anchorEl={reactionInfoVisible}
-					onClose={() => setReactionInfoVisible(null)}
-					message={message}
-				/>
-			)}
+			<ReactionInfo
+				anchorEl={reactionInfoVisible}
+				onClose={() => setReactionInfoVisible(null)}
+				message={message}
+			/>
 		</li>
 	);
 }

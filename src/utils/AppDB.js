@@ -233,7 +233,7 @@ const AppDB = {
 	updateMessageReaction(id, reactions) {
 		const $_TABLE = this.$_TABLE;
 		return this.exec((resolve) => {
-            const $_TABLE = this.$_TABLE;
+			const $_TABLE = this.$_TABLE;
 			return this.exec((resolve) => {
 				$_TABLE
 					.where("id")
@@ -246,21 +246,21 @@ const AppDB = {
 		});
 	},
 
-    deleteReactions(id,meta) {
-        const $_TABLE = this.$_TABLE;
+	deleteReactions(id, reactions) {
+		const $_TABLE = this.$_TABLE;
 		return this.exec((resolve) => {
 			const $_TABLE = this.$_TABLE;
 			return this.exec((resolve) => {
 				$_TABLE
 					.where("id")
 					.equals(id)
-					.modify({ meta: meta })
+					.modify({ reactions: reactions })
 					.then((res) => {
 						console.log("deleteReactions", res);
 					});
 			});
 		});
-    }
+	},
 };
 
 export default AppDB

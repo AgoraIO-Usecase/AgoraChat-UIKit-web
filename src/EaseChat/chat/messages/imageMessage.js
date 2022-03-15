@@ -82,6 +82,7 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
 	const classes = useStyles({ bySelf: message.bySelf });
 	const [state, setState] = useState(initialState);
 	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
+	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
 	const reactionMsg = message?.reactions || [];
 	const handleClose = () => {
 		setState(initialState);
@@ -163,6 +164,12 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
 					</MenuItem>
 				</Menu>
 			) : null}
+
+			<ReactionInfo
+				anchorEl={reactionInfoVisible}
+				onClose={() => setReactionInfoVisible(null)}
+				message={message}
+			/>
 		</li>
 	);
 }

@@ -10,7 +10,12 @@ import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
+import Avatar from "@material-ui/core/Avatar";
 import deleteReactionIcon from "../../../common/icons/reaction_delete@2x.png";
+
+import avatarIcon1 from "../../../common/images/avatar1.png";
+import avatarIcon2 from "../../../common/images/avatar2.png";
+import avatarIcon3 from "../../../common/images/avatar3.png";
 
 const useStyles = makeStyles((theme) => ({
 	infoBox: {
@@ -72,12 +77,24 @@ const useStyles = makeStyles((theme) => ({
 		alignItems: "center",
 	},
 	reactionUserStyle: {
+		display: "flex",
+		justifyContent: "space-between",
+		alignItems: "center",
 		fontFamily: "SF Compact Text",
 		fontWeight: "600",
 		fontStyle: "normal",
 		fontSize: "16px",
 		lineHeight: "20px",
+		marginTop:"10px"
 	},
+	userBox: {
+		display: "flex",
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	textStyle: {
+		marginLeft: '8px'
+	}
 }));
 
 function TabPanel(props) {
@@ -112,6 +129,14 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 	const [value, setValue] = useState(0);
 	const reactionMsg = message.reactions || [];
 	const loginUserId = WebIM.conn.context.userId || "";
+	let userAvatars = {
+		1: avatarIcon1,
+		2: avatarIcon2,
+		3: avatarIcon3,
+	};
+
+	let newwInfoData = localStorage.getItem("usersInfo_1.0");
+
 	const handleChange = (event, newValue) => {
 		setValue(newValue);
 	};
@@ -122,17 +147,36 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 		store.dispatch(MessageActions.deleteReaction(message, reaction));
 	};
 
-	const reactionUserList = (userList) => {
-		let userName = ''
+	const reactionUserList = (item) => {
+		let {userList,reaction} = item
+		let userName = "";
 		return (
 			<>
 				{userList.map((val, i) => {
-					if (val === loginUserId) {
+					let isCurrentLoginUser = val === loginUserId;
+					if (isCurrentLoginUser) {
 						userName = "You";
-					}else {
+					} else {
 						userName = val;
 					}
-					return <Typography key={i} className={classes.reactionUserStyle}>{userName}</Typography>;
+					return (
+						<div key={i} className={classes.reactionUserStyle}>
+							<div className={classes.userBox}>
+								<Avatar src={userAvatars[1]} />
+								<Typography className={classes.textStyle}>{userName}</Typography>
+							</div>
+							{isCurrentLoginUser && (
+								<img
+									src={deleteReactionIcon}
+									alt=""
+									className={classes.iconStyle}
+									onClick={() =>
+										handleDeleteReaction(reaction)
+									}
+								/>
+							)}
+						</div>
+					);
 				})}
 			</>
 		);
@@ -202,19 +246,7 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 									index={i}
 									className={classes.tabPanelItem}
 								>
-									<div className={classes.reactionUsreItem}>
-										{reactionUserList(item.userList)}
-										<img
-											src={deleteReactionIcon}
-											alt=""
-											className={classes.iconStyle}
-											onClick={() =>
-												handleDeleteReaction(
-													item.reaction
-												)
-											}
-										/>
-									</div>
+									<div>{reactionUserList(item)}</div>
 								</TabPanel>
 							</div>
 						);
