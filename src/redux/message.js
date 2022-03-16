@@ -260,8 +260,11 @@ export const addMessage = (state, { message, messageType = 'txt' }) => {
     const username = WebIM.conn.context.userId
     const { id, to, status } = message
     let { chatType } = message
+    // where the message comes from, when from current user, it is null
     const from = message.from || username
+    // bySelf is true when sent by current user, otherwise is false
     const bySelf = from === username
+    // root id: when sent by current user or in group chat, is id of receiver. Otherwise is id of sender
     let chatId = bySelf || chatType !== 'singleChat' ? to : from
     const chatData = state.getIn([chatType, chatId], Immutable([])).asMutable()
     const _message = {

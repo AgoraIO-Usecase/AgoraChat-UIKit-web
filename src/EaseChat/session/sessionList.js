@@ -1,19 +1,14 @@
 import React, { useContext ,useState} from "react";
 import { makeStyles } from "@material-ui/styles";
 import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import Avatar from "@material-ui/core/Avatar";
 import SearchIcon from '@material-ui/icons/Search';
-import Box from "@material-ui/core/Box";
 import {IconButton,InputBase} from "@material-ui/core"
 import Paper from "@material-ui/core/Paper";
-import Typography from "@material-ui/core/Typography";
-import { useSelector, useDispatch } from "../../EaseApp/index";
-import { renderTime } from "../../utils/index";
+import { useSelector } from "../../EaseApp/index";
 import {EaseAppContext} from '../../EaseApp/index'
 import _ from 'lodash'
-// import { FixedSizeList } from 'react-window';
+import SessionItem from './sessionItem';
+
 import groupIcon from "../../common/images/groupAvatar.png";
 import chatRoomIcon from "../../common/images/chatroom@2x.png";
 import noticeIcon from "../../common/images/notice@2x.png";
@@ -42,78 +37,10 @@ const useStyles = makeStyles((theme) => ({
   inputBase:{
     width:'100%'
   },
-  listItem: {
-    padding: "0 14px",
-    borderRadius:'20px',
-    '& .Mui-selected':{
-      backgroundColor: 'rgba(255, 255, 255, 1) !important'
-    }
-  },
-  itemBox: {
-    display: "flex",
-    flex: 1,
-    height: "100%",
-    alignItems: "center",
-    boxSizing: "border-box",
-    padding:'5px 0'
-  },
-  avatar: {
-    height: "40px !important",
-    width: "40px !important",
-    overflow: "inherit !important",
-  },
-  MuiListItemTextSecondary: {
-    color: "red",
-  },
-  itemRightBox: {
-    flex: 1,
-  },
-  itemName: {
-    fontSize: "16px",
-    overflow: "hidden",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  itemMsgBox: {
-    position: "relative",
-    height: "20px",
-    display: "flex",
-    alignItems: "center",
-  },
-  time: {
-    display: "inline-block",
-    height: "17px",
-    fontSize: "12px",
-    color: "rgba(1, 1, 1, .6)",
-    marginRight: "2px",
-  },
-  itemMsg: {
-    display: "inline-block",
-    height: "20px",
-    overflow: "hidden",
-    color: "rgba(1, 1, 1, .6)",
-    width: "calc(100% - 18px)",
-    fontSize: "14px",
-    wordBreak: 'break-all'
-  },
-  unreadNum: {
-    color: "#fff",
-    background: "rgba(245, 12, 205, 1)",
-    display: "inline-block",
-    height: "16px",
-    borderRadius: "8px",
-    fontSize: "10px",
-    minWidth: "16px",
-    textAlign: "center",
-    position: "absolute",
-    right: "0",
-  },
 }));
 
 export default function SessionList(props) {
   let easeAppProps = useContext(EaseAppContext)
-  const {isShowUnread,unreadType} = easeAppProps
   const classes = useStyles();
   const sessionList = useSelector((state) => state.session?.sessionList) || [];
   const to = useSelector((state) => state.global.globalProps.to);
@@ -126,6 +53,8 @@ export default function SessionList(props) {
   const notices = useSelector((state) => state.notice?.notices) || [];
   const [searchAry,setSearchAry] = useState([])
   let noticeUnreadNum = 0;
+
+  /******** -session- ********/
   notices.forEach((item) => {
     if (!item.disabled) {
       noticeUnreadNum++;
@@ -183,13 +112,17 @@ export default function SessionList(props) {
       if (!b?.lastMessage?.time) return -1;
       return b?.lastMessage?.time - a?.lastMessage?.time;
     });
+
+  /******** -- ********/
   renderSessionList.forEach((element, index) => {
     if (element.sessionId === currentSession) {
       currentSessionIndex = index;
     }
   });
 
-  const handleListItemClick = (event, index, session) => {
+  const handleListItemClick = (e, index, session) => {
+    e.preventDefault()
+    e.stopPropagation()
     if (currentSessionIndex !== index || !to) {
       props.onClickItem(session);
     }
@@ -211,14 +144,7 @@ export default function SessionList(props) {
       setSearchAry([])
     }
   }
-  
-  const test1 = () =>{
-    console.log('1');
-  }
 
-  const test2 = () =>{
-    console.log('2');
-  }
 
   let userAvatars = {
     1: avatarIcon1,
@@ -230,7 +156,7 @@ export default function SessionList(props) {
     <>
     <Paper component="form" className={classes.paper}
       sx={{ p: '2px 4px', display: 'flex', alignItems: 'center'}}>
-      <IconButton type="submit" sx={{ p: '10px' }} aria-label="search">
+      <IconButton aria-label="search">
         <SearchIcon />
       </IconButton>
       <InputBase
@@ -240,9 +166,6 @@ export default function SessionList(props) {
         onChange={searchSession}
       />
     </Paper>
-    {/* <FixedSizeList className={classes.root}   itemSize={46}
-        itemCount={200}
-        overscanCount={5}> */}
       <List dense className={classes.root}>
         {renderSession.map((session, index) => {
           let usersInfoData = localStorage.getItem("usersInfo_1.0")
@@ -258,65 +181,13 @@ export default function SessionList(props) {
             avatarSrc = noticeIcon;
           }
           return (
-            <ListItem
-              key={session.sessionId}
-              selected={currentSessionIndex === index}
-              onClick={(event) => handleListItemClick(event, index, session)}
-              button
-              className={classes.listItem}
-
-              onMouseOver={test1} onMouseLeave={test2}
-            >
-              <Box className={classes.itemBox}>
-                <ListItemAvatar>
-                  <Avatar
-                    // className={classes.avatar}
-                    style={{ borderRadius: `${session.sessionType}` === "singleChat" ? "50%" : 'inherit'}}
-                    alt={`${session.name || session.sessionId}`}
-                    src={avatarSrc}
-                  />
-                </ListItemAvatar>
-                <Box className={classes.itemRightBox}>
-                  <Typography className={classes.itemName}>
-                    <span>{session.name || session.sessionId}</span>
-                    <span className={classes.time}>
-                      {renderTime(session?.lastMessage?.time)}
-                    </span>
-                  </Typography>
-
-                  <Typography className={classes.itemMsgBox}>
-                    <span className={classes.itemMsg}>
-                      {session?.lastMessage?.body?.msg}
-                    </span>
-
-                    {isShowUnread &&
-                      <span
-                      className={classes.unreadNum}
-                      style={{
-                        display: session.unreadNum ? "inline-block" : "none",
-                      }}
-                    >
-                      {unreadType ?session.unreadNum:null}
-                    </span>
-                    }
-                    <IconButton
-                      className="iconfont icon-hanbaobao icon"
-                      sx={{
-                        bgcolor:'red',
-                        height:'10px',
-                        width:'10px'
-                      }}
-                    ></IconButton>
-                  </Typography>
-                </Box>
-              </Box>
-            </ListItem>
+            <SessionItem 
+            key={index} 
+            currentVal={{session,index,currentSessionIndex,avatarSrc}} 
+            handleListItemClick={handleListItemClick}/>
           );
         })}
       </List>
-      {/* </FixedSizeList> */}
       </>
   );
 }
-
-SessionList.defaultProps = {};

@@ -26,7 +26,7 @@ export default class Demo extends Component {
     addSessionItem = () => {
     let session = {
       conversationType: "singleChat",
-      conversationId: "zd131",
+      conversationId: "zd132",
     };
     EaseApp.addConversationItem(session);
 
@@ -57,8 +57,8 @@ export default class Demo extends Component {
             onChatAvatarClick={this.test4}
             
             appkey= "41117440#383391"
-            username="test002"
-            agoraToken="007eJxTYDC59fHg549GEpcXSJulZjv/eczcp3Z/3jeX9Wu21/Qn9T9QYEgzTEk2N7dISklJNjMxS0yxSDMyM7A0N0tONEoxMDRNljRST1KQYWBISrrVwMjAysAIhCC+CoO5hVGaiZmhga5lkqWhrqFharJuUnJaom6ipaWpgUFScmKKYSoAQEMoxQ=="
+            username="test003"
+            agoraToken="007eJxTYFgUnyKiI5H3xG7BP7sTdvmhZx39Xzz4GjdBf9/ZvbdfCjQrMKQZpiSbm1skpaQkm5mYJaZYpBmZGViamyUnGqUYGJomT+0wTFKQYWA4IbH2NyMDKwMjEIL4KgzmKRZGZuamBrqWSYmmuoaGqcm6lubmqbop5smWZkZpxhamlmYA5rcoEQ=="
             header={<div style={{ height: "100px" }}>TestHeader</div>} />
         </div>
       </div>
