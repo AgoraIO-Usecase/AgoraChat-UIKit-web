@@ -144,8 +144,10 @@ EaseAppProvider.addConversationItem = (session) => {
 };
 EaseAppProvider.changePresenceStatus = (ext) => {
   console.log(ext, 'changePresenceStatus')
+  const { dispatch, getState } = store;
   dispatch(
     GlobalPropsActions.setGlobalProps({
+      ...getState().global.globalProps,
       presenceExt: ext
     })
   )

@@ -29,7 +29,7 @@ export default class Demo extends Component {
       conversationId: "zd123",
     };
     EaseApp.addConversationItem(session);
-
+    EaseApp.changePresenceStatus('Online')
   };
   test = (res) =>{
     console.log('test登录成功',res);
