@@ -1,4 +1,4 @@
-import React, { useState, useRef, createContext, useEffect } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
 import ReactDOM from "react-dom";
 import ThreadBar from "./threadBar"
@@ -370,7 +370,6 @@ const ThreadPanel = (props) => {
             }
         }
     };
-
     return (
         <EaseChatContext.Provider value={props}>
             <Box className={classes.root}>

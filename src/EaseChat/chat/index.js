@@ -128,6 +128,8 @@ EaseChatProvider.propTypes = {
   successLoginCallback:PropTypes.func,
   failCallback:PropTypes.func,
   onChatAvatarClick:PropTypes.func,
+
+  testFunc:PropTypes.func
 };
 
 EaseChatProvider.defaultProps = {

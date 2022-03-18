@@ -5,6 +5,8 @@ import { EaseChat, EaseApp } from "../../src/index";
 // import WebIM from "./WebIM";
 import val from "./comm";
 // import initListen from "./WebIMListen";
+import EditThreadPanel from "../demo-comments/components/editThreadPanel";
+import Dialog  from "../demo-comments/components/dialog";
 export default class Demo extends Component {
   state = {
     token: val,
@@ -43,10 +45,14 @@ export default class Demo extends Component {
   test4 = (val) =>{
     console.log('val',val);
   }
+  test5 = () =>{
+    console.log('test5');
+  }
   render() {
     console.log("this.state.token>>", this.state.token);
     return (
       <div>
+        <Dialog title="dialog title" button1='Cancel' button2='save' input='true' />
           <button onClick={this.addSessionItem}> 测试 </button>
         <h3>EaseApp</h3>
         <div>
@@ -57,8 +63,10 @@ export default class Demo extends Component {
             onChatAvatarClick={this.test4}
             appkey= "41117440#383391"
             username="zd129"
-            agoraToken="007eJxTYIiMLcphy2EU7uB1+JW35n6KblZ1dkbUnC9/NR7MT97uK6jAkGaYkmxubpGUkpJsZmKWmGKRZmRmYGlulpxolGJgaJrcG2iSpCDDwFBc5POAkYGVgREIQXwVBhND40QLYwMD3UQzy1RdQ8PUZN0kc0NLXUtjE2PTtLRkUzNzEwCaoiSn"
-            header={<div style={{ height: "100px" }}>TestHeader</div>} />
+            editThreadPanel={<EditThreadPanel/>}
+            agoraToken="007eJxTYLi/O/OPTf3/t+aOgaly7a/v//B1XOJ8pPOel8b2Y58ET2gpMKQZpiSbm1skpaQkm5mYJaZYpBmZGViamyUnGqUYGJom31pukqQgw8AQozvbhpGBlYERCEF8FQYTQ+NEC2MDA91EM8tUXUPD1GTdJHNDS11LYxNj07S0ZFMzcxMAT6soJw=="
+            header={<div style={{ height: "100px" }}>TestHeader</div>} 
+            />
         </div>
       </div>
     );

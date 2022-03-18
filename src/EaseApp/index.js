@@ -152,6 +152,7 @@ EaseAppProvider.propTypes = {
   appkey: PropTypes.string,
 
   header: PropTypes.node,
+  editThreadPanel: PropTypes.node,
   addConversationItem: PropTypes.func,
   isShowUnread: PropTypes.bool,
   unreadType: PropTypes.bool,

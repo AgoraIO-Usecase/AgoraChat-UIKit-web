@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
 import {
     Box,
@@ -8,6 +8,7 @@ import threadIcon from '../../common/images/thread.png'
 import close from '../../common/images/threadClose.png'
 import { useSelector, useDispatch } from "../../EaseApp/index";
 import ThreadActions from "../../redux/thread";
+import { EaseChatContext } from "../chat/index";
 
 
 
@@ -33,24 +34,38 @@ const useStyles = makeStyles((theme) => {
         },
         leftBar: {
             fontWeight: '600',
+        },
+        rightBar: {
+            display: 'flex',
+        },
+        editPanel: {
+            height: '38px',
+            width: '38px',
+
         }
     };
 });
 
-const ThreadBar = () => {
+const ThreadBar = (props) => {
+    let easeChatProps = useContext(EaseChatContext);
+    const {editThreadPanel} = easeChatProps
     const classes = useStyles();
     const dispatch = useDispatch();
     const closeThreadPanel = () => {
         dispatch(ThreadActions.updateThreadStates(false));
     }
     const threadName = useSelector((state) => state.thread?.currentThreadInfo?.thread?.threadName)||'New thread';
+
     return (
         <div className={classes.root}>
             <Box position="static" className={classes.leftBar}>
                 <IconButton className="iconfont icon">
                     <img alt="" className={classes.threadIcon} src={threadIcon} />
                 </IconButton>{threadName}</Box>
-            <Box position="static">
+            <Box position="static" className={classes.rightBar}>
+                <div className={classes.editPanel}>
+                    {editThreadPanel}
+                </div>
                 <IconButton className="iconfont icon" onClick={closeThreadPanel}>
                     <img alt="" className={classes.close} src={close} />
                 </IconButton>
