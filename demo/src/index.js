@@ -55,10 +55,9 @@ export default class Demo extends Component {
             failCallback={this.test2}
             onAvatarChange={this.test3}
             onChatAvatarClick={this.test4}
-            
             appkey= "41117440#383391"
-            username="test002"
-            agoraToken="007eJxTYJD+pzTT2Xt7cGpOFM/h1qcdWuUFeqfDzW50LvzuucviEbcCQ5phSrK5uUVSSkqymYlZYopFmpGZgaW5WXKiUYqBoWnywweqSQoyDAyn6pUiGRlYGRiBEMRXYTC3MEozMTM00LVMsjTUNTRMTdZNSk5L1E20tDQ1MEhKTkwxTAUANA8m7w=="
+            username="zd124"
+            agoraToken="007eJxTYHA2nfu66tMru9X7Ht63PX9VSaS3jVNB5Lvhen2JolX+W1YoMKQZpiSbm1skpaQkm5mYJaZYpBmZGViamyUnGqUYGJomn3lsnKQgw8Bw3n/FCUYGVgZGIATxVRgsjS0MkpNNDHSBVJquoWFqsq5FspmhrmlSmkFicmqyWbKRCQDp/Sis"
             header={<div style={{ height: "100px" }}>TestHeader</div>} />
         </div>
       </div>

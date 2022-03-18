@@ -8,8 +8,6 @@ import AppDB from '../utils/AppDB';
 import i18next from "i18next";
 import { message } from '../EaseChat/common/alert'
 
-
-
 /* ------------- Initial State ------------- */
 export const INITIAL_STATE = Immutable({
     byId: {},
@@ -17,6 +15,7 @@ export const INITIAL_STATE = Immutable({
     groupChat: {},
     chatRoom: {},
     stranger: {},
+    threadMessage:{},
     extra: {},
     unread: {
         singleChat: {},
@@ -34,13 +33,15 @@ const { Types, Creators } = createActions({
     clearUnread: ["chatType", "sessionId"],
     updateMessages: ["chatType", "sessionId", "messages"],
     updateMessageMid: ['id', 'mid'],
+    updateThreadDetails: ['chatType','groupId','messageList'],
+    updateThreadMessage: ['to','messageList','isScroll'],
     
 
     // -async-
-    sendTxtMessage: (to, chatType, message = {}) => {
+    sendTxtMessage: (to, chatType, message = {}, isThread=false) => {
         if (!to || !chatType) return
         return (dispatch, getState) => {
-            const formatMsg = formatLocalMessage(to, chatType, message, 'txt')
+            const formatMsg = formatLocalMessage(to, chatType, message, 'txt', isThread)
             const { body, id } = formatMsg
             const { msg } = body
             const msgObj = new WebIM.message('txt', id)
@@ -49,6 +50,7 @@ const { Types, Creators } = createActions({
                 msg,
                 chatType,
                 ext: message.ext,
+                isThread,
                 success: () => {
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
                 },
@@ -57,7 +59,7 @@ const { Types, Creators } = createActions({
                     dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
                 }
             })
-            WebIM.conn.send(msgObj.body)
+            // WebIM.conn.send(msgObj.body)
             dispatch(Creators.addMessage(formatMsg))
         }
     },
@@ -224,7 +226,16 @@ const { Types, Creators } = createActions({
             })
         }
     },
-
+    fetchThreadMessage: (to, offset, cb, isScroll) => {
+        return (dispatch) => {
+            AppDB.fetchThreadMessage(to, offset).then(messageList => {
+                if (messageList.length) {
+                    dispatch(Creators.updateThreadMessage(to,messageList,isScroll))
+                }
+                cb && cb(messageList.length)
+            })
+        }
+    },
     clearMessage: (chatType, id) => {
         return (dispatch) => {
             dispatch({ 'type': 'CLEAR_MESSAGE', 'chatType': chatType, 'id': id })
@@ -254,15 +265,52 @@ const { Types, Creators } = createActions({
 })
 
 /* ------------- Reducers ------------- */
+export const updateThreadMessage = (state,{to,messageList,isScroll}) =>{
+    let data = state['threadMessage'][to] ? state['threadMessage'][to].asMutable() : []
+    data = data.concat(messageList)
+    if(isScroll === "scroll"){
+        state = state.setIn(['threadMessage', to], data)
+    }else{
+        state = state.setIn(['threadMessage', to], messageList)
+    }
+    
+    
+    return state
+}
+
 export const addMessage = (state, { message, messageType = 'txt' }) => {
     const rootState = uikit_store.getState()
     !message.status && (message = formatServerMessage(message, messageType))
     const username = WebIM.conn.context.userId
-    const { id, to, status } = message
+    const { id, to, status, isThread, thread } = message
     let { chatType } = message
     const from = message.from || username
     const bySelf = from === username
     let chatId = bySelf || chatType !== 'singleChat' ? to : from
+    if(isThread || (thread && JSON.stringify(thread)!=='{}')){
+        //isThread -自己发送  thread不为空 sdk解析收到的消息
+        //处理-存储到 threadMessage和indexDb中
+        const chatData = state.getIn(['threadMessage', chatId], Immutable([])).asMutable()
+        const _message = {
+            ...message,
+            bySelf,
+            isThread:true,//是thread消息
+            time: +new Date(),
+            status: status
+        }
+        let isPushed = false
+        chatData.forEach(m => {
+            if (m.id === _message.id) {
+                isPushed = true
+            }
+        })
+    
+        !isPushed && chatData.push(_message)
+        state = state.setIn(['threadMessage', chatId], chatData)
+        // add a message to db, if by myselt, isUnread equals 0
+        !isPushed && AppDB.addMessage(_message, !bySelf ? 1 : 0,isThread)
+        return state
+    }
     const chatData = state.getIn([chatType, chatId], Immutable([])).asMutable()
     const _message = {
         ...message,
@@ -307,7 +355,6 @@ export const addMessage = (state, { message, messageType = 'txt' }) => {
     }
 
     state = state.setIn(['byId', id], { chatType, chatId })
-
     return state
 }
 
@@ -420,6 +467,9 @@ export const updateMessageMid = (state, { id, mid }) => {
     setTimeout(() => { AppDB.updateMessageMid(mid, Number(id)) }, 500)
     return state.setIn(['byMid', mid], { id })
 }
+export const updateThreadDetails = (state, {chatType,groupId,messageList}) => {
+    return state.setIn([chatType, groupId], messageList)
+}
 
 /* ------------- Hookup Reducers To Types ------------- */
 
@@ -432,6 +482,8 @@ export const messageReducer = createReducer(INITIAL_STATE, {
     [Types.UPDATE_MESSAGES]: updateMessages,
     [Types.UPDATE_MESSAGE_MID]: updateMessageMid,
     [Types.UPDATE_MESSAGE_STATUS]: updateMessageStatus,
+    [Types.UPDATE_THREAD_DETAILS]: updateThreadDetails,
+    [Types.UPDATE_THREAD_MESSAGE]: updateThreadMessage
 })
 
 export default Creators

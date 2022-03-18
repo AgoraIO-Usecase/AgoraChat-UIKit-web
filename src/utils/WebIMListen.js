@@ -101,6 +101,44 @@ export default function createlistener(props) {
       store.dispatch(MessageActions.clearMessage('singleChat', msg.from));
       store.dispatch(SessionActions.deleteSession(msg.from));
       store.dispatch(GlobalPropsActions.setGlobalProps({to:null}))
+    },
+    //群成员收到therad更新的通知--抛出到demo层处理
+    onThreadUpdate:(msg) =>{
+      switch(msg.type){
+        case 'create':
+          console.log("create")
+        case 'update':
+          console.log("update")
+        case 'delete':
+          console.log("delete")
+        case 'update_msg':
+          console.log("update_msg")
+        default:
+          console.log('error')
+      }
+    },
+    //thread成员收到thread更新的通知
+    onThreadChange:(msg) =>{
+      switch(msg.type){
+        case 'threadCreate':
+          console.log("threadCreate")
+        case 'threadDestroy':
+          console.log("threadDestroy")
+        case 'threadJoin':
+          console.log("threadJoin")
+        case 'threadLeave':
+          console.log("threadLeave")
+        case 'threadKick':
+          console.log("threadKick")
+        case 'threadNameUpdate':
+          console.log("threadNameUpdate")
+        case 'threadPresence':
+          console.log("threadPresence")
+        case 'threadAbsence':
+          console.log("threadAbsence")
+      default:
+          console.log('error')
+      }
     }
 
   });

@@ -3,7 +3,7 @@ import _ from 'lodash'
 
 const DB_VERSION = '1'
 const TABLE_NAME = 'IM_message'
-const TABLE_INDEX_KEYS = ['id', 'from', 'to', 'chatType', 'isUnread', 'status', 'mid', 'session']
+const TABLE_INDEX_KEYS = ['id', 'from', 'to', 'chatType', 'isUnread', 'status', 'mid', 'session', 'thread']
 const DB_ENABLE = true
 const PAGE_NUM = 20
 const AppDB = {
@@ -65,6 +65,30 @@ const AppDB = {
                 })
         })
     },
+    fetchThreadMessage(to,offset = 0,limit = PAGE_NUM){
+        const $_TABLE = this.$_TABLE
+        return this.exec(resolve => {
+            $_TABLE.where('to')
+                .equals(to)
+                .offset(offset)
+                .limit(limit)
+                .toArray()
+                .then(res => {
+                    resolve(res)
+                })
+        })
+    },
+    findLastMessage(to){
+        const $_TABLE = this.$_TABLE
+        return this.exec(resolve => {
+            $_TABLE.where('to')
+                .equals(to)
+                .last()
+                .then(res => {
+                    resolve(res)
+                })
+        })
+    },
 
     // read all messages of conversation
     readMessage(chatType, userId) {
@@ -121,16 +145,25 @@ const AppDB = {
                 .then(res => console.log('res', res))
         })
     },
+    updateMessageThread(id, thread){
+        const $_TABLE = this.$_TABLE
+        return this.exec(resolve => {
+            $_TABLE.where('id')
+                .equals(id)
+                .modify({ 'thread': thread })
+                .then(res => console.log('res', res))
+        })
+    },
 
     // add a message to the database
-    addMessage(message, isUnread = 0) {
+    addMessage(message, isUnread = 0,isThread = false) {
         const $_TABLE = this.$_TABLE
         if ($_TABLE === undefined) return
         if (!message.error) {
             return this.exec(resolve => {
                 $_TABLE.where('id').equals(message.id).count().then(res => {
                     if (res === 0) {
-                        message.isUnread = isUnread
+                        !isThread ? message.isUnread = isUnread:null
                         $_TABLE.add(message)
                             .then(res => resolve(res))
                             .catch(e => console.log('add messaga:', e))
@@ -186,7 +219,7 @@ const AppDB = {
                                 sessionType: element.chatType
                             })
                         }
-                        else if(!sessionObj[element.to]){
+                        else if(!sessionObj[element.to] && !element.isThread){
                             sessionObj[element.to] = true
                             sessionList.push({
                                 sessionId:element.to,

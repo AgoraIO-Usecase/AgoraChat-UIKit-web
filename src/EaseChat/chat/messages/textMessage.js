@@ -7,6 +7,7 @@ import { emoji } from "../../../common/emoji";
 import { renderTime } from "../../../utils";
 
 import MessageStatus from "./messageStatus";
+import MsgThreadInfo from "./msgThreadInfo"
 
 import { EaseChatContext } from "../index";
 const useStyles = makeStyles((theme) => ({
@@ -49,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: (props) =>
       props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
     padding: "15px",
-    maxWidth: "65%",
+    // maxWidth: "65%",
     wordBreak: "break-all",
     textAlign: "initial",
   },
@@ -78,7 +79,7 @@ const initialState = {
   mouseX: null,
   mouseY: null,
 };
-function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
+function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThreade, isThreadPanel }) {
   let easeChatProps = useContext(EaseChatContext);
   const { onAvatarChange } = easeChatProps;
   const classes = useStyles({
@@ -134,6 +135,9 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 
     return rnTxt;
   };
+  const createThread = ()=>{
+    onCreateThreade(message)
+  }
 
   return (
     <li className={classes.pulldownListItem}>
@@ -152,7 +156,8 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
       <div className={classes.textBodyBox}>
         <span className={classes.userName}>{message.from}</span>
         <div className={classes.textBody} onContextMenu={handleClick}>
-          {renderTxt(message.body.msg)}
+          {renderTxt(message.body.msg)}{message.isThread}
+          {(!isThreadPanel) && message.chatType ==="groupChat" && message.thread&& (JSON.stringify(message.thread)!=='{}') ? <MsgThreadInfo message={message} />: null}
         </div>
         {message.bySelf && (
           <MessageStatus
@@ -163,6 +168,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
           />
         )}
       </div>
+      {!message.thread && !isThreadPanel && message.chatType === 'groupChat'? (<button onClick={createThread}>thread</button>):null}
       <div className={classes.time}>{renderTime(message.body.time || message.time)}</div>
       {message.status === "read" ? (
         <div className={classes.read}>{i18next.t("Read")}</div>

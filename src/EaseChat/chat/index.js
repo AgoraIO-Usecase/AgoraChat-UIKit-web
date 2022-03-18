@@ -14,6 +14,7 @@ import "../../i18n";
 import "../../common/iconfont.css";
 import noMessage from "../../common/images/nomessage.png";
 import i18next from "i18next";
+import ThreadPanel from "../thread/threadPanel";
 
 export const EaseChatContext = createContext();
 const useStyles = makeStyles((theme) => ({
@@ -86,10 +87,19 @@ const Chat = (props) => {
 };
 
 const EaseChatProvider = (props) => {
+  const threadPanelStates = useSelector((state) => state.thread?.threadPanelStates);
   return (
     <Provider store={store}>
       <React.StrictMode>
-        <Chat {...props} />
+        <div style={{display: 'flex',height: '100%'}}>
+          <div style={{flex: '1 1 auto',height: '100%'}}>
+             <Chat {...props} />
+          </div>
+          <div style={{flex: '0 0 392px',overflow:'hidden',display: threadPanelStates?'flex':'none',height: '100%'}}>
+            <hr style={{width:0,height:'100%',border:'none',borderRight:'8px solid #edeff2'}}/>
+            <ThreadPanel {...props} />
+          </div>
+        </div>
       </React.StrictMode>
     </Provider>
   );
@@ -123,6 +133,7 @@ EaseChatProvider.propTypes = {
 EaseChatProvider.defaultProps = {
   showByselfAvatar:false,
   easeInputMenu:'all',
+  isThread: false,
   menuList: [
     { name: i18next.t('send-image'), value: "img", key: "1" },
     { name: i18next.t('send-file'), value: "file", key: "2" },

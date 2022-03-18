@@ -12,6 +12,8 @@ import i18next from "i18next";
 import MessageActions from "../../../redux/message";
 import SessionActions from "../../../redux/session";
 import GlobalPropsActions from "../../../redux/globalProps"
+import ThreadActions from "../../../redux/thread";
+import ThreadListPanel from "../../thread/threadList/index.js"
 import { EaseChatContext } from "../index";
 
 import _ from 'lodash'
@@ -19,6 +21,7 @@ import avatarIcon1 from '../../../common/images/avatar1.png'
 import avatarIcon2 from '../../../common/images/avatar2.png'
 import avatarIcon3 from '../../../common/images/avatar3.png'
 import groupAvatarIcon from '../../../common/images/groupAvatar.png'
+import threadIcon from '../../../common/images/thread.png'
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -40,6 +43,10 @@ const useStyles = makeStyles((theme) => {
     avatar: {
       margin: "0 20px 0 16px",
     },
+    threadIcon: {
+      width: '21px',
+      height: '20px',
+    }
   };
 });
 const MessageBar = () => {
@@ -49,6 +56,7 @@ const MessageBar = () => {
   const dispatch = useDispatch();
   const groupById = useSelector((state) => state.group?.group.byId) || {};
   const globalProps = useSelector((state) => state.global.globalProps);
+  const threadList = useSelector((state) => state.thread?.threadList) || [];
 
   const [sessionEl, setSessionEl] = useState(null);
 
@@ -95,6 +103,9 @@ const MessageBar = () => {
   const handleSessionInfoClick = (e) => {
     setSessionEl(e.currentTarget);
   };
+  const openThreadList = ()=>{
+    dispatch(ThreadActions.setShowThreadList(true));
+  }
 
   let userAvatars = {
     1: avatarIcon1,
@@ -119,12 +130,17 @@ const MessageBar = () => {
         {to}
       </Box>
       <Box position="static">
+        <IconButton className="iconfont icon" style={{display: chatType === "groupChat" ? "inline-flex" : "none"}} onClick={openThreadList}>
+          <img alt="" className={classes.threadIcon} src={threadIcon} />
+          <span style={{color: '#0D0D0D',fontSize:'14px',fontWeitht:'600',marginLeft:'3px',fontFamily:'Roboto'}}>{threadList.length>99 ? '99+':threadList.length }</span>
+        </IconButton>
         <IconButton
           onClick={handleSessionInfoClick}
           className="iconfont icon-hanbaobao icon"
         ></IconButton>
       </Box>
       {renderSessionInfoMenu()}
+      <ThreadListPanel/>
     </div>
   );
 };

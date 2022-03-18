@@ -27,6 +27,7 @@ import Recorder from "./messages/recorder";
 import icon_emoji from "../../common/icons/emoji@2x.png";
 import icon_yuyin from "../../common/icons/voice@2x.png";
 import attachment from "../../common/icons/attachment@2x.png";
+import ThreadActions from "../../redux/thread"
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -75,11 +76,11 @@ const useStyles = makeStyles((theme) => ({
 
 function SendBox(props) {
   let easeChatProps = useContext(EaseChatContext);
-  const { easeInputMenu,menuList,handleMenuItem } = easeChatProps;
+  const { easeInputMenu, menuList, handleMenuItem } = easeChatProps;
   const dispatch = useDispatch();
   const classes = useStyles();
   const globalProps = useSelector((state) => state.global.globalProps);
-  const { chatType, to } = globalProps;
+  let { chatType, to } = globalProps;
   const emojiRef = useRef(null);
   const fileEl = useRef(null);
   const [emojiVisible, setEmojiVisible] = useState(null);
@@ -111,16 +112,58 @@ function SendBox(props) {
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
   };
+  const isCreatingThread = useSelector((state) => state.thread?.isCreatingThread);
+  const currentThreadInfo = useSelector((state) => state.thread?.currentThreadInfo);
   const sendMessage = useCallback(() => {
     if (!inputValue) return;
+    if (isCreatingThread && props.isThread) {
+      if (!currentThreadInfo.name) {
+        console.log('threadName can not empty')
+        return;
+      }
+      const options = {
+        name: currentThreadInfo.name,
+        msgId: currentThreadInfo.id,
+        groupId: currentThreadInfo.to,
+      }
+      //test=====start 本地测试 不调用接口
+      var promise = new Promise(function (resolve, reject) {
+        resolve({ threadId: '33' })
+      });
+      promise.then(res => {
+        dispatch(ThreadActions.setIsCreatingThread(false));
+        //发送thread消息
+        dispatch(MessageActions.sendTxtMessage(res.threadId, chatType, {
+            msg: inputValue,
+          }, props.isThread)
+        )
+       })
+      //test=====end
+
+      // WebIM.conn.createThread(options).then(res=>{
+      //   //修改thread的编辑状态
+      //   dispatch(ThreadActions.setIsCreatingThread(false));
+      //   dispatch(
+      //     MessageActions.sendTxtMessage(res.threadId, chatType, {
+      //       msg: inputValue,
+      //     },props.isThread )
+      //   );
+      //   setInputValue("");
+      //   inputRef.current.focus();
+      // })
+      // return 
+    }
+    if(props.isThread) {
+      to = currentThreadInfo.thread.threadId
+    }
     dispatch(
       MessageActions.sendTxtMessage(to, chatType, {
         msg: inputValue,
-      })
+      }, props.isThread)
     );
     setInputValue("");
     inputRef.current.focus();
-  }, [inputValue, to, chatType, dispatch]);
+  }, [inputValue, to, chatType, dispatch,currentThreadInfo ]);
 
   const onKeyDownEvent = useCallback(
     (e) => {
@@ -157,14 +200,14 @@ function SendBox(props) {
     if (!file.filename) {
       return false;
     }
-    dispatch(MessageActions.sendFileMessage(to, chatType, file,fileEl));
+    dispatch(MessageActions.sendFileMessage(to, chatType, file, fileEl));
   };
   const handleImageChange = (e) => {
     let file = WebIM.utils.getFileUrl(e.target);
     if (!file.filename) {
       return false;
     }
-    dispatch(MessageActions.sendImgMessage(to, chatType, file,imageEl));
+    dispatch(MessageActions.sendImgMessage(to, chatType, file, imageEl));
   };
 
   const handleClickMenu = (e) => {
@@ -172,7 +215,7 @@ function SendBox(props) {
   };
 
   const onClickMenuItem = (v) => (e) => {
-    handleMenuItem && handleMenuItem(v,e)
+    handleMenuItem && handleMenuItem(v, e)
     switch (v) {
       case 0:
         handleImageClick();
