@@ -1,4 +1,4 @@
-import React, { memo, useState, useContext } from "react";
+import React, { memo, useState, useContext, useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
 import i18next from "i18next";
 import { Menu, MenuItem } from "@material-ui/core";
@@ -7,6 +7,7 @@ import { emoji } from "../../../common/emoji";
 import { renderTime } from "../../../utils";
 
 import MessageStatus from "./messageStatus";
+import {CopyToClipboard} from 'react-copy-to-clipboard'
 
 import { EaseChatContext } from "../index";
 const useStyles = makeStyles((theme) => ({
@@ -85,16 +86,22 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
     bySelf: message.bySelf,
     chatType: message.chatType,
   });
-  const [state, setState] = useState(initialState);
+  const [menuState, setMenuState] = useState(initialState);
+  const [copyMsgVal,setCopyMsgVal] = useState('');
+
+  useEffect(()=>{
+    setCopyMsgVal(message.msg)
+  },[copyMsgVal])
+  
   const handleClick = (event) => {
     event.preventDefault();
-    setState({
+    setMenuState({
       mouseX: event.clientX - 2,
       mouseY: event.clientY - 4,
     });
   };
   const handleClose = () => {
-    setState(initialState);
+    setMenuState(initialState);
   };
   const recallMessage = () => {
     onRecallMessage(message);
@@ -135,6 +142,11 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
     return rnTxt;
   };
 
+    const changeCopyVal = () => {
+    setCopyMsgVal(message.msg);  
+    handleClose() 
+  }
+
   return (
     <li className={classes.pulldownListItem}>
       <div>
@@ -142,7 +154,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
           <img
             className={classes.avatarStyle}
             src={avatar}
-            onClick={() => onAvatarChange && onAvatarChange(message)}
+            onClick={(e) => onAvatarChange && onAvatarChange(e,message)}
           ></img>
         )}
         {showByselfAvatar && message.bySelf && (
@@ -163,26 +175,29 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
           />
         )}
       </div>
-      <div className={classes.time}>{renderTime(message.body.time || message.time)}</div>
+      <div className={classes.time}>{renderTime(message.time)}</div>
       {message.status === "read" ? (
         <div className={classes.read}>{i18next.t("Read")}</div>
       ) : null}
 
-      {message.bySelf ? (
         <Menu
           keepMounted
-          open={state.mouseY !== null}
+          open={menuState.mouseY !== null}
           onClose={handleClose}
           anchorReference="anchorPosition"
           anchorPosition={
-            state.mouseY !== null && state.mouseX !== null
-              ? { top: state.mouseY, left: state.mouseX }
+            menuState.mouseY !== null && menuState.mouseX !== null
+              ? { top: menuState.mouseY, left: menuState.mouseX }
               : undefined
           }
         >
-          <MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
+         {message.bySelf && <MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>} 
+          {<MenuItem onClick={changeCopyVal}>
+          <CopyToClipboard text={copyMsgVal}>
+            <span>{i18next.t("Copy")}</span>
+        </CopyToClipboard>
+          </MenuItem> }
         </Menu>
-      ) : null}
     </li>
   );
 }

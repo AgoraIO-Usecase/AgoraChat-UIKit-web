@@ -15,6 +15,22 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: (props) => (props.bySelf ? "row-reverse" : "row"),
     alignItems: "center",
   },
+  userName: {
+    padding: "0 10px 4px",
+    color: "#8797A4",
+    fontSize: "14px",
+    display: (props) =>
+      props.chatType !== "singleChat" && !props.bySelf
+        ? "inline-block"
+        : "none",
+    textAlign: (props) => (props.bySelf ? "right" : "left"),
+  },
+  textBodyBox: {
+    display: "flex",
+    flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
+    maxWidth: "65%",
+    alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
+  },
   imgBox: {
     marginLeft: "10px",
     maxWidth: "50%",
@@ -61,13 +77,17 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
       {!message.bySelf && (
         <Avatar
           src={avatar}
-          onClick={() => onAvatarChange && onAvatarChange(message)}
+          onClick={(e) => onAvatarChange && onAvatarChange(e,message)}
         ></Avatar>
       )}
       {showByselfAvatar && message.bySelf && <Avatar src={avatar}></Avatar>}
-      <div className={classes.imgBox} onContextMenu={handleClick}>
-        <img src={message.url} alt="img message"></img>
+      <div className={classes.textBodyBox}>
+        <span className={classes.userName}>{message.from}</span>
+        <div className={classes.imgBox} onContextMenu={handleClick}>
+          <img src={message.url} alt="img message"></img>
+        </div>
       </div>
+     
       <div className={classes.time}>{renderTime(message.time)}</div>
       {message.bySelf ? (
         <Menu
