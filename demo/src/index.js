@@ -58,7 +58,7 @@ export default class Demo extends Component {
             
             appkey= "41117440#383391"
             username="test003"
-            agoraToken="007eJxTYFgUnyKiI5H3xG7BP7sTdvmhZx39Xzz4GjdBf9/ZvbdfCjQrMKQZpiSbm1skpaQkm5mYJaZYpBmZGViamyUnGqUYGJomT+0wTFKQYWA4IbH2NyMDKwMjEIL4KgzmKRZGZuamBrqWSYmmuoaGqcm6lubmqbop5smWZkZpxhamlmYA5rcoEQ=="
+            agoraToken="007eJxTYDiw2fuKzNWjLzknllxuMkl+z+OTa5dxRZPB6fP1VGlGX1sFhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9NkPSnjJAUZBgbT1MfvGBlYGRiBEMRXYTBPsTAyMzc10LVMSjTVNTRMTda1NDdP1U0xT7Y0M0oztjC1NAMA7zUk8Q=="
             header={<div style={{ height: "100px" }}>TestHeader</div>} />
         </div>
       </div>
