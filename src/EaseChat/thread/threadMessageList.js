@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import RetractedMessage from "../chat/messages/retractedMessage";
 import FileMessage from "../chat/messages/fileMessage";
 import ImgMessage from "../chat/messages/imageMessage";
-import AudioMessage from "../chat/messages/audioMessage";
+import AudioOrVideoMessage from "../chat/messages/audioOrVideoMessage";
 import TextMessage from "../chat/messages/textMessage";
 import i18next from "i18next";
 
@@ -115,8 +115,8 @@ function ThreadMessageList({ messageList, showByselfAvatar }) {
                       showByselfAvatar={showByselfAvatar}
                     />
                   );
-                } else if (msg.body.type === "audio") {
-                  return <AudioMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}/>;
+                } else if (msg.body.type === "audio" || msg.body.type === "video") {
+                    return <AudioOrVideoMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}/>;
                 } else if (msg.body.type === "recall") {
                   return (
                     <RetractedMessage message={msg} key={msg.id + index}/>

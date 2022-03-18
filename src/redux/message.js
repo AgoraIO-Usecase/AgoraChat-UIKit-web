@@ -88,7 +88,8 @@ const { Types, Creators } = createActions({
                 },
                 onFileUploadComplete: function (data) {
                     let url = data.uri + '/' + data.entities[0].uuid
-                    formatMsg.url = formatMsg.body.url = url
+                    formatMsg.url = url
+                    formatMsg.body.url = url
                     formatMsg.status = 'sent'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
                     dispatch(Creators.updateMessages(chatType, to, formatMsg))
@@ -128,7 +129,8 @@ const { Types, Creators } = createActions({
                 },
                 onFileUploadComplete: function (data) {
                     let url = data.uri + '/' + data.entities[0].uuid
-                    formatMsg.url = formatMsg.body.url = url
+                    formatMsg.url = url
+                    formatMsg.body.url = url
                     formatMsg.status = 'sent'
                     dispatch(Creators.updateMessages(chatType, to, formatMsg ))
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
@@ -174,6 +176,7 @@ const { Types, Creators } = createActions({
                 onFileUploadComplete: function (data) {
                     let url = data.uri + '/' + data.entities[0].uuid
                     formatMsg.url = url
+                    formatMsg.body.url = url
                     formatMsg.status = 'sent'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
                     dispatch(Creators.updateMessages(chatType, to, formatMsg))
@@ -185,6 +188,58 @@ const { Types, Creators } = createActions({
 
             WebIM.conn.send(msgObj.body)
             dispatch(Creators.addMessage(formatMsg, 'audio'))
+        }
+    },
+
+    sendVideoMessage: (to, chatType, file,videoEl) => {
+        return (dispatch, getState) => {
+            if (file.data.size > (1024 * 1024 * 10)) {
+                message.error(i18next.t('The video exceeds the upper limit'))
+                return
+            }
+            let allowType = {
+                'mp4': true,
+                'wmv': true,
+                'avi': true,
+                'rmvb': true,
+                'mkv': true
+            };
+            if (file.filetype.toLowerCase() in allowType) {
+                const formatMsg = formatLocalMessage(to, chatType, file, 'video')
+                const { id } = formatMsg
+                const msgObj = new WebIM.message('video', id)
+                msgObj.set({
+                    ext: {
+                        file_length: file.data.size,
+                        file_type: file.data.type,
+                    },
+                    file: file,
+                    length:file.length,
+                    file_length:file.data.size,
+                    to,
+                    chatType,
+                    onFileUploadError: function (error) {
+                        formatMsg.status = 'fail'
+                        dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
+                        videoEl.current.value =''
+                    },
+                    onFileUploadComplete: function (data) {
+                        let url = data.uri + '/' + data.entities[0].uuid
+                        formatMsg.url = url
+                        formatMsg.body.url = url
+                        formatMsg.status = 'sent'
+                        dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
+                        dispatch(Creators.updateMessages(chatType, to, formatMsg))
+                        videoEl.current.value =''
+                    },
+                    fail: function () {
+                        dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
+                        videoEl.current.value =''
+                    },
+                })
+                WebIM.conn.send(msgObj.body)
+                dispatch(Creators.addMessage(formatMsg, 'video'))
+            }
         }
     },
 
@@ -284,8 +339,11 @@ export const addMessage = (state, { message, messageType = 'txt' }) => {
     const username = WebIM.conn.context.userId
     const { id, to, status, isThread, thread } = message
     let { chatType } = message
+    // where the message comes from, when from current user, it is null
     const from = message.from || username
+    // bySelf is true when sent by current user, otherwise is false
     const bySelf = from === username
+    // root id: when sent by current user or in group chat, is id of receiver. Otherwise is id of sender
     let chatId = bySelf || chatType !== 'singleChat' ? to : from
     if(isThread || (thread && JSON.stringify(thread)!=='{}')){
         //isThread -自己发送  thread不为空 sdk解析收到的消息

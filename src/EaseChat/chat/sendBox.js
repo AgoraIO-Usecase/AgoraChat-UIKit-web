@@ -83,6 +83,7 @@ function SendBox(props) {
   let { chatType, to } = globalProps;
   const emojiRef = useRef(null);
   const fileEl = useRef(null);
+  const videoEl = useRef(null)
   const [emojiVisible, setEmojiVisible] = useState(null);
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
@@ -187,14 +188,24 @@ function SendBox(props) {
     };
   }, [onKeyDownEvent]);
 
-  const handleFileClick = () => {
-    fileEl.current.focus();
-    fileEl.current.click();
-  };
-  const handleImageClick = () => {
-    imageEl.current.focus();
-    imageEl.current.click();
-  };
+  const handlefocus = (v) =>{
+    const {value} = v
+    switch (value) {
+      case 'img':
+        imageEl.current.focus();
+        imageEl.current.click();
+        break;
+      case 'file':
+        fileEl.current.focus();
+        fileEl.current.click();
+        break;
+      case 'video':
+        videoEl.current.focus();
+        videoEl.current.click();
+      default:
+        break;
+    }
+  }
   const handleFileChange = (e) => {
     let file = WebIM.utils.getFileUrl(e.target);
     if (!file.filename) {
@@ -202,6 +213,14 @@ function SendBox(props) {
     }
     dispatch(MessageActions.sendFileMessage(to, chatType, file, fileEl));
   };
+
+  const handleVideoChange = (e) => {
+    let file = WebIM.utils.getFileUrl(e.target);
+    if (!file.filename) {
+      return false;
+    }
+    dispatch(MessageActions.sendVideoMessage(to, chatType, file,videoEl));
+  }
   const handleImageChange = (e) => {
     let file = WebIM.utils.getFileUrl(e.target);
     if (!file.filename) {
@@ -215,17 +234,8 @@ function SendBox(props) {
   };
 
   const onClickMenuItem = (v) => (e) => {
-    handleMenuItem && handleMenuItem(v, e)
-    switch (v) {
-      case 0:
-        handleImageClick();
-        break;
-      case 1:
-        handleFileClick();
-        break;
-      default:
-        break;
-    }
+    handleMenuItem && handleMenuItem(v,e)
+    handlefocus(v)
     setSessionEl(null);
   };
 
@@ -249,14 +259,8 @@ function SendBox(props) {
       >
         {menuList && menuList.map((option, index) => {
           return (
-            <MenuItem onClick={onClickMenuItem(index)} key={index}>
-              <Box className={classes.menuItemIconBox}>
-                {/* <img
-                  alt=""
-                  className={classes.iconStyle}
-                  src={option.icon}
-                ></img> */}
-              </Box>
+            <MenuItem onClick={onClickMenuItem(option)} key={index}>
+              <Box className={classes.menuItemIconBox}></Box>
               <Typography variant="inherit" noWrap>
                 {i18next.t(option.name)}
               </Typography>
@@ -273,6 +277,14 @@ function SendBox(props) {
                 <input
                   ref={fileEl}
                   onChange={handleFileChange}
+                  type="file"
+                  className={classes.hide}
+                />
+              )}
+               {option.value === "video" && (
+                <input
+                  ref={videoEl}
+                  onChange={handleVideoChange}
                   type="file"
                   className={classes.hide}
                 />

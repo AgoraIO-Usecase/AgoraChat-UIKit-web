@@ -37,6 +37,8 @@
         "Click to start recording":"Click to start recording",
         "send-image": "Photo",
         "send-file": "File",
-        "you retracted a message":"you retracted a message"
+        "send-video":"Video",
+        "you retracted a message":"you retracted a message",
+        "Copy":"Copy"
     }
 }

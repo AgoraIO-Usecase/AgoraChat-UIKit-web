@@ -137,5 +137,6 @@ EaseChatProvider.defaultProps = {
   menuList: [
     { name: i18next.t('send-image'), value: "img", key: "1" },
     { name: i18next.t('send-file'), value: "file", key: "2" },
+    { name: i18next.t('send-video'), value: "video", key: "3"}
   ],
 };

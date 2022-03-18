@@ -386,7 +386,7 @@ const ThreadPanel = (props) => {
                         <span>Loading...</span>
                     </div>
                 </Box>
-                <SendBox isThread={isThread} />
+                <SendBox isThread={isThread}/>
             </Box>
         </EaseChatContext.Provider>
     );
