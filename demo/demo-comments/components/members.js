@@ -1,4 +1,4 @@
-import React, { useState, } from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
 import "./member.css"
 import SearchBox from './searchBox'
@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => {
             background: '#EDEFF2',
             borderRadius: '0 12px 12px 0',
             boxShadow: '1px 1px 10px rgb(0 0 0 / 30%)',
-            zIndex: '100',
+            zIndex: '1000',
             minHeight: '416px',
             maxHeight: '770px'
         },
@@ -26,38 +26,34 @@ const useStyles = makeStyles((theme) => {
 });
 
 const members = (props) => {
+    let { list, isShow } = props
+    let [displayList, changeDisplayList] = useState([]);
+    useEffect(() => {
+        changeDisplayList(list.concat());
+    }, [list])
     const classes = useStyles();
     const [showSearchBar, setSearchBarState] = useState(false);
     const changeSearchBarState = (state) => {
         setSearchBarState(state);
     }
-    const searchMember = (value) => {
-        console.log('====', value)
+    const searchValue = (value) => {
+        let searchList = list.concat();
+        searchList = searchList.filter((item) => {
+            return item.nickName.indexOf(value) > -1
+        })
+        changeDisplayList(searchList.concat());
     }
     const closeThreadList = () => {
-        // dispatch(ThreadActions.setShowThreadList(false));
-        console.log("888")
+        console.log("=====close list")
     }
-    const [list, setList] = useState([
-        { nikeName: 'test000', role: 'GroupOwner' },
-        { nikeName: 'test111', role: 'Admin' },
-        { nikeName: 'test222', role: 'Admin' },
-        { nikeName: 'test333', role: 'member' },
-        { nikeName: 'test444', role: 'member' },
-        { nikeName: 'test444', role: 'member' },
-        { nikeName: 'test444', role: 'member' },
-        { nikeName: 'test444', role: 'member' },
-        { nikeName: 'test444', role: 'member' },
-        { nikeName: 'test444', role: 'member' },
-        { nikeName: 'test444', role: 'member' },
-        { nikeName: 'test444', role: 'member' },
-        { nikeName: 'test444', role: 'member' },
-        { nikeName: 'test444', role: 'member' },
-    ])
+    const removeMemver = (item) => {
+        console.log("=====", item)
+        // WebIM.conn.removeMemberFromThread({threadId:'123',userName:item.nickName}).then((res)=>{})//
+    }
     return (
-        <div className={classes.container}>
+        <div className={classes.container} style={{ display: isShow ? 'block' : 'none' }}>
             <div className='tlp-header'>
-                <span className='tlp-header-title'>members List ({88})</span>
+                <span className='tlp-header-title'>threadId ({displayList.length})</span>
                 <Box style={{ lineHeight: '60px', display: showSearchBar == 1 ? 'none' : 'flex' }}>
                     <div className="tlp-header-icon">
                         <img className="tlp-header-icon-search" alt="" src={threadSearch} onClick={(e) => changeSearchBarState(true)} />
@@ -67,23 +63,24 @@ const members = (props) => {
                     </div>
                 </Box>
                 <Box style={{ marginTop: '12px', display: showSearchBar == 1 ? 'flex' : 'none' }}>
-                    <SearchBox changeSearchBarState={changeSearchBarState} searchMember={searchMember} />
+                    <SearchBox changeSearchBarState={changeSearchBarState} searchValue={searchValue} />
                 </Box>
             </div>
             <div className="list-con">
-                {list.length > 0 && list.map((item, index) => {
+                {displayList.length === 0 && <div className="list-empty">No member</div>}
+                {displayList.length > 0 && displayList.map((item, index) => {
                     return (
                         <div className="list-item">
                             <div className="user-info">
                                 <img className="avatar" src="https://aip.bdstatic.com/portal-pc-node/dist/1645513367427/images/technology/imageprocess/dehaze/5.jpg"></img>
-                                <span className="username">{item.nikeName}</span>
+                                <span className="username">{item.nickName}</span>
                             </div>
                             <div className="user-role">
                                 {item.role !== 'member' && <span className="role">{item.role}</span>}
                                 {item.role !== 'GroupOwner' &&
                                     <div className="edit-con">
                                         <span className="edit"></span>
-                                        <div className="remove-con">
+                                        <div className="remove-con" onClick={(e) => removeMemver(item)}>
                                             <div className="remove">
                                                 <span className="remove-icon"></span>
                                                 <span className="remove-text">Remove</span>

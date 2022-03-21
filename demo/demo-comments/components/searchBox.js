@@ -63,10 +63,10 @@ const searchBox = (props) => {
         setSearchValue(e.target.value);
     }
     const closeSearchBar = (state) => {
-        // props.changeSearchBarState(state)
+        props.changeSearchBarState(state)
     }
     const search = () => {
-        // props.searchThread(searchValue)
+        props.searchValue(searchValue)
     }
     const clearInput = (e) => {
         setSearchValue('');

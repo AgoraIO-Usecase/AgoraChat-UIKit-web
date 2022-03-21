@@ -1,9 +1,6 @@
-import React, { useState, } from "react";
+import React, { useEffect, useState, } from "react";
 import { makeStyles } from "@material-ui/styles";
-import {
-    Box,
-    IconButton
-} from "@material-ui/core";
+import { IconButton } from "@material-ui/core";
 import MembersIcon from '../images/members.png'
 import NotificationsIcon from '../images/Notifications.png'
 import FullViewIcon from '../images/FullView.png'
@@ -89,41 +86,59 @@ const editThreadPanel = (props) => {
             type: 'Disband Thread',
         },
     }
+    useEffect(() => {
+        //获取用户角色-计算权限
+    })
     //群管理员
-    let editTypes = ['Members', 'Notifications', 'FullView', 'EditThread','LeaveThread', 'DisbandThread']
+    let editTypes = ['Members', 'Notifications', 'FullView', 'EditThread', 'LeaveThread', 'DisbandThread']
 
     const [showEditPanle, setShowEditPanel] = useState(false);
-    const openEditPanel = (states) => {
+    const changeEditPanel = (states) => {
         setShowEditPanel(states)
     }
-    const changepanelstates = (type)=>{
-        console.log("=====",type)
-        switch (type){
-            case 'Members':
+    const changepanelstates = (type) => {
+        console.log("=====", type)
+        changeEditPanel(false)
+        switch (type) {
+            case 'Members': {
+                break;
+            }
+            case 'Notifications': {
                 console.log('1')
-            case 'Notifications':
+                break;
+            }
+            case 'FullView': {
                 console.log('1')
-            case 'FullView':
+                break;
+            }
+            case 'EditThread': {
                 console.log('1')
-            case 'EditThread':
+                break;
+            }
+            case 'LeaveThread': {
                 console.log('1')
-            case 'LeaveThread':
+                break;
+            }
+            case 'DisbandThread': {
                 console.log('1')
-            case 'DisbandThread':
-                console.log('1')
-    }
+                break;
+            }
+            default:
+                console.log("wrong type")
+                break;
+        }
     }
     return (
         <div className={classes.editPanel}>
             <IconButton
                 className="iconfont icon-hanbaobao icon"
-                style={{height: '38px',width: '38px'}}
-                onClick={(e) => openEditPanel(true)}
+                style={{ height: '38px', width: '38px' }}
+                onClick={(e) => changeEditPanel(true)}
             ></IconButton>
-            <div className={classes.container} style={{display: showEditPanle? 'block': 'none'}}>
+            <div className={classes.container} style={{ display: showEditPanle ? 'block' : 'none' }}>
                 {editTypes.length && editTypes.map((itemType, index) => {
                     return (
-                        <div className={classes.itemType} onClick={(e) => {changepanelstates(itemType)}} key={index}>
+                        <div className={classes.itemType} onClick={(e) => { changepanelstates(itemType) }} key={index}>
                             <img src={EDIT_THREAD_TYPES[itemType].icon} className={classes.typeIcon}></img>
                             <span className={classes.typeText} style={{ color: itemType === "DisbandThread" ? "#FF14CC" : '#000' }}>{EDIT_THREAD_TYPES[itemType].type}</span>
                         </div>

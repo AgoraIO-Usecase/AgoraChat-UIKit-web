@@ -8,9 +8,28 @@ import val from "./comm";
 import EditThreadPanel from "../demo-comments/components/editThreadPanel";
 import Dialog  from "../demo-comments/components/dialog";
 import Members  from "../demo-comments/components/members";
+import { times } from "lodash";
 export default class Demo extends Component {
   state = {
     token: val,
+    type:'',
+    showMemberList: false,
+    list:[
+      { nickName: 'test000', role: 'GroupOwner' },
+      { nickName: 'test111', role: 'Admin' },
+      { nickName: 'test222', role: 'Admin' },
+      { nickName: 'test333', role: 'member' },
+      { nickName: 'test444', role: 'member' },
+      { nickName: 'test444', role: 'member' },
+      { nickName: 'test444', role: 'member' },
+      { nickName: 'test444', role: 'member' },
+      { nickName: 'test444', role: 'member' },
+      { nickName: 'test444', role: 'member' },
+      { nickName: 'test444', role: 'member' },
+      { nickName: 'test444', role: 'member' },
+      { nickName: 'test444', role: 'member' },
+      { nickName: 'test444', role: 'member' },
+  ],
   };
 
   postData = (url, data) => {
@@ -49,13 +68,51 @@ export default class Demo extends Component {
   test5 = () =>{
     console.log('test5');
   }
+  //test--start
+  editThread = ()=>{
+    let editTypes = ['Members', 'Notifications', 'FullView', 'EditThread', 'LeaveThread', 'DisbandThread']
+    this.state.type = editTypes[0];
+    switch (this.state.type) {
+      case 'Members': {
+          // WebIM.conn.getThreadMembers({threadId:'123',size:'1',pageSize:'50'}).then((res)=>{})//
+          break;
+      }
+      case 'Notifications': {
+          console.log('Notifications')
+          break;
+      }
+      case 'FullView': { 
+          console.log('FullView') 
+          break;
+      }
+      case 'EditThread': { 
+        // WebIM.conn.changeThreadName({threadId:'123',name:'newName',}).then((res)=>{})//
+          break;
+      }
+      case 'LeaveThread': { 
+          //WebIM.conn.leaveThread({threadId:'123'}).then((res)=>{})
+          break;
+      }
+      case 'DisbandThread': { 
+          //WebIM.conn.destroyThread({threadId:'123'}).then((res)=>{})
+          break;
+      }
+      default:
+          console.log("wrong type")
+          break;
+  }
+  }
+  //test--end
+
+
   render() {
     console.log("this.state.token>>", this.state.token);
     return (
       <div>
-        {/* <Dialog showDialog = 'false' title="dialog title" button1='Cancel' button2='save' input='true' /> */}
-        {/* <Members /> */}
+        <Dialog showDialog = 'false' title="dialog title" button1='Cancel' button2='save' input='true' />
+        <Members list={this.state.list} isShow = {this.state.showMemberList} />
           <button onClick={this.addSessionItem}> 测试 </button>
+          <button onClick={this.editThread}> 测试Edit </button>
         <h3>EaseApp</h3>
         <div>
           <EaseApp
@@ -66,7 +123,7 @@ export default class Demo extends Component {
             appkey= "41117440#383391"
             username="zd129"
             editThreadPanel={<EditThreadPanel/>}
-            agoraToken="007eJxTYLBr7/ZkVcjyS5m+N3KLbmRdsH75Su43Zz8JNTNvPCk9f7UCQ5phSrK5uUVSSkqymYlZYopFmpGZgaW5WXKiUYqBoWnyvLfmSQoyDAyX3RYEMDKwMjACIYivwmBiaJxoYWxgoJtoZpmqa2iYmqybZG5oqWtpbGJsmpaWbGpmbgIAt9QlLA=="
+            agoraToken="007eJxTYFA+KLF0bcqqKV93bTqhF5EoqB/Tt0zm3uWFIQ/0Hvya8/i6AkOaYUqyublFUkpKspmJWWKKRZqRmYGluVlyolGKgaFpsomiRZKCDAPDSumpmYwMrAyMQAjiqzCYGBonWhgbGOgmmlmm6hoapibrJpkbWupaGpsYm6alJZuamZsAAAKkJ3I="
             header={<div style={{ height: "100px" }}>TestHeader</div>} 
             />
         </div>

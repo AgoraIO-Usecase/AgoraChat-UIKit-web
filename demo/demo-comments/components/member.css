@@ -115,3 +115,8 @@
     color: #FF14CC;
     line-height: 38px;
 }
+.list-empty{
+    margin-top: 150px;
+    width: 100%;
+    text-align: center;
+}

@@ -55,7 +55,7 @@ const ThreadBar = (props) => {
         dispatch(ThreadActions.updateThreadStates(false));
     }
     const threadName = useSelector((state) => state.thread?.currentThreadInfo?.thread?.threadName) || 'New thread';
-
+    const { isCreatingThread } = useSelector((state) => state.thread);
     return (
         <div className={classes.root}>
             <Box position="static" className={classes.leftBar}>
@@ -63,9 +63,10 @@ const ThreadBar = (props) => {
                     <img alt="" className={classes.threadIcon} src={threadIcon} />
                 </IconButton>{threadName}</Box>
             <Box position="static" className={classes.rightBar}>
-                <div className={classes.editPanel}>
+                {/* {!isCreatingThread && <div className={classes.editPanel}> */}
+                {isCreatingThread && <div className={classes.editPanel}>
                     {editThreadPanel}
-                </div>
+                </div>}
                 <IconButton className="iconfont icon" onClick={closeThreadPanel}>
                     <img alt="" className={classes.close} src={close} />
                 </IconButton>
