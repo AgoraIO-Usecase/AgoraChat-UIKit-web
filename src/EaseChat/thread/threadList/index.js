@@ -10,6 +10,7 @@ import threadSearch from '../../../common/images/search.png'
 import close from '../../../common/images/threadClose.png'
 import "./index.css"
 import SearchBox from '../components/searchBox'
+import avatar from "../../../common/icons/avatar1.png";
 
 const ThreadListPanel = () => {
     const dispatch = useDispatch();
@@ -132,7 +133,7 @@ const ThreadListPanel = () => {
                                     <img
                                         className='tlp-avatar'
                                         alt="Remy Sharp"
-                                        src="https://aip.bdstatic.com/portal-pc-node/dist/1645513367427/images/technology/imageprocess/dehaze/5.jpg"
+                                        src={avatar}
                                     />
                                     <span className="tpl-item-owner">{option.owner}</span>
                                     <span className="tpl-item-msg">{renderMessage(option.lastMessage?.body)}</span>

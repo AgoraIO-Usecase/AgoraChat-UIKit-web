@@ -13,6 +13,7 @@ import ThreadActions from "../../../redux/thread"
 import MessageActions from "../../../redux/message"
 import { getTimeDiff } from "../../../utils/index";
 import WebIM from "../../../utils/WebIM";
+import avatar from "../../../common/icons/avatar1.png";
 
 const useStyles = makeStyles((theme) => {
     return {
@@ -231,7 +232,7 @@ const MsgThreadInfo = (props) => {
                 </div>
                 {thread.lastMessage && <div className={classes.threadBottom}>
                     <div className={classes.threadAva}>
-                        <img className={classes.threadAvaIcon} src="https://aip.bdstatic.com/portal-pc-node/dist/1645513367427/images/technology/imageprocess/dehaze/5.jpg"></img>
+                        <img className={classes.threadAvaIcon} src={avatar} ></img>
                     </div>
                     <div className={classes.threadMsg}>
                         <span className={classes.threadOwner}>{thread.lastMessage.from}</span>&nbsp;

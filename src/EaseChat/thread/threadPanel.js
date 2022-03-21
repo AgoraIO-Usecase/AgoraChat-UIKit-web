@@ -12,6 +12,7 @@ import MessageActions from "../../redux/message"
 import { Box } from "@material-ui/core";
 import { EaseChatContext } from "../chat/index";
 import _ from "lodash";
+import avatar from "../../common/icons/avatar1.png";
 
 
 const useStyles = makeStyles((theme) => {
@@ -296,7 +297,7 @@ const ThreadPanel = (props) => {
             <Box>
                 <div className={classes.threadOwnerInfo}>
                     <div className={classes.threadOwnerAvatarCon}>
-                        <img className={classes.threadOwnerAvatar} src="https://aip.bdstatic.com/portal-pc-node/dist/1645513367427/images/technology/imageprocess/dehaze/5.jpg"></img>
+                        <img className={classes.threadOwnerAvatar} src={avatar} ></img>
                     </div>
                     <div className={classes.threadOwnerMsg}>
                         <div className={classes.info}>
