@@ -132,7 +132,7 @@ const dialog = (props) => {
         )
     }
     return (
-        <div className={classes.dialog}>
+        <div className={classes.dialog} style={{display: props.showDialog=='true'? 'block':'none'}}>
             <div className={classes.dialogHeader}>
                 <div className={classes.title}>{props.title}</div>
                 <img src={closeIcon} className={classes.icon} onClick={closeDialog}></img>

@@ -7,6 +7,7 @@ import val from "./comm";
 // import initListen from "./WebIMListen";
 import EditThreadPanel from "../demo-comments/components/editThreadPanel";
 import Dialog  from "../demo-comments/components/dialog";
+import Members  from "../demo-comments/components/members";
 export default class Demo extends Component {
   state = {
     token: val,
@@ -52,7 +53,8 @@ export default class Demo extends Component {
     console.log("this.state.token>>", this.state.token);
     return (
       <div>
-        <Dialog title="dialog title" button1='Cancel' button2='save' input='true' />
+        {/* <Dialog showDialog = 'false' title="dialog title" button1='Cancel' button2='save' input='true' /> */}
+        {/* <Members /> */}
           <button onClick={this.addSessionItem}> 测试 </button>
         <h3>EaseApp</h3>
         <div>
@@ -64,7 +66,7 @@ export default class Demo extends Component {
             appkey= "41117440#383391"
             username="zd129"
             editThreadPanel={<EditThreadPanel/>}
-            agoraToken="007eJxTYLi/O/OPTf3/t+aOgaly7a/v//B1XOJ8pPOel8b2Y58ET2gpMKQZpiSbm1skpaQkm5mYJaZYpBmZGViamyUnGqUYGJom31pukqQgw8AQozvbhpGBlYERCEF8FQYTQ+NEC2MDA91EM8tUXUPD1GTdJHNDS11LYxNj07S0ZFMzcxMAT6soJw=="
+            agoraToken="007eJxTYLBr7/ZkVcjyS5m+N3KLbmRdsH75Su43Zz8JNTNvPCk9f7UCQ5phSrK5uUVSSkqymYlZYopFmpGZgaW5WXKiUYqBoWnyvLfmSQoyDAyX3RYEMDKwMjACIYivwmBiaJxoYWxgoJtoZpmqa2iYmqybZG5oqWtpbGJsmpaWbGpmbgIAt9QlLA=="
             header={<div style={{ height: "100px" }}>TestHeader</div>} 
             />
         </div>
