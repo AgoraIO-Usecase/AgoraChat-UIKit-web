@@ -664,7 +664,9 @@ export const messageReducer = createReducer(INITIAL_STATE, {
     [Types.UPDATE_MESSAGE_MID]: updateMessageMid,
     [Types.UPDATE_MESSAGE_STATUS]: updateMessageStatus,
     [Types.UPDATE_THREAD_DETAILS]: updateThreadDetails,
-    [Types.UPDATE_THREAD_MESSAGE]: updateThreadMessage
+    [Types.UPDATE_THREAD_MESSAGE]: updateThreadMessage,
+    [Types.ADD_REACTIONS]: addReactions,
+	[Types.DELETE_REACTION]: deleteReaction,
 })
 
 export default Creators;

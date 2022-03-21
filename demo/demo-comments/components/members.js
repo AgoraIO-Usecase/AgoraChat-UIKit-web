@@ -70,7 +70,7 @@ const members = (props) => {
                 {displayList.length === 0 && <div className="list-empty">No member</div>}
                 {displayList.length > 0 && displayList.map((item, index) => {
                     return (
-                        <div className="list-item">
+                        <div className="list-item" key={index}>
                             <div className="user-info">
                                 <img className="avatar" src="https://aip.bdstatic.com/portal-pc-node/dist/1645513367427/images/technology/imageprocess/dehaze/5.jpg"></img>
                                 <span className="username">{item.nickName}</span>

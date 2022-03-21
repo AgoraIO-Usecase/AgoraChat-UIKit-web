@@ -122,22 +122,21 @@ EaseChatProvider.getSdk = (props) => {
 export default EaseChatProvider;
 
 EaseChatProvider.propTypes = {
-  appkey: PropTypes.string,
-  username: PropTypes.string,
-  agoraToken: PropTypes.string,
-  chatType: PropTypes.string,
-  to: PropTypes.string,
+	appkey: PropTypes.string,
+	username: PropTypes.string,
+	agoraToken: PropTypes.string,
+	chatType: PropTypes.string,
+	to: PropTypes.string,
 
-  showByselfAvatar: PropTypes.bool,
-  easeInputMenu:PropTypes.string,
-  menuList:PropTypes.array,
-  handleMenuItem:PropTypes.func,
+	showByselfAvatar: PropTypes.bool,
+	easeInputMenu: PropTypes.string,
+	menuList: PropTypes.array,
+	handleMenuItem: PropTypes.func,
 
-  successLoginCallback:PropTypes.func,
-  failCallback:PropTypes.func,
-  onChatAvatarClick:PropTypes.func,
-
-  testFunc:PropTypes.func
+	successLoginCallback: PropTypes.func,
+	failCallback: PropTypes.func,
+	onChatAvatarClick: PropTypes.func,
+	isShowReaction: PropTypes.bool,
 };
 
 EaseChatProvider.defaultProps = {

@@ -65,4 +65,3 @@ export const defaultReactions = {
 		"[emoji_12]": "ee_12.png",
 	},
 };
-

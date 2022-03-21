@@ -47,4 +47,3 @@ const Reaction = ({ message }) => {
 };
 
 export default memo(Reaction);
-

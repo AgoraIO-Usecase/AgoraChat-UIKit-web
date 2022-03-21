@@ -1,0 +1,55 @@
+import React, { memo } from "react";
+import rnReactionEmoji from "../../../utils/rnReactionEmoji";
+import { makeStyles } from "@material-ui/styles";
+
+const useStyles = makeStyles((theme) => ({
+	reaction: {
+		display: "flex",
+		cursor: "pointer",
+	},
+	reactionItem: {
+		height: "20px",
+		width: "20px",
+		marginLeft: (props) => props.rnReaction ? "4px" : ""
+	},
+	reactionLingth: {
+		font: "SF Compact Text",
+		fontWeight: "400",
+		fontStyle: "normal",
+		fontSize: "14px",
+		lineHeight: "20px",
+		textAlign: "Center",
+		color: "#000000",
+		marginLeft: "5px",
+		width: "20px",
+		height: "20px",
+	},
+}));
+
+const RenderReactions = ({ message }) => {
+	const reactionMsg = message.reactions || [];
+	const classes = useStyles({
+		rnReaction : reactionMsg.length > 1
+	});
+	return (
+		<div className={classes.reaction}>
+			{reactionMsg.length > 0 &&
+				reactionMsg.map((item, i) => {
+					if (i > 3) return;
+					return (
+						<div key={i} className={classes.reactionItem}>
+							{rnReactionEmoji(item.reaction)}
+						</div>
+					);
+				})}
+			{reactionMsg.length > 4 && (
+				<span className={classes.reactionLingth}>...</span>
+			)}
+			{reactionMsg.length > 1 && <span className={classes.reactionLingth}>
+				{reactionMsg.length}
+			</span>}
+		</div>
+	);
+};
+
+export default memo(RenderReactions);

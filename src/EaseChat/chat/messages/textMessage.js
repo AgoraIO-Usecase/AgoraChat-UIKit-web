@@ -1,4 +1,4 @@
-import React, { memo, useState, useContext, useEffect } from "react";
+import React, { memo, useState, useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
 import i18next from "i18next";
 import { Menu, MenuItem } from "@material-ui/core";
@@ -9,8 +9,11 @@ import { renderTime } from "../../../utils";
 import MessageStatus from "./messageStatus";
 import MsgThreadInfo from "./msgThreadInfo"
 import {CopyToClipboard} from 'react-copy-to-clipboard'
-
+import Reaction from "../reaction";
+import RenderReactions from "../reaction/renderReaction";
+import ReactionInfo from "../reaction/reactionInfo";
 import { EaseChatContext } from "../index";
+
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
     display: "flex",
@@ -37,24 +40,6 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: "65%",
     alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
   },
-  textBody: {
-    // display: "flex",
-    margin: (props) => (props.bySelf ? "0 10px 10px 0" : "0 0 10px 10px"),
-    lineHeight: "20px",
-    fontSize: "14px",
-    background: (props) =>
-      props.bySelf
-        ? "linear-gradient(124deg, #c913df 20%,#154DFE 90%)"
-        : "#F2F2F2",
-    color: (props) => (props.bySelf ? "#fff" : "#000"),
-    border: "1px solid #fff",
-    borderRadius: (props) =>
-      props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-    padding: "15px",
-    // maxWidth: "65%",
-    wordBreak: "break-all",
-    textAlign: "initial",
-  },
   time: {
     position: "absolute",
     fontSize: "11px",
@@ -75,137 +60,221 @@ const useStyles = makeStyles((theme) => ({
     width: "40px",
     borderRadius: "50%",
   },
-}));
+	textBody: {
+		// display: "flex",
+		margin: (props) => (props.bySelf ? "0 10px 10px 0" : "0 0 10px 10px"),
+		lineHeight: "20px",
+		fontSize: "14px",
+		background: (props) =>
+			props.bySelf
+				? "linear-gradient(124deg, #c913df 20%,#154DFE 90%)"
+				: "#F2F2F2",
+		color: (props) => (props.bySelf ? "#fff" : "#000"),
+		border: "1px solid #fff",
+		borderRadius: (props) =>
+			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+		padding: "15px",
+		maxWidth: "65%",
+		wordBreak: "break-all",
+		textAlign: "initial",
+		position: "relative",
+	},
+	textReaction: {
+		position: "absolute",
+		right: (props) => (props.bySelf ? "" : "-30px"),
+		bottom: "-10px",
+		left: (props) => (props.bySelf ? "-25px" : ""),
+		marginRight: "5px",
+	},
+	reactionBox: {
+		position: "absolute",
+		top: (props) => (props.bySelf ? "-15px" : "-10px"),
+		right: (props) => (props.bySelf ? "0px" : ""),
+		left: (props) => (props.bySelf ? "" : "0px"),
+		background: "#F2F2F2",
+		borderRadius: "17.5px",
+		padding: (props) => (props.rnReactions ? "4px 8px" : "4px"),
+		border: "solid 2px #FFFFFF",
+		boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
+	},
+}))
 const initialState = {
-  mouseX: null,
-  mouseY: null,
+	mouseX: null,
+	mouseY: null,
 };
+
 function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThreade, isThreadPanel }) {
-  let easeChatProps = useContext(EaseChatContext);
-  const { onAvatarChange } = easeChatProps;
-  const classes = useStyles({
-    bySelf: message.bySelf,
-    chatType: message.chatType,
-  });
+	let easeChatProps = useContext(EaseChatContext);
+	const { onAvatarChange, isShowReaction } = easeChatProps;
+	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
+	const reactionMsg = message?.reactions || [];
+	const classes = useStyles({
+		bySelf: message.bySelf,
+		chatType: message.chatType,
+		rnReactions: reactionMsg.length > 1,
+	});
   const [menuState, setMenuState] = useState(initialState);
   const [copyMsgVal,setCopyMsgVal] = useState('');
+	const [state, setState] = useState(initialState);
+	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
 
-  useEffect(()=>{
-    setCopyMsgVal(message.msg)
-  },[copyMsgVal])
-  
-  const handleClick = (event) => {
-    event.preventDefault();
-    setMenuState({
-      mouseX: event.clientX - 2,
-      mouseY: event.clientY - 4,
-    });
-  };
-  const handleClose = () => {
-    setMenuState(initialState);
-  };
-  const recallMessage = () => {
-    onRecallMessage(message);
-    handleClose();
-  };
-  const renderTxt = (txt) => {
-    if (txt === undefined) {
-      return [];
-    }
-    let rnTxt = [];
-    let match = null;
-    const regex = /(\[.*?\])/g;
-    let start = 0;
-    let index = 0;
-    while ((match = regex.exec(txt))) {
-      index = match.index;
-      if (index > start) {
-        rnTxt.push(txt.substring(start, index));
-      }
-      if (match[1] in emoji.map) {
-        const v = emoji.map[match[1]];
-        rnTxt.push(
-          <img
-            key={v}
-            alt={v}
-            src={require(`../../../common/faces/${v}`).default}
-            width={20}
-            height={20}
-          />
-        );
-      } else {
-        rnTxt.push(match[1]);
-      }
-      start = index + match[1].length;
-    }
-    rnTxt.push(txt.substring(start, txt.length));
+	const handleClick = (event) => {
+		event.preventDefault();
+		setState({
+			mouseX: event.clientX - 2,
+			mouseY: event.clientY - 4,
+		});
+	};
+	const handleClose = () => {
+		setState(initialState);
+	};
+	const recallMessage = () => {
+		onRecallMessage(message);
+		handleClose();
+	};
+	const renderTxt = (txt) => {
+		if (txt === undefined) {
+			return [];
+		}
+		let rnTxt = [];
+		let match = null;
+		const regex = /(\[.*?\])/g;
+		let start = 0;
+		let index = 0;
+		while ((match = regex.exec(txt))) {
+			index = match.index;
+			if (index > start) {
+				rnTxt.push(txt.substring(start, index));
+			}
+			if (match[1] in emoji.map) {
+				const v = emoji.map[match[1]];
+				rnTxt.push(
+					<img
+						key={v}
+						alt={v}
+						src={require(`../../../common/faces/${v}`).default}
+						width={20}
+						height={20}
+					/>
+				);
+			} else {
+				rnTxt.push(match[1]);
+			}
+			start = index + match[1].length;
+		}
+		rnTxt.push(txt.substring(start, txt.length));
 
-    return rnTxt;
-  };
+		return rnTxt;
+	};
+
+	const handleReaction = (e) => {
+		setReactionInfoVisible(e.currentTarget);
+	};
+	const sentStatus = () => {
+		return (
+			<div>
+				{message.bySelf && (
+					<MessageStatus
+						status={message.status}
+						style={{
+							marginTop:
+								message.chatType === "singleChat"
+									? "0"
+									: "22px",
+						}}
+					/>
+				)}
+			</div>
+		);
+	};
+
   const createThread = ()=>{
     onCreateThreade(message)
   }
-
-    const changeCopyVal = () => {
-    setCopyMsgVal(message.msg);  
-    handleClose() 
-  }
-
-  return (
-    <li className={classes.pulldownListItem}>
-      <div>
-        {!message.bySelf && (
-          <img
-            className={classes.avatarStyle}
-            src={avatar}
-            onClick={(e) => onAvatarChange && onAvatarChange(e,message)}
-          ></img>
-        )}
-        {showByselfAvatar && message.bySelf && (
-          <img className={classes.avatarStyle} src={avatar}></img>
-        )}
-      </div>
-      <div className={classes.textBodyBox}>
-        <span className={classes.userName}>{message.from}</span>
-        <div className={classes.textBody} onContextMenu={handleClick}>
-          {renderTxt(message.body.msg)}{message.isThread}
+	return (
+		<li
+			className={classes.pulldownListItem}
+			onMouseOver={() => setHoverDeviceModule(true)}
+			onMouseLeave={() => setHoverDeviceModule(false)}
+		>
+			<div>
+				{!message.bySelf && (
+					<img
+						className={classes.avatarStyle}
+						src={avatar}
+						onClick={() =>
+							onAvatarChange && onAvatarChange(message)
+						}
+					></img>
+				)}
+				{showByselfAvatar && message.bySelf && (
+					<img className={classes.avatarStyle} src={avatar}></img>
+				)}
+			</div>
+			<div className={classes.textBodyBox}>
+				<span className={classes.userName}>{message.from}</span>
+				<div
+					className={classes.textBody}
+					onContextMenu={handleClick}
+					id={message.id}
+				>
+					{renderTxt(message.body.msg)}{message.isThread}
           {(!isThreadPanel) && message.chatType ==="groupChat" && message.thread&& (JSON.stringify(message.thread)!=='{}') ? <MsgThreadInfo message={message} />: null}
-        </div>
-        {message.bySelf && (
-          <MessageStatus
-            status={message.status}
-            style={{
-              marginTop: message.chatType === "singleChat" ? "0" : "22px",
-            }}
-          />
-        )}
-      </div>
-      {!message.thread && !isThreadPanel && message.chatType === 'groupChat'? (<button onClick={createThread}>thread</button>):null}
-      <div className={classes.time}>{renderTime(message.time)}</div>
-      {message.status === "read" ? (
-        <div className={classes.read}>{i18next.t("Read")}</div>
-      ) : null}
 
-        <Menu
-          keepMounted
-          open={menuState.mouseY !== null}
-          onClose={handleClose}
-          anchorReference="anchorPosition"
-          anchorPosition={
-            menuState.mouseY !== null && menuState.mouseX !== null
-              ? { top: menuState.mouseY, left: menuState.mouseX }
-              : undefined
-          }
-        >
-         {message.bySelf && <MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>} 
-          {<MenuItem onClick={changeCopyVal}>
-          <CopyToClipboard text={copyMsgVal}>
-            <span>{i18next.t("Copy")}</span>
-        </CopyToClipboard>
-          </MenuItem> }
-        </Menu>
-    </li>
-  );
+					{reactionMsg.length > 0 && (
+						<div
+							className={classes.reactionBox}
+							onClick={handleReaction}
+						>
+							<RenderReactions message={message} />
+						</div>
+					)}
+					<div className={classes.textReaction}>
+						{hoverDeviceModule ? (
+							<div>
+								{isShowReaction && (
+									<Reaction message={message} />
+								)}
+							</div>
+						) : (
+							sentStatus()
+						)}
+					</div>
+				</div>
+			</div>
+			<div className={classes.time}>{renderTime(message.time)}</div>
+			{message.status === "read" ? (
+				<div className={classes.read}>{i18next.t("Read")}</div>
+			) : null}
+      {!message.thread && !isThreadPanel && message.chatType === 'groupChat'? (<button onClick={createThread}>thread</button>):null}
+      
+			{message.bySelf ? (
+				<Menu
+					keepMounted
+					open={state.mouseY !== null}
+					onClose={handleClose}
+					anchorReference="anchorPosition"
+					anchorPosition={
+						state.mouseY !== null && state.mouseX !== null
+							? { top: state.mouseY, left: state.mouseX }
+							: undefined
+					}
+				>
+					<MenuItem onClick={recallMessage}>
+						{i18next.t("withdraw")}
+					</MenuItem>
+				</Menu>
+			) : null}
+
+			{reactionMsg.length > 0 && (
+				<ReactionInfo
+					anchorEl={reactionInfoVisible}
+					onClose={() => setReactionInfoVisible(null)}
+					message={message}
+				/>
+			)}
+		</li>
+	);
 }
 
 export default memo(TextMessage);

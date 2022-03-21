@@ -147,9 +147,9 @@ EaseAppProvider.getSdk = (props) => {
   return WebIM
 };
 EaseAppProvider.propTypes = {
-  username: PropTypes.string,
-  agoraToken: PropTypes.string,
-  appkey: PropTypes.string,
+	username: PropTypes.string,
+	agoraToken: PropTypes.string,
+	appkey: PropTypes.string,
 
   header: PropTypes.node,
   editThreadPanel: PropTypes.node,
@@ -162,6 +162,7 @@ EaseAppProvider.propTypes = {
   menuList: PropTypes.array,
   handleMenuItem: PropTypes.func,
   onChatAvatarClick:PropTypes.func,
+	isShowReaction: PropTypes.bool,
 };
 EaseAppProvider.defaultProps = {
   isShowUnread: true,
