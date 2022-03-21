@@ -5,6 +5,10 @@ import avatar from "../../../common/icons/avatar1.png";
 import i18next from "i18next";
 import { renderTime } from "../../../utils";
 import { EaseChatContext } from "../index";
+import Reaction from "../reaction";
+import RenderReactions from "../reaction/renderReaction";
+import ReactionInfo from "../reaction/reactionInfo";
+
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
     padding: "10px 0",
@@ -54,58 +58,101 @@ const initialState = {
   mouseY: null,
 };
 function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
-  let easeChatProps = useContext(EaseChatContext);
-  const { onAvatarChange } = easeChatProps;
-  const classes = useStyles({ bySelf: message.bySelf });
-  const [state, setState] = useState(initialState);
-  const handleClose = () => {
-    setState(initialState);
-  };
-  const recallMessage = () => {
-    onRecallMessage(message);
-    handleClose();
-  };
-  const handleClick = (event) => {
-    event.preventDefault();
-    setState({
-      mouseX: event.clientX - 2,
-      mouseY: event.clientY - 4,
-    });
-  };
-  return (
-    <li className={classes.pulldownListItem}>
-      {!message.bySelf && (
-        <Avatar
-          src={avatar}
-          onClick={(e) => onAvatarChange && onAvatarChange(e,message)}
-        ></Avatar>
-      )}
-      {showByselfAvatar && message.bySelf && <Avatar src={avatar}></Avatar>}
-      <div className={classes.textBodyBox}>
-        <span className={classes.userName}>{message.from}</span>
-        <div className={classes.imgBox} onContextMenu={handleClick}>
-          <img src={message.url} alt="img message"></img>
-        </div>
-      </div>
-     
-      <div className={classes.time}>{renderTime(message.time)}</div>
-      {message.bySelf ? (
-        <Menu
-          keepMounted
-          open={state.mouseY !== null}
-          onClose={handleClose}
-          anchorReference="anchorPosition"
-          anchorPosition={
-            state.mouseY !== null && state.mouseX !== null
-              ? { top: state.mouseY, left: state.mouseX }
-              : undefined
-          }
-        >
-          <MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
-        </Menu>
-      ) : null}
-    </li>
-  );
+	let easeChatProps = useContext(EaseChatContext);
+	const { onAvatarChange, isShowReaction } = easeChatProps;
+	const classes = useStyles({ bySelf: message.bySelf });
+	const [state, setState] = useState(initialState);
+	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
+	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
+	const reactionMsg = message?.reactions || [];
+	const handleClose = () => {
+		setState(initialState);
+	};
+	const recallMessage = () => {
+		onRecallMessage(message);
+		handleClose();
+	};
+	const handleClick = (event) => {
+		event.preventDefault();
+		setState({
+			mouseX: event.clientX - 2,
+			mouseY: event.clientY - 4,
+		});
+	};
+
+	const handleReaction = (e) => {
+		setReactionInfoVisible(e.currentTarget);
+	};
+
+	return (
+		<li
+			className={classes.pulldownListItem}
+			onMouseOver={() => setHoverDeviceModule(true)}
+			onMouseLeave={() => setHoverDeviceModule(false)}
+		>
+			{!message.bySelf && (
+				<Avatar
+					src={avatar}
+					onClick={(e) =>
+						onAvatarChange && onAvatarChange(e, message)
+					}
+				></Avatar>
+			)}
+			{showByselfAvatar && message.bySelf && (
+				<Avatar src={avatar}></Avatar>
+			)}
+			<div className={classes.textBodyBox}>
+				<span className={classes.userName}>{message.from}</span>
+				<div className={classes.imgBox} onContextMenu={handleClick}>
+					<img src={message.url} alt="img message"></img>
+					<div className={classes.textReaction}>
+						{hoverDeviceModule ? (
+							<div>
+								{isShowReaction && (
+									<Reaction message={message} />
+								)}
+							</div>
+						) : (
+							<></>
+						)}
+					</div>
+					{reactionMsg.length > 0 && (
+						<div
+							className={classes.reactionBox}
+							onClick={handleReaction}
+						>
+							<RenderReactions message={message} />
+						</div>
+					)}
+				</div>
+			</div>
+
+			<div className={classes.time}>{renderTime(message.time)}</div>
+			{message.bySelf ? (
+				<Menu
+					keepMounted
+					open={state.mouseY !== null}
+					onClose={handleClose}
+					anchorReference="anchorPosition"
+					anchorPosition={
+						state.mouseY !== null && state.mouseX !== null
+							? { top: state.mouseY, left: state.mouseX }
+							: undefined
+					}
+				>
+					<MenuItem onClick={recallMessage}>
+						{i18next.t("withdraw")}
+					</MenuItem>
+				</Menu>
+			) : null}
+
+			<ReactionInfo
+				anchorEl={reactionInfoVisible}
+				onClose={() => setReactionInfoVisible(null)}
+				message={message}
+			/>
+		</li>
+	);
 }
 
 export default memo(ImgMessage);

@@ -135,16 +135,21 @@ const AppDB = {
                 .then(res => console.log('res', res))
         })
     },
-    
-    updateMessageUrl(id, url){
-        const $_TABLE = this.$_TABLE
-        return this.exec(resolve => {
-            $_TABLE.where('id')
-                .equals(id)
-                .modify({ 'url': url })
-                .then(res => console.log('res', res))
-        })
-    },
+
+	updateMessageUrl(id, url) {
+		const $_TABLE = this.$_TABLE;
+		return this.exec((resolve) => {
+			console.log(
+				">>>>>msgUrl>>>",
+				$_TABLE.where("id").equals(id).modify({ url: url })
+			);
+			$_TABLE
+				.where("id")
+				.equals(id)
+				.modify({ url: url })
+				.then((res) => console.log("res", res));
+		});
+	},
     updateMessageThread(id, thread){
         const $_TABLE = this.$_TABLE
         return this.exec(resolve => {
@@ -154,6 +159,7 @@ const AppDB = {
                 .then(res => console.log('res', res))
         })
     },
+	
 
     // add a message to the database
     addMessage(message, isUnread = 0,isThread = false) {
@@ -231,8 +237,40 @@ const AppDB = {
                     resolve(sessionList)
                 })
         })
-    }
+    },
+	updateMessageReaction(id, reactions) {
+		const $_TABLE = this.$_TABLE;
+		return this.exec((resolve) => {
+			const $_TABLE = this.$_TABLE;
+			return this.exec((resolve) => {
+				$_TABLE
+					.where("id")
+					.equals(id)
+					.modify({ reactions: reactions })
+					.then((res) => {
+						console.log("updateMessageReaction", res);
+					});
+			});
+		});
+	},
+
+	deleteReactions(id, reactions) {
+		const $_TABLE = this.$_TABLE;
+		return this.exec((resolve) => {
+			const $_TABLE = this.$_TABLE;
+			return this.exec((resolve) => {
+				$_TABLE
+					.where("id")
+					.equals(id)
+					.modify({ reactions: reactions })
+					.then((res) => {
+						console.log("deleteReactions", res);
+					});
+			});
+		});
+	},
 }
+
 
 export default AppDB
 
