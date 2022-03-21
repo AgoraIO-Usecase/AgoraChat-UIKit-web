@@ -141,6 +141,8 @@ const useStyles = makeStyles((theme) => {
 
 const ThreadPanel = (props) => {
     const dispatch = useDispatch();
+    const easeChatProps = useContext(EaseChatContext);
+    const { showByselfAvatar } = easeChatProps;
     const [threadName, setThreadName] = useState('');
     const changeThreadName = (e) => {
         setThreadName(e.target.value)
@@ -273,10 +275,10 @@ const ThreadPanel = (props) => {
             threadName: 'hahaThreadName',
             count: 3,
             owner: 'lucy',
-            lastMessage:{
-                contenttype:'TEXT',
-                text:'updated~~',
-                from:'wy',
+            lastMessage: {
+                contenttype: 'TEXT',
+                text: 'updated~~',
+                from: 'wy',
                 timestamp: 1647421680000,
             }
         },
@@ -346,13 +348,13 @@ const ThreadPanel = (props) => {
         const dom = scrollEl.current;
         if (!ReactDOM.findDOMNode(dom)) return;
         // console.log("========",isLoaded,dom.scrollTop,dom.scrollHeight === (dom.scrollTop + dom.clientHeight))
-        if(isLoaded && dom.scrollTop!==0 && dom.scrollHeight !== (dom.scrollTop + dom.clientHeight)){
+        if (isLoaded && dom.scrollTop !== 0 && dom.scrollHeight !== (dom.scrollTop + dom.clientHeight)) {
             dom.scrollTop = dom.scrollHeight;
         }
-    },[messageList])
+    }, [messageList])
 
     const handleScroll = (e) => {
-        if (e.target.scrollHeight === (e.target.scrollTop + e.target.clientHeight) && !isLoaded && e.target.scrollTop!==0) {
+        if (e.target.scrollHeight === (e.target.scrollTop + e.target.clientHeight) && !isLoaded && e.target.scrollTop !== 0) {
             if (!isPullingDown) {
                 setIsPullingDown(true);
                 setTimeout(() => {
@@ -371,23 +373,21 @@ const ThreadPanel = (props) => {
         }
     };
     return (
-        <EaseChatContext.Provider value={props}>
-            <Box className={classes.root}>
-                <ThreadBar />
-                <Box ref={scrollEl} className={classes.chat} onScroll={handleScroll}>
-                    {isCreatingThread ? createThread() : showThreadMessage()}
-                    {renderOriginalMsg()}
-                    <ThreadMessageList
-                        messageList={messageList}
-                        showByselfAvatar={props.showByselfAvatar}
-                    />
-                    <div style={{ display: isPullingDown ? "block" : "none" }}>
-                        <span>Loading...</span>
-                    </div>
-                </Box>
-                <SendBox isThread={isThread}/>
+        <Box className={classes.root}>
+            <ThreadBar />
+            <Box ref={scrollEl} className={classes.chat} onScroll={handleScroll}>
+                {isCreatingThread ? createThread() : showThreadMessage()}
+                {renderOriginalMsg()}
+                <ThreadMessageList
+                    messageList={messageList}
+                    showByselfAvatar={showByselfAvatar}
+                />
+                <div style={{ display: isPullingDown ? "block" : "none" }}>
+                    <span>Loading...</span>
+                </div>
             </Box>
-        </EaseChatContext.Provider>
+            <SendBox isThread={isThread} />
+        </Box>
     );
 }
 export default ThreadPanel

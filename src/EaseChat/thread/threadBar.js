@@ -48,13 +48,13 @@ const useStyles = makeStyles((theme) => {
 
 const ThreadBar = (props) => {
     let easeChatProps = useContext(EaseChatContext);
-    const {editThreadPanel} = easeChatProps
+    const { editThreadPanel } = easeChatProps
     const classes = useStyles();
     const dispatch = useDispatch();
     const closeThreadPanel = () => {
         dispatch(ThreadActions.updateThreadStates(false));
     }
-    const threadName = useSelector((state) => state.thread?.currentThreadInfo?.thread?.threadName)||'New thread';
+    const threadName = useSelector((state) => state.thread?.currentThreadInfo?.thread?.threadName) || 'New thread';
 
     return (
         <div className={classes.root}>

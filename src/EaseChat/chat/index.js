@@ -85,7 +85,14 @@ const Chat = (props) => {
     </div>
   );
 };
-
+const Thread = (props) =>{
+  return (
+    <EaseChatContext.Provider value={props}>
+      <ThreadPanel/>
+    </EaseChatContext.Provider>
+    
+  )
+}
 const EaseChatProvider = (props) => {
   const threadPanelStates = useSelector((state) => state.thread?.threadPanelStates);
   return (
@@ -97,7 +104,8 @@ const EaseChatProvider = (props) => {
           </div>
           <div style={{flex: '0 0 392px',overflow:'hidden',display: threadPanelStates?'flex':'none',height: '100%'}}>
             <hr style={{width:0,height:'100%',border:'none',borderRight:'8px solid #edeff2'}}/>
-            <ThreadPanel {...props} />
+            {/* <ThreadPanel {...props} /> */}
+            <Thread {...props}/>
           </div>
         </div>
       </React.StrictMode>
