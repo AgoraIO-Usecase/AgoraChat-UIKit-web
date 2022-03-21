@@ -49,11 +49,21 @@ const EaseApp = (props) => {
         dispatch(MessageActions.fetchMessage(sessionId, sessionType));
       }
       WebIM.conn.getPresenceStatus({usernames: [sessionId]}).then(res => {
+        let extFlag = false
+        const data = res.result[0]
+        Object.values(data.status).forEach(val => {
+          if (Number(val) === 1) {
+            extFlag = true
+          }
+        })
+        if (!extFlag) {
+          data.ext = 'Offline'
+        }
         dispatch(
           GlobalPropsActions.setGlobalProps({
             to: sessionId,
             chatType: sessionType,
-            presenceExt: res.result[0].ext
+            presenceExt: data.ext
           })
         );
       });
