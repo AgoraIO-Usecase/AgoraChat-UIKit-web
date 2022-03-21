@@ -564,14 +564,16 @@ export const deleteReaction = (state, { message, reaction }) => {
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const messageReducer = createReducer(INITIAL_STATE, {
-    [Types.ADD_MESSAGE]: addMessage,
-    [Types.DELETE_MESSAGE]: deleteMessage,
-    [Types.CLEAR_UNREAD]: clearUnread,
-    [Types.FETCH_MESSAGE]: fetchMessage,
-    [Types.CLEAR_MESSAGE]: clearMessage,
-    [Types.UPDATE_MESSAGES]: updateMessages,
-    [Types.UPDATE_MESSAGE_MID]: updateMessageMid,
-    [Types.UPDATE_MESSAGE_STATUS]: updateMessageStatus,
-})
+	[Types.ADD_MESSAGE]: addMessage,
+	[Types.DELETE_MESSAGE]: deleteMessage,
+	[Types.CLEAR_UNREAD]: clearUnread,
+	[Types.FETCH_MESSAGE]: fetchMessage,
+	[Types.CLEAR_MESSAGE]: clearMessage,
+	[Types.UPDATE_MESSAGES]: updateMessages,
+	[Types.UPDATE_MESSAGE_MID]: updateMessageMid,
+	[Types.UPDATE_MESSAGE_STATUS]: updateMessageStatus,
+	[Types.ADD_REACTIONS]: addReactions,
+	[Types.DELETE_REACTION]: deleteReaction,
+});
 
 export default Creators;

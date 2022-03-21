@@ -44,7 +44,7 @@ function MessageList({ messageList, showByselfAvatar }) {
         dom.scrollTop = dom.scrollHeight;
       }, 0);
     }
-  });
+  }, [messageList.length]);
 
   const handleRecallMsg = useCallback(
     (message) => {

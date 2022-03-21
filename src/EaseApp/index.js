@@ -147,20 +147,21 @@ EaseAppProvider.getSdk = (props) => {
   return WebIM
 };
 EaseAppProvider.propTypes = {
-  username: PropTypes.string,
-  agoraToken: PropTypes.string,
-  appkey: PropTypes.string,
+	username: PropTypes.string,
+	agoraToken: PropTypes.string,
+	appkey: PropTypes.string,
 
-  header: PropTypes.node,
-  addConversationItem: PropTypes.func,
-  isShowUnread: PropTypes.bool,
-  unreadType: PropTypes.bool,
-  onConversationClick: PropTypes.func,
-  showByselfAvatar: PropTypes.bool,
-  easeInputMenu: PropTypes.string,
-  menuList: PropTypes.array,
-  handleMenuItem: PropTypes.func,
-  onChatAvatarClick:PropTypes.func,
+	header: PropTypes.node,
+	addConversationItem: PropTypes.func,
+	isShowUnread: PropTypes.bool,
+	unreadType: PropTypes.bool,
+	onConversationClick: PropTypes.func,
+	showByselfAvatar: PropTypes.bool,
+	easeInputMenu: PropTypes.string,
+	menuList: PropTypes.array,
+	handleMenuItem: PropTypes.func,
+	onChatAvatarClick: PropTypes.func,
+	isShowReaction: PropTypes.bool,
 };
 EaseAppProvider.defaultProps = {
   isShowUnread: true,

@@ -258,4 +258,3 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 };
 
 export default memo(ReactionInfo);
-

@@ -25,9 +25,9 @@ export default class Demo extends Component {
   };
     addSessionItem = () => {
     let session = {
-      conversationType: "singleChat",
-      conversationId: "zd132",
-    };
+		conversationType: "singleChat",
+		conversationId: "test0001",
+	};
     EaseApp.addConversationItem(session);
 
   };

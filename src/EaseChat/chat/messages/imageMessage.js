@@ -10,52 +10,71 @@ import RenderReactions from "../reaction/renderReaction";
 import ReactionInfo from "../reaction/reactionInfo";
 
 const useStyles = makeStyles((theme) => ({
-  pulldownListItem: {
-    padding: "10px 0",
-    listStyle: "none",
-    marginBottom: "26px",
-    position: "relative",
-    display: "flex",
-    flexDirection: (props) => (props.bySelf ? "row-reverse" : "row"),
-    alignItems: "center",
-  },
-  userName: {
-    padding: "0 10px 4px",
-    color: "#8797A4",
-    fontSize: "14px",
-    display: (props) =>
-      props.chatType !== "singleChat" && !props.bySelf
-        ? "inline-block"
-        : "none",
-    textAlign: (props) => (props.bySelf ? "right" : "left"),
-  },
-  textBodyBox: {
-    display: "flex",
-    flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
-    maxWidth: "65%",
-    alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
-  },
-  imgBox: {
-    marginLeft: "10px",
-    maxWidth: "50%",
-    "& img": {
-      maxWidth: "100%",
-    },
-  },
-  time: {
-    position: "absolute",
-    fontSize: "11px",
-    height: "16px",
-    color: "rgba(1, 1, 1, .2)",
-    lineHeight: "16px",
-    textAlign: "center",
-    top: "-18px",
-    width: "100%",
-  },
+	pulldownListItem: {
+		padding: "10px 0",
+		listStyle: "none",
+		marginBottom: "26px",
+		position: "relative",
+		display: "flex",
+		flexDirection: (props) => (props.bySelf ? "row-reverse" : "row"),
+		alignItems: "center",
+	},
+	userName: {
+		padding: "0 10px 4px",
+		color: "#8797A4",
+		fontSize: "14px",
+		display: (props) =>
+			props.chatType !== "singleChat" && !props.bySelf
+				? "inline-block"
+				: "none",
+		textAlign: (props) => (props.bySelf ? "right" : "left"),
+	},
+	textBodyBox: {
+		display: "flex",
+		flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
+		maxWidth: "65%",
+		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
+	},
+	imgBox: {
+		marginLeft: "10px",
+		maxWidth: "50%",
+		"& img": {
+			maxWidth: "100%",
+		},
+		position: "relative",
+	},
+	time: {
+		position: "absolute",
+		fontSize: "11px",
+		height: "16px",
+		color: "rgba(1, 1, 1, .2)",
+		lineHeight: "16px",
+		textAlign: "center",
+		top: "-18px",
+		width: "100%",
+	},
+	textReaction: {
+		position: "absolute",
+		right: (props) => (props.bySelf ? "" : "-28px"),
+		bottom: "-5px",
+		left: (props) => (props.bySelf ? "-25px" : ""),
+		marginRight: "5px",
+	},
+	reactionBox: {
+		position: "absolute",
+		top: (props) => (props.bySelf ? "-15px" : "-10px"),
+		right: (props) => (props.bySelf ? "0px" : ""),
+		left: (props) => (props.bySelf ? "" : "0px"),
+		background: "#F2F2F2",
+		borderRadius: "17.5px",
+		padding: "3px",
+		border: "solid 2px #FFFFFF",
+		boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
+	},
 }));
 const initialState = {
-  mouseX: null,
-  mouseY: null,
+	mouseX: null,
+	mouseY: null,
 };
 function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
 	let easeChatProps = useContext(EaseChatContext);
