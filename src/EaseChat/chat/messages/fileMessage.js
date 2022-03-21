@@ -118,55 +118,65 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
     });
   };
 
-  return (
-    <li className={classes.pulldownListItem}>
-      {!message.bySelf && (
-        <img
-          className={classes.avatarStyle}
-          src={avatar}
-          onClick={(e) => onAvatarChange && onAvatarChange(e,message)}
-        ></img>
-      )}
-      {showByselfAvatar && message.bySelf && (
-        <img className={classes.avatarStyle} src={avatar}></img>
-      )}
-      <div className={classes.textBodyBox}>
-        <span className={classes.userName}>{message.from}</span>
-        <div className={classes.fileCard} onContextMenu={handleClick}>
-          <div className={classes.fileIcon}>
-            {/* <Icon className={clsx(classes.icon, 'iconfont icon-fujian')}></Icon> */}
-            {i18next.t("file")}
-          </div>
-          <div className={classes.fileInfo}>
-            <p>{message.filename}</p>
-            <span>{Math.floor(message.body.size / 1024) + "kb"}</span>
-          </div>
-          <div className={classes.download}>
-            <a href={message.url} download={message.filename}>
-              <IconButton className="iconfont icon-xiazai"></IconButton>
-            </a>
-          </div>
-          </div>
-      </div>
-   
-      <div className={classes.time}>{renderTime(message.time)}</div>
-      {message.bySelf ? (
-        <Menu
-          keepMounted
-          open={state.mouseY !== null}
-          onClose={handleClose}
-          anchorReference="anchorPosition"
-          anchorPosition={
-            state.mouseY !== null && state.mouseX !== null
-              ? { top: state.mouseY, left: state.mouseX }
-              : undefined
-          }
-        >
-          <MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
-        </Menu>
-      ) : null}
-    </li>
-  );
+						{i18next.t("file")}
+					</div>
+					<div className={classes.fileInfo}>
+						<p>{message.filename}</p>
+						<span>
+							{Math.floor(message.body.size / 1024) + "kb"}
+						</span>
+					</div>
+					<div className={classes.download}>
+						<a href={message.body.url} download={message.filename}>
+							<IconButton className="iconfont icon-xiazai"></IconButton>
+						</a>
+					</div>
+				</div>
+				<div className={classes.textReaction}>
+					{hoverDeviceModule ? (
+						<div>
+							{isShowReaction && <Reaction message={message} />}
+						</div>
+					) : (
+						<></>
+					)}
+				</div>
+				{reactionMsg.length > 0 && (
+					<div
+						className={classes.reactionBox}
+						onClick={handleReaction}
+					>
+						<RenderReactions message={message} />
+					</div>
+				)}
+			</div>
+
+			<div className={classes.time}>{renderTime(message.time)}</div>
+			{message.bySelf ? (
+				<Menu
+					keepMounted
+					open={state.mouseY !== null}
+					onClose={handleClose}
+					anchorReference="anchorPosition"
+					anchorPosition={
+						state.mouseY !== null && state.mouseX !== null
+							? { top: state.mouseY, left: state.mouseX }
+							: undefined
+					}
+				>
+					<MenuItem onClick={recallMessage}>
+						{i18next.t("withdraw")}
+					</MenuItem>
+				</Menu>
+			) : null}
+
+			<ReactionInfo
+				anchorEl={reactionInfoVisible}
+				onClose={() => setReactionInfoVisible(null)}
+				message={message}
+			/>
+		</li>
+	);
 }
 
 export default memo(FileMessage);
