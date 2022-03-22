@@ -153,7 +153,7 @@ const MessageBar = () => {
           {
             chatType === "singleChat" ?
             <div className={classes.imgBox}>
-              <img alt="" src={getUserOnlineStatus[presenceExt] || customIcon} className={classes.imgStyle} />
+              <img alt="" src={getUserOnlineStatus[presenceExt[to]] || customIcon} className={classes.imgStyle} />
             </div>
             : null
           }

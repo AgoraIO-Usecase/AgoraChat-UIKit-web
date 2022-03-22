@@ -38,9 +38,10 @@ export const logout = (state = INITIAL_STATE) => {
 
 export const updateGlobalProps2 = (state, { options }) => {
   console.log(options, 'options==updateGlobalProps2')
+  let presenceObj = state.globalProps.presenceExt?.asMutable() || {}
   state = state.setIn(["globalProps", "to"], options.to);
   state = state.setIn(["globalProps", "chatType"], options.chatType);
-  state = state.setIn(["globalProps", "presenceExt"], options.presenceExt);
+  state = state.setIn(["globalProps", "presenceExt"], {...presenceObj, ...options.presenceExt});
   return state;
 };
 

@@ -63,7 +63,7 @@ const EaseApp = (props) => {
           GlobalPropsActions.setGlobalProps({
             to: sessionId,
             chatType: sessionType,
-            presenceExt: data.ext
+            presenceExt: {[data.uid] : data.ext}
           })
         );
       });
@@ -146,7 +146,7 @@ EaseAppProvider.addConversationItem = (session) => {
       GlobalPropsActions.setGlobalProps({
         to: conversationId,
         chatType: conversationType,
-        presenceExt: ext
+        presenceExt: {[conversationId] : ext }
       })
     );
     dispatch(MessageActions.clearUnreadAsync(conversationType, conversationId));
