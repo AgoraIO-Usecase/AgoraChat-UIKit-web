@@ -36,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: "50%",
     "& img": {
       maxWidth: "100%",
+      borderRadius: "10px"
     },
   },
   time: {
