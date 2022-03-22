@@ -34,6 +34,7 @@ const useStyles = makeStyles((theme) => ({
   },
   grid: {
     backgroundColor: "rgba(206, 211, 217, 0.3)",
+    width:'360px'
   },
 }));
 const Item = styled(Grid)(({ theme }) => ({}));
@@ -75,8 +76,6 @@ const EaseApp = (props) => {
       >
         <Grid
           item
-          xs={6}
-          md={3}
           className={classes.grid}
         >
           <div
@@ -85,6 +84,7 @@ const EaseApp = (props) => {
               overflowY: "auto",
               display: "flex",
               flexDirection: "column",
+              width:'360px'
             }}
           >
             <div>{props.header}</div>
@@ -93,7 +93,9 @@ const EaseApp = (props) => {
             </EaseAppContext.Provider>
           </div>
         </Grid>
-        <Grid item xs={6} md={9}>
+        <Grid 
+        style={{width:'100%'}}
+        >
           <EaseChat {...props} />
         </Grid>
       </div>

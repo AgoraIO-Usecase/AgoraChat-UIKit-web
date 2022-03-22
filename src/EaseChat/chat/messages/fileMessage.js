@@ -142,7 +142,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
             <span>{Math.floor(message.body.size / 1024) + "kb"}</span>
           </div>
           <div className={classes.download}>
-            <a href={message.body.url} download={message.filename}>
+            <a href={message.url} download={message.filename}>
               <IconButton className="iconfont icon-xiazai"></IconButton>
             </a>
           </div>
