@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { makeStyles } from "@material-ui/styles";
 import searchgray from '../../../common/images/searchgray.png'
 import searchCancel from '../../../common/images/cancel.png'
+import "../../../i18n";
+import i18next from "i18next";
 
 const useStyles = makeStyles((theme) => {
     return {
@@ -79,7 +81,7 @@ const searchBox = (props) => {
                 <input className={classes.searchInput} value={searchValue} onChange={(e) => changeSearchValue(e)}></input>
                 <div className={classes.cancelIcon} onClick={clearInput}></div>
             </div>
-            <div className={classes.cancel} onClick={(e) => closeSearchBar(false)}>Cancel</div>
+            <div className={classes.cancel} onClick={(e) => closeSearchBar(false)}>{i18next.t("Cancel")}</div>
         </div>
     );
 }

@@ -44,6 +44,17 @@
         "send-image": "图片",
         "send-file": "文件",
         "send-video":"视频",
-        "Copy":"复制"
+        "Copy":"复制",
+        "Start a Thread":"发送一条消息以启动此群聊中的子区",
+        "New thread":"新子区",
+        "Thread Name":"子区名称",
+        "Started by":"Started by",
+        "Original message from Group Chat":"来自群聊的原始消息。",
+        "File Message":"文件",
+        "Image Message":"图片",
+        "Audio Message":"音频",
+        "Video Message":"视频",
+        "Cancel":"取消",
+        "Threads List":"子区列表"
     }
 }

@@ -39,6 +39,17 @@
         "send-file": "File",
         "send-video":"Video",
         "you retracted a message":"you retracted a message",
-        "Copy":"Copy"
+        "Copy":"Copy",
+        "Start a Thread":"Send a message to start a thread in this Group Chat.",
+        "New thread":"New thread",
+        "Thread Name":"Thread Name",
+        "Started by":"Started by",
+        "Original message from Group Chat":"Original message from Group Chat.",
+        "File Message":"File",
+        "Image Message":"Image",
+        "Audio Message":"Audio",
+        "Video Message":"Video",
+        "Cancel":"Cancel",
+        "Threads List":"Threads List"
     }
 }

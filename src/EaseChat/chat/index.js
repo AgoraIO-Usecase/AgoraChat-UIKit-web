@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Chat = (props) => {
   useEffect(() => {
-    if (props.appkey && props.username && props.agoraToken) {
+    if (props.appkey && props.username && (props.agoraToken || props.password)) {
       initIMSDK(props.appkey);
       createlistener(props);
       if (WebIM.conn.logOut) {
@@ -42,12 +42,22 @@ const Chat = (props) => {
 
   const login = () => {
     const noLogin = WebIM.conn.logOut;
-    noLogin &&
+    if(props.agoraToken){
+      noLogin &&
       WebIM.conn.open({
         user: props.username,
         agoraToken: props.agoraToken,
         appKey: WebIM.config.appkey,
       });
+    }else if(props.password){
+      noLogin &&
+      WebIM.conn.open({
+        user: props.username,
+        pwd: props.password,
+        appKey: WebIM.config.appkey,
+      });
+    }
+    
   };
   const classes = useStyles();
 
@@ -124,7 +134,8 @@ export default EaseChatProvider;
 EaseChatProvider.propTypes = {
 	appkey: PropTypes.string,
 	username: PropTypes.string,
-	agoraToken: PropTypes.string,
+	// agoraToken: PropTypes.string,
+  password: PropTypes.string,
 	chatType: PropTypes.string,
 	to: PropTypes.string,
 

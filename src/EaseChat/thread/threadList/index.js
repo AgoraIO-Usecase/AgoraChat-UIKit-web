@@ -11,6 +11,8 @@ import close from '../../../common/images/threadClose.png'
 import "./index.css"
 import SearchBox from '../components/searchBox'
 import avatar from "../../../common/icons/avatar1.png";
+import "../../../i18n";
+import i18next from "i18next";
 
 const ThreadListPanel = () => {
     const dispatch = useDispatch();
@@ -62,11 +64,13 @@ const ThreadListPanel = () => {
             case 'txt':
                 return renderTxt(body.msg)
             case 'file':
-                return '[文件]'
+                return `[${i18next.t('File Message')}]`
             case 'img':
-                return '[图片]'
+                return `[${i18next.t('Image Message')}]`
             case 'audio':
-                return '[音频]'
+                return `[${i18next.t('Audio Message')}]`
+            case 'video':
+                return `[${i18next.t('Video Message')}]`
             default:
                 return ''
         }
@@ -109,7 +113,7 @@ const ThreadListPanel = () => {
     return (
         <Box className='threadListPanel' style={{ display: showThreadList == 1 ? 'block' : 'none' }}>
             <div className='tlp-header'>
-                <span className='tlp-header-title'>Threads List ({threadList.length})</span>
+                <span className='tlp-header-title'>{i18next.t('Threads List')} ({threadList.length})</span>
                 <Box style={{ lineHeight: '60px', display: showSearchBar == 1 ? 'none' : 'flex' }}>
                     <div className="tlp-header-icon">
                         <img className="tlp-header-icon-search" alt="" src={threadSearch} onClick={(e) => changeSearchBarState(true)} />

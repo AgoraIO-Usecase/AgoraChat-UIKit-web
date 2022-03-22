@@ -9,6 +9,8 @@ import close from '../../common/images/threadClose.png'
 import { useSelector, useDispatch } from "../../EaseApp/index";
 import ThreadActions from "../../redux/thread";
 import { EaseChatContext } from "../chat/index";
+import "../../i18n";
+import i18next from "i18next";
 
 
 
@@ -54,7 +56,7 @@ const ThreadBar = (props) => {
     const closeThreadPanel = () => {
         dispatch(ThreadActions.updateThreadStates(false));
     }
-    const threadName = useSelector((state) => state.thread?.currentThreadInfo?.thread?.threadName) || 'New thread';
+    const threadName = useSelector((state) => state.thread?.currentThreadInfo?.thread?.threadName) || i18next.t('New thread');
     const { isCreatingThread } = useSelector((state) => state.thread);
     return (
         <div className={classes.root}>

@@ -148,7 +148,8 @@ EaseAppProvider.getSdk = (props) => {
 };
 EaseAppProvider.propTypes = {
 	username: PropTypes.string,
-	agoraToken: PropTypes.string,
+	// agoraToken: PropTypes.string,
+  password: PropTypes.string,
 	appkey: PropTypes.string,
 
   header: PropTypes.node,

@@ -13,6 +13,8 @@ import { Box } from "@material-ui/core";
 import { EaseChatContext } from "../chat/index";
 import _ from "lodash";
 import avatar from "../../common/icons/avatar1.png";
+import "../../i18n";
+import i18next from "i18next";
 
 
 const useStyles = makeStyles((theme) => {
@@ -158,30 +160,32 @@ const ThreadPanel = (props) => {
     const createThread = () => {
         return (<Box>
             <div className={classes.createThreadCon}>
-                <input className={classes.threadNameInput} style={{ color: threadName.length === 0 ? '#ccc' : '#000' }} placeholder="Thread Name" maxLength={100} value={threadName} onChange={(e) => changeThreadName(e)}></input>
+                <input className={classes.threadNameInput} style={{ color: threadName.length === 0 ? '#ccc' : '#000' }} placeholder={i18next.t('Thread Name')} maxLength={100} value={threadName} onChange={(e) => changeThreadName(e)}></input>
                 <span className={classes.threadNameClear} style={{ opacity: threadName.length === 0 ? '15%' : '100%' }} onClick={clearThreadName}></span>
             </div>
             <div className={classes.startTips} style={{ color: threadName.length === 0 ? '#ccc' : '#4d4d4d' }}>
-                Send a message to start a thread in this Group Chat.
+                {i18next.t('Start a Thread')}
             </div>
         </Box>)
     }
     const showThreadMessage = () => {
         return (<Box>
             <div className={classes.threadName}>{currentMessage?.thread?.threadName}</div>
-            <div className={classes.threadDesc}>Straded by <span className={classes.threadStartMember}>{currentMessage?.thread?.owner}</span></div>
+            <div className={classes.threadDesc}>{i18next.t('Started by')} <span className={classes.threadStartMember}>{currentMessage?.thread?.owner}</span></div>
         </Box>)
     }
     const renderMessage = () => {
-        switch (currentMessage.type) {
+        switch (currentMessage.type) {//File Message
             case 'txt':
                 return renderTxt(currentMessage.body.msg)
             case 'file':
-                return '[文件]'
+                return `[${i18next.t('File Message')}]`
             case 'img':
-                return '[图片]'
+                return `[${i18next.t('Image Message')}]`
             case 'audio':
-                return '[音频]'
+                return `[${i18next.t('Audio Message')}]`
+            case 'video':
+                return `[${i18next.t('Video Message')}]`
             default:
                 return ''
         }
@@ -305,7 +309,7 @@ const ThreadPanel = (props) => {
                             <span>{renderTimeWithDate(currentMessage.time)}</span>
                         </div>
                         <div className={classes.threadReplayMessage}>{renderMessage()}</div>
-                        <div className={classes.threadOriginalMessage}>Original message from Group Chat.</div>
+                        <div className={classes.threadOriginalMessage}>{i18next.t('Original message from Group Chat')}</div>
                     </div>
                 </div>
                 {isCreatingThread ? null : <hr className={classes.split} />}
