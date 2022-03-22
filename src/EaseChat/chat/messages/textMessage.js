@@ -13,6 +13,7 @@ import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
 import ReactionInfo from "../reaction/reactionInfo";
 import { EaseChatContext } from "../index";
+import threadIcon from "../../../common/images/thread.png"
 
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
@@ -81,11 +82,18 @@ const useStyles = makeStyles((theme) => ({
 	},
 	textReaction: {
 		position: "absolute",
-		right: (props) => (props.bySelf ? "" : "-30px"),
+		right: (props) => (props.bySelf ? "" : "-50px"),
 		bottom: "-10px",
-		left: (props) => (props.bySelf ? "-25px" : ""),
+		left: (props) => (props.bySelf ? "-50px" : ""),
 		marginRight: "5px",
+    width: '52px',
+    height: '24px',
 	},
+  textReactionCon: {
+    width: '100%',
+    height: '100%',
+    float: (props) => (props.bySelf? 'right':'left'),
+  },
 	reactionBox: {
 		position: "absolute",
 		top: (props) => (props.bySelf ? "-15px" : "-10px"),
@@ -97,13 +105,31 @@ const useStyles = makeStyles((theme) => ({
 		border: "solid 2px #FFFFFF",
 		boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
 	},
+  threadCon: {
+    float: (props) => (props.bySelf? 'left':'right'),
+    height: '24px',
+    width: '24px',
+    borderRadius: '50%',
+    '&:hover':{
+      background: '#E6E6E6',
+    }
+  },
+  thread: {
+    marginTop: '5px',
+    marginLeft: '4px',
+    width: '16px',
+    height: '15px',
+    background: `url(${threadIcon}) center center no-repeat`,
+    backgroundSize: 'contain',
+    cursor: 'pointer',
+  }
 }))
 const initialState = {
 	mouseX: null,
 	mouseY: null,
 };
 
-function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThreade, isThreadPanel }) {
+function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread, isThreadPanel }) {
 	let easeChatProps = useContext(EaseChatContext);
 	const { onAvatarChange, isShowReaction } = easeChatProps;
 	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
@@ -189,7 +215,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	};
 
   const createThread = ()=>{
-    onCreateThreade(message)
+    onCreateThread(message)
   }
 	return (
 		<li
@@ -231,10 +257,14 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 					)}
 					<div className={classes.textReaction}>
 						{hoverDeviceModule ? (
-							<div>
+							<div className={classes.textReactionCon}>
 								{isShowReaction && (
-									<Reaction message={message} />
+									<Reaction message={message}/>
 								)}
+                {!message.thread && !isThreadPanel && message.chatType === 'groupChat'&& <div className={classes.threadCon} onClick={createThread}>
+                <div className={classes.thread}></div>
+               </div>}
+               
 							</div>
 						) : (
 							sentStatus()
@@ -246,7 +276,6 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 			{message.status === "read" ? (
 				<div className={classes.read}>{i18next.t("Read")}</div>
 			) : null}
-      {!message.thread && !isThreadPanel && message.chatType === 'groupChat'? (<button onClick={createThread}>thread</button>):null}
       
 			{message.bySelf ? (
 				<Menu

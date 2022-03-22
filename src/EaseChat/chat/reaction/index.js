@@ -10,6 +10,11 @@ const useStyles = makeStyles((theme) => ({
 		width: "24px",
 		cursor: "pointer",
 	},
+	conatiner: {
+		height: "24px",
+		width: "24px",
+		float: (props) => (props.bySelf? 'right':'left'),
+	}
 }));
 
 const Reaction = ({ message }) => {
@@ -29,7 +34,7 @@ const Reaction = ({ message }) => {
 	};
 
 	return (
-		<div>
+		<div className={classes.conatiner}>
 			<img
 				src={addReactionIcon}
 				alt="reaction"

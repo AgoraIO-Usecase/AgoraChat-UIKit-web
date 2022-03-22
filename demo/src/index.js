@@ -124,7 +124,7 @@ export default class Demo extends Component {
             appkey= "41117440#383391"
             username="zd129"
             editThreadPanel={<EditThreadPanel/>}
-            agoraToken="007eJxTYHBiZQx56blvgtO9o/XFMWLr32e/uLj23ure71m7NkdHC89SYEgzTEk2N7dISklJNjMxS0yxSDMyM7A0N0tONEoxMDRNtoy1SFKQYWAoS92lycjAysAIhCC+CoOJoXGihbGBgW6imWWqrqFharJukrmhpa6lsYmxaVpasqmZuQkAxNEm+g=="
+            agoraToken="007eJxTYHjxQeQA0z7myPkfpxtwymmvbuBTUX4ZZDJ/Z+z+V2s/7p6iwJBmmJJsbm6RlJKSbGZilphikWZkZmBpbpacaJRiYGiarKZhmaQgw8DwPD0ymJGBlYERCEF8FQYTQ+NEC2MDA91EM8tUXUPD1GTdJHNDS11LYxNj07S0ZFMzcxMAIYAlfw=="
             header={<div style={{ height: "100px" }}>TestHeader</div>} 
             />
         </div>

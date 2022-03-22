@@ -103,7 +103,7 @@ function MessageList({ messageList, showByselfAvatar }) {
                       message={msg}
                       key={msg.id + index}
                       onRecallMessage={handleRecallMsg}
-                      onCreateThreade={createThread}
+                      onCreateThread={createThread}
                       showByselfAvatar={showByselfAvatar}
                     />
                   );
@@ -113,6 +113,7 @@ function MessageList({ messageList, showByselfAvatar }) {
                       message={msg}
                       key={msg.id + index}
                       onRecallMessage={handleRecallMsg}
+                      onCreateThread={createThread}
                       showByselfAvatar={showByselfAvatar}
                     />
                   );
@@ -122,6 +123,7 @@ function MessageList({ messageList, showByselfAvatar }) {
                       message={msg}
                       key={msg.id + index}
                       onRecallMessage={handleRecallMsg}
+                      onCreateThread={createThread}
                       showByselfAvatar={showByselfAvatar}
                     />
                   );

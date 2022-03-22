@@ -8,6 +8,7 @@ import { EaseChatContext } from "../index";
 import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
 import ReactionInfo from "../reaction/reactionInfo";
+import threadIcon from "../../../common/images/thread.png"
 
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
@@ -55,10 +56,17 @@ const useStyles = makeStyles((theme) => ({
 	},
 	textReaction: {
 		position: "absolute",
-		right: (props) => (props.bySelf ? "" : "-28px"),
+		right: (props) => (props.bySelf ? "" : "-55px"),
 		bottom: "-5px",
-		left: (props) => (props.bySelf ? "-25px" : ""),
+		left: (props) => (props.bySelf ? "-52px" : ""),
 		marginRight: "5px",
+		width: '52px',
+		height: '24px',
+	},
+	textReactionCon: {
+		width: '100%',
+		height: '100%',
+		float: (props) => (props.bySelf? 'right':'left'),
 	},
 	reactionBox: {
 		position: "absolute",
@@ -71,12 +79,30 @@ const useStyles = makeStyles((theme) => ({
 		border: "solid 2px #FFFFFF",
 		boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
 	},
+	threadCon: {
+		float: (props) => (props.bySelf? 'left':'right'),
+		height: '24px',
+		width: '24px',
+		borderRadius: '50%',
+		'&:hover':{
+		  background: '#E6E6E6',
+		}
+	  },
+	thread: {
+		marginTop: '5px',
+		marginLeft: '4px',
+		width: '16px',
+		height: '15px',
+		background: `url(${threadIcon}) center center no-repeat`,
+		backgroundSize: 'contain',
+		cursor: 'pointer',
+	}
 }));
 const initialState = {
 	mouseX: null,
 	mouseY: null,
 };
-function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
+function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread, isThreadPanel  }) {
 	let easeChatProps = useContext(EaseChatContext);
 	const { onAvatarChange, isShowReaction } = easeChatProps;
 	const classes = useStyles({ bySelf: message.bySelf });
@@ -103,6 +129,9 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
 		setReactionInfoVisible(e.currentTarget);
 	};
 
+	const createThread = ()=>{
+		onCreateThread(message)
+	}
 	return (
 		<li
 			className={classes.pulldownListItem}
@@ -126,11 +155,18 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
 					<img src={message.url} alt="img message"></img>
 					<div className={classes.textReaction}>
 						{hoverDeviceModule ? (
-							<div>
+							// <div>
+							// 	{isShowReaction && (
+							// 		<Reaction message={message} />
+							// 	)}
+							// </div>
+							<div className={classes.textReactionCon}>
 								{isShowReaction && (
-									<Reaction message={message} />
+									<Reaction message={message}/>
 								)}
-							</div>
+							{!message.thread && !isThreadPanel && message.chatType === 'groupChat'&& <div className={classes.threadCon} onClick={createThread}>
+							  <div className={classes.thread}></div></div>}
+               				</div>
 						) : (
 							<></>
 						)}
