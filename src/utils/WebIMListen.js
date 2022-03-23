@@ -32,6 +32,10 @@ export default function createlistener(props) {
       console.log("onFileMessage", message);
       store.dispatch(MessageActions.addMessage(message, "file"));
     },
+    onVideoMessage: (message) => {
+      console.log("onVideoMessage", message);
+      store.dispatch(MessageActions.addMessage(message, "video"));
+    },
     onImageMessage: (message) => {
       console.log("onImageMessage", message);
       const { chatType, from, to } = message;
