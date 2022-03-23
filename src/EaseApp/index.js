@@ -16,6 +16,7 @@ import GlobalPropsActions from "../redux/globalProps";
 import createlistener from "../utils/WebIMListen";
 import MessageActions from "../redux/message";
 import SessionActions from "../redux/session";
+import ThreadActions from "../redux/thread"
 import _ from "lodash";
 import "../i18n";
 import "../common/iconfont.css";
@@ -57,6 +58,7 @@ const EaseApp = (props) => {
       );
       dispatch(SessionActions.setCurrentSession(sessionId));
       dispatch(MessageActions.clearUnreadAsync(sessionType, sessionId));
+      dispatch(ThreadActions.setShowThreadList(false));
     },
     [props.width]
   );

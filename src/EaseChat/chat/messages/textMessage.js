@@ -261,7 +261,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 								{isShowReaction && (
 									<Reaction message={message}/>
 								)}
-                {!message.thread && !isThreadPanel && message.chatType === 'groupChat'&& <div className={classes.threadCon} onClick={createThread}>
+                {!message.thread && !isThreadPanel && message.chatType === 'groupChat'&& <div className={classes.threadCon} onClick={createThread} title="Reply">
                 <div className={classes.thread}></div>
                </div>}
                

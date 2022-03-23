@@ -78,7 +78,7 @@ function MessageList({ messageList, showByselfAvatar }) {
       //如果消息未创建thread-跳转到创建thread页面
       dispatch(ThreadActions.setCurrentThreadInfo(message));
       dispatch(ThreadActions.updateThreadStates(true));
-      dispatch(ThreadActions.setIsCreatingThread(true));//修改thead面板状态 正在编辑
+      dispatch(ThreadActions.setIsCreatingThread(true));//修改thread面板状态 正在编辑
     }
   }
   return (

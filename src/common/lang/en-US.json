@@ -50,6 +50,9 @@
         "Audio Message":"Audio",
         "Video Message":"Video",
         "Cancel":"Cancel",
-        "Threads List":"Threads List"
+        "Threads List":"Threads List",
+        "There are no Threads":"There are no Threads",
+        "Create a Thread from a Group Chat Message":"Create a Thread from a Group Chat Message",
+        "No Result":"No Result"
     }
 }

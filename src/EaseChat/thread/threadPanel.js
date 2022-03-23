@@ -15,6 +15,7 @@ import _ from "lodash";
 import avatar from "../../common/icons/avatar1.png";
 import "../../i18n";
 import i18next from "i18next";
+import { emoji } from "../../common/emoji";
 
 
 const useStyles = makeStyles((theme) => {
@@ -98,7 +99,9 @@ const useStyles = makeStyles((theme) => {
             color: '#999',
         },
         threadReplayMessage: {
+            marginTop: '2px',
             lineHeight: '20px',
+            fontWeight: '600',
             fontSize: '16px',
             width: '100%',
             overflow: 'hidden',
@@ -174,10 +177,10 @@ const ThreadPanel = (props) => {
             <div className={classes.threadDesc}>{i18next.t('Started by')} <span className={classes.threadStartMember}>{currentMessage?.thread?.owner}</span></div>
         </Box>)
     }
-    const renderMessage = () => {
-        switch (currentMessage.type) {//File Message
+    const renderMessage = (body) => {
+        switch (body?.type) {
             case 'txt':
-                return renderTxt(currentMessage.body.msg)
+                return renderTxt(body.msg)
             case 'file':
                 return `[${i18next.t('File Message')}]`
             case 'img':
@@ -308,7 +311,7 @@ const ThreadPanel = (props) => {
                             <span>{currentMessage.from}</span>
                             <span>{renderTimeWithDate(currentMessage.time)}</span>
                         </div>
-                        <div className={classes.threadReplayMessage}>{renderMessage()}</div>
+                        <div className={classes.threadReplayMessage}>{renderMessage(currentMessage.body)}</div>
                         <div className={classes.threadOriginalMessage}>{i18next.t('Original message from Group Chat')}</div>
                     </div>
                 </div>
@@ -319,9 +322,9 @@ const ThreadPanel = (props) => {
     const messageList =
         useSelector((state) => {
             const to = state.thread.currentThreadInfo?.thread?.threadId;
+            console.log("=======list:",state.message.threadMessage,state.thread.currentThreadInfo)
             return _.get(state, ["message", 'threadMessage', to], []);
         }) || [];
-
     let isThread = true;
     const PAGE_NUM = 20;
     const [isLoaded, setIsLoaded] = useState(false);
@@ -339,7 +342,6 @@ const ThreadPanel = (props) => {
     //     }
     // });
     useEffect(() => {
-        // console.log("=======aaaa")
         setIsLoaded(false)
         setIsPullingDown(false)
         //每次进入thread面板，滚动条置顶
@@ -349,10 +351,9 @@ const ThreadPanel = (props) => {
     }, [currentMessage])
 
     //收到新消息后，判断已经加载完旧消息则滚动条置底
-    useEffect(() => {
+    useEffect(() => {console.log("=====change",messageList)
         const dom = scrollEl.current;
         if (!ReactDOM.findDOMNode(dom)) return;
-        // console.log("========",isLoaded,dom.scrollTop,dom.scrollHeight === (dom.scrollTop + dom.clientHeight))
         if (isLoaded && dom.scrollTop !== 0 && dom.scrollHeight !== (dom.scrollTop + dom.clientHeight)) {
             dom.scrollTop = dom.scrollHeight;
         }

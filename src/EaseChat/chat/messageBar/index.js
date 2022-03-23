@@ -56,7 +56,6 @@ const MessageBar = () => {
   const dispatch = useDispatch();
   const groupById = useSelector((state) => state.group?.group.byId) || {};
   const globalProps = useSelector((state) => state.global.globalProps);
-  const threadList = useSelector((state) => state.thread?.threadList) || [];
 
   const [sessionEl, setSessionEl] = useState(null);
 
@@ -132,7 +131,6 @@ const MessageBar = () => {
       <Box position="static">
         <IconButton className="iconfont icon" style={{display: chatType === "groupChat" ? "inline-flex" : "none"}} onClick={openThreadList}>
           <img alt="" className={classes.threadIcon} src={threadIcon} />
-          <span style={{color: '#0D0D0D',fontSize:'14px',fontWeitht:'600',marginLeft:'3px',fontFamily:'Roboto'}}>{threadList.length>99 ? '99+':threadList.length }</span>
         </IconButton>
         <IconButton
           onClick={handleSessionInfoClick}

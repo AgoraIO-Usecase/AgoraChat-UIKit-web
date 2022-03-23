@@ -127,32 +127,32 @@ function SendBox(props) {
         msgId: currentThreadInfo.id,
         groupId: currentThreadInfo.to,
       }
-      //test=====start 本地测试 不调用接口
-      var promise = new Promise(function (resolve, reject) {
-        resolve({ threadId: '33' })
-      });
-      promise.then(res => {
+      WebIM.conn.createThread(options).then(res=>{
+        // const threadId = res.data?.id;
+        const threadId = res.data?.id+""
+        //change edit status of thread
         dispatch(ThreadActions.setIsCreatingThread(false));
-        //发送thread消息
-        dispatch(MessageActions.sendTxtMessage(res.threadId, chatType, {
+        //update currentThreadInfo
+        const threadInfo = {
+          chatType: chatType,
+          messageId: options.msgId,
+          groupId: to,
+          thread:{
+            threadId: threadId,
+            threadName: options.name,
+          }
+        }
+        dispatch(ThreadActions.updateThreadInfo(threadInfo));
+        //send message
+        dispatch(
+          MessageActions.sendTxtMessage(threadId, chatType, {
             msg: inputValue,
-          }, props.isThread)
-        )
-       })
-      //test=====end
-
-      // WebIM.conn.createThread(options).then(res=>{
-      //   //修改thread的编辑状态
-      //   dispatch(ThreadActions.setIsCreatingThread(false));
-      //   dispatch(
-      //     MessageActions.sendTxtMessage(res.threadId, chatType, {
-      //       msg: inputValue,
-      //     },props.isThread )
-      //   );
-      //   setInputValue("");
-      //   inputRef.current.focus();
-      // })
-      // return 
+          },props.isThread )
+        );
+        setInputValue("");
+        inputRef.current.focus();
+      })
+      return 
     }
     if(props.isThread) {
       to = currentThreadInfo.thread.threadId

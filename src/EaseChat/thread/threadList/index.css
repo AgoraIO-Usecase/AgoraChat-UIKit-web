@@ -10,13 +10,15 @@
 }
 .tlp-list {
     position: relative;
-    padding:0;
+    padding: 0 8px;
     margin: 0;
     width: 100%;
     min-height: 361px;
     max-height: 666px;
+    overflow-x: hidden;
     overflow-Y:scroll;
     list-style: none;
+    box-sizing: border-box;
 }
 .tlp-header{
     display: flex;
@@ -42,7 +44,7 @@
 }
 .tlp-item {
     height: 60px;
-    margin: 8px 16px;
+    margin: 16px 0px;
     width: 524px;
     background: #F4F5F7;
     border-radius: 16px;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "../../../EaseApp/index";
 import {
     Box,
@@ -13,6 +13,7 @@ import SearchBox from '../components/searchBox'
 import avatar from "../../../common/icons/avatar1.png";
 import "../../../i18n";
 import i18next from "i18next";
+import { emoji } from "../../../common/emoji";
 
 const ThreadListPanel = () => {
     const dispatch = useDispatch();
@@ -28,7 +29,11 @@ const ThreadListPanel = () => {
     }
     useEffect(() => {
         if (chatType === "groupChat") {
-            dispatch(ThreadActions.getThreadsListOfGroup(to))
+            let options = {
+                groupId : to,
+                limit : 50,
+            }
+            dispatch(ThreadActions.getThreadsListOfGroup(options))
         }
     }, [to])
     const [showSearchBar, setSearchBarState] = useState(false);
@@ -43,19 +48,16 @@ const ThreadListPanel = () => {
         })
         changeDisplayThreadList(list.concat());
     }
-    const clearInput = (e) => {
-        setSearchValue('');
-    }
     //The list is empty
     const renderDefaultList = () => {
         if (threadList.length === 0) return (
             <Box className='tlp-default-tips'>
-                <div className='tlp-tips1'>There are no Threads</div>
-                <div className='tlp-tips2'>Create a Thread from a Group Chat Message</div>
+                <div className='tlp-tips1'>{i18next.t('There are no Threads')}</div>
+                <div className='tlp-tips2'>{i18next.t('Create a Thread from a Group Chat Message')}</div>
             </Box>
         )
         if (displayThreadList.length === 0) {
-            return (<Box className='tlp-default-tips'>No Result</Box>)
+            return (<Box className='tlp-default-tips'>{i18next.t('No Result')}</Box>)
         }
     }
     const renderMessage = (body) => {
@@ -109,11 +111,31 @@ const ThreadListPanel = () => {
 
         return rnTxt;
     };
+    const threadListDom = useRef(null);
+    const [isPullingDown, setIsPullingDown] = useState(false);
+    const handleScroll = (e) => {
+        if (e.target.scrollHeight === (e.target.scrollTop + e.target.clientHeight)) {
+            if (!isPullingDown) {
+                setIsPullingDown(true);
+                setTimeout(() => {
+                    setIsPullingDown(false);
+                    if (chatType === "groupChat") {
+                        let options = {
+                            groupId : to,
+                            limit : 50,
+                            isScroll: true
+                        }
+                        dispatch(ThreadActions.getThreadsListOfGroup(options))
+                    }
+                }, 500);
+            }
+        }
+    };
 
     return (
         <Box className='threadListPanel' style={{ display: showThreadList == 1 ? 'block' : 'none' }}>
             <div className='tlp-header'>
-                <span className='tlp-header-title'>{i18next.t('Threads List')} ({threadList.length})</span>
+                <span className='tlp-header-title'>{i18next.t('Threads List')}</span>
                 <Box style={{ lineHeight: '60px', display: showSearchBar == 1 ? 'none' : 'flex' }}>
                     <div className="tlp-header-icon">
                         <img className="tlp-header-icon-search" alt="" src={threadSearch} onClick={(e) => changeSearchBarState(true)} />
@@ -126,14 +148,14 @@ const ThreadListPanel = () => {
                     <SearchBox changeSearchBarState={changeSearchBarState} searchThread={searchThread}/>
                 </Box>
             </div>
-            <ul className='tlp-list'>
+            <ul className='tlp-list' ref={threadListDom} onScroll={handleScroll}>
                 {renderDefaultList()}
                 {displayThreadList.length > 0 && displayThreadList.map((option, index) => {
                     return (
                         <li className='tlp-item' key={option.id}>
                             <Box sx={{ padding: '8px 16px', width: '100%', height: '100%', boxSizing: 'border-box' }}>
                                 <div className="tpl-item-name">{option.name}</div>
-                                <Box style={{ display: 'flex', }}>
+                                <Box style={{ display: 'flex', marginTop: '2px'}}>
                                     <img
                                         className='tlp-avatar'
                                         alt="Remy Sharp"
