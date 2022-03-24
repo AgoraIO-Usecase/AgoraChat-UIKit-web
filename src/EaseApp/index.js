@@ -161,6 +161,9 @@ EaseAppProvider.propTypes = {
   menuList: PropTypes.array,
   handleMenuItem: PropTypes.func,
   onChatAvatarClick:PropTypes.func,
+
+  customMessageList:PropTypes.array,
+  customMessageClick:PropTypes.func
 };
 EaseAppProvider.defaultProps = {
   isShowUnread: true,

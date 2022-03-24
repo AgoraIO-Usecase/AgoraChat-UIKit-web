@@ -81,7 +81,7 @@ const initialState = {
 };
 function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
   let easeChatProps = useContext(EaseChatContext);
-  const { onAvatarChange } = easeChatProps;
+  const { onAvatarChange, customMessageClick, customMessageList} = easeChatProps;
   const classes = useStyles({
     bySelf: message.bySelf,
     chatType: message.chatType,
@@ -147,6 +147,11 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
     handleClose() 
   }
 
+  const _customMessageClick = (val,option) =>(e) =>{
+    customMessageClick && customMessageClick(e,val,option)
+    handleClose()
+  }
+
   return (
     <li className={classes.pulldownListItem}>
       <div>
@@ -197,6 +202,9 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
             <span>{i18next.t("Copy")}</span>
         </CopyToClipboard>
           </MenuItem> }
+          {customMessageList.map((val,key)=>{
+            return <MenuItem key={key} onClick={_customMessageClick(val,message)}>{val.name}</MenuItem>
+          })}
         </Menu>
     </li>
   );

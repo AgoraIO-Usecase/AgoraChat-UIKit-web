@@ -100,7 +100,7 @@ const initialState = {
 };
 function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
   let easeChatProps = useContext(EaseChatContext);
-  const { onAvatarChange } = easeChatProps;
+  const { onAvatarChange, customMessageClick, customMessageList} = easeChatProps;
   const classes = useStyles({ bySelf: message.bySelf });
   const [state, setState] = useState(initialState);
   const handleClose = () => {
@@ -117,6 +117,10 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
       mouseY: event.clientY - 4,
     });
   };
+  const _customMessageClick = (val,option) =>(e) =>{
+    customMessageClick && customMessageClick(e,val,option)
+    handleClose()
+  }
 
   return (
     <li className={classes.pulldownListItem}>
@@ -150,7 +154,6 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
       </div>
    
       <div className={classes.time}>{renderTime(message.time)}</div>
-      {message.bySelf ? (
         <Menu
           keepMounted
           open={state.mouseY !== null}
@@ -162,9 +165,12 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
               : undefined
           }
         >
-          <MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
+          {message.bySelf && <MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>}
+          {customMessageList.map((val,key)=>{
+            return <MenuItem key={key} onClick={_customMessageClick(val,message)}>{val.name}</MenuItem>
+          })}
         </Menu>
-      ) : null}
+
     </li>
   );
 }
