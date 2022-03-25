@@ -122,7 +122,7 @@ export function formatLocalMessage(to, chatType, message = {}, messageType) {
     const ext = message.ext || {}
     const formatMsg = Object.assign(msgTpl.base, message)
     const body = Object.assign(msgTpl[messageType], message)
-    if (messageType === 'file' || messageType === 'img') {
+    if (messageType === 'file' || messageType === 'img' || messageType === 'video') {
         body.size = message?.data.size
     }
     return {
@@ -152,6 +152,9 @@ export function formatServerMessage(message = {}, messageType) {
         body.size = body.file_length
     } else if (messageType === 'img') {
         body.type = 'img'
+    } else if (messageType === 'video') {
+        body.type = 'video'
+        body.size = body.file_length
     }
     return {
         ...formatMsg,
