@@ -209,7 +209,8 @@ function SendBox(props) {
     if (!file.filename) {
       return false;
     }
-    dispatch(MessageActions.sendFileMessage(to, chatType, file, fileEl));
+    const receiveId = props.isThread ? currentThreadInfo.thread.id: to
+    dispatch(MessageActions.sendFileMessage(receiveId, chatType, file, fileEl, props.isThread));
   };
 
   const handleVideoChange = (e) => {
@@ -217,14 +218,16 @@ function SendBox(props) {
     if (!file.filename) {
       return false;
     }
-    dispatch(MessageActions.sendVideoMessage(to, chatType, file,videoEl));
+    const receiveId = props.isThread ? currentThreadInfo.thread.id: to
+    dispatch(MessageActions.sendVideoMessage(receiveId, chatType, file,videoEl, props.isThread));
   }
   const handleImageChange = (e) => {
     let file = WebIM.utils.getFileUrl(e.target);
     if (!file.filename) {
       return false;
     }
-    dispatch(MessageActions.sendImgMessage(to, chatType, file, imageEl));
+    const receiveId = props.isThread ? currentThreadInfo.thread.id: to
+    dispatch(MessageActions.sendImgMessage(receiveId, chatType, file, imageEl, props.isThread));
   };
 
   const handleClickMenu = (e) => {

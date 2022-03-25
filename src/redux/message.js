@@ -66,13 +66,13 @@ const { Types, Creators } = createActions({
         }
     },
 
-    sendFileMessage: (to, chatType, file,fileEl) => {
+    sendFileMessage: (to, chatType, file,fileEl, isThread=false) => {
         return (dispatch, getState) => {
             if (file.data.size > (1024 * 1024 * 10)) {
                 message.error(i18next.t('The file exceeds the upper limit'))
                 return
             }
-            const formatMsg = formatLocalMessage(to, chatType, file, 'file')
+            const formatMsg = formatLocalMessage(to, chatType, file, 'file', isThread)
             const { id } = formatMsg
             const msgObj = new WebIM.message('file', id)
             msgObj.set({
@@ -83,6 +83,7 @@ const { Types, Creators } = createActions({
                 file: file,
                 to,
                 chatType,
+                isThread,
                 onFileUploadError: function (error) {
                     formatMsg.status = 'fail'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
@@ -94,7 +95,12 @@ const { Types, Creators } = createActions({
                     formatMsg.body.url = url
                     formatMsg.status = 'sent'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
-                    dispatch(Creators.updateMessages(chatType, to, formatMsg))
+                    // dispatch(Creators.updateMessages(chatType, to, formatMsg))
+                    if(isThread){
+                        dispatch(Creators.updateMessages('threadMessage', to, formatMsg ))
+                    }else{
+                        dispatch(Creators.updateMessages(chatType, to, formatMsg ))
+                    }
                     fileEl.current.value =''
                 },
                 fail: function () {
@@ -107,13 +113,13 @@ const { Types, Creators } = createActions({
         }
     },
 
-    sendImgMessage: (to, chatType, file,imageEl) => {
+    sendImgMessage: (to, chatType, file,imageEl, isThread=false) => {
         return (dispatch, getState) => {
             if (file.data.size > (1024 * 1024 * 10)) {
                 message.error(i18next.t('The file exceeds the upper limit'))
                 return
             }
-            const formatMsg = formatLocalMessage(to, chatType, file, 'img')
+            const formatMsg = formatLocalMessage(to, chatType, file, 'img', isThread)
             const { id } = formatMsg
             const msgObj = new WebIM.message('img', id)
             msgObj.set({
@@ -124,6 +130,7 @@ const { Types, Creators } = createActions({
                 file: file,
                 to,
                 chatType,
+                isThread,
                 onFileUploadError: function (error) {
                     formatMsg.status = 'fail'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
@@ -134,7 +141,12 @@ const { Types, Creators } = createActions({
                     formatMsg.url = url
                     formatMsg.body.url = url
                     formatMsg.status = 'sent'
-                    dispatch(Creators.updateMessages(chatType, to, formatMsg ))
+                    // dispatch(Creators.updateMessages(chatType, to, formatMsg ))
+                    if(isThread){
+                        dispatch(Creators.updateMessages('threadMessage', to, formatMsg ))
+                    }else{
+                        dispatch(Creators.updateMessages(chatType, to, formatMsg ))
+                    }
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
                     imageEl.current.value = ''
                 },
