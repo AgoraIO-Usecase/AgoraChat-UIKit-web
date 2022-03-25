@@ -106,7 +106,7 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar }) {
           }
         >
          {message.bySelf && <MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>} 
-          {customMessageList.map((val,key)=>{
+          {customMessageList && customMessageList.map((val,key)=>{
             return <MenuItem key={key} onClick={_customMessageClick(val,message)}>{val.name}</MenuItem>
           })}
         </Menu>

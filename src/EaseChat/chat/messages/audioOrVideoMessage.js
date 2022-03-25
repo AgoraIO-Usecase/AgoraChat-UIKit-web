@@ -158,7 +158,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar }) {
               : undefined
           }
         >
-          {customMessageList.map((val,key)=>{
+          {customMessageList && customMessageList.map((val,key)=>{
             return <MenuItem key={key} onClick={_customMessageClick(val,message)}>{val.name}</MenuItem>
           })}
         </Menu>
