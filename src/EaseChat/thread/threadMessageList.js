@@ -27,26 +27,13 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-// const PAGE_NUM = 20;
 function ThreadMessageList({ messageList, showByselfAvatar }) {
   const classes = useStyles();
   const dispatch = useDispatch();
   const currentThreadInfo = useSelector((state) => state.thread.currentThreadInfo);
   const {thread} = currentThreadInfo;
-//   const scrollEl = useRef(null);
   const [isPullingDown, setIsPullingDown] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-//   let _not_scroll_bottom = false;
-
-//   useEffect(() => {
-//     if (!_not_scroll_bottom) {
-//       setTimeout(() => {
-//         const dom = scrollEl.current;
-//         if (!ReactDOM.findDOMNode(dom)) return;
-//         dom.scrollTop = dom.scrollHeight;
-//       }, 0);
-//     }
-//   });
 
   const handleRecallMsg = useCallback(
     (message) => {
@@ -56,24 +43,6 @@ function ThreadMessageList({ messageList, showByselfAvatar }) {
     },
     [dispatch]
   );
-
-//   const handleScroll = (e) => {debugger
-//     if (e.target.scrollTop === 0 && !isLoaded) {
-//       setTimeout(() => {
-//         const offset = messageList.length;
-//         dispatch(
-//           MessageActions.fetchMessage(to, chatType, offset, (res) => {
-//             setIsPullingDown(false);
-//             if (res < PAGE_NUM) {
-//               setIsLoaded(true);
-//             }
-//           })
-//         );
-//       }, 500);
-//       setIsPullingDown(true);
-//     }
-//   };
-
   return (
     <div className={classes.root}>
       <div className="pulldown-wrapper">

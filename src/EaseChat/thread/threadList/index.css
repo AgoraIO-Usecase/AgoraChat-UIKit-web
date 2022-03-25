@@ -75,6 +75,10 @@
     font-weight: 500;
     font-size: 14px;
     line-height: 20px;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .tpl-item-msg{
     display: inline-block;
@@ -82,7 +86,7 @@
     color: #666;
     font-size: 14px;
     line-height: 20px;
-    max-width: 290px;
+    max-width: 262px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

@@ -22,7 +22,9 @@ export const INITIAL_STATE = Immutable({
         groupChat: {},
         chatRoom: {},
         stranger: {},
-    }
+    },
+    threadHistoryStart:-1,
+    threadHistoryIsLast:false,
 })
 
 /* -------- Types and Action Creators -------- */
@@ -37,6 +39,8 @@ const { Types, Creators } = createActions({
     updateThreadMessage: ['to','messageList','isScroll'],
 	addReactions: ["message", "reaction"],
 	deleteReaction: ["message", "reaction"],
+    setThreadHistoryStart:['start'],
+    setThreadHistoryIsLast: ['status'],
     
 
     // -async-
@@ -295,29 +299,35 @@ const { Types, Creators } = createActions({
             })
         }
     },
-    fetchThreadMessage: (to, offset, cb, isScroll) => {
+    fetchThreadMessage: (to, cb, isScroll) => {
+        const rootState = uikit_store.getState();
+        const username = WebIM.conn.context.userId;
+        if(rootState.message.threadHistoryIsLast && isScroll) return
         return (dispatch) => {
             let options = {
                 queue:to,
-                start:-1,
+                start: isScroll ? rootState.message.threadHistoryStart : -1,
                 count: 50,
                 isGroup:true,
                 format:true,
                 is_positive:true,
-
             }
             WebIM.conn.getHistoryMessages(options).then((res)=>{
-                
+                let msgList = res.msgs;
+                const newMsgList  = [];
+                if(!res.is_last && msgList.length>0) {
+                    msgList.forEach((item)=>{
+                        let msg = formatServerMessage(item, item.type);
+                        msg.bySelf = msg.from === username;
+                        newMsgList.push(msg)
+                    })
+                    dispatch(Creators.setThreadHistoryStart(res.next_key));
+                    dispatch(Creators.updateThreadMessage(to,newMsgList,isScroll))
+                }
+                res.is_last && dispatch(Creators.setThreadHistoryIsLast(res.is_last));
+                cb && cb(newMsgList.length);
             })
         }
-        // return (dispatch) => {
-        //     AppDB.fetchThreadMessage(to, offset).then(messageList => {
-        //         if (messageList.length) {
-        //             dispatch(Creators.updateThreadMessage(to,messageList,isScroll))
-        //         }
-        //         cb && cb(messageList.length)
-        //     })
-        // }
     },
     clearMessage: (chatType, id) => {
         return (dispatch) => {
@@ -678,6 +688,12 @@ export const deleteReaction = (state, { message, reaction }) => {
 	AppDB.deleteReactions(id, reactionList);
 	return state;
 };
+export const setThreadHistoryStart = (state, {start}) => {
+    return state.setIn(['threadHistoryStart'], start);
+}
+export const setThreadHistoryIsLast = (state, {status}) => {
+    return state.setIn(['threadHistoryIsLast'], status)
+}
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const messageReducer = createReducer(INITIAL_STATE, {
@@ -693,6 +709,9 @@ export const messageReducer = createReducer(INITIAL_STATE, {
     [Types.UPDATE_THREAD_MESSAGE]: updateThreadMessage,
     [Types.ADD_REACTIONS]: addReactions,
 	[Types.DELETE_REACTION]: deleteReaction,
+    [Types.SET_THREAD_HISTORY_START]: setThreadHistoryStart,
+    [Types.SET_THREAD_HISTORY_IS_LAST]: setThreadHistoryIsLast
+
 })
 
 export default Creators;

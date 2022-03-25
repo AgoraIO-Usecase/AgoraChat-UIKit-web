@@ -5,6 +5,36 @@ import AppDB from '../utils/AppDB';
 import MessageActions from "./message";
 import WebIM from "../utils/WebIM";
 
+function getThreadList(options,state,dispatch){
+    const cursor = state.threadListCursor;
+    let paramsData = {
+        groupId: options.groupId,
+        limit: options.limit,
+    }
+    if (options.isScroll) {
+        paramsData.cursor = cursor
+    } else {
+        dispatch(Creators.setThreadListEnd(false))
+    }
+    const getThreadFun = state.curGroupRole.role === 'member' ? 'getJoinedThreadsOfGroup' : 'getThreadsOfGroup';
+    WebIM.conn[getThreadFun](paramsData).then((res) => {
+        const threadList = res.entities;
+        if (threadList.length === 0) {
+            dispatch(Creators.setThreadListEnd(true));
+            return
+        }
+        dispatch(Creators.setThreadListCursor(res.properties.cursor))
+        threadList.forEach((item) => {
+            item.last_message = {}
+            AppDB.findLastMessage(item.id).then((msg) => {
+                item.last_message = msg
+            }).then(() => {
+                dispatch(Creators.setThreadList(threadList, options.isScroll))
+            })
+        })
+    })
+}
+
 /* ------------- Initial State ------------- */
 export const INITIAL_STATE = Immutable({
     threadPanelStates: false,//是否展示thread部分面板
@@ -15,6 +45,7 @@ export const INITIAL_STATE = Immutable({
     isCreatingThread: false,//是否正在创建thread
     currentThreadInfo: {},//点击消息查看thread信息、创建thread
     curGroupAdminAndOwner: {},//当前群组的adminList(list) 和owner(only one)
+    curGroupRole:{},//currentGrouprole{groupId:groupId,role: ''}
 });
 
 /* ------------- Types and Action Creators ------------- */
@@ -26,74 +57,34 @@ const { Types, Creators } = createActions({
     setCurrentThreadInfo: ['message'],
     setThreadListCursor: ['cursor'],
     setThreadListEnd: ['status'],
+    setCurGroupRole: ['options'],
     getThreadsListOfGroup: (options) => {
-        return (dispatch) => {
-            // var promise = new Promise(function (resolve, reject) {
-            //     resolve([
-            //         { id: '2', name: 'thread-first', owner: 'echo', 'msgId': '123456765',groupId: '1234',created: '1647502554746' },
-            //         { id: '222', name: 'thread222-测试名字超级长阿斯顿福建的时刻拉飞机奥斯卡地sfdsafsadfsadfd方', owner: 'lucy', 'msgId': '123456765',groupId: '1234',created: '1647502554746' },
-            //         { id: '333', name: 'third thread', owner: 'zhang','msgId': '123456765',groupId: '1234',created: '1647502554746' },
-            //         { id: '444', name: 'fourth thread', owner: 'zhang', 'msgId': '123456765',groupId: '1234',created: '1647502554746' },
-            //     ])
-            //   });
+        return  (dispatch) => {
             const rootState = uikit_store.getState()
             const { username } = _.get(rootState, ['global', 'globalProps'])
-            const cursor = _.get(rootState, ['thread', 'threadListCursor'])
             const threadListEnd = _.get(rootState, ['thread', 'threadListEnd'])
-            let groupOwner = '';
             if (threadListEnd) return
+            if(rootState.thread.curGroupRole.groupId === options.groupId){
+                getThreadList(options,rootState.thread,dispatch);
+                return
+            }
             WebIM.conn.getGroupInfo({ groupId: options.groupId }).then(res => {
                 const data = res.data ? res.data[0] : {};
-                if (data.id === options.groupId) {
-                    groupOwner = data.owner
+                if (data.id === options.groupId && data.owner === username) {
+                    if(data.owner === username){
+                        dispatch(Creators.setCurGroupRole({groupId: options.groupId,role:'owner'}))
+                    }
+                }else {
+                    WebIM.conn.getGroupAdmin({ groupId: options.groupId }).then((res) => {
+                        if(res.data.indexOf(username) > -1 ){
+                            dispatch(Creators.setCurGroupRole({groupId: options.groupId,role:'admin'}))
+                        }else{
+                            dispatch(Creators.setCurGroupRole({groupId: options.groupId,role:'member'}))
+                        }
+                    })
                 }
-                WebIM.conn.getGroupAdmin({ groupId: options.groupId }).then((res) => {
-                    const isAdmin = (res.data.indexOf(username) > -1 || username === groupOwner) ? true : false;
-                    let paramsData = {
-                        groupId: options.groupId,
-                        limit: options.limit,
-                    }
-                    if (options.isScroll) {
-                        paramsData.cursor = cursor
-                    } else {
-                        dispatch(Creators.setThreadListEnd(false))
-                    }
-                    if (isAdmin) {
-                        WebIM.conn.getThreadsOfGroup(options).then((res) => {
-                            const threadList = res.entities;
-                            if (threadList.length === 0) {
-                                dispatch(Creators.setThreadListEnd(true));
-                                return
-                            }
-                            dispatch(Creators.setThreadListCursor(res.properties.cursor))
-                            threadList.forEach((item) => {
-                                item.lastMessage = {}
-                                AppDB.findLastMessage(item.id).then((msg) => {
-                                    item.lastMessage = msg
-                                }).then(() => {
-                                    dispatch(Creators.setThreadList(threadList, options.isScroll))
-                                })
-                            })
-                        })
-                    } else {
-                        WebIM.conn.getJoinedThreadsOfGroup(paramsData).then((res) => {
-                            const threadList = res.entities;
-                            if (threadList.length === 0) {
-                                dispatch(Creators.setThreadListEnd(true));
-                                return
-                            }
-                            dispatch(Creators.setThreadListCursor(res.properties.cursor))
-                            threadList.forEach((item) => {
-                                item.lastMessage = {}
-                                AppDB.findLastMessage(item.id).then((msg) => {
-                                    item.lastMessage = msg
-                                }).then(() => {
-                                    dispatch(Creators.setThreadList(threadList, options.isScroll))
-                                })
-                            })
-                        })
-                    }
-                })
+                getThreadList(options,rootState.thread,dispatch)
+                
             })
 
         }
@@ -165,6 +156,9 @@ export const setThreadListCursor = (state, { cursor }) => {
 export const setThreadListEnd = (state, { status }) => {
     return state = state.setIn(['threadListEnd'], status)
 }
+export const setCurGroupRole = (state, { options }) => {
+    return state = state.setIn(['curGroupRole'], options)
+}
 
 
 /* ------------- Hookup Reducers To Types ------------- */
@@ -175,7 +169,8 @@ export const threadReducer = createReducer(INITIAL_STATE, {
     [Types.SET_IS_CREATING_THREAD]: setIsCreatingThread,
     [Types.SET_CURRENT_THREAD_INFO]: setCurrentThreadInfo,
     [Types.SET_THREAD_LIST_CURSOR]: setThreadListCursor,
-    [Types.SET_THREAD_LIST_END]: setThreadListEnd
+    [Types.SET_THREAD_LIST_END]: setThreadListEnd,
+    [Types.SET_CUR_GROUP_ROLE]: setCurGroupRole
 });
 
 export default Creators;

@@ -253,53 +253,50 @@ const ThreadPanel = (props) => {
             return _.get(state, ["message", 'threadMessage', to], []);
         }) || [];
     let isThread = true;
-    const PAGE_NUM = 20;
-    const [isLoaded, setIsLoaded] = useState(false);
+    const [hasNoHistory, setHasHistory] = useState(true);
     const [isPullingDown, setIsPullingDown] = useState(false);
 
-    const scrollEl = useRef(null);
+    const scrollThreadEl = useRef(null);
     useEffect(() => {
         setThreadName('');
-        setIsLoaded(false)
+        setHasHistory(true)
         setIsPullingDown(false)
-        //每次进入thread面板，滚动条置顶
-        const dom = scrollEl.current;
+        const dom = scrollThreadEl.current;
         if (!ReactDOM.findDOMNode(dom)) return;
         dom.scrollTop = 0;
-    }, [currentMessage])
+        
+    }, [currentMessage?.thread?.id])
 
-    //收到新消息后，判断已经加载完旧消息则滚动条置底
+    //receive new message 
     useEffect(() => {
-        const dom = scrollEl.current;
+        const dom = scrollThreadEl.current;
         if (!ReactDOM.findDOMNode(dom)) return;
-        if (isLoaded && dom.scrollTop !== 0 && dom.scrollHeight !== (dom.scrollTop + dom.clientHeight)) {
-            dom.scrollTop = dom.scrollHeight;
+        if (!hasNoHistory && dom.scrollTop!==0 && dom.scrollHeight !== (dom.scrollTop + dom.clientHeight)) {
+            // dom.scrollTop = dom.scrollHeight;
         }
     }, [messageList])
 
     const handleScroll = (e) => {
-        if (e.target.scrollHeight === (e.target.scrollTop + e.target.clientHeight) && !isLoaded && e.target.scrollTop !== 0) {
+        if (hasNoHistory && e.target.scrollTop!==0 && e.target.scrollHeight === (e.target.scrollTop + e.target.clientHeight) && e.target.scrollTop !== 0) {
             if (!isPullingDown) {
                 setIsPullingDown(true);
                 setTimeout(() => {
-                    const offset = messageList.length;
-                    const to = currentMessage.thread?.threadId;
-                    dispatch(
-                        MessageActions.fetchThreadMessage(to, offset, (res) => {
-                            setIsPullingDown(false);
-                            if (res < PAGE_NUM) {
-                                setIsLoaded(true);
-                            }
-                        }, 'scroll')
-                    );
+                    const to = currentMessage.thread?.id;
+                    dispatch(MessageActions.fetchThreadMessage(to, cb, 'scroll'));
                 }, 500);
             }
         }
     };
+    const cb = (res)=>{
+        if(res === 0){
+            setHasHistory(false)
+        }
+        setIsPullingDown(false)
+    }
     return (
         <Box className={classes.root}>
             <ThreadBar />
-            <Box ref={scrollEl} className={classes.chat} onScroll={handleScroll}>
+            <Box ref={scrollThreadEl} className={classes.chat} onScroll={handleScroll}>
                 {isCreatingThread ? createThread() : showThreadMessage()}
                 {renderOriginalMsg()}
                 <ThreadMessageList

@@ -14,10 +14,13 @@ import avatar from "../../../common/icons/avatar1.png";
 import "../../../i18n";
 import i18next from "i18next";
 import { emoji } from "../../../common/emoji";
+import MessageActions from "../../../redux/message"
+import _ from "lodash";
 
 const ThreadListPanel = () => {
     const dispatch = useDispatch();
     const threadList = useSelector((state) => state.thread?.threadList) || [];
+    const groupChat = useSelector ((state) => state.message?.groupChat);
     let [displayThreadList, changeDisplayThreadList] = useState([]);
     useEffect(() => {
         changeDisplayThreadList(threadList.concat());
@@ -31,7 +34,7 @@ const ThreadListPanel = () => {
         if (chatType === "groupChat") {
             let options = {
                 groupId : to,
-                limit : 50,
+                limit : 20,
             }
             dispatch(ThreadActions.getThreadsListOfGroup(options))
         }
@@ -122,7 +125,7 @@ const ThreadListPanel = () => {
                     if (chatType === "groupChat") {
                         let options = {
                             groupId : to,
-                            limit : 50,
+                            limit : 20,
                             isScroll: true
                         }
                         dispatch(ThreadActions.getThreadsListOfGroup(options))
@@ -131,6 +134,24 @@ const ThreadListPanel = () => {
             }
         }
     };
+    const changeMessage = (option)=> {
+        WebIM.conn.joinThread({threadId:option.id}).then((res) => {
+            //如果正在创建thread，修改状态
+            dispatch(ThreadActions.setIsCreatingThread(false));
+            //获取threadMessageList
+            dispatch(MessageActions.fetchThreadMessage(option.id))
+            //查找当前消息 option.msgId修改当前的消息--找不到消息则报错（本地数据库中获取数据较为准确-找不到消息？？？）
+            const msgList = groupChat[option.groupId]||[];
+            let foundMsg = msgList.find((item)=>{
+                return item.id === option.msgId || item.mid === option.msgId
+            })
+            dispatch(ThreadActions.setCurrentThreadInfo(foundMsg));
+            //打开thread面板
+            dispatch(ThreadActions.updateThreadStates(true));
+            //关闭threadList面板
+            dispatch(ThreadActions.setShowThreadList(false));
+        })
+    }
 
     return (
         <Box className='threadListPanel' style={{ display: showThreadList == 1 ? 'block' : 'none' }}>
@@ -152,7 +173,7 @@ const ThreadListPanel = () => {
                 {renderDefaultList()}
                 {displayThreadList.length > 0 && displayThreadList.map((option, index) => {
                     return (
-                        <li className='tlp-item' key={index}>
+                        <li className='tlp-item' key={index} onClick={(e)=>changeMessage(option)}>
                             <Box sx={{ padding: '8px 16px', width: '100%', height: '100%', boxSizing: 'border-box' }}>
                                 <div className="tpl-item-name">{option.name}</div>
                                 <Box style={{ display: 'flex', marginTop: '2px'}}>
@@ -162,8 +183,8 @@ const ThreadListPanel = () => {
                                         src={avatar}
                                     />
                                     <span className="tpl-item-owner">{option.owner}</span>
-                                    {/* <span className="tpl-item-msg">{renderMessage(option.lastMessage?.body)}</span>
-                                    <span className="tpl-item-time">{getTimeDiff(option.lastMessage?.time)}</span> */}
+                                    <span className="tpl-item-msg">{renderMessage(option.last_message?.body)}</span>
+                                    <span className="tpl-item-time">{getTimeDiff(option.last_message?.time)}</span>
                                 </Box>
                             </Box>
                         </li>
