@@ -5,6 +5,7 @@ import AppDB from "../utils/AppDB";
 import MessageActions from "../redux/message";
 import SessionActions from "../redux/session";
 import GlobalPropsActions from "../redux/globalProps";
+import ThreadActions from "../redux/thread"
 export default function createlistener(props) {
 	WebIM.conn.addEventHandler("EaseChat", {
 		onConnected: (msg) => {
@@ -105,40 +106,40 @@ export default function createlistener(props) {
       store.dispatch(SessionActions.deleteSession(msg.from));
       store.dispatch(GlobalPropsActions.setGlobalProps({to:null}))
     },
-    //群成员收到therad更新的通知--抛出到demo层处理
+    //thread notify
     onThreadUpdate:(msg) =>{
-      switch(msg.type){
-        case 'create':
-          console.log("create")
-        case 'update':
-          console.log("update")
-        case 'delete':
-          console.log("delete")
-        case 'update_msg':
-          console.log("update_msg")
-        default:
-          console.log('error')
-      }
+      console.log("listener====msg:",msg)
+      store.dispatch(ThreadActions.updateThreadInfo(msg));
+      //msg.type: 'create'，'update'，'delete'，'update_msg'，'recall_msg'
     },
-    //thread成员收到thread更新的通知
+    //thread member received changed
     onThreadChange:(msg) =>{
+      console.log("=======thread member received changed",msg)
       switch(msg.type){
         case 'threadCreate':
           console.log("threadCreate")
+          break;
         case 'threadDestroy':
           console.log("threadDestroy")
+          break;
         case 'threadJoin':
           console.log("threadJoin")
+          break;
         case 'threadLeave':
           console.log("threadLeave")
+          break;
         case 'threadKick':
           console.log("threadKick")
+          break;
         case 'threadNameUpdate':
           console.log("threadNameUpdate")
+          break;
         case 'threadPresence':
           console.log("threadPresence")
+          break;
         case 'threadAbsence':
           console.log("threadAbsence")
+          break;
       default:
           console.log('error')
       }

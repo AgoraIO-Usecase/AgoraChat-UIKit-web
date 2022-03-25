@@ -152,7 +152,7 @@ const ThreadListPanel = () => {
                 {renderDefaultList()}
                 {displayThreadList.length > 0 && displayThreadList.map((option, index) => {
                     return (
-                        <li className='tlp-item' key={option.id}>
+                        <li className='tlp-item' key={index}>
                             <Box sx={{ padding: '8px 16px', width: '100%', height: '100%', boxSizing: 'border-box' }}>
                                 <div className="tpl-item-name">{option.name}</div>
                                 <Box style={{ display: 'flex', marginTop: '2px'}}>
@@ -162,8 +162,8 @@ const ThreadListPanel = () => {
                                         src={avatar}
                                     />
                                     <span className="tpl-item-owner">{option.owner}</span>
-                                    <span className="tpl-item-msg">{renderMessage(option.lastMessage?.body)}</span>
-                                    <span className="tpl-item-time">{getTimeDiff(option.lastMessage?.time)}</span>
+                                    {/* <span className="tpl-item-msg">{renderMessage(option.lastMessage?.body)}</span>
+                                    <span className="tpl-item-time">{getTimeDiff(option.lastMessage?.time)}</span> */}
                                 </Box>
                             </Box>
                         </li>

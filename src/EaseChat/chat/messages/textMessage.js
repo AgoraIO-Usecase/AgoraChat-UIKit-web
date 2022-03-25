@@ -75,7 +75,8 @@ const useStyles = makeStyles((theme) => ({
 		borderRadius: (props) =>
 			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
 		padding: "15px",
-		maxWidth: "65%",
+		maxWidth: "100%",
+		// maxWidth: "65%",
 		wordBreak: "break-all",
 		textAlign: "initial",
 		position: "relative",

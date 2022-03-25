@@ -14,12 +14,14 @@ import MessageActions from "../../../redux/message"
 import { getTimeDiff } from "../../../utils/index";
 import WebIM from "../../../utils/WebIM";
 import avatar from "../../../common/icons/avatar1.png";
+import i18next from "i18next";
+import { emoji } from "../../../common/emoji";
 
 const useStyles = makeStyles((theme) => {
     return {
         root: {
             minWidth: "200px",
-            width: '100%',
+            maxWidth: '100%',
             height: "64px",
             display: "flex",
         },
@@ -84,17 +86,19 @@ const useStyles = makeStyles((theme) => {
             width: '100%',
         },
         threadAva: {
-            flex: '0 0 18px',
+            flex: '0 0 16px',
             textAlign: 'center',
             lineHeight: '16px',
         },
         threadAvaIcon: {
             display: 'inline-block',
+            marginTop: '2px',
             height: '14px',
             width: '14px',
             borderRadius: '50%',
         },
         threadMsg: {
+            marginLeft: '4px',
             flex: '1 1 auto',
             fontSize: '14px',
             overflow: 'hidden',
@@ -102,6 +106,8 @@ const useStyles = makeStyles((theme) => {
             whiteSpace: 'nowrap',
         },
         time: {
+            color: '#999',
+            fontSize: '12px',
             flex: '0 0 50px',
             textAlign: 'right',
         },
@@ -121,22 +127,28 @@ const useStyles = makeStyles((theme) => {
 });
 
 const MsgThreadInfo = (props) => {
+    const {thread} = props.message;
     const dispatch = useDispatch();
     const classes = useStyles();
-    const { thread } = props.message;
-    const renderMessage = (lastMessage) => {
-        switch (lastMessage.contenttype) {
-            case 'TEXT':
-                return renderTxt(lastMessage.text)
-            case 'file':
-                return '[文件]'
-            case 'img':
-                return '[图片]'
-            case 'audio':
-                return '[音频]'
-            default:
-                return ''
+    const renderMessage = (payload) => {
+        if(payload.bodies && payload.bodies.length>0){
+            let message = payload.bodies[0]
+            switch (message.type) {
+                case 'txt':
+                    return renderTxt(message.msg)
+                case 'file':
+                    return `[${i18next.t('File Message')}]`
+                case 'img':
+                    return `[${i18next.t('Image Message')}]`
+                case 'audio':
+                    return `[${i18next.t('Audio Message')}]`
+                case 'video':
+                    return `[${i18next.t('Video Message')}]`
+                default:
+                    return ''
+            }
         }
+        return ''
     }
     const renderTxt = (txt) => {
         if (txt === undefined) {
@@ -176,48 +188,41 @@ const MsgThreadInfo = (props) => {
     const changeMessage = () => {
         //自己是否在该thread中，若不在-调用sdk加入的接口
         let hasJoined = threadList.find((item) => {
-            return item.id === props.message.thread.threadId
+            return item.id === props.message.thread.id
         })
         if (!hasJoined) {
-            //test-start
-            setTimeout(() => {
+            WebIM.conn.joinThread({threadId:props.message.thread.id}).then((res) => {
                 //加入到thread列表中
-                let threadInfo = {
-                    id: props.message.thread.threadId,
-                    name: props.message.thread.threadName,
-                    owner: props.message.thread.owner,
-                    msgId: props.message.id,
-                    groupId: props.message.to,
-                    created: '1647502554746',//通知中有create_timestamp
-                    lastMessage: props.message.thread.lastMessage,
-                }
-                let newList = threadList.concat([threadInfo])
-                dispatch(ThreadActions.setThreadList(newList))
+                // let threadInfo = {
+                //     id: props.message.thread.threadId,
+                //     name: props.message.thread.threadName,
+                //     owner: props.message.thread.owner,
+                //     msgId: props.message.id,
+                //     groupId: props.message.to,
+                //     created: '1647502554746',//通知中有create_timestamp
+                //     lastMessage: props.message.thread.lastMessage,
+                // }
+                // let newList = threadList.concat([threadInfo])
+                //更新threadList
+                // dispatch(ThreadActions.setThreadList(newList))
+                //如果正在创建thread，修改状态
+                dispatch(ThreadActions.setIsCreatingThread(false));
+                //获取threadMessageList
+                dispatch(MessageActions.fetchThreadMessage(props.message.thread.id))
+                //修改当前的消息
+                dispatch(ThreadActions.setCurrentThreadInfo(props.message));
+                //打开thread面板
+                dispatch(ThreadActions.updateThreadStates(true));
             })
-            //test-end
-            // WebIM.conn.joinThread(props.message.thread.threadId).then(() => {
-            //     //加入到thread列表中
-            //     let threadInfo = {
-            //         id: props.message.thread.threadId,
-            //         name: props.message.thread.threadName,
-            //         owner: props.message.thread.owner,
-            //         msgId: props.message.id,
-            //         groupId: props.message.to,
-            //         created: '1647502554746',//通知中有create_timestamp
-            //         lastMessage: props.message.thread.lastMessage,
-            //     }
-            //     let newList = threadList.concat([threadInfo])
-            //     dispatch(ThreadActions.setThreadList(newList))
-            //     dispatch(ThreadActions.setIsCreatingThread(false));
-            //     dispatch(MessageActions.fetchThreadMessage(props.message.thread.threadId))
-            //     dispatch(ThreadActions.setCurrentThreadInfo(props.message));
-            //     dispatch(ThreadActions.updateThreadStates(true));
-            // })
             return 
         }
+        //如果正在创建thread，修改状态
         dispatch(ThreadActions.setIsCreatingThread(false));
-        dispatch(MessageActions.fetchThreadMessage(props.message.thread.threadId))
+        //获取threadMessageList
+        dispatch(MessageActions.fetchThreadMessage(props.message.thread.id))
+        //修改当前的消息
         dispatch(ThreadActions.setCurrentThreadInfo(props.message));
+        //打开thread面板
         dispatch(ThreadActions.updateThreadStates(true));
 
     }
@@ -227,22 +232,22 @@ const MsgThreadInfo = (props) => {
                 <span className={classes.triangle}></span>
                 <div className={classes.threadTop}>
                     <div className={classes.threadIcon}></div>
-                    <div className={classes.threadName}>{thread.threadName}</div>
-                    <span className={classes.messageCount} onClick={changeMessage}>{thread.count}&nbsp;&gt;</span>
+                    <div className={classes.threadName}>{thread.name}</div>
+                    <span className={classes.messageCount} onClick={changeMessage}>{thread.message_count}&nbsp;&gt;</span>
                 </div>
-                {thread.lastMessage && <div className={classes.threadBottom}>
+                {thread.last_message && <div className={classes.threadBottom}>
                     <div className={classes.threadAva}>
                         <img className={classes.threadAvaIcon} src={avatar} ></img>
                     </div>
                     <div className={classes.threadMsg}>
-                        <span className={classes.threadOwner}>{thread.lastMessage.from}</span>&nbsp;
-                        <span className={classes.lastMessage}>{renderMessage(thread.lastMessage)}</span>
+                        <span className={classes.threadOwner}>{thread.last_message.from||''}</span>&nbsp;
+                        <span className={classes.lastMessage}>{renderMessage(thread.last_message.payload)}</span>
                     </div>
-                    <span className={classes.time}>{getTimeDiff(thread.lastMessage.timestamp)}</span>
+                    <span className={classes.time}>{getTimeDiff(thread.last_message.timestamp)}</span>
                 </div>
                 }
                 {
-                    !thread.lastMessage && <div className={classes.defaultMessage}>No Messages</div>
+                    (!thread.last_message||JSON.stringify(thread.last_message)=='{}') && <div className={classes.defaultMessage}>No Messages</div>
                 }
 
             </div>

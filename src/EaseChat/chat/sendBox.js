@@ -118,44 +118,42 @@ function SendBox(props) {
   const sendMessage = useCallback(() => {
     if (!inputValue) return;
     if (isCreatingThread && props.isThread) {
-      if (!currentThreadInfo.name) {
+      if (!props.threadName) {
         console.log('threadName can not empty')
         return;
       }
       const options = {
-        name: currentThreadInfo.name,
-        msgId: currentThreadInfo.id,
+        name: props.threadName,
+        msgId: currentThreadInfo.bySelf ? currentThreadInfo.mid: currentThreadInfo.id,
         groupId: currentThreadInfo.to,
       }
       WebIM.conn.createThread(options).then(res=>{
-        // const threadId = res.data?.id;
-        const threadId = res.data?.id+""
+        const threadId = res.data?.thread_id;
         //change edit status of thread
         dispatch(ThreadActions.setIsCreatingThread(false));
-        //update currentThreadInfo
-        const threadInfo = {
-          chatType: chatType,
-          messageId: options.msgId,
-          groupId: to,
-          thread:{
-            threadId: threadId,
-            threadName: options.name,
-          }
-        }
-        dispatch(ThreadActions.updateThreadInfo(threadInfo));
         //send message
-        dispatch(
-          MessageActions.sendTxtMessage(threadId, chatType, {
-            msg: inputValue,
-          },props.isThread )
-        );
-        setInputValue("");
-        inputRef.current.focus();
+        // dispatch(
+        //   MessageActions.sendTxtMessage(threadId, chatType, {
+        //     msg: inputValue,
+        //   },props.isThread )
+        // );
+        // setInputValue("");
+        // inputRef.current.focus();
+        //2s后发消息 等服务端修复后去掉
+        setTimeout(()=>{
+          dispatch(
+            MessageActions.sendTxtMessage(threadId, chatType, {
+              msg: inputValue,
+            },props.isThread )
+          );
+          setInputValue("");
+          inputRef.current.focus();
+        },3000)
       })
       return 
     }
     if(props.isThread) {
-      to = currentThreadInfo.thread.threadId
+      to = currentThreadInfo.thread.id
     }
     dispatch(
       MessageActions.sendTxtMessage(to, chatType, {

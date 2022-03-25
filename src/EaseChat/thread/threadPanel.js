@@ -151,8 +151,8 @@ const ThreadPanel = (props) => {
     const { showByselfAvatar } = easeChatProps;
     const [threadName, setThreadName] = useState('');
     const changeThreadName = (e) => {
-        setThreadName(e.target.value)
-        dispatch(ThreadActions.setCurrentThreadName({ "name": e.target.value.replace(/(^\s*)|(\s*$)/g, "") }));
+        let val = e.target.value.replace(/(^\s*)|(\s*$)/g, "");
+        setThreadName(val)
     }
     const clearThreadName = () => {
         setThreadName('');
@@ -173,8 +173,8 @@ const ThreadPanel = (props) => {
     }
     const showThreadMessage = () => {
         return (<Box>
-            <div className={classes.threadName}>{currentMessage?.thread?.threadName}</div>
-            <div className={classes.threadDesc}>{i18next.t('Started by')} <span className={classes.threadStartMember}>{currentMessage?.thread?.owner}</span></div>
+            <div className={classes.threadName}>{currentMessage?.thread?.name || ''}</div>
+            <div className={classes.threadDesc}>{i18next.t('Started by')} <span className={classes.threadStartMember}>{currentMessage?.thread?.from || ''}</span></div>
         </Box>)
     }
     const renderMessage = (body) => {
@@ -227,78 +227,6 @@ const ThreadPanel = (props) => {
 
         return rnTxt;
     };
-    //test--start 手动触发更新thread消息
-    //first  群成员
-    //创建thread
-    // let data = {
-    //     operation: 'create',
-    //     chatType: 'groupChat',
-    //     messageId: '986390930909039160',
-    //     groupId: '167772754608129',
-    //     thread: {
-    //       threadId: '33',
-    //       threadName: 'test create thread',
-    //       count: 0,
-    //       owner:'lucy',
-    //     }
-    // }
-
-    //修改threadName
-    // let data = {
-    //     operation: 'update',
-    //     chatType: 'groupChat',
-    //     messageId: '986390930909039160',
-    //     groupId: '167772754608129',
-    //     thread: {
-    //         threadId: '33',
-    //         threadName: 'hahaThreadName',
-    //         count: 3,
-    //         owner: 'lucy',
-    //     }
-    // }
-    let test = 0;
-    //删除thread
-    // let data = {
-    //     operation: 'delete',
-    //     chatType: 'groupChat',
-    //     messageId: '986390930909039160',
-    //     groupId: '167772754608129',
-    //     thread: {
-    //         threadId: '33',
-    //         threadName: 'hahaThreadName',
-    //         count: 3,
-    //         owner: 'lucy',
-    //     }
-    // }
-    //需要出提示"current thread is deleted"
-    //关闭thread面板
-    //thread消息变化，新消息，撤回消息等
-    let data = {
-        operation: 'update_msg',
-        chatType: 'groupChat',
-        messageId: '986390930909039160',
-        groupId: '167772754608129',
-        thread: {
-            threadId: '33',
-            threadName: 'hahaThreadName',
-            count: 3,
-            owner: 'lucy',
-            lastMessage: {
-                contenttype: 'TEXT',
-                text: 'updated~~',
-                from: 'wy',
-                timestamp: 1647421680000,
-            }
-        },
-    }
-
-    useEffect(() => {
-        setTimeout(() => {
-            console.log("=====计时器")
-            // dispatch(ThreadActions.updateThreadInfo(data));
-        }, 5000)
-    }, [test])
-    //test--end
     const renderOriginalMsg = () => {
         return (
             <Box>
@@ -321,8 +249,7 @@ const ThreadPanel = (props) => {
     }
     const messageList =
         useSelector((state) => {
-            const to = state.thread.currentThreadInfo?.thread?.threadId;
-            console.log("=======list:",state.message.threadMessage,state.thread.currentThreadInfo)
+            const to = state.thread.currentThreadInfo?.thread?.id;
             return _.get(state, ["message", 'threadMessage', to], []);
         }) || [];
     let isThread = true;
@@ -331,17 +258,8 @@ const ThreadPanel = (props) => {
     const [isPullingDown, setIsPullingDown] = useState(false);
 
     const scrollEl = useRef(null);
-    // let _not_scroll_bottom = false;
-    // useEffect(() => {
-    //     if (!_not_scroll_bottom) {
-    //         setTimeout(() => {
-    //             const dom = scrollEl.current;
-    //             if (!ReactDOM.findDOMNode(dom)) return;
-    //             dom.scrollTop = dom.scrollHeight;
-    //         }, 0);
-    //     }
-    // });
     useEffect(() => {
+        setThreadName('');
         setIsLoaded(false)
         setIsPullingDown(false)
         //每次进入thread面板，滚动条置顶
@@ -351,7 +269,7 @@ const ThreadPanel = (props) => {
     }, [currentMessage])
 
     //收到新消息后，判断已经加载完旧消息则滚动条置底
-    useEffect(() => {console.log("=====change",messageList)
+    useEffect(() => {
         const dom = scrollEl.current;
         if (!ReactDOM.findDOMNode(dom)) return;
         if (isLoaded && dom.scrollTop !== 0 && dom.scrollHeight !== (dom.scrollTop + dom.clientHeight)) {
@@ -392,7 +310,7 @@ const ThreadPanel = (props) => {
                     <span>Loading...</span>
                 </div>
             </Box>
-            <SendBox isThread={isThread} />
+            <SendBox isThread={isThread} threadName={threadName} />
         </Box>
     );
 }

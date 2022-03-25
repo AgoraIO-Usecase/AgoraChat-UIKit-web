@@ -20,15 +20,14 @@ export const INITIAL_STATE = Immutable({
 /* ------------- Types and Action Creators ------------- */
 const { Types, Creators } = createActions({
     updateThreadStates: ["options"],
-    setThreadList: ["threadList","isScroll"],
+    setThreadList: ["threadList", "isScroll"],
     setShowThreadList: ['status'],
     setIsCreatingThread: ['status'],
     setCurrentThreadInfo: ['message'],
-    setCurrentThreadName: ['options'],
-    setThreadListCursor:['cursor'],
-    setThreadListEnd:['status'],
+    setThreadListCursor: ['cursor'],
+    setThreadListEnd: ['status'],
     getThreadsListOfGroup: (options) => {
-        return (dispatch) => { 
+        return (dispatch) => {
             // var promise = new Promise(function (resolve, reject) {
             //     resolve([
             //         { id: '2', name: 'thread-first', owner: 'echo', 'msgId': '123456765',groupId: '1234',created: '1647502554746' },
@@ -39,82 +38,92 @@ const { Types, Creators } = createActions({
             //   });
             const rootState = uikit_store.getState()
             const { username } = _.get(rootState, ['global', 'globalProps'])
-            const  cursor = _.get(rootState, ['thread', 'threadListCursor'])
-            const  threadListEnd = _.get(rootState, ['thread', 'threadListEnd'])
-            if(threadListEnd) return
-            WebIM.conn.getGroupAdmin({groupId:options.groupId}).then((res)=>{
-                const isAdmin = res.data.indexOf(username)>-1 ? true : false;
-                let paramsData = {
-                    groupId: options.groupId,
-                    limit: options.limit,
+            const cursor = _.get(rootState, ['thread', 'threadListCursor'])
+            const threadListEnd = _.get(rootState, ['thread', 'threadListEnd'])
+            let groupOwner = '';
+            if (threadListEnd) return
+            WebIM.conn.getGroupInfo({ groupId: options.groupId }).then(res => {
+                const data = res.data ? res.data[0] : {};
+                if (data.id === options.groupId) {
+                    groupOwner = data.owner
                 }
-                if(options.isScroll){
-                    paramsData.cursor = cursor
-                }else{
-                    dispatch(Creators.setThreadListEnd(false))
-                }
-                if(isAdmin){
-                    WebIM.conn.getThreadsOfGroup(options).then((res) => {
-                        const threadList = res.entities;
-                        if(threadList.length === 0 ){
-                            dispatch(Creators.setThreadListEnd(true));
-                            return
-                        }
-                        dispatch(Creators.setThreadListCursor(res.properties.cursor))
-                        threadList.forEach((item)=>{
-                            item.lastMessage = {}
-                            AppDB.findLastMessage(item.id).then((msg)=>{
-                                item.lastMessage = msg
-                            }).then(()=>{
-                                dispatch(Creators.setThreadList(threadList,options.isScroll))
+                WebIM.conn.getGroupAdmin({ groupId: options.groupId }).then((res) => {
+                    const isAdmin = (res.data.indexOf(username) > -1 || username === groupOwner) ? true : false;
+                    let paramsData = {
+                        groupId: options.groupId,
+                        limit: options.limit,
+                    }
+                    if (options.isScroll) {
+                        paramsData.cursor = cursor
+                    } else {
+                        dispatch(Creators.setThreadListEnd(false))
+                    }
+                    if (isAdmin) {
+                        WebIM.conn.getThreadsOfGroup(options).then((res) => {
+                            const threadList = res.entities;
+                            if (threadList.length === 0) {
+                                dispatch(Creators.setThreadListEnd(true));
+                                return
+                            }
+                            dispatch(Creators.setThreadListCursor(res.properties.cursor))
+                            threadList.forEach((item) => {
+                                item.lastMessage = {}
+                                AppDB.findLastMessage(item.id).then((msg) => {
+                                    item.lastMessage = msg
+                                }).then(() => {
+                                    dispatch(Creators.setThreadList(threadList, options.isScroll))
+                                })
                             })
                         })
-                    })
-                }else{
-                    WebIM.conn.getJoinedThreadsOfGroup(paramsData).then((res) => {
-                        const threadList = res.entities;
-                        if(threadList.length === 0 ){
-                            dispatch(Creators.setThreadListEnd(true));
-                            return
-                        }
-                        dispatch(Creators.setThreadListCursor(res.properties.cursor))
-                        threadList.forEach((item)=>{
-                            item.lastMessage = {}
-                            AppDB.findLastMessage(item.id).then((msg)=>{
-                                item.lastMessage = msg
-                            }).then(()=>{
-                                dispatch(Creators.setThreadList(threadList,options.isScroll))
+                    } else {
+                        WebIM.conn.getJoinedThreadsOfGroup(paramsData).then((res) => {
+                            const threadList = res.entities;
+                            if (threadList.length === 0) {
+                                dispatch(Creators.setThreadListEnd(true));
+                                return
+                            }
+                            dispatch(Creators.setThreadListCursor(res.properties.cursor))
+                            threadList.forEach((item) => {
+                                item.lastMessage = {}
+                                AppDB.findLastMessage(item.id).then((msg) => {
+                                    item.lastMessage = msg
+                                }).then(() => {
+                                    dispatch(Creators.setThreadList(threadList, options.isScroll))
+                                })
                             })
                         })
-                    })
-                }
+                    }
+                })
             })
+
         }
     },
     updateThreadInfo: (options) => {
         return (dispatch) => {
             const rootState = uikit_store.getState();
-            let messageList = _.get(rootState, ['message', options.chatType, options.groupId]).asMutable({ deep: true });
+            const { currentThreadInfo } = rootState.thread;
+            let messageList = _.get(rootState, ['message', 'groupChat', options.muc_parent_id]).asMutable({ deep: true });
             messageList.forEach((msg) => {
-                if (msg.id === options.messageId) {
-                    if(options.operation === 'delete'){//删除thread
+                if (msg.id === options.msg_parent_id && !msg.bySelf || msg.mid === options.msg_parent_id && msg.bySelf) {
+                    if (options.operation === 'delete') {//delete thread
                         msg.thread = undefined;
-                        dispatch(Creators.updateThreadStates(false))
-                    }else{//更新thread
-                        if (!msg.thread || JSON.stringify(msg.thread) === "{}") {
-                            msg.thread = options.thread;
-                        } else {
-                            //更新msg thread 的相关字段
-                            msg.thread = Object.assign(msg.thread, options.thread)
+                        if (options.msg_parent_id === currentThreadInfo.thread.id) {
+                            dispatch(Creators.updateThreadStates(false))
+                        }
+                    } else {//other operation
+                        if (!msg.thread || JSON.stringify(msg.thread) === "{}") {//create
+                            msg.thread = options;
+                        } else {//update_msg or recall_msg or update threadName
+                            msg.thread = Object.assign(msg.thread, options)
                         }
                     }
-                    //更新本地数据库
+                    //update Local database
                     AppDB.updateMessageThread(msg.id, msg.thread)
-                    //更新currentThreadInfo
+                    //update currentThreadInfo
                     dispatch(Creators.setCurrentThreadInfo(msg))
                 }
             })
-            dispatch(MessageActions.updateThreadDetails(options.chatType, options.groupId,messageList))
+            dispatch(MessageActions.updateThreadDetails('groupChat', options.muc_parent_id, messageList))
         }
     },
 });
@@ -122,8 +131,8 @@ const { Types, Creators } = createActions({
 
 
 /* ------------- Reducers ------------- */
-export const setThreadMessage = (state, {theadId,message}) => {
-    let data = state[threadMessage][theadId] ? state[threadMessage][theadId].asMutable():[];
+export const setThreadMessage = (state, { theadId, message }) => {
+    let data = state[threadMessage][theadId] ? state[threadMessage][theadId].asMutable() : [];
     data = data.concat(message);
     return state.setIn([threadMessage, theadId], data);
 }
@@ -131,15 +140,15 @@ export const updateThreadStates = (state, { options }) => {
     state = state.setIn(["threadPanelStates"], options);
     return state
 };
-export const setThreadList = (state, { threadList,isScroll }) => {
+export const setThreadList = (state, { threadList, isScroll }) => {
     let data = state['threadList'].asMutable()
     data = data.concat(threadList)
-    if(isScroll){
+    if (isScroll) {
         state = state.setIn(['threadList'], data)
-    }else{
+    } else {
         state = state.setIn(['threadList'], threadList)
     }
-    return  state
+    return state
 }
 export const setShowThreadList = (state, { status }) => {
     return state.merge({ showThreadList: status })
@@ -150,15 +159,11 @@ export const setIsCreatingThread = (state, { status }) => {
 export const setCurrentThreadInfo = (state, { message }) => {
     return state.merge({ currentThreadInfo: message })
 }
-export const setCurrentThreadName = (state, { options }) => {
-    state = state.setIn(['currentThreadInfo', 'name'], options.name)
-    return state
-}
-export const setThreadListCursor = (state, {cursor}) => {
+export const setThreadListCursor = (state, { cursor }) => {
     return state = state.setIn(['threadListCursor'], cursor)
 }
-export const setThreadListEnd = (state,{ status }) => {
-    return state = state.setIn(['threadListEnd'],status)
+export const setThreadListEnd = (state, { status }) => {
+    return state = state.setIn(['threadListEnd'], status)
 }
 
 
@@ -169,7 +174,6 @@ export const threadReducer = createReducer(INITIAL_STATE, {
     [Types.SET_SHOW_THREAD_LIST]: setShowThreadList,
     [Types.SET_IS_CREATING_THREAD]: setIsCreatingThread,
     [Types.SET_CURRENT_THREAD_INFO]: setCurrentThreadInfo,
-    [Types.SET_CURRENT_THREAD_NAME]: setCurrentThreadName,
     [Types.SET_THREAD_LIST_CURSOR]: setThreadListCursor,
     [Types.SET_THREAD_LIST_END]: setThreadListEnd
 });

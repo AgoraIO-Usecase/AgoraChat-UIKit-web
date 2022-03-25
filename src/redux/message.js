@@ -285,13 +285,27 @@ const { Types, Creators } = createActions({
     },
     fetchThreadMessage: (to, offset, cb, isScroll) => {
         return (dispatch) => {
-            AppDB.fetchThreadMessage(to, offset).then(messageList => {
-                if (messageList.length) {
-                    dispatch(Creators.updateThreadMessage(to,messageList,isScroll))
-                }
-                cb && cb(messageList.length)
+            let options = {
+                queue:to,
+                start:-1,
+                count: 50,
+                isGroup:true,
+                format:true,
+                is_positive:true,
+
+            }
+            WebIM.conn.getHistoryMessages(options).then((res)=>{
+                
             })
         }
+        // return (dispatch) => {
+        //     AppDB.fetchThreadMessage(to, offset).then(messageList => {
+        //         if (messageList.length) {
+        //             dispatch(Creators.updateThreadMessage(to,messageList,isScroll))
+        //         }
+        //         cb && cb(messageList.length)
+        //     })
+        // }
     },
     clearMessage: (chatType, id) => {
         return (dispatch) => {
@@ -530,7 +544,7 @@ export const updateMessageMid = (state, { id, mid }) => {
         state = state.setIn([chatType, chatId], messages)
     }
 
-    setTimeout(() => { AppDB.updateMessageMid(mid, Number(id)) }, 500)
+    setTimeout(() => { AppDB.updateMessageMid(mid, id) }, 500)
     return state.setIn(['byMid', mid], { id })
 }
 export const updateThreadDetails = (state, {chatType,groupId,messageList}) => {
