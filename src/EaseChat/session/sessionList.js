@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -6,7 +6,6 @@ import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import Avatar from "@material-ui/core/Avatar";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
-import Tooltip from "@material-ui/core/Tooltip";
 import { useSelector, useDispatch } from "../../EaseApp/index";
 import { renderTime } from "../../utils/index";
 import {EaseAppContext} from '../../EaseApp/index'
@@ -18,12 +17,8 @@ import avatarIcon1 from '../../common/images/avatar1.png'
 import avatarIcon2 from '../../common/images/avatar2.png'
 import avatarIcon3 from '../../common/images/avatar3.png'
 
-import offlineImg from '../../common/images/Offline.png'
-import onlineIcon from '../../common/images/Online.png'
-import busyIcon from '../../common/images/Busy.png'
-import donotdisturbIcon from '../../common/images/Do_not_Disturb.png'
-import customIcon from '../../common/images/custom.png'
-import leaveIcon from '../../common/images/leave.png'
+import i18next from "i18next";
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -96,17 +91,6 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     right: "0",
   },
-  imgStyle: {
-    width: '18px',
-    height: '18px',
-    borderRadius: '50%',
-    cursor: 'pointer',
-    verticalAlign: 'middle',
-    position: 'absolute',
-    bottom: '0px',
-    left: '30px',
-    zIndex: 1
-  },
 }));
 
 export default function SessionList(props) {
@@ -134,7 +118,7 @@ export default function SessionList(props) {
       const chatMsgs =
         message?.[session.sessionType]?.[session.sessionId] || [];
       if (chatMsgs.length > 0) {
-        session.lastMessage = chatMsgs[chatMsgs.length - 1];
+        let lastMessage = chatMsgs[chatMsgs.length - 1];
         let val = lastMessage.body || ''
         if (val && val.type === 'recall') {
           session.lastMessage = {
@@ -178,6 +162,7 @@ export default function SessionList(props) {
       currentSessionIndex = index;
     }
   });
+
   const handleListItemClick = (event, index, session) => {
     if (currentSessionIndex !== index || !to) {
       props.onClickItem(session);
@@ -188,14 +173,6 @@ export default function SessionList(props) {
     1: avatarIcon1,
     2: avatarIcon2,
     3: avatarIcon3
-  }
-  const getUserOnlineStatus = {
-    'Offline': offlineImg,
-    'Online': onlineIcon,
-    'Busy': busyIcon,
-    'Do not Disturb': donotdisturbIcon,
-    'Leave': leaveIcon,
-    '': onlineIcon
   }
 
   return (
@@ -227,21 +204,14 @@ export default function SessionList(props) {
             className={classes.listItem}
           >
             <Box className={classes.itemBox}>
-              <div style={{position: 'relative'}}>
+              <ListItemAvatar>
                 <Avatar
                   // className={classes.avatar}
                   style={{ borderRadius: `${session.sessionType}` === "singleChat" ? "50%" : 'inherit'}}
                   alt={`${session.name || session.sessionId}`}
                   src={avatarSrc}
                 />
-                {/* {
-                  session.sessionType === "singleChat" &&  session.presence ?
-                  <Tooltip title={session.presence.ext} placement="bottom-end">
-                    <img alt="" src={getUserOnlineStatus[session.presence.ext] ? getUserOnlineStatus[session.presence.ext] : customIcon} className={classes.imgStyle} />
-                  </Tooltip>
-                  : null
-                } */}
-              </div>
+              </ListItemAvatar>
               <Box className={classes.itemRightBox}>
                 <Typography className={classes.itemName}>
                   <span>{session.name || session.sessionId}</span>

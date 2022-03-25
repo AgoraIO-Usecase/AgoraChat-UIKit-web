@@ -48,15 +48,22 @@ const useStyles = makeStyles((theme) => {
     avatar: {
       margin: "0 20px 0 16px",
     },
+    imgBox: {
+      position: 'absolute',
+      bottom: '0px',
+      left: '45px',
+      zIndex: 1,
+      borderRadius: '50%',
+      width: '20px',
+      height: '20px',
+      lineHeight: '26px',
+      textAlign: 'center',
+      background: '#fff',
+    },
     imgStyle: {
       width: '18px',
       height: '18px',
       borderRadius: '50%',
-      verticalAlign: 'middle',
-      position: 'absolute',
-      bottom: '0px',
-      left: '45px',
-      zIndex: 1
     },
   };
 });
@@ -145,7 +152,10 @@ const MessageBar = () => {
         ></Avatar>
           {
             chatType === "singleChat" ?
-            <img alt="" src={getUserOnlineStatus[presenceExt] || customIcon} className={classes.imgStyle} /> : null
+            <div className={classes.imgBox}>
+              <img alt="" src={getUserOnlineStatus[presenceExt[to]] || customIcon} className={classes.imgStyle} />
+            </div>
+            : null
           }
         {to}
       </Box>
