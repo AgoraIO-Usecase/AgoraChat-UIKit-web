@@ -208,35 +208,21 @@ const MsgThreadInfo = (props) => {
         })
         if (!hasJoined) {
             WebIM.conn.joinThread({ threadId: props.message.thread.id }).then((res) => {
-                //加入到thread列表中
-                // let threadInfo = {
-                //     id: props.message.thread.threadId,
-                //     name: props.message.thread.threadName,
-                //     owner: props.message.thread.owner,
-                //     msgId: props.message.id,
-                //     groupId: props.message.to,
-                //     created: '1647502554746',//通知中有create_timestamp
-                //     lastMessage: props.message.thread.lastMessage,
-                // }
-                // let newList = threadList.concat([threadInfo])
-                //更新threadList
-                // dispatch(ThreadActions.setThreadList(newList))
-                //如果正在创建thread，修改状态
-                dispatch(ThreadActions.setIsCreatingThread(false));
-                //修改当前的消息
-                dispatch(ThreadActions.setCurrentThreadInfo(props.message));
-                //打开thread面板
-                dispatch(ThreadActions.updateThreadStates(true));
+                if(res.data.status !== 'ok') return 
+                changeThreadStatus()
             })
             return
         }
-        //如果正在创建thread，修改状态
+        changeThreadStatus()
+    }
+    //changes thread status after joing the thread
+    const changeThreadStatus = ()=>{
+        //change the status of creatingThread
         dispatch(ThreadActions.setIsCreatingThread(false));
-        //修改当前的消息
+        //updtate currentThreadInfo
         dispatch(ThreadActions.setCurrentThreadInfo(props.message));
-        //打开thread面板
+        //open threadPanel
         dispatch(ThreadActions.updateThreadStates(true));
-
     }
     return (
         <Box className={classes.root}>

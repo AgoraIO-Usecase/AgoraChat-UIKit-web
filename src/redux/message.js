@@ -24,7 +24,7 @@ export const INITIAL_STATE = Immutable({
         stranger: {},
     },
     threadHistoryStart:-1,
-    threadHistoryIsLast:false,
+    threadHasHistory:true,
 })
 
 /* -------- Types and Action Creators -------- */
@@ -40,7 +40,7 @@ const { Types, Creators } = createActions({
 	addReactions: ["message", "reaction"],
 	deleteReaction: ["message", "reaction"],
     setThreadHistoryStart:['start'],
-    setThreadHistoryIsLast: ['status'],
+    setThreadHasHistory: ['status'],
     
 
     // -async-
@@ -302,29 +302,31 @@ const { Types, Creators } = createActions({
     fetchThreadMessage: (to, cb, isScroll) => {
         const rootState = uikit_store.getState();
         const username = WebIM.conn.context.userId;
-        if(rootState.message.threadHistoryIsLast && isScroll) return
+        if(!rootState.message.threadHasHistory && isScroll) return
         return (dispatch) => {
             let options = {
-                queue:to,
+                queue: to,
                 start: isScroll ? rootState.message.threadHistoryStart : -1,
-                pull_number: 50,
-                isGroup:true,
-                format:true,
-                is_positive:true,
+                pull_number: 5,
+                isGroup: true,
+                format: true,
+                is_positive: true,
             }
             WebIM.conn.getHistoryMessages(options).then((res)=>{
                 let msgList = res.msgs;
                 const newMsgList  = [];
-                if(!res.is_last && msgList.length>0) {
+                if(msgList.length>0) {
                     msgList.forEach((item)=>{
                         let msg = formatServerMessage(item, item.type);
                         msg.bySelf = msg.from === username;
                         newMsgList.push(msg)
                     })
                     dispatch(Creators.setThreadHistoryStart(res.next_key));
-                    dispatch(Creators.updateThreadMessage(to,newMsgList,isScroll))
+                    dispatch(Creators.updateThreadMessage(to,newMsgList,isScroll));
+                    if(newMsgList.length < options.pull_number || newMsgList.length === 0){
+                        dispatch(Creators.setThreadHasHistory(false));
+                    }
                 }
-                res.is_last && dispatch(Creators.setThreadHistoryIsLast(res.is_last));
                 cb && cb(newMsgList.length);
             })
         }
@@ -364,10 +366,9 @@ export const updateThreadMessage = (state,{to,messageList,isScroll}) =>{
     if(isScroll === "scroll"){
         state = state.setIn(['threadMessage', to], data)
     }else{
+        state = state.setIn(['threadMessage'], {})
         state = state.setIn(['threadMessage', to], messageList)
     }
-    
-    
     return state
 }
 
@@ -384,6 +385,7 @@ export const addMessage = (state, { message, messageType = 'txt' }) => {
     // root id: when sent by current user or in group chat, is id of receiver. Otherwise is id of sender
     let chatId = bySelf || chatType !== 'singleChat' ? to : from
     if(isThread || (thread && JSON.stringify(thread)!=='{}')){
+        if(state.threadHasHistory) return state
         //isThread -自己发送  thread不为空 sdk解析收到的消息
         //处理-存储到 threadMessage和indexDb中
         const chatData = state.getIn(['threadMessage', chatId], Immutable([])).asMutable()
@@ -403,8 +405,15 @@ export const addMessage = (state, { message, messageType = 'txt' }) => {
     
         !isPushed && chatData.push(_message)
         state = state.setIn(['threadMessage', chatId], chatData)
-        // add a message to db, if by myselt, isUnread equals 0
         !isPushed && AppDB.addMessage(_message, !bySelf ? 1 : 0,isThread)
+        //更新threadList的最新一条消息
+        const threadList  = _.get(rootState, ['thread', 'threadList']).asMutable({ deep: true });
+        threadList.forEach( item => {
+            if(item .id === _message.to){
+                item.last_message = _message
+            }
+        })
+        rootState.thread = rootState.thread.setIn(['threadList'],threadList)
         return state
     }
     const chatData = state.getIn([chatType, chatId], Immutable([])).asMutable()
@@ -691,8 +700,8 @@ export const deleteReaction = (state, { message, reaction }) => {
 export const setThreadHistoryStart = (state, {start}) => {
     return state.setIn(['threadHistoryStart'], start);
 }
-export const setThreadHistoryIsLast = (state, {status}) => {
-    return state.setIn(['threadHistoryIsLast'], status)
+export const setThreadHasHistory = (state, {status}) => {
+    return state.setIn(['threadHasHistory'], status)
 }
 /* ------------- Hookup Reducers To Types ------------- */
 
@@ -710,8 +719,7 @@ export const messageReducer = createReducer(INITIAL_STATE, {
     [Types.ADD_REACTIONS]: addReactions,
 	[Types.DELETE_REACTION]: deleteReaction,
     [Types.SET_THREAD_HISTORY_START]: setThreadHistoryStart,
-    [Types.SET_THREAD_HISTORY_IS_LAST]: setThreadHistoryIsLast
-
+    [Types.SET_THREAD_HAS_HISTORY]: setThreadHasHistory,
 })
 
 export default Creators;

@@ -174,7 +174,7 @@ const ThreadPanel = (props) => {
     const showThreadMessage = () => {
         return (<Box>
             <div className={classes.threadName}>{currentMessage?.thread?.name || ''}</div>
-            <div className={classes.threadDesc}>{i18next.t('Started by')} <span className={classes.threadStartMember}>{currentMessage?.thread?.from || ''}</span></div>
+            <div className={classes.threadDesc}>{i18next.t('Started by')} <span className={classes.threadStartMember}>{currentMessage?.thread?.from || currentMessage?.thread?.owner||''}</span></div>
         </Box>)
     }
     const renderMessage = (body) => {
@@ -247,37 +247,45 @@ const ThreadPanel = (props) => {
             </Box>
         )
     }
+    const renderEmptyMsg = () => {
+        return (
+            <Box>
+                {i18next.t('Sorry,unable to load original message')}
+            </Box>
+        )
+    }
+    
+    let isThread = true;
+    
+    const [isPullingDown, setIsPullingDown] = useState(false);
+    const threadHasHistory = useSelector(state => state.message.threadHasHistory);
     const messageList =
         useSelector((state) => {
             const to = state.thread.currentThreadInfo?.thread?.id;
             return _.get(state, ["message", 'threadMessage', to], []);
         }) || [];
-    let isThread = true;
-    const [hasNoHistory, setHasHistory] = useState(true);
-    const [isPullingDown, setIsPullingDown] = useState(false);
-
     const scrollThreadEl = useRef(null);
     useEffect(() => {
-        setThreadName('');
-        setHasHistory(true)
-        setIsPullingDown(false)
-        const dom = scrollThreadEl.current;
-        if (!ReactDOM.findDOMNode(dom)) return;
-        dom.scrollTop = 0;
-        
+        if(currentMessage?.thread?.id){
+            dispatch(MessageActions.setThreadHasHistory(true));
+            setThreadName('');
+            setIsPullingDown(false)
+            const dom = scrollThreadEl.current;
+            if (!ReactDOM.findDOMNode(dom)) return;
+            dom.scrollTop = 0;
+        }
+        currentMessage?.thread?.id && dispatch(MessageActions.fetchThreadMessage(currentMessage.thread.id))
     }, [currentMessage?.thread?.id])
-
-    //receive new message 
     useEffect(() => {
         const dom = scrollThreadEl.current;
         if (!ReactDOM.findDOMNode(dom)) return;
-        if (!hasNoHistory && dom.scrollTop!==0 && dom.scrollHeight !== (dom.scrollTop + dom.clientHeight)) {
-            // dom.scrollTop = dom.scrollHeight;
+        if (!threadHasHistory && messageList.length!==0 && dom.scrollHeight >= (dom.scrollTop + dom.clientHeight)) {//receive new message 
+            dom.scrollTop = dom.scrollHeight;
         }
-    }, [messageList])
+    }, [messageList.length])
 
     const handleScroll = (e) => {
-        if (hasNoHistory && e.target.scrollTop!==0 && e.target.scrollHeight === (e.target.scrollTop + e.target.clientHeight) && e.target.scrollTop !== 0) {
+        if (threadHasHistory && e.target.scrollTop!==0 && e.target.scrollHeight === (e.target.scrollTop + e.target.clientHeight)) {
             if (!isPullingDown) {
                 setIsPullingDown(true);
                 setTimeout(() => {
@@ -287,10 +295,7 @@ const ThreadPanel = (props) => {
             }
         }
     };
-    const cb = (res)=>{
-        if(res === 0){
-            setHasHistory(false)
-        }
+    const cb = ()=>{
         setIsPullingDown(false)
     }
     return (
@@ -298,7 +303,7 @@ const ThreadPanel = (props) => {
             <ThreadBar />
             <Box ref={scrollThreadEl} className={classes.chat} onScroll={handleScroll}>
                 {isCreatingThread ? createThread() : showThreadMessage()}
-                {renderOriginalMsg()}
+                {!currentMessage.id && !currentMessage.mid ? renderEmptyMsg() :renderOriginalMsg()}
                 <ThreadMessageList
                     messageList={messageList}
                     showByselfAvatar={showByselfAvatar}
