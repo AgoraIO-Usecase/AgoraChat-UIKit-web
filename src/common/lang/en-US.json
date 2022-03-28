@@ -53,6 +53,7 @@
         "Threads List":"Threads List",
         "There are no Threads":"There are no Threads",
         "Create a Thread from a Group Chat Message":"Create a Thread from a Group Chat Message",
-        "No Result":"No Result"
+        "No Result":"No Result",
+        "Sorry,unable to load original message": "Sorry,unable to load original message"
     }
 }

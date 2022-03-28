@@ -89,6 +89,20 @@ const AppDB = {
                 })
         })
     },
+    findAppointedMessage(chatType,threadId){
+        const $_TABLE = this.$_TABLE
+        return this.exec(resolve => {
+            $_TABLE.where('chatType')
+                .equals(chatType)
+                .filter(item => {
+                    return item.thread?.id === threadId
+                })
+                .toArray()
+                .then(res => {
+                    resolve(res)
+                })
+        })
+    },
 
     // read all messages of conversation
     readMessage(chatType, userId) {

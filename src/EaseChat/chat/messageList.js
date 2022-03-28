@@ -74,12 +74,12 @@ function MessageList({ messageList, showByselfAvatar }) {
   };
 
   const createThread = (message)=>{
-    if(!message.thread){
-      //如果消息未创建thread-跳转到创建thread页面
-      dispatch(ThreadActions.setCurrentThreadInfo(message));
-      dispatch(ThreadActions.updateThreadStates(true));
-      dispatch(ThreadActions.setIsCreatingThread(true));//修改thread面板状态 正在编辑
-    }
+    //update currentThreadInfo
+    dispatch(ThreadActions.setCurrentThreadInfo(message));
+    //change the status of threadPanel
+    dispatch(ThreadActions.updateThreadStates(true));
+    //change the status of creatingThread
+    dispatch(ThreadActions.setIsCreatingThread(true));
   }
   return (
     <div className={classes.root}>

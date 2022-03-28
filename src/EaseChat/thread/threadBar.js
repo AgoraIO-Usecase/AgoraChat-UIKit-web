@@ -56,7 +56,7 @@ const ThreadBar = (props) => {
     const closeThreadPanel = () => {
         dispatch(ThreadActions.updateThreadStates(false));
     }
-    const threadName = useSelector((state) => state.thread?.currentThreadInfo?.thread?.threadName) || i18next.t('New thread');
+    const threadName = useSelector((state) => state.thread?.currentThreadInfo?.thread?.name) || i18next.t('New thread');
     const { isCreatingThread } = useSelector((state) => state.thread);
     return (
         <div className={classes.root}>

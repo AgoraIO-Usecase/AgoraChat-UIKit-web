@@ -307,7 +307,7 @@ const { Types, Creators } = createActions({
             let options = {
                 queue:to,
                 start: isScroll ? rootState.message.threadHistoryStart : -1,
-                count: 50,
+                pull_number: 50,
                 isGroup:true,
                 format:true,
                 is_positive:true,

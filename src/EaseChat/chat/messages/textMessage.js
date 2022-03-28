@@ -38,7 +38,8 @@ const useStyles = makeStyles((theme) => ({
   textBodyBox: {
     display: "flex",
     flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
-    maxWidth: "65%",
+    minWidth: "40%",
+    maxWidth: "80%",
     alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
   },
   time: {
@@ -75,8 +76,8 @@ const useStyles = makeStyles((theme) => ({
 		borderRadius: (props) =>
 			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
 		padding: "15px",
-		maxWidth: "100%",
-		// maxWidth: "65%",
+		maxWidth: "80%",
+		minWidth: "40%",
 		wordBreak: "break-all",
 		textAlign: "initial",
 		position: "relative",

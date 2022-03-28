@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "../../../EaseApp/index";
-import {
-    Box,
-    IconButton,
-} from "@material-ui/core";
+import { Box } from "@material-ui/core";
 import ThreadActions from "../../../redux/thread";
 import { getTimeDiff } from "../../../utils/index";
 import threadSearch from '../../../common/images/search.png'
@@ -16,11 +13,11 @@ import i18next from "i18next";
 import { emoji } from "../../../common/emoji";
 import MessageActions from "../../../redux/message"
 import _ from "lodash";
+import AppDB from "../../../utils/AppDB";
 
 const ThreadListPanel = () => {
     const dispatch = useDispatch();
     const threadList = useSelector((state) => state.thread?.threadList) || [];
-    const groupChat = useSelector ((state) => state.message?.groupChat);
     let [displayThreadList, changeDisplayThreadList] = useState([]);
     useEffect(() => {
         changeDisplayThreadList(threadList.concat());
@@ -33,8 +30,8 @@ const ThreadListPanel = () => {
     useEffect(() => {
         if (chatType === "groupChat") {
             let options = {
-                groupId : to,
-                limit : 20,
+                groupId: to,
+                limit: 20,
             }
             dispatch(ThreadActions.getThreadsListOfGroup(options))
         }
@@ -64,7 +61,7 @@ const ThreadListPanel = () => {
         }
     }
     const renderMessage = (body) => {
-        if(!body) return ''
+        if (!body) return ''
         switch (body.type) {
             case 'txt':
                 return renderTxt(body.msg)
@@ -124,8 +121,8 @@ const ThreadListPanel = () => {
                     setIsPullingDown(false);
                     if (chatType === "groupChat") {
                         let options = {
-                            groupId : to,
-                            limit : 20,
+                            groupId: to,
+                            limit: 20,
                             isScroll: true
                         }
                         dispatch(ThreadActions.getThreadsListOfGroup(options))
@@ -134,21 +131,24 @@ const ThreadListPanel = () => {
             }
         }
     };
-    const changeMessage = (option)=> {
-        WebIM.conn.joinThread({threadId:option.id}).then((res) => {
-            //如果正在创建thread，修改状态
+    const changeMessage = (option) => {
+        WebIM.conn.joinThread({ threadId: option.id }).then((res) => {
+            //change the status of creatingThread
             dispatch(ThreadActions.setIsCreatingThread(false));
-            //获取threadMessageList
-            dispatch(MessageActions.fetchThreadMessage(option.id))
-            //查找当前消息 option.msgId修改当前的消息--找不到消息则报错（本地数据库中获取数据较为准确-找不到消息？？？）
-            const msgList = groupChat[option.groupId]||[];
-            let foundMsg = msgList.find((item)=>{
-                return item.id === option.msgId || item.mid === option.msgId
+            //Find the muc message of the thread  you are clicking by the thread id
+            AppDB.findAppointedMessage('groupChat', option.id).then((res) => {
+                if (res.length === 1) {
+                    dispatch(ThreadActions.setCurrentThreadInfo(res[0]));
+                } else {
+                    const msg = {
+                        thread: option
+                    }
+                    dispatch(ThreadActions.setCurrentThreadInfo(msg));
+                }
             })
-            dispatch(ThreadActions.setCurrentThreadInfo(foundMsg));
-            //打开thread面板
+            //open threadPanel
             dispatch(ThreadActions.updateThreadStates(true));
-            //关闭threadList面板
+            //close threadListPanel
             dispatch(ThreadActions.setShowThreadList(false));
         })
     }
@@ -166,17 +166,17 @@ const ThreadListPanel = () => {
                     </div>
                 </Box>
                 <Box style={{ marginTop: '12px', display: showSearchBar == 1 ? 'flex' : 'none' }}>
-                    <SearchBox changeSearchBarState={changeSearchBarState} searchThread={searchThread}/>
+                    <SearchBox changeSearchBarState={changeSearchBarState} searchThread={searchThread} />
                 </Box>
             </div>
             <ul className='tlp-list' ref={threadListDom} onScroll={handleScroll}>
                 {renderDefaultList()}
                 {displayThreadList.length > 0 && displayThreadList.map((option, index) => {
                     return (
-                        <li className='tlp-item' key={index} onClick={(e)=>changeMessage(option)}>
+                        <li className='tlp-item' key={index} onClick={(e) => changeMessage(option)}>
                             <Box sx={{ padding: '8px 16px', width: '100%', height: '100%', boxSizing: 'border-box' }}>
                                 <div className="tpl-item-name">{option.name}</div>
-                                <Box style={{ display: 'flex', marginTop: '2px'}}>
+                                <Box style={{ display: 'flex', marginTop: '2px' }}>
                                     <img
                                         className='tlp-avatar'
                                         alt="Remy Sharp"

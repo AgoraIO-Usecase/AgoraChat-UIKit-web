@@ -166,8 +166,8 @@ const msgTpl = {
 
 export function formatLocalMessage(to, chatType, message = {}, messageType, isThread) {
     const ext = message.ext || {}
-    const formatMsg = Object.assign(msgTpl.base, message)
-    const body = Object.assign(msgTpl[messageType], message)
+    const formatMsg = Object.assign(JSON.parse(JSON.stringify(msgTpl.base)), message)
+    const body = Object.assign(JSON.parse(JSON.stringify(msgTpl[messageType])), message)
     if (messageType === 'file' || messageType === 'img' || messageType === 'video') {
         body.size = message?.data.size
     }
@@ -188,8 +188,8 @@ export function formatLocalMessage(to, chatType, message = {}, messageType, isTh
 
 export function formatServerMessage(message = {}, messageType) {
     const ext = message.ext || {}
-    const formatMsg = Object.assign(msgTpl.base, message)
-    const body = Object.assign(msgTpl[messageType], message)
+    const formatMsg = Object.assign(JSON.parse(JSON.stringify(msgTpl.base)), message)
+    const body = Object.assign(JSON.parse(JSON.stringify(msgTpl[messageType])), message)
     let chatType = message.chatType
     if (messageType === 'txt') {
         body.msg = message.msg;

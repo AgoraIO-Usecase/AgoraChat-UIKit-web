@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => {
         root: {
             minWidth: "200px",
             maxWidth: '100%',
-            height: "64px",
+            height: "80px",
             display: "flex",
         },
         container: {
@@ -30,9 +30,9 @@ const useStyles = makeStyles((theme) => {
             flexDirection: 'column',
             position: 'relative',
             marginTop: '8px',
-            padding: '6px 6px 6px 10px',
+            padding: '8px 12px',
             width: '100%',
-            height: "56px",
+            height: "80px",
             display: "flex",
             background: '#fff',
             borderRadius: '5px',
@@ -79,10 +79,25 @@ const useStyles = makeStyles((theme) => {
             cursor: 'pointer',
         },
         threadBottom: {
+            width: '100%',
+            overflow: 'hidden',
+        },
+        threadInfo: {
             display: 'flex',
             marginTop: '8px',
             height: '16px',
             lineHeight: '16px',
+            width: '100%',
+        },
+        messageInfo: {
+            display:'inline-block',
+            lineHeight: '16px',
+            marginTop: '4px',
+            color: '#4d4d4d',
+            fontSize: '12px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
             width: '100%',
         },
         threadAva: {
@@ -99,11 +114,12 @@ const useStyles = makeStyles((theme) => {
         },
         threadMsg: {
             marginLeft: '4px',
-            flex: '1 1 auto',
             fontSize: '14px',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
+            color: '#000',
+            width: 'calc(100% - 70px)',
         },
         time: {
             color: '#999',
@@ -127,11 +143,11 @@ const useStyles = makeStyles((theme) => {
 });
 
 const MsgThreadInfo = (props) => {
-    const {thread} = props.message;
+    const { thread } = props.message;
     const dispatch = useDispatch();
     const classes = useStyles();
     const renderMessage = (payload) => {
-        if(payload.bodies && payload.bodies.length>0){
+        if (payload.bodies && payload.bodies.length > 0) {
             let message = payload.bodies[0]
             switch (message.type) {
                 case 'txt':
@@ -191,7 +207,7 @@ const MsgThreadInfo = (props) => {
             return item.id === props.message.thread.id
         })
         if (!hasJoined) {
-            WebIM.conn.joinThread({threadId:props.message.thread.id}).then((res) => {
+            WebIM.conn.joinThread({ threadId: props.message.thread.id }).then((res) => {
                 //加入到thread列表中
                 // let threadInfo = {
                 //     id: props.message.thread.threadId,
@@ -207,19 +223,15 @@ const MsgThreadInfo = (props) => {
                 // dispatch(ThreadActions.setThreadList(newList))
                 //如果正在创建thread，修改状态
                 dispatch(ThreadActions.setIsCreatingThread(false));
-                //获取threadMessageList
-                dispatch(MessageActions.fetchThreadMessage(props.message.thread.id))
                 //修改当前的消息
                 dispatch(ThreadActions.setCurrentThreadInfo(props.message));
                 //打开thread面板
                 dispatch(ThreadActions.updateThreadStates(true));
             })
-            return 
+            return
         }
         //如果正在创建thread，修改状态
         dispatch(ThreadActions.setIsCreatingThread(false));
-        //获取threadMessageList
-        dispatch(MessageActions.fetchThreadMessage(props.message.thread.id))
         //修改当前的消息
         dispatch(ThreadActions.setCurrentThreadInfo(props.message));
         //打开thread面板
@@ -236,18 +248,18 @@ const MsgThreadInfo = (props) => {
                     <span className={classes.messageCount} onClick={changeMessage}>{thread.message_count}&nbsp;&gt;</span>
                 </div>
                 {thread.last_message && <div className={classes.threadBottom}>
-                    <div className={classes.threadAva}>
-                        <img className={classes.threadAvaIcon} src={avatar} ></img>
+                    <div className={classes.threadInfo}>
+                        <div className={classes.threadAva}>
+                            <img className={classes.threadAvaIcon} src={avatar} ></img>
+                        </div>
+                        <span className={classes.threadMsg}>{thread.last_message.from || ''}</span>
+                        <span className={classes.time}>{getTimeDiff(thread.last_message.timestamp)}</span>
                     </div>
-                    <div className={classes.threadMsg}>
-                        <span className={classes.threadOwner}>{thread.last_message.from||''}</span>&nbsp;
-                        <span className={classes.lastMessage}>{renderMessage(thread.last_message.payload)}</span>
-                    </div>
-                    <span className={classes.time}>{getTimeDiff(thread.last_message.timestamp)}</span>
+                    <span className={ classes.messageInfo}>{renderMessage(thread.last_message.payload)}</span>
                 </div>
                 }
                 {
-                    (!thread.last_message||JSON.stringify(thread.last_message)=='{}') && <div className={classes.defaultMessage}>No Messages</div>
+                    (!thread.last_message || JSON.stringify(thread.last_message) == '{}') && <div className={classes.defaultMessage}>No Messages</div>
                 }
 
             </div>

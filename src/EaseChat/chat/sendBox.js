@@ -132,23 +132,13 @@ function SendBox(props) {
         //change edit status of thread
         dispatch(ThreadActions.setIsCreatingThread(false));
         //send message
-        // dispatch(
-        //   MessageActions.sendTxtMessage(threadId, chatType, {
-        //     msg: inputValue,
-        //   },props.isThread )
-        // );
-        // setInputValue("");
-        // inputRef.current.focus();
-        //2s后发消息 等服务端修复后去掉
-        setTimeout(()=>{
-          dispatch(
-            MessageActions.sendTxtMessage(threadId, chatType, {
-              msg: inputValue,
-            },props.isThread )
-          );
-          setInputValue("");
-          inputRef.current.focus();
-        },3000)
+        dispatch(
+          MessageActions.sendTxtMessage(threadId, chatType, {
+            msg: inputValue,
+          },props.isThread )
+        );
+        setInputValue("");
+        inputRef.current.focus();
       })
       return 
     }
