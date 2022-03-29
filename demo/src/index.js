@@ -121,7 +121,7 @@ export default class Demo extends Component {
             onAvatarChange={this.test3}
             onChatAvatarClick={this.test4}
             appkey= "easemob-demo#chatdemoui"
-            username="wy5"
+            username="wy6"
             password="1"
             isShowReaction
             editThreadPanel={<EditThreadPanel/>}

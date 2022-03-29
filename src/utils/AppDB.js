@@ -3,7 +3,7 @@ import _ from 'lodash'
 
 const DB_VERSION = '1'
 const TABLE_NAME = 'IM_message'
-const TABLE_INDEX_KEYS = ['id', 'from', 'to', 'chatType', 'isUnread', 'status', 'mid', 'session', 'thread']
+const TABLE_INDEX_KEYS = ['id', 'from', 'to', 'chatType', 'isUnread', 'status', 'mid', 'session', 'thread_overview']
 const DB_ENABLE = true
 const PAGE_NUM = 20
 const AppDB = {
@@ -95,7 +95,7 @@ const AppDB = {
             $_TABLE.where('chatType')
                 .equals(chatType)
                 .filter(item => {
-                    return item.thread?.id === threadId
+                    return item.thread_overview?.id === threadId
                 })
                 .toArray()
                 .then(res => {
@@ -169,7 +169,7 @@ const AppDB = {
         return this.exec(resolve => {
             $_TABLE.where('id')
                 .equals(id)
-                .modify({ 'thread': thread })
+                .modify({ 'thread_overview': thread })
                 .then(res => console.log('res', res))
         })
     },

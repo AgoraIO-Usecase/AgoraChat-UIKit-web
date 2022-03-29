@@ -98,21 +98,21 @@ const { Types, Creators } = createActions({
             let messageList = _.get(rootState, ['message', 'groupChat', options.muc_parent_id]).asMutable({ deep: true });
             messageList.forEach((msg) => {
                 if (msg.id === options.msg_parent_id && !msg.bySelf || msg.mid === options.msg_parent_id && msg.bySelf) {
-                    if(msg.thread && msg.thread.operation === options.operation && msg.thread.timestamp>options.timestamp) return
+                    if(msg.thread_overview && msg.thread_overview.operation === options.operation && msg.thread_overview.timestamp>options.timestamp) return
                     if (options.operation === 'delete') {//delete thread
-                        msg.thread = undefined;
-                        if (options.msg_parent_id === currentThreadInfo.thread.id) {
+                        msg.thread_overview = undefined;
+                        if (options.msg_parent_id === currentThreadInfo.thread_overview.id) {
                             dispatch(Creators.updateThreadStates(false))
                         }
                     } else {//other operation
-                        if (!msg.thread || JSON.stringify(msg.thread) === "{}") {//create
-                            msg.thread = options;
+                        if (!msg.thread_overview || JSON.stringify(msg.thread_overview) === "{}") {//create
+                            msg.thread_overview = options;
                         } else {//update_msg or recall_msg or update threadName
-                            msg.thread = Object.assign(msg.thread, options)
+                            msg.thread_overview = Object.assign(msg.thread_overview, options)
                         }
                     }
                     //update Local database
-                    AppDB.updateMessageThread(msg.id, msg.thread)
+                    AppDB.updateMessageThread(msg.id, msg.thread_overview)
                     //update currentThreadInfo
                     dispatch(Creators.setCurrentThreadInfo(msg))
                 }

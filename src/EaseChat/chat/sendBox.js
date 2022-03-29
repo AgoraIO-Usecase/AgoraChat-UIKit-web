@@ -123,7 +123,7 @@ function SendBox(props) {
         return;
       }
       const options = {
-        name: props.threadName,
+        name: props.threadName.replace(/(^\s*)|(\s*$)/g, ""),
         msgId: currentThreadInfo.bySelf ? currentThreadInfo.mid: currentThreadInfo.id,
         groupId: currentThreadInfo.to,
       }
@@ -143,7 +143,7 @@ function SendBox(props) {
       return 
     }
     if(props.isThread) {
-      to = currentThreadInfo.thread.id
+      to = currentThreadInfo.thread_overview.id
     }
     dispatch(
       MessageActions.sendTxtMessage(to, chatType, {
@@ -199,7 +199,7 @@ function SendBox(props) {
     if (!file.filename) {
       return false;
     }
-    const receiveId = props.isThread ? currentThreadInfo.thread.id: to
+    const receiveId = props.isThread ? currentThreadInfo.thread_overview.id: to
     dispatch(MessageActions.sendFileMessage(receiveId, chatType, file, fileEl, props.isThread));
   };
 
@@ -208,7 +208,7 @@ function SendBox(props) {
     if (!file.filename) {
       return false;
     }
-    const receiveId = props.isThread ? currentThreadInfo.thread.id: to
+    const receiveId = props.isThread ? currentThreadInfo.thread_overview.id: to
     dispatch(MessageActions.sendVideoMessage(receiveId, chatType, file,videoEl, props.isThread));
   }
   const handleImageChange = (e) => {
@@ -216,7 +216,7 @@ function SendBox(props) {
     if (!file.filename) {
       return false;
     }
-    const receiveId = props.isThread ? currentThreadInfo.thread.id: to
+    const receiveId = props.isThread ? currentThreadInfo.thread_overview.id: to
     dispatch(MessageActions.sendImgMessage(receiveId, chatType, file, imageEl, props.isThread));
   };
 

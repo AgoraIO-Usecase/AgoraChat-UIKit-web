@@ -222,7 +222,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 								{isShowReaction && (
 									<Reaction message={message}/>
 								)}
-							{!message.thread && !isThreadPanel && message.chatType === 'groupChat'&& <div className={classes.threadCon} onClick={createThread}>
+							{!message.thread_overview && !isThreadPanel && message.chatType === 'groupChat'&& <div className={classes.threadCon} onClick={createThread}>
 							  <div className={classes.thread}></div></div>}
                			</div>
 					) : (

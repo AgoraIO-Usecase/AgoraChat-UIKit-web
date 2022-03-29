@@ -143,7 +143,7 @@ const useStyles = makeStyles((theme) => {
 });
 
 const MsgThreadInfo = (props) => {
-    const { thread } = props.message;
+    const { thread_overview } = props.message;
     const dispatch = useDispatch();
     const classes = useStyles();
     const renderMessage = (payload) => {
@@ -204,10 +204,10 @@ const MsgThreadInfo = (props) => {
     const changeMessage = () => {
         //Whether you are in the thread. If not, call the interface added by SDK
         let hasJoined = threadList.find((item) => {
-            return item.id === props.message.thread.id
+            return item.id === props.message.thread_overview.id
         })
         if (!hasJoined) {
-            WebIM.conn.joinThread({ threadId: props.message.thread.id }).then((res) => {
+            WebIM.conn.joinThread({ threadId: props.message.thread_overview.id }).then((res) => {
                 if(res.data.status !== 'ok') return 
                 changeThreadStatus()
             })
@@ -230,22 +230,22 @@ const MsgThreadInfo = (props) => {
                 <span className={classes.triangle}></span>
                 <div className={classes.threadTop}>
                     <div className={classes.threadIcon}></div>
-                    <div className={classes.threadName}>{thread.name}</div>
-                    <span className={classes.messageCount} onClick={changeMessage}>{thread.message_count}&nbsp;&gt;</span>
+                    <div className={classes.threadName}>{thread_overview.name}</div>
+                    <span className={classes.messageCount} onClick={changeMessage}>{thread_overview.message_count}&nbsp;&gt;</span>
                 </div>
-                {thread.last_message && JSON.stringify(thread.last_message) !== '{}' && <div className={classes.threadBottom}>
+                {thread_overview.last_message && JSON.stringify(thread_overview.last_message) !== '{}' && <div className={classes.threadBottom}>
                     <div className={classes.threadInfo}>
                         <div className={classes.threadAva}>
                             <img className={classes.threadAvaIcon} src={avatar} ></img>
                         </div>
-                        <span className={classes.threadMsg}>{thread.last_message.from || ''}</span>
-                        <span className={classes.time}>{getTimeDiff(thread.last_message.timestamp)}</span>
+                        <span className={classes.threadMsg}>{thread_overview.last_message.from || ''}</span>
+                        <span className={classes.time}>{getTimeDiff(thread_overview.last_message.timestamp)}</span>
                     </div>
-                    <span className={ classes.messageInfo}>{renderMessage(thread.last_message.payload)}</span>
+                    <span className={ classes.messageInfo}>{renderMessage(thread_overview.last_message.payload)}</span>
                 </div>
                 }
                 {
-                    (!thread.last_message || JSON.stringify(thread.last_message) === '{}') && <div className={classes.defaultMessage}>No Messages</div>
+                    (!thread_overview.last_message || JSON.stringify(thread_overview.last_message) === '{}') && <div className={classes.defaultMessage}>No Messages</div>
                 }
 
             </div>

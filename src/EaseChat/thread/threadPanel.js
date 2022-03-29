@@ -161,8 +161,7 @@ const ThreadPanel = (props) => {
     const { showByselfAvatar } = easeChatProps;
     const [threadName, setThreadName] = useState('');
     const changeThreadName = (e) => {
-        let val = e.target.value.replace(/(^\s*)|(\s*$)/g, "");
-        setThreadName(val)
+        setThreadName(e.target.value)
     }
     const clearThreadName = () => {
         setThreadName('');
@@ -272,12 +271,12 @@ const ThreadPanel = (props) => {
     const threadHasHistory = useSelector(state => state.message.threadHasHistory);
     const messageList =
         useSelector((state) => {
-            const to = state.thread.currentThreadInfo?.thread?.id;
+            const to = state.thread.currentThreadInfo?.thread_overview?.id;
             return _.get(state, ["message", 'threadMessage', to], []);
         }) || [];
     const scrollThreadEl = useRef(null);
     useEffect(() => {
-        if(currentMessage?.thread?.id){
+        if(currentMessage?.thread_overview?.id){
             dispatch(MessageActions.setThreadHasHistory(true));
             setThreadName('');
             setIsPullingDown(false)
@@ -285,8 +284,8 @@ const ThreadPanel = (props) => {
             if (!ReactDOM.findDOMNode(dom)) return;
             dom.scrollTop = 0;
         }
-        currentMessage?.thread?.id && dispatch(MessageActions.fetchThreadMessage(currentMessage.thread.id))
-    }, [currentMessage?.thread?.id])
+        currentMessage?.thread_overview?.id && dispatch(MessageActions.fetchThreadMessage(currentMessage.thread_overview.id))
+    }, [currentMessage?.thread_overview?.id])
     useEffect(() => {
         const dom = scrollThreadEl.current;
         if (!ReactDOM.findDOMNode(dom)) return;
@@ -300,7 +299,7 @@ const ThreadPanel = (props) => {
             if (!isPullingDown) {
                 setIsPullingDown(true);
                 setTimeout(() => {
-                    const to = currentMessage.thread?.id;
+                    const to = currentMessage.thread_overview?.id;
                     dispatch(MessageActions.fetchThreadMessage(to, cb, 'scroll'));
                 }, 500);
             }

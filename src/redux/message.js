@@ -551,7 +551,7 @@ export const deleteMessage = (state, { msgId, to, chatType }) => {
     //update currentThreadInfo after recalling group message
     if(msgId === rootState.thread.currentThreadInfo?.id){
         const newMsg = {
-            thread:rootState.thread.currentThreadInfo.thread
+            thread_overview :rootState.thread.currentThreadInfo.thread_overview
         }
         rootState.thread = rootState.thread.setIn(['currentThreadInfo'],newMsg)
     }

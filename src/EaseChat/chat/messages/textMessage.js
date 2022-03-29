@@ -247,7 +247,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 					id={message.id}
 				>
 					{renderTxt(message.body.msg)}{message.isThread}
-          {(!isThreadPanel) && message.chatType ==="groupChat" && message.thread&& (JSON.stringify(message.thread)!=='{}') ? <MsgThreadInfo message={message} />: null}
+          {(!isThreadPanel) && message.chatType ==="groupChat" && message.thread_overview&& (JSON.stringify(message.thread_overview)!=='{}') ? <MsgThreadInfo message={message} />: null}
 
 					{reactionMsg.length > 0 && (
 						<div
