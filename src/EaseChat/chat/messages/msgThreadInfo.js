@@ -147,7 +147,7 @@ const MsgThreadInfo = (props) => {
     const dispatch = useDispatch();
     const classes = useStyles();
     const renderMessage = (payload) => {
-        if (payload.bodies && payload.bodies.length > 0) {
+        if (payload?.bodies && payload.bodies.length > 0) {
             let message = payload.bodies[0]
             switch (message.type) {
                 case 'txt':
@@ -184,7 +184,7 @@ const MsgThreadInfo = (props) => {
                 const v = emoji.map[match[1]];
                 rnTxt.push(
                     <img
-                        key={v}
+                        key={v + Math.floor(Math.random()*99 + 1)}
                         alt={v}
                         src={require(`../../../common/faces/${v}`).default}
                         width={20}
@@ -233,7 +233,7 @@ const MsgThreadInfo = (props) => {
                     <div className={classes.threadName}>{thread.name}</div>
                     <span className={classes.messageCount} onClick={changeMessage}>{thread.message_count}&nbsp;&gt;</span>
                 </div>
-                {thread.last_message && <div className={classes.threadBottom}>
+                {thread.last_message && JSON.stringify(thread.last_message) !== '{}' && <div className={classes.threadBottom}>
                     <div className={classes.threadInfo}>
                         <div className={classes.threadAva}>
                             <img className={classes.threadAvaIcon} src={avatar} ></img>
@@ -245,7 +245,7 @@ const MsgThreadInfo = (props) => {
                 </div>
                 }
                 {
-                    (!thread.last_message || JSON.stringify(thread.last_message) == '{}') && <div className={classes.defaultMessage}>No Messages</div>
+                    (!thread.last_message || JSON.stringify(thread.last_message) === '{}') && <div className={classes.defaultMessage}>No Messages</div>
                 }
 
             </div>

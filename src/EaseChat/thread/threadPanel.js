@@ -211,7 +211,7 @@ const ThreadPanel = (props) => {
                 const v = emoji.map[match[1]];
                 rnTxt.push(
                     <img
-                        key={v}
+                        key={v + Math.floor(Math.random()*99 + 1)}
                         alt={v}
                         src={require(`../../common/faces/${v}`).default}
                         width={20}

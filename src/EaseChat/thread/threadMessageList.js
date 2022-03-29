@@ -40,7 +40,7 @@ function ThreadMessageList({ messageList, showByselfAvatar }) {
     (message) => {
       console.log("handleRecallMsg", message);
       const { to, chatType } = message;
-      dispatch(MessageActions.recallMessage(to, chatType, message));
+      dispatch(MessageActions.recallMessage(to, chatType, message, true));
     },
     [dispatch]
   );

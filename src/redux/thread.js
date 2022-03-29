@@ -24,13 +24,15 @@ function getThreadList(options,state,dispatch){
             return
         }
         dispatch(Creators.setThreadListCursor(res.properties.cursor))
-        threadList.forEach((item) => {
-            item.last_message = {}
-            AppDB.findLastMessage(item.id).then((msg) => {
-                item.last_message = msg
-            }).then(() => {
-                dispatch(Creators.setThreadList(threadList, options.isScroll))
-            })
+        let pArr = []
+        for(let i = 0;i<threadList.length;i++){
+            threadList[i].last_message = {}
+            pArr.push(AppDB.findLastMessage(threadList[i].id).then((msg) => {
+                threadList[i].last_message = msg
+            }))
+        }
+        Promise.all(pArr).then(()=>{
+            dispatch(Creators.setThreadList(threadList, options.isScroll))
         })
     })
 }
@@ -96,6 +98,7 @@ const { Types, Creators } = createActions({
             let messageList = _.get(rootState, ['message', 'groupChat', options.muc_parent_id]).asMutable({ deep: true });
             messageList.forEach((msg) => {
                 if (msg.id === options.msg_parent_id && !msg.bySelf || msg.mid === options.msg_parent_id && msg.bySelf) {
+                    if(msg.thread && msg.thread.operation === options.operation && msg.thread.timestamp>options.timestamp) return
                     if (options.operation === 'delete') {//delete thread
                         msg.thread = undefined;
                         if (options.msg_parent_id === currentThreadInfo.thread.id) {

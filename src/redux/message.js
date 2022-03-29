@@ -34,7 +34,7 @@ const { Types, Creators } = createActions({
     updateMessageStatus: ['message', 'status'],
     clearUnread: ["chatType", "sessionId"],
     updateMessages: ["chatType", "sessionId", "messages"],
-    updateMessageMid: ['id', 'mid'],
+    updateMessageMid: ['id', 'mid', 'to'],
     updateThreadDetails: ['chatType','groupId','messageList'],
     updateThreadMessage: ['to','messageList','isScroll'],
 	addReactions: ["message", "reaction"],
@@ -261,13 +261,14 @@ const { Types, Creators } = createActions({
         }
     },
 
-    recallMessage: (to, chatType, msg) => {
+    recallMessage: (to, chatType, msg, isThread = false) => {
         return (dispatch, getState) => {
             const { id, toJid, mid } = msg
             WebIM.conn.recallMessage({
                 to: to,
                 mid: toJid || mid, // message id
                 type: chatType,
+                isThread,
                 success: () => {
                     dispatch(Creators.deleteMessage(id, to, chatType))
                 },
@@ -307,7 +308,7 @@ const { Types, Creators } = createActions({
             let options = {
                 queue: to,
                 start: isScroll ? rootState.message.threadHistoryStart : -1,
-                pull_number: 5,
+                pull_number: 20,
                 isGroup: true,
                 format: true,
                 is_positive: true,
@@ -386,13 +387,13 @@ export const addMessage = (state, { message, messageType = 'txt' }) => {
     let chatId = bySelf || chatType !== 'singleChat' ? to : from
     if(isThread || (thread && JSON.stringify(thread)!=='{}')){
         if(state.threadHasHistory) return state
-        //isThread -自己发送  thread不为空 sdk解析收到的消息
-        //处理-存储到 threadMessage和indexDb中
+        //The message is sent byself when isThread is true or the thread is not null when receiving a thread message
+        //save the thread message  indexDB & threadMessageList
         const chatData = state.getIn(['threadMessage', chatId], Immutable([])).asMutable()
         const _message = {
             ...message,
             bySelf,
-            isThread:true,//是thread消息
+            isThread:true,//is thread message
             time: +new Date(),
             status: status
         }
@@ -406,10 +407,10 @@ export const addMessage = (state, { message, messageType = 'txt' }) => {
         !isPushed && chatData.push(_message)
         state = state.setIn(['threadMessage', chatId], chatData)
         !isPushed && AppDB.addMessage(_message, !bySelf ? 1 : 0,isThread)
-        //更新threadList的最新一条消息
+        //update the last_message of the threadList
         const threadList  = _.get(rootState, ['thread', 'threadList']).asMutable({ deep: true });
         threadList.forEach( item => {
-            if(item .id === _message.to){
+            if(item.id === _message.to){
                 item.last_message = _message
             }
         })
@@ -499,6 +500,35 @@ export const deleteMessage = (state, { msgId, to, chatType }) => {
 	msgId = msgId.mid || msgId;
 	let byId = state.getIn(["byId", msgId]);
 	let sessionType, chatId;
+    //update the mid of  thread message 
+    if(state.threadMessage[to]){
+        let threadMsg = {}
+        const threadMsgList = state.getIn(['threadMessage', to]).asMutable({ deep: true })
+        threadMsg = _.find(threadMsgList, { id: msgId })
+        const index = threadMsgList.indexOf(threadMsg);
+        //update the last_message of the threadList
+        const rootState = uikit_store.getState()
+        const threadList  = _.get(rootState, ['thread', 'threadList']).asMutable({ deep: true });
+        threadList.forEach( item => {
+            if(item.id === to){
+                item.last_message ={}
+            }
+        })
+        rootState.thread = rootState.thread.setIn(['threadList'],threadList)
+        //update threadMessageList and indexDB
+        if(threadMsg && threadMsg.id){
+            threadMsgList.splice(index, 1, {
+                ...threadMsg,
+                body: {
+                    ...threadMsg.body,
+                    type: "recall",
+                },
+            });
+            state = state.setIn(['threadMessage',to],threadMsgList);
+            AppDB.deleteMessage(msgId);
+            return state
+        }
+    }
 	if (!byId) {
 		return state;
 	} else {
@@ -562,7 +592,7 @@ export const updateMessages = (state, { chatType, sessionId, messages }) => {
 	return state.setIn([chatType, sessionId], messagesArr);
 };
 
-export const updateMessageMid = (state, { id, mid }) => {
+export const updateMessageMid = (state, { id, mid,to }) => {
     const byId = state.getIn(['byId', id])
     if (!_.isEmpty(byId)) {
         const { chatType, chatId } = byId
@@ -574,8 +604,19 @@ export const updateMessageMid = (state, { id, mid }) => {
         messages.splice(messages.indexOf(found), 1, found)
         state = state.setIn([chatType, chatId], messages)
     }
-
     setTimeout(() => { AppDB.updateMessageMid(mid, id) }, 500)
+    //update the mid of thread message 
+    if(state.threadMessage[to]){
+        let threadMsg = {}
+        const threadMsgList = state.getIn(['threadMessage', to]).asMutable({ deep: true })
+        threadMsg = _.find(threadMsgList, { id: id })
+        if(threadMsg && threadMsg.id){
+            threadMsg.toJid = mid;
+            threadMsg.mid = mid;
+            state = state.setIn(['threadMessage',to],threadMsgList)
+            return state
+        }
+    }
     return state.setIn(['byMid', mid], { id })
 }
 export const updateThreadDetails = (state, {chatType,groupId,messageList}) => {
