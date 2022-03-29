@@ -5,9 +5,6 @@ import { EaseChat, EaseApp } from "../../src/index";
 // import WebIM from "./WebIM";
 import val from "./comm";
 // import initListen from "./WebIMListen";
-import EditThreadPanel from "../demo-comments/components/editThreadPanel";
-import Dialog  from "../demo-comments/components/dialog";
-import Members  from "../demo-comments/components/members";
 import { times } from "lodash";
 export default class Demo extends Component {
   state = {
@@ -65,10 +62,6 @@ export default class Demo extends Component {
   test4 = (val) =>{
     console.log('val',val);
   }
-  test5 = () =>{
-    console.log('test5');
-  }
-  //test--start
   editThread = ()=>{
     let editTypes = ['Members', 'Notifications', 'FullView', 'EditThread', 'LeaveThread', 'DisbandThread']
     this.state.type = editTypes[0];
@@ -109,10 +102,7 @@ export default class Demo extends Component {
     console.log("this.state.token>>", this.state.token);
     return (
       <div>
-        <Dialog showDialog = 'false' title="dialog title" button1='Cancel' button2='save' input='true' />
-        <Members list={this.state.list} isShow = {this.state.showMemberList} />
           <button onClick={this.addSessionItem}> 测试 </button>
-          <button onClick={this.editThread}> 测试Edit </button>
         <h3>EaseApp</h3>
         <div>
           <EaseApp
@@ -124,7 +114,6 @@ export default class Demo extends Component {
             username="wy6"
             password="1"
             isShowReaction
-            editThreadPanel={<EditThreadPanel/>}
             // agoraToken="007eJxTYPCe51Vb5Rl3kCX/veizhwyel9f7fNp0e2mBNGd157ut3zUVGNIMU5LNzS2SUlKSzUzMElMs0ozMDCzNzZITjVIMDE2To7ItkxRkGBhONNtwMzKwMjACIYivwmBiaJxoYWxgoJtoZpmqa2iYmqybZG5oqWtpbGJsmpaWbGpmbgIAfPMmSQ=="
             header={<div style={{ height: "100px" }}>TestHeader</div>} 
             />
