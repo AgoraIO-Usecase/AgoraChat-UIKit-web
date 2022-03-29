@@ -202,7 +202,7 @@ const MsgThreadInfo = (props) => {
     };
     const threadList = useSelector((state) => state.thread?.threadList) || [];
     const changeMessage = () => {
-        //自己是否在该thread中，若不在-调用sdk加入的接口
+        //Whether you are in the thread. If not, call the interface added by SDK
         let hasJoined = threadList.find((item) => {
             return item.id === props.message.thread.id
         })

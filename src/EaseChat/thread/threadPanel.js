@@ -13,6 +13,7 @@ import { Box } from "@material-ui/core";
 import { EaseChatContext } from "../chat/index";
 import _ from "lodash";
 import avatar from "../../common/icons/avatar1.png";
+import emptyMsg from "../../common/images/noOriginalMsg.png";
 import "../../i18n";
 import i18next from "i18next";
 import { emoji } from "../../common/emoji";
@@ -139,8 +140,17 @@ const useStyles = makeStyles((theme) => {
             width: '100%',
             border: 'none',
             borderBottom: '1px solid #e6e6e6',
+        },
+        emptyMsg:{
+            marginTop: '15px',
+            paddingLeft: '36px',
+            height: '28px',
+            lineHeight: '28px',
+            color: '#999',
+            fontSize: '16px',
+            fontWeight: '600',
+            background: `url(${emptyMsg}) 0 center no-repeat`,
         }
-
 
     };
 });
@@ -250,7 +260,8 @@ const ThreadPanel = (props) => {
     const renderEmptyMsg = () => {
         return (
             <Box>
-                {i18next.t('Sorry,unable to load original message')}
+               <div className={classes.emptyMsg}>{i18next.t('Sorry,unable to load original message')}</div>
+               {isCreatingThread ? null : <hr className={classes.split} />}
             </Box>
         )
     }

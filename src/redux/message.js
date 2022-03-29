@@ -501,13 +501,13 @@ export const deleteMessage = (state, { msgId, to, chatType }) => {
 	let byId = state.getIn(["byId", msgId]);
 	let sessionType, chatId;
     //update the mid of  thread message 
+    const rootState = uikit_store.getState()
     if(state.threadMessage[to]){
         let threadMsg = {}
         const threadMsgList = state.getIn(['threadMessage', to]).asMutable({ deep: true })
         threadMsg = _.find(threadMsgList, { id: msgId })
         const index = threadMsgList.indexOf(threadMsg);
         //update the last_message of the threadList
-        const rootState = uikit_store.getState()
         const threadList  = _.get(rootState, ['thread', 'threadList']).asMutable({ deep: true });
         threadList.forEach( item => {
             if(item.id === to){
@@ -548,6 +548,13 @@ export const deleteMessage = (state, { msgId, to, chatType }) => {
 	});
 	state = state.setIn([sessionType, chatId], messages);
 	AppDB.deleteMessage(msgId);
+    //update currentThreadInfo after recalling group message
+    if(msgId === rootState.thread.currentThreadInfo?.id){
+        const newMsg = {
+            thread:rootState.thread.currentThreadInfo.thread
+        }
+        rootState.thread = rootState.thread.setIn(['currentThreadInfo'],newMsg)
+    }
 	return state;
 };
 
