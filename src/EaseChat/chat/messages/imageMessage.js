@@ -99,12 +99,17 @@ const useStyles = makeStyles((theme) => ({
 	}
 }));
 const initialState = {
-	mouseX: null,
-	mouseY: null,
+  mouseX: null,
+  mouseY: null,
 };
 function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread, isThreadPanel  }) {
 	let easeChatProps = useContext(EaseChatContext);
-	const { onAvatarChange, isShowReaction } = easeChatProps;
+	const {
+    onAvatarChange,
+    isShowReaction,
+    customMessageClick,
+    customMessageList,
+  } = easeChatProps;
 	const classes = useStyles({ bySelf: message.bySelf });
 	const [state, setState] = useState(initialState);
 	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
@@ -124,10 +129,14 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 			mouseY: event.clientY - 4,
 		});
 	};
+  const _customMessageClick = (val, option) => (e) => {
+    customMessageClick && customMessageClick(e, val, option);
+    handleClose();
+  };
 
-	const handleReaction = (e) => {
-		setReactionInfoVisible(e.currentTarget);
-	};
+  const handleReaction = (e) => {
+    setReactionInfoVisible(e.currentTarget);
+  };
 
 	const createThread = ()=>{
 		onCreateThread(message)
@@ -182,32 +191,38 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 				</div>
 			</div>
 
-			<div className={classes.time}>{renderTime(message.time)}</div>
-			{message.bySelf ? (
-				<Menu
-					keepMounted
-					open={state.mouseY !== null}
-					onClose={handleClose}
-					anchorReference="anchorPosition"
-					anchorPosition={
-						state.mouseY !== null && state.mouseX !== null
-							? { top: state.mouseY, left: state.mouseX }
-							: undefined
-					}
-				>
-					<MenuItem onClick={recallMessage}>
-						{i18next.t("withdraw")}
-					</MenuItem>
-				</Menu>
-			) : null}
+      <div className={classes.time}>{renderTime(message.time)}</div>
+      <Menu
+        keepMounted
+        open={state.mouseY !== null}
+        onClose={handleClose}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          state.mouseY !== null && state.mouseX !== null
+            ? { top: state.mouseY, left: state.mouseX }
+            : undefined
+        }
+      >
+        {message.bySelf && (
+          <MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
+        )}
+        {customMessageList &&
+          customMessageList.map((val, key) => {
+            return (
+              <MenuItem key={key} onClick={_customMessageClick(val, message)}>
+                {val.name}
+              </MenuItem>
+            );
+          })}
+      </Menu>
 
-			<ReactionInfo
-				anchorEl={reactionInfoVisible}
-				onClose={() => setReactionInfoVisible(null)}
-				message={message}
-			/>
-		</li>
-	);
+      <ReactionInfo
+        anchorEl={reactionInfoVisible}
+        onClose={() => setReactionInfoVisible(null)}
+        message={message}
+      />
+    </li>
+  );
 }
 
 export default memo(ImgMessage);

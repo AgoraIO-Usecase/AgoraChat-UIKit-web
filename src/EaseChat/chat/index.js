@@ -144,10 +144,12 @@ EaseChatProvider.propTypes = {
 	menuList: PropTypes.array,
 	handleMenuItem: PropTypes.func,
 
-	successLoginCallback: PropTypes.func,
-	failCallback: PropTypes.func,
-	onChatAvatarClick: PropTypes.func,
-	isShowReaction: PropTypes.bool,
+  successLoginCallback:PropTypes.func,
+  failCallback:PropTypes.func,
+  onChatAvatarClick:PropTypes.func,
+  isShowReaction: PropTypes.bool,
+  customMessageList:PropTypes.array,
+  customMessageClick:PropTypes.func
 };
 
 EaseChatProvider.defaultProps = {

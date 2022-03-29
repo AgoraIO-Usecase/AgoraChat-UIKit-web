@@ -1,4 +1,4 @@
-import React, { memo, useState, useContext } from "react";
+import React, { memo, useState, useEffect, useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
 import i18next from "i18next";
 import { Menu, MenuItem } from "@material-ui/core";
@@ -8,7 +8,8 @@ import { renderTime } from "../../../utils";
 
 import MessageStatus from "./messageStatus";
 import MsgThreadInfo from "./msgThreadInfo"
-import {CopyToClipboard} from 'react-copy-to-clipboard'
+import { CopyToClipboard } from "react-copy-to-clipboard";
+
 import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
 import ReactionInfo from "../reaction/reactionInfo";
@@ -133,7 +134,7 @@ const initialState = {
 
 function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread, isThreadPanel }) {
 	let easeChatProps = useContext(EaseChatContext);
-	const { onAvatarChange, isShowReaction } = easeChatProps;
+	const { onAvatarChange, isShowReaction, customMessageClick, customMessageList } = easeChatProps;
 	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
 	const reactionMsg = message?.reactions || [];
 	const classes = useStyles({
@@ -146,15 +147,20 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	const [state, setState] = useState(initialState);
 	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
 
+	
+	  useEffect(() => {
+    	setCopyMsgVal(message.msg);
+  	}, [copyMsgVal]);
+
 	const handleClick = (event) => {
 		event.preventDefault();
-		setState({
+		setMenuState({
 			mouseX: event.clientX - 2,
 			mouseY: event.clientY - 4,
 		});
 	};
 	const handleClose = () => {
-		setState(initialState);
+		setMenuState(initialState);
 	};
 	const recallMessage = () => {
 		onRecallMessage(message);
@@ -297,15 +303,15 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 				</Menu>
 			) : null}
 
-			{reactionMsg.length > 0 && (
-				<ReactionInfo
-					anchorEl={reactionInfoVisible}
-					onClose={() => setReactionInfoVisible(null)}
-					message={message}
-				/>
-			)}
-		</li>
-	);
+      {reactionMsg.length > 0 && (
+        <ReactionInfo
+          anchorEl={reactionInfoVisible}
+          onClose={() => setReactionInfoVisible(null)}
+          message={message}
+        />
+      )}
+    </li>
+  );
 }
 
 export default memo(TextMessage);
