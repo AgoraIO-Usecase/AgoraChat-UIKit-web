@@ -407,14 +407,6 @@ export const addMessage = (state, { message, messageType = 'txt' }) => {
         !isPushed && chatData.push(_message)
         state = state.setIn(['threadMessage', chatId], chatData)
         !isPushed && AppDB.addMessage(_message, !bySelf ? 1 : 0,isThread)
-        //update the last_message of the threadList
-        const threadList  = _.get(rootState, ['thread', 'threadList']).asMutable({ deep: true });
-        threadList.forEach( item => {
-            if(item.id === _message.to){
-                item.last_message = _message
-            }
-        })
-        rootState.thread = rootState.thread.setIn(['threadList'],threadList)
         return state
     }
     const chatData = state.getIn([chatType, chatId], Immutable([])).asMutable()
@@ -507,14 +499,6 @@ export const deleteMessage = (state, { msgId, to, chatType }) => {
         const threadMsgList = state.getIn(['threadMessage', to]).asMutable({ deep: true })
         threadMsg = _.find(threadMsgList, { id: msgId })
         const index = threadMsgList.indexOf(threadMsg);
-        //update the last_message of the threadList
-        const threadList  = _.get(rootState, ['thread', 'threadList']).asMutable({ deep: true });
-        threadList.forEach( item => {
-            if(item.id === to){
-                item.last_message ={}
-            }
-        })
-        rootState.thread = rootState.thread.setIn(['threadList'],threadList)
         //update threadMessageList and indexDB
         if(threadMsg && threadMsg.id){
             threadMsgList.splice(index, 1, {

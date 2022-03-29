@@ -39,14 +39,13 @@ function getThreadList(options,state,dispatch){
 
 /* ------------- Initial State ------------- */
 export const INITIAL_STATE = Immutable({
-    threadPanelStates: false,//是否展示thread部分面板
+    threadPanelStates: false,//show thread panel
     threadList: [],
-    threadListCursor: '',//thread列表下次请求标记
-    threadListEnd: false,//是否请求全部数据
-    showThreadList: false,//是否展示群组内的thread列表
-    isCreatingThread: false,//是否正在创建thread
-    currentThreadInfo: {},//点击消息查看thread信息、创建thread
-    curGroupAdminAndOwner: {},//当前群组的adminList(list) 和owner(only one)
+    threadListCursor: '',//Tag for request thread list
+    threadListEnd: false,//Are all data requested
+    showThreadList: false,//Show the thread list
+    isCreatingThread: false,//Whether it is creating thread
+    currentThreadInfo: {},
     curGroupRole:{},//currentGrouprole{groupId:groupId,role: ''}
 });
 
@@ -118,6 +117,78 @@ const { Types, Creators } = createActions({
                 }
             })
             dispatch(MessageActions.updateThreadDetails('groupChat', options.muc_parent_id, messageList))
+            //update threadList
+            //options.operation: 'create'，'update'，'delete'，'update_msg'，'recall_msg'
+            const { username } = _.get(rootState, ['global', 'globalProps'])
+            const threadList = _.get(rootState,['thread','threadList'], Immutable([])).asMutable()
+            switch(options.operation){
+                case 'create':{
+                    if(options.from === username && threadList.indexOf(options.id) < 0){//user created a thread
+                        threadList.push({
+                            created: options.create_timestamp,
+                            groupId: options.muc_parent_id,
+                            id: options.id,
+                            msgId: options.msg_parent_id,
+                            name: options.name,
+                            owner: options.from
+                        })
+                        dispatch(Creators.setThreadList(threadList))
+                    }
+                    break;
+                }
+                case 'update':{
+                    let found = _.find(threadList, { id: options.id });
+                    if(found){
+                        let newThread = {
+                            ...found,
+                            name: options.name
+                        }
+                        threadList.splice(threadList.indexOf(found), 1, newThread)
+                        dispatch(Creators.setThreadList(threadList))
+                    }
+                    break;
+                }
+                case 'delete':{
+                    if(currentThreadInfo.thread_overview?.id === options.id){
+                        alert("delete thread")
+                        dispatch(Creators.threadPanelStates(false))
+                    }
+                    let found = _.find(threadList, { id: options.id });
+                    if(found){
+                        threadList.splice(threadList.indexOf(found), 1)
+                        rdispatch(Creators.setThreadList(threadList))
+                    }
+                    break;
+                }
+                case 'update_msg':{
+                    let found = _.find(threadList, { id: options.id });
+                    if(found){
+                        let newThread = {
+                            ...found,
+                            last_message: options.last_message
+                        }
+                        threadList.splice(threadList.indexOf(found), 1,newThread)
+                        dispatch(Creators.setThreadList(threadList))
+                    }
+                    break;
+                }
+                case 'recall_msg':{
+                    if(JSON.stringify(options.last_message) === "{}"){
+                        let found = _.find(threadList, { id: options.id });
+                        if(found){
+                            let newThread = {
+                                ...found,
+                                last_message: options.last_message
+                            }
+                            threadList.splice(threadList.indexOf(found), 1,newThread)
+                            dispatch(Creators.setThreadList(threadList))
+                        } 
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
         }
     },
 });

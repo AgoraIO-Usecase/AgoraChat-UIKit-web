@@ -11,7 +11,6 @@ import avatar from "../../../common/icons/avatar1.png";
 import "../../../i18n";
 import i18next from "i18next";
 import { emoji } from "../../../common/emoji";
-import MessageActions from "../../../redux/message"
 import _ from "lodash";
 import AppDB from "../../../utils/AppDB";
 
@@ -60,22 +59,25 @@ const ThreadListPanel = () => {
             return (<Box className='tlp-default-tips'>{i18next.t('No Result')}</Box>)
         }
     }
-    const renderMessage = (body) => {
-        if (!body) return ''
-        switch (body.type) {
-            case 'txt':
-                return renderTxt(body.msg)
-            case 'file':
-                return `[${i18next.t('File Message')}]`
-            case 'img':
-                return `[${i18next.t('Image Message')}]`
-            case 'audio':
-                return `[${i18next.t('Audio Message')}]`
-            case 'video':
-                return `[${i18next.t('Video Message')}]`
-            default:
-                return ''
+    const renderMessage = (payload) => {
+        if (payload?.bodies && payload.bodies.length > 0) {
+            let message = payload.bodies[0]
+            switch (message.type) {
+                case 'txt':
+                    return renderTxt(message.msg)
+                case 'file':
+                    return `[${i18next.t('File Message')}]`
+                case 'img':
+                    return `[${i18next.t('Image Message')}]`
+                case 'audio':
+                    return `[${i18next.t('Audio Message')}]`
+                case 'video':
+                    return `[${i18next.t('Video Message')}]`
+                default:
+                    return ''
+            }
         }
+        return ''
     }
     const renderTxt = (txt) => {
         if (txt === undefined) {
@@ -183,7 +185,7 @@ const ThreadListPanel = () => {
                                         src={avatar}
                                     />
                                     <span className="tpl-item-owner">{option.owner}</span>
-                                    <span className="tpl-item-msg">{renderMessage(option.last_message?.body)}</span>
+                                    <span className="tpl-item-msg">{renderMessage(option.last_message?.payload)}</span>
                                     <span className="tpl-item-time">{getTimeDiff(option.last_message?.time)}</span>
                                 </Box>
                             </Box>
