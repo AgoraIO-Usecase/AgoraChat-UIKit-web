@@ -4,6 +4,7 @@ import { Avatar, Icon } from "@material-ui/core";
 import { renderTime } from "../../../utils/index";
 import avatar from "../../../common/icons/avatar1.png";
 import AudioPlayer from "./audioPlayer/audioPlayer";
+import { Menu ,MenuItem } from '@mui/material';
 import { EaseChatContext } from "../index";
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
@@ -75,10 +76,13 @@ const useStyles = makeStyles((theme) => ({
     height: "34px",
   },
 }));
-
+const initialState = {
+  mouseX: null,
+  mouseY: null,
+};
 function AudioOrVideoMessage({ message, showByselfAvatar }) {
   let easeChatProps = useContext(EaseChatContext);
-  const { onAvatarChange } = easeChatProps;
+  const { onAvatarChange, customMessageClick, customMessageList} = easeChatProps;
   const classes = useStyles({
     bySelf: message.bySelf,
     duration: Math.round(message.body.length),
@@ -86,6 +90,17 @@ function AudioOrVideoMessage({ message, showByselfAvatar }) {
   const url = message.body.url;
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [state, setState] = useState(initialState);
+  const handleClose = () => {
+    setState(initialState);
+  };
+  const handleClick = (event) => {
+    event.preventDefault();
+    setState({
+      mouseX: event.clientX - 2,
+      mouseY: event.clientY - 4,
+    });
+  };
 
   const play = () => {
     setIsPlaying(true);
@@ -96,6 +111,10 @@ function AudioOrVideoMessage({ message, showByselfAvatar }) {
     }, time + 500);
   };
 
+  const _customMessageClick = (val,option) =>(e) =>{
+    customMessageClick && customMessageClick(e,val,option)
+    handleClose()
+  }
   return (
     <li className={classes.pulldownListItem}>
       {!message.bySelf && (
@@ -108,7 +127,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar }) {
       <div className={classes.textBodyBox}>
         <span className={classes.userName}>{message.from}</span>
         {message.type === "audio" ? (
-          <div className={classes.audioBox} onClick={play}>
+          <div className={classes.audioBox} onClick={play} onContextMenu={handleClick}>
             <AudioPlayer play={isPlaying} reverse={message.bySelf} />
             <span className={classes.duration}>
               {Math.floor(message.body.length) + "''"}
@@ -121,12 +140,28 @@ function AudioOrVideoMessage({ message, showByselfAvatar }) {
               style={{width:'320px',borderRadius:'20px'}}
               controls
               src={message.url}
+              onContextMenu={handleClick}
             />
           </div>
         )}
       </div>
 
       <div className={classes.time}>{renderTime(message.time)}</div>
+        <Menu
+          keepMounted
+          open={state.mouseY !== null}
+          onClose={handleClose}
+          anchorReference="anchorPosition"
+          anchorPosition={
+            state.mouseY !== null && state.mouseX !== null
+              ? { top: state.mouseY, left: state.mouseX }
+              : undefined
+          }
+        >
+          {customMessageList && customMessageList.map((val,key)=>{
+            return <MenuItem key={key} onClick={_customMessageClick(val,message)}>{val.name}</MenuItem>
+          })}
+        </Menu>
     </li>
   );
 }

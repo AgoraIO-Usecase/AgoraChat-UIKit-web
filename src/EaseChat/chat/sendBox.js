@@ -216,7 +216,7 @@ function SendBox(props) {
       >
         {menuList && menuList.map((option, index) => {
           return (
-            <MenuItem onClick={onClickMenuItem(option)} key={option.index}>
+            <MenuItem onClick={onClickMenuItem(option)} key={index}>
               <Box className={classes.menuItemIconBox}></Box>
               <Typography variant="inherit" noWrap>
                 {i18next.t(option.name)}

@@ -1,4 +1,4 @@
-import React, { memo, useState, useContext } from "react";
+import React, { memo, useState, useEffect, useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
 import i18next from "i18next";
 import { Menu, MenuItem } from "@material-ui/core";
@@ -7,6 +7,8 @@ import { emoji } from "../../../common/emoji";
 import { renderTime } from "../../../utils";
 
 import MessageStatus from "./messageStatus";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+
 import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
 import ReactionInfo from "../reaction/reactionInfo";
@@ -102,7 +104,7 @@ const initialState = {
 
 function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 	let easeChatProps = useContext(EaseChatContext);
-	const { onAvatarChange, isShowReaction } = easeChatProps;
+	const { onAvatarChange, isShowReaction, customMessageClick, customMessageList } = easeChatProps;
 	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
 	const reactionMsg = message?.reactions || [];
 	const classes = useStyles({
@@ -110,18 +112,23 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 		chatType: message.chatType,
 		rnReactions: reactionMsg.length > 1,
 	});
-	const [state, setState] = useState(initialState);
 	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
+	const [menuState, setMenuState] = useState(initialState);
+  	const [copyMsgVal,setCopyMsgVal] = useState('')
+	
+	  useEffect(() => {
+    	setCopyMsgVal(message.msg);
+  	}, [copyMsgVal]);
 
 	const handleClick = (event) => {
 		event.preventDefault();
-		setState({
+		setMenuState({
 			mouseX: event.clientX - 2,
 			mouseY: event.clientY - 4,
 		});
 	};
 	const handleClose = () => {
-		setState(initialState);
+		setMenuState(initialState);
 	};
 	const recallMessage = () => {
 		onRecallMessage(message);
@@ -183,88 +190,101 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 		);
 	};
 
+	const changeCopyVal = () => {
+    	setCopyMsgVal(message.msg);
+    	handleClose();
+  	};
+	const _customMessageClick = (val, option) => (e) => {
+    	customMessageClick && customMessageClick(e, val, option);
+    	handleClose();
+  	};
+
 	return (
-		<li
-			className={classes.pulldownListItem}
-			onMouseOver={() => setHoverDeviceModule(true)}
-			onMouseLeave={() => setHoverDeviceModule(false)}
-		>
-			<div>
-				{!message.bySelf && (
-					<img
-						className={classes.avatarStyle}
-						src={avatar}
-						onClick={() =>
-							onAvatarChange && onAvatarChange(message)
-						}
-					></img>
-				)}
-				{showByselfAvatar && message.bySelf && (
-					<img className={classes.avatarStyle} src={avatar}></img>
-				)}
-			</div>
-			<div className={classes.textBodyBox}>
-				<span className={classes.userName}>{message.from}</span>
-				<div
-					className={classes.textBody}
-					onContextMenu={handleClick}
-					id={message.id}
-				>
-					{renderTxt(message.body.msg)}
+    <li
+      className={classes.pulldownListItem}
+      onMouseOver={() => setHoverDeviceModule(true)}
+      onMouseLeave={() => setHoverDeviceModule(false)}
+    >
+      <div>
+        {!message.bySelf && (
+          <img
+            className={classes.avatarStyle}
+            src={avatar}
+            onClick={() => onAvatarChange && onAvatarChange(message)}
+          ></img>
+        )}
+        {showByselfAvatar && message.bySelf && (
+          <img className={classes.avatarStyle} src={avatar}></img>
+        )}
+      </div>
+      <div className={classes.textBodyBox}>
+        <span className={classes.userName}>{message.from}</span>
+        <div
+          className={classes.textBody}
+          onContextMenu={handleClick}
+          id={message.id}
+        >
+          {renderTxt(message.body.msg)}
 
-					{reactionMsg.length > 0 && (
-						<div
-							className={classes.reactionBox}
-							onClick={handleReaction}
-						>
-							<RenderReactions message={message} />
-						</div>
-					)}
-					<div className={classes.textReaction}>
-						{hoverDeviceModule ? (
-							<div>
-								{isShowReaction && (
-									<Reaction message={message} />
-								)}
-							</div>
-						) : (
-							sentStatus()
-						)}
-					</div>
-				</div>
-			</div>
-			<div className={classes.time}>{renderTime(message.time)}</div>
-			{message.status === "read" ? (
-				<div className={classes.read}>{i18next.t("Read")}</div>
-			) : null}
+          {reactionMsg.length > 0 && (
+            <div className={classes.reactionBox} onClick={handleReaction}>
+              <RenderReactions message={message} />
+            </div>
+          )}
+          <div className={classes.textReaction}>
+            {hoverDeviceModule ? (
+              <div>{isShowReaction && <Reaction message={message} />}</div>
+            ) : (
+              sentStatus()
+            )}
+          </div>
+        </div>
+      </div>
+      <div className={classes.time}>{renderTime(message.time)}</div>
+      {message.status === "read" ? (
+        <div className={classes.read}>{i18next.t("Read")}</div>
+      ) : null}
 
-			{message.bySelf ? (
-				<Menu
-					keepMounted
-					open={state.mouseY !== null}
-					onClose={handleClose}
-					anchorReference="anchorPosition"
-					anchorPosition={
-						state.mouseY !== null && state.mouseX !== null
-							? { top: state.mouseY, left: state.mouseX }
-							: undefined
-					}
-				>
-					<MenuItem onClick={recallMessage}>
-						{i18next.t("withdraw")}
-					</MenuItem>
-				</Menu>
-			) : null}
+      <Menu
+        keepMounted
+        open={menuState.mouseY !== null}
+        onClose={handleClose}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          menuState.mouseY !== null && menuState.mouseX !== null
+            ? { top: menuState.mouseY, left: menuState.mouseX }
+            : undefined
+        }
+      >
+        {message.bySelf && (
+          <MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
+        )}
+        {
+          <MenuItem onClick={changeCopyVal}>
+            <CopyToClipboard text={copyMsgVal}>
+              <span>{i18next.t("Copy")}</span>
+            </CopyToClipboard>
+          </MenuItem>
+        }
+        {customMessageList &&
+          customMessageList.map((val, key) => {
+            return (
+              <MenuItem key={key} onClick={_customMessageClick(val, message)}>
+                {val.name}
+              </MenuItem>
+            );
+          })}
+      </Menu>
 
-			{reactionMsg.length > 0 && (
-				<ReactionInfo
-					anchorEl={reactionInfoVisible}
-					onClose={() => setReactionInfoVisible(null)}
-					message={message}
-				/>
-			)}
-		</li>
-	);
+      {reactionMsg.length > 0 && (
+        <ReactionInfo
+          anchorEl={reactionInfoVisible}
+          onClose={() => setReactionInfoVisible(null)}
+          message={message}
+        />
+      )}
+    </li>
+  );
 }
 
 export default memo(TextMessage);

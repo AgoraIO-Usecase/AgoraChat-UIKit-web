@@ -132,7 +132,6 @@ export default function SessionList(props) {
     let ary = []
     if (e.target.value) {
       renderSessionList.map((val,key)=>{
-        console.log('val>>',val);
         let isIncludeAry = val.sessionType === 'groupChat'? val.name : val.sessionId
         let isIncludeVal = _.includes(_.toLower(isIncludeAry),_.toLower(e.target.value))
         if (isIncludeVal) {
@@ -151,7 +150,15 @@ export default function SessionList(props) {
     2: avatarIcon2,
     3: avatarIcon3
   }
- let renderSession = searchAry.length>0?searchAry:renderSessionList
+ let renderSession = searchAry && searchAry.length>0?searchAry:renderSessionList
+
+
+const deleteSessionClick = (v) =>{
+  let newAry = _.filter(searchAry,(o)=>{
+    return v.sessionId !== o.sessionId
+  })
+  setSearchAry(newAry)
+}
   return (
     <>
     <Paper component="form" className={classes.paper}
@@ -184,7 +191,9 @@ export default function SessionList(props) {
             <SessionItem 
             key={index} 
             currentVal={{session,index,currentSessionIndex,avatarSrc}} 
-            handleListItemClick={handleListItemClick}/>
+            handleListItemClick={handleListItemClick}
+            deleteSessionClick={deleteSessionClick}
+            />
           );
         })}
       </List>
