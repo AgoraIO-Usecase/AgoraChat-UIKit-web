@@ -45,7 +45,7 @@ const EaseApp = (props) => {
   const handleClickItem = useCallback(
     (session) => {
       props.onConversationClick && props.onConversationClick(session);
-      const { sessionType, sessionId } = session;
+      const { sessionType, sessionId, name } = session;
       if (!session.lastMessage) {
         dispatch(MessageActions.fetchMessage(sessionId, sessionType));
       }
@@ -53,6 +53,7 @@ const EaseApp = (props) => {
         GlobalPropsActions.setGlobalProps({
           to: sessionId,
           chatType: sessionType,
+          name: name,
         })
       );
       dispatch(SessionActions.setCurrentSession(sessionId));
