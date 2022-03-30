@@ -163,7 +163,7 @@ const { Types, Creators } = createActions({
         }
     },
 
-    sendVideoMessage: (to, chatType, file,videoEl) => {
+    sendVideoMessage: (to, chatType, file,videoEl, isThread=false) => {
         return (dispatch, getState) => {
             if (file.data.size > (1024 * 1024 * 10)) {
                 message.error(i18next.t('The video exceeds the upper limit'))
@@ -190,6 +190,7 @@ const { Types, Creators } = createActions({
                     file_length:file.data.size,
                     to,
                     chatType,
+                    isThread,
                     onFileUploadError: function (error) {
                         formatMsg.status = 'fail'
                         dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
@@ -201,7 +202,12 @@ const { Types, Creators } = createActions({
                         formatMsg.body.url = url
                         formatMsg.status = 'sent'
                         dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
-                        dispatch(Creators.updateMessages(chatType, to, formatMsg))
+                        // dispatch(Creators.updateMessages(chatType, to, formatMsg))
+                        if(isThread){
+                            dispatch(Creators.updateMessages('threadMessage', to, formatMsg ))
+                        }else{
+                            dispatch(Creators.updateMessages(chatType, to, formatMsg ))
+                        }
                         videoEl.current.value =''
                     },
                     fail: function () {
@@ -214,7 +220,7 @@ const { Types, Creators } = createActions({
             }
         }
     },
-    sendRecorder: (to, chatType, file) => {
+    sendRecorder: (to, chatType, file, isThread=false ) => {
 		return (dispatch, getState) => {
 			if (file.data.size > 1024 * 1024 * 10) {
 				message.error(i18next.t("The file exceeds the upper limit"));
@@ -235,6 +241,7 @@ const { Types, Creators } = createActions({
 				file_length: file.data.size,
 				to,
 				chatType,
+                isThread,
 				onFileUploadError: function (error) {
 					console.log(error);
 					// dispatch(Creators.updateMessageStatus(pMessage, "fail"))
@@ -246,7 +253,12 @@ const { Types, Creators } = createActions({
 					formatMsg.url = url;
 					formatMsg.status = "sent";
 					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
-					dispatch(Creators.updateMessages(chatType, to, formatMsg));
+					// dispatch(Creators.updateMessages(chatType, to, formatMsg));
+                    if(isThread){
+                        dispatch(Creators.updateMessages('threadMessage', to, formatMsg ))
+                    }else{
+                        dispatch(Creators.updateMessages(chatType, to, formatMsg ))
+                    }
 				},
 				fail: function () {
 					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));

@@ -11,6 +11,7 @@ import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
 import ReactionInfo from "../reaction/reactionInfo";
 import threadIcon from "../../../common/images/thread.png"
+import MsgThreadInfo from "./msgThreadInfo"
 
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
@@ -34,10 +35,16 @@ const useStyles = makeStyles((theme) => ({
 	},
 	textBodyBox: {
 		display: "flex",
-		flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
-		maxWidth: "65%",
+		// flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
+		flexDirection: 'column',
+		maxWidth: "80%",
+		minWidth: "40%",
 		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
 		position: "relative",
+		background: '#f2f2f2',
+		padding: '12px',
+		borderRadius: (props) =>
+			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
 	},
 	fileCard: {
 		width: "252px",
@@ -46,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
 		display: "flex",
 		alignItems: "center",
 		marginLeft: "10px",
-		marginBottom: "26px",
+		marginBottom: "6px",
 	},
 	fileIcon: {
 		width: "59px",
@@ -103,7 +110,7 @@ const useStyles = makeStyles((theme) => ({
 		position: "absolute",
 		right: (props) => (props.bySelf ? "" : "-50px"),
 		bottom: (props) => (props.bySelf ? "25px" : "20px"),
-		left: (props) => (props.bySelf ? "-32px" : ""),
+		left: (props) => (props.bySelf ? "-50px" : ""),
 		marginRight: "5px",
 		width: '52px',
 		height: '24px',
@@ -238,6 +245,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 						<></>
 					)}
 				</div>
+				{(!isThreadPanel) && message.chatType ==="groupChat" && message.thread_overview&& (JSON.stringify(message.thread_overview)!=='{}') ? <MsgThreadInfo message={message} />: null}
 				{reactionMsg.length > 0 && (
 					<div
 						className={classes.reactionBox}

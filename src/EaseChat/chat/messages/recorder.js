@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 let MediaStream
-function Recorder({ open, onClose }) {
+function Recorder({ open, onClose, isThread }) {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [status, setStatus] = useState("");
@@ -122,7 +122,7 @@ function Recorder({ open, onClose }) {
           length: duration,
           duration: duration,
         };
-        dispatch(MessageActions.sendRecorder(to, chatType, uri));
+        dispatch(MessageActions.sendRecorder(to, chatType, uri, isThread));
         onClose();
         MediaStream.getTracks()[0].stop()
       }

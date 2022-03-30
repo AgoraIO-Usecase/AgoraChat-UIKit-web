@@ -89,14 +89,14 @@ const useStyles = makeStyles((theme) => ({
 		bottom: "-10px",
 		left: (props) => (props.bySelf ? "-50px" : ""),
 		marginRight: "5px",
-    width: '52px',
-    height: '24px',
+		width: '52px',
+		height: '24px',
 	},
-  textReactionCon: {
-    width: '100%',
-    height: '100%',
-    float: (props) => (props.bySelf? 'right':'left'),
-  },
+	textReactionCon: {
+		width: '100%',
+		height: '100%',
+		float: (props) => (props.bySelf? 'right':'left'),
+	},
 	reactionBox: {
 		position: "absolute",
 		top: (props) => (props.bySelf ? "-15px" : "-10px"),
@@ -108,24 +108,24 @@ const useStyles = makeStyles((theme) => ({
 		border: "solid 2px #FFFFFF",
 		boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
 	},
-  threadCon: {
-    float: (props) => (props.bySelf? 'left':'right'),
-    height: '24px',
-    width: '24px',
-    borderRadius: '50%',
-    '&:hover':{
-      background: '#E6E6E6',
-    }
-  },
-  thread: {
-    marginTop: '5px',
-    marginLeft: '4px',
-    width: '16px',
-    height: '15px',
-    background: `url(${threadIcon}) center center no-repeat`,
-    backgroundSize: 'contain',
-    cursor: 'pointer',
-  }
+	threadCon: {
+		float: (props) => (props.bySelf? 'left':'right'),
+		height: '24px',
+		width: '24px',
+		borderRadius: '50%',
+		'&:hover':{
+		background: '#E6E6E6',
+		}
+	},
+	thread: {
+		marginTop: '5px',
+		marginLeft: '4px',
+		width: '16px',
+		height: '15px',
+		background: `url(${threadIcon}) center center no-repeat`,
+		backgroundSize: 'contain',
+		cursor: 'pointer',
+	}
 }))
 const initialState = {
 	mouseX: null,
@@ -144,7 +144,6 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	});
   const [menuState, setMenuState] = useState(initialState);
   const [copyMsgVal,setCopyMsgVal] = useState('');
-	const [state, setState] = useState(initialState);
 	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
 
 	
@@ -225,6 +224,14 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
   const createThread = ()=>{
     onCreateThread(message)
   }
+  const changeCopyVal = () => {
+	setCopyMsgVal(message.msg);
+	handleClose();
+  };
+const _customMessageClick = (val, option) => (e) => {
+	customMessageClick && customMessageClick(e, val, option);
+	handleClose();
+  };
 	return (
 		<li
 			className={classes.pulldownListItem}
@@ -269,7 +276,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 								{isShowReaction && (
 									<Reaction message={message}/>
 								)}
-                {!message.thread && !isThreadPanel && message.chatType === 'groupChat'&& <div className={classes.threadCon} onClick={createThread} title="Reply">
+                {!message.thread_overview && !isThreadPanel && message.chatType === 'groupChat'&& <div className={classes.threadCon} onClick={createThread} title="Reply">
                 <div className={classes.thread}></div>
                </div>}
                
@@ -285,23 +292,36 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 				<div className={classes.read}>{i18next.t("Read")}</div>
 			) : null}
       
-			{message.bySelf ? (
-				<Menu
-					keepMounted
-					open={state.mouseY !== null}
-					onClose={handleClose}
-					anchorReference="anchorPosition"
-					anchorPosition={
-						state.mouseY !== null && state.mouseX !== null
-							? { top: state.mouseY, left: state.mouseX }
-							: undefined
-					}
-				>
-					<MenuItem onClick={recallMessage}>
-						{i18next.t("withdraw")}
-					</MenuItem>
-				</Menu>
-			) : null}
+	  <Menu
+        keepMounted
+        open={menuState.mouseY !== null}
+        onClose={handleClose}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          menuState.mouseY !== null && menuState.mouseX !== null
+            ? { top: menuState.mouseY, left: menuState.mouseX }
+            : undefined
+        }
+      >
+        {message.bySelf && (
+          <MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
+        )}
+        {
+          <MenuItem onClick={changeCopyVal}>
+            <CopyToClipboard text={copyMsgVal}>
+              <span>{i18next.t("Copy")}</span>
+            </CopyToClipboard>
+          </MenuItem>
+        }
+        {customMessageList &&
+          customMessageList.map((val, key) => {
+            return (
+              <MenuItem key={key} onClick={_customMessageClick(val, message)}>
+                {val.name}
+              </MenuItem>
+            );
+          })}
+      </Menu>
 
       {reactionMsg.length > 0 && (
         <ReactionInfo

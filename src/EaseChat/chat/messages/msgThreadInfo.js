@@ -1,16 +1,9 @@
 import React from "react";
 import { makeStyles } from "@material-ui/styles";
-import {
-    Box,
-    IconButton,
-    MenuItem,
-    TextareaAutosize,
-    Menu,
-} from "@material-ui/core";
+import { Box } from "@material-ui/core";
 import threadIcon from '../../../common/images/thread.png'
 import { useSelector, useDispatch } from "../../../EaseApp/index";
 import ThreadActions from "../../../redux/thread"
-import MessageActions from "../../../redux/message"
 import { getTimeDiff } from "../../../utils/index";
 import WebIM from "../../../utils/WebIM";
 import avatar from "../../../common/icons/avatar1.png";
@@ -20,17 +13,19 @@ import { emoji } from "../../../common/emoji";
 const useStyles = makeStyles((theme) => {
     return {
         root: {
+            position: 'relative',
             minWidth: "200px",
-            maxWidth: '100%',
-            height: "80px",
+            width: '100%',
+            height: "85px",
             display: "flex",
         },
         container: {
+            position: 'absolute',
+            bottom: '0',
             display: 'flex',
             flexDirection: 'column',
-            position: 'relative',
             marginTop: '8px',
-            padding: '8px 12px',
+            padding: '0px 10px',
             width: '100%',
             height: "80px",
             display: "flex",
@@ -51,6 +46,7 @@ const useStyles = makeStyles((theme) => {
         },
         threadTop: {
             display: 'flex',
+            marginTop: '4px',
             height: '20px',
             lineHeight: '20px',
             width: '100%',
@@ -79,12 +75,13 @@ const useStyles = makeStyles((theme) => {
             cursor: 'pointer',
         },
         threadBottom: {
+            marginTop: '9px',
             width: '100%',
+            height: '35px',
             overflow: 'hidden',
         },
         threadInfo: {
             display: 'flex',
-            marginTop: '8px',
             height: '16px',
             lineHeight: '16px',
             width: '100%',
@@ -92,7 +89,7 @@ const useStyles = makeStyles((theme) => {
         messageInfo: {
             display:'inline-block',
             lineHeight: '16px',
-            marginTop: '4px',
+            marginTop: '3px',
             color: '#4d4d4d',
             fontSize: '12px',
             overflow: 'hidden',

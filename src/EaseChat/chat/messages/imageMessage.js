@@ -9,6 +9,7 @@ import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
 import ReactionInfo from "../reaction/reactionInfo";
 import threadIcon from "../../../common/images/thread.png"
+import MsgThreadInfo from "./msgThreadInfo"
 
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
@@ -33,12 +34,17 @@ const useStyles = makeStyles((theme) => ({
 	textBodyBox: {
 		display: "flex",
 		flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
-		maxWidth: "65%",
+		maxWidth: "80%",
+		maxWidth: "40%",
 		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
-	},
+		background: '#f2f2f2',
+		padding: '12px',
+		borderRadius: (props) =>
+				props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+		},
 	imgBox: {
 		marginLeft: "10px",
-		maxWidth: "50%",
+		// maxWidth: "50%",
 		"& img": {
 			maxWidth: "100%",
 		},
@@ -58,7 +64,7 @@ const useStyles = makeStyles((theme) => ({
 		position: "absolute",
 		right: (props) => (props.bySelf ? "" : "-55px"),
 		bottom: "-5px",
-		left: (props) => (props.bySelf ? "-52px" : ""),
+		left: (props) => (props.bySelf ? "-70px" : ""),
 		marginRight: "5px",
 		width: '52px',
 		height: '24px',
@@ -173,13 +179,14 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 								{isShowReaction && (
 									<Reaction message={message}/>
 								)}
-							{!message.thread && !isThreadPanel && message.chatType === 'groupChat'&& <div className={classes.threadCon} onClick={createThread}>
+							{!message.thread_overview && !isThreadPanel && message.chatType === 'groupChat'&& <div className={classes.threadCon} onClick={createThread}>
 							  <div className={classes.thread}></div></div>}
                				</div>
 						) : (
 							<></>
 						)}
 					</div>
+					{(!isThreadPanel) && message.chatType ==="groupChat" && message.thread_overview&& (JSON.stringify(message.thread_overview)!=='{}') ? <MsgThreadInfo message={message} />: null}
 					{reactionMsg.length > 0 && (
 						<div
 							className={classes.reactionBox}

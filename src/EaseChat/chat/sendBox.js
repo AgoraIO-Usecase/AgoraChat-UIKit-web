@@ -304,6 +304,7 @@ function SendBox(props) {
           onClose={() => {
             setShowRecorder(false);
           }}
+          isThread = {props.isThread}
         />
       </>
     );
