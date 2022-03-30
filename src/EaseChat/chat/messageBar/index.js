@@ -116,7 +116,7 @@ const MessageBar = () => {
         src={chatType === "singleChat" ? userAvatars[userAvatarIndex] : groupAvatarIcon}
           style={{ borderRadius: chatType === "singleChat" ? "50%" : 'inherit'}}
         ></Avatar>
-        {name}
+        {name || to}
       </Box>
       <Box position="static">
         <IconButton
