@@ -62,6 +62,9 @@ export default class Demo extends Component {
   test4 = (val) =>{
     console.log('val',val);
   }
+  test5 = (val) => {
+    console.log('val',val)
+  }
   editThread = ()=>{
     let editTypes = ['Members', 'Notifications', 'FullView', 'EditThread', 'LeaveThread', 'DisbandThread']
     this.state.type = editTypes[0];
@@ -95,9 +98,6 @@ export default class Demo extends Component {
           break;
   }
   }
-  //test--end
-
-
   render() {
     console.log("this.state.token>>", this.state.token);
     return (
@@ -110,10 +110,12 @@ export default class Demo extends Component {
             failCallback={this.test2}
             onAvatarChange={this.test3}
             onChatAvatarClick={this.test4}
+            onEditThreadPanel={this.test5}
             appkey= "easemob-demo#chatdemoui"
             username="wy6"
             password="1"
             isShowReaction
+            hasThreadEditPanel
             // agoraToken="007eJxTYPCe51Vb5Rl3kCX/veizhwyel9f7fNp0e2mBNGd157ut3zUVGNIMU5LNzS2SUlKSzUzMElMs0ozMDCzNzZITjVIMDE2To7ItkxRkGBhONNtwMzKwMjACIYivwmBiaJxoYWxgoJtoZpmqa2iYmqybZG5oqWtpbGJsmpaWbGpmbgIAfPMmSQ=="
             header={<div style={{ height: "100px" }}>TestHeader</div>} 
             />

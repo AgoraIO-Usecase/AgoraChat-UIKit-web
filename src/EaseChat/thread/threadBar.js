@@ -48,16 +48,19 @@ const useStyles = makeStyles((theme) => {
     };
 });
 
-const ThreadBar = (props) => {
+const ThreadBar = () => {
     let easeChatProps = useContext(EaseChatContext);
-    const { editThreadPanel } = easeChatProps
+    const { hasThreadEditPanel,onEditThreadPanel } = easeChatProps
     const classes = useStyles();
     const dispatch = useDispatch();
     const closeThreadPanel = () => {
         dispatch(ThreadActions.updateThreadStates(false));
     }
     const threadName = useSelector((state) => state.thread?.currentThreadInfo?.thread_overview?.name) || i18next.t('New thread');
-    const { isCreatingThread } = useSelector((state) => state.thread);
+    const to = useSelector((state) => state.global.globalProps?.to);
+    const openEditPanel = ()=>{
+        onEditThreadPanel(true,to);
+    }
     return (
         <div className={classes.root}>
             <Box position="static" className={classes.leftBar}>
@@ -65,10 +68,10 @@ const ThreadBar = (props) => {
                     <img alt="" className={classes.threadIcon} src={threadIcon} />
                 </IconButton>{threadName}</Box>
             <Box position="static" className={classes.rightBar}>
-                {/* {!isCreatingThread && <div className={classes.editPanel}> */}
-                {isCreatingThread && <div className={classes.editPanel}>
-                    {editThreadPanel}
-                </div>}
+                {hasThreadEditPanel && <IconButton
+                    className="iconfont icon-hanbaobao icon editPanel"
+                    onClick={(e) => openEditPanel()}
+                ></IconButton>}
                 <IconButton className="iconfont icon" onClick={closeThreadPanel}>
                     <img alt="" className={classes.close} src={close} />
                 </IconButton>

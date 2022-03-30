@@ -108,6 +108,7 @@ const useStyles = makeStyles((theme) => {
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
+            textAlign: 'left',
         },
         threadOriginalMessage: {
             marginTop: '2px',
@@ -118,6 +119,7 @@ const useStyles = makeStyles((theme) => {
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
+            textAlign: 'left',
         },
         threadName: {
             marginTop: '4px',
@@ -130,6 +132,7 @@ const useStyles = makeStyles((theme) => {
             fontWeight: '600',
             fontSize: '14px',
             color: '#4d4d4d',
+            textAlign: 'left',
         },
         threadStartMember: {
             color: '#000'

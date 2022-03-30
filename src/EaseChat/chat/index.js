@@ -149,7 +149,9 @@ EaseChatProvider.propTypes = {
   onChatAvatarClick:PropTypes.func,
   isShowReaction: PropTypes.bool,
   customMessageList:PropTypes.array,
-  customMessageClick:PropTypes.func
+  customMessageClick:PropTypes.func,
+  hasThreadEditPanel: PropTypes.bool,
+  onEditThreadPanel:PropTypes.func
 };
 
 EaseChatProvider.defaultProps = {
