@@ -22,6 +22,7 @@ import "../common/iconfont.css";
 
 import SessionList from "../EaseChat/session/sessionList";
 import EaseChat from "../EaseChat/chat/index";
+import EaseLivestream from "../EaseLivestream/chat/index";
 const uikit_store = React.createContext();
 export const useDispatch = createDispatchHook(uikit_store);
 export const useSelector = createSelectorHook(uikit_store);
@@ -93,7 +94,7 @@ const EaseApp = (props) => {
         <Grid 
         style={{width:'100%'}}
         >
-          <EaseChat {...props} />
+          <EaseLivestream {...props} />
         </Grid>
       </div>
     </Box>

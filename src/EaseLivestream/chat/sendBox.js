@@ -21,11 +21,11 @@ import MessageActions from "../../redux/message";
 import PropTypes from "prop-types";
 import i18next from "i18next";
 import WebIM from "../../utils/WebIM";
-import { EaseChatContext } from "./index";
+import { EaseLivestreamContext } from "./index";
 
-import icon_emoji from "../../common/icons/emoji@2x.png";
+import icon_emoji from "../../common/icons/sendEmoji.png";
 import icon_yuyin from "../../common/icons/voice@2x.png";
-import attachment from "../../common/icons/attachment@2x.png";
+import attachment from "../../common/icons/sendIcon.png";
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
   },
   emitter: {
     display: "flex",
-    alignItems: "flex-end",
+    alignItems: "center",
     padding: "0 16px",
   },
   input: {
@@ -48,7 +48,7 @@ const useStyles = makeStyles((theme) => ({
     lineHeight: "17px",
     fontSize: "14px",
     border: "none",
-    color: "#010101",
+    color: "#f1f1f1",
     resize: "none",
     backgroundColor: "#393939",
     borderRadius: "10px",
@@ -73,8 +73,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function SendBox(props) {
-  let easeChatProps = useContext(EaseChatContext);
-  const { easeInputMenu,menuList,handleMenuItem } = easeChatProps;
+  let easeLivestreamProps = useContext(EaseLivestreamContext);
+  const { easeInputMenu,menuList,handleMenuItem } = easeLivestreamProps;
   const dispatch = useDispatch();
   const classes = useStyles();
   const globalProps = useSelector((state) => state.global.globalProps);
@@ -144,134 +144,8 @@ function SendBox(props) {
     };
   }, [onKeyDownEvent]);
 
-  const handlefocus = (v) =>{
-    const {value} = v
-    switch (value) {
-      case 'img':
-        imageEl.current.focus();
-        imageEl.current.click();
-        break;
-      case 'file':
-        fileEl.current.focus();
-        fileEl.current.click();
-        break;
-      case 'video':
-        videoEl.current.focus();
-        videoEl.current.click();
-      default:
-        break;
-    }
-  }
-  const handleFileChange = (e) => {
-    let file = WebIM.utils.getFileUrl(e.target);
-    if (!file.filename) {
-      return false;
-    }
-    dispatch(MessageActions.sendFileMessage(to, chatType, file,fileEl));
-  };
-
-  const handleVideoChange = (e) => {
-    let file = WebIM.utils.getFileUrl(e.target);
-    if (!file.filename) {
-      return false;
-    }
-    dispatch(MessageActions.sendVideoMessage(to, chatType, file,videoEl));
-  }
-  const handleImageChange = (e) => {
-    let file = WebIM.utils.getFileUrl(e.target);
-    if (!file.filename) {
-      return false;
-    }
-    dispatch(MessageActions.sendImgMessage(to, chatType, file,imageEl));
-  };
-
-  const handleClickMenu = (e) => {
-    setSessionEl(e.currentTarget);
-  };
-
-  const onClickMenuItem = (v) => (e) => {
-    handleMenuItem && handleMenuItem(v,e)
-    handlefocus(v)
-    setSessionEl(null);
-  };
-
-  /*------------ ui-menu ----------*/
-  const renderMenu = () => {
-    return (
-      <Menu
-        id="simple-menu"
-        anchorEl={sessionEl}
-        keepMounted
-        open={Boolean(sessionEl)}
-        onClose={() => setSessionEl(null)}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
-        }}
-      >
-        {menuList && menuList.map((option, index) => {
-          return (
-            <MenuItem onClick={onClickMenuItem(option)} key={index}>
-              <Box className={classes.menuItemIconBox}></Box>
-              <Typography variant="inherit" noWrap>
-                {i18next.t(option.name)}
-              </Typography>
-              {option.value === "img" && (
-                <input
-                  type="file"
-                  accept="image/gif,image/jpeg,image/jpg,image/png,image/svg"
-                  ref={imageEl}
-                  onChange={handleImageChange}
-                  className={classes.hide}
-                />
-              )}
-              {option.value === "file" && (
-                <input
-                  ref={fileEl}
-                  onChange={handleFileChange}
-                  type="file"
-                  className={classes.hide}
-                />
-              )}
-               {option.value === "video" && (
-                <input
-                  ref={videoEl}
-                  onChange={handleVideoChange}
-                  type="file"
-                  className={classes.hide}
-                />
-              )}
-            </MenuItem>
-          );
-        })}
-      </Menu>
-    );
-  };
-
-  const renderRecorder = () => {
-    return (
-      <>
-        {window.location.protocol === "https:" && (
-          <IconButton
-            onClick={() => {
-              setShowRecorder(true);
-            }}
-          >
-            <img alt="" className={classes.iconStyle} src={icon_yuyin} />
-          </IconButton>
-        )}
-        <Recorder
-          open={showRecorder}
-          onClose={() => {
-            setShowRecorder(false);
-          }}
-        />
-      </>
-    );
+  const handleSendMsg = () => {
+    sendMessage();
   };
 
   const renderTextarea = () => {
@@ -283,6 +157,7 @@ function SendBox(props) {
         value={inputValue}
         onChange={handleInputChange}
         ref={inputRef}
+        placeholder={'Say Hi...'}
       ></TextareaAutosize>
     );
   };
@@ -291,7 +166,7 @@ function SendBox(props) {
     return (
       <>
         <IconButton ref={emojiRef} onClick={handleClickEmoji}>
-          <img alt="" className={classes.iconStyle} src={icon_emoji} />
+          <img alt="" style={{width:'20px',height:'20px'}} src={icon_emoji} />
         </IconButton>
         <Emoji
           anchorEl={emojiVisible}
@@ -302,13 +177,12 @@ function SendBox(props) {
     );
   };
 
-  const renderMoreFeatures = () => {
+  const renderSend = () => {
     return (
       <>
-        <IconButton onClick={handleClickMenu}>
+        <IconButton onClick={handleSendMsg}>
           <img alt="" className={classes.iconStyle} src={attachment} />
         </IconButton>
-        {renderMenu()}
       </>
     );
   };
@@ -320,33 +194,9 @@ function SendBox(props) {
           <>
             {renderTextarea()}
             {renderEmoji()}
-            {renderMoreFeatures()}
+            {renderSend()}
           </>
         );
-      case "noAudio":
-        return (
-          <>
-            {renderTextarea()}
-            {renderEmoji()}
-            {renderMoreFeatures()}
-          </>
-        );
-      case "noEmoji":
-        return (
-          <>
-            {renderTextarea()}
-            {renderMoreFeatures()}
-          </>
-        );
-      case "noAudioAndEmoji":
-        return (
-          <>
-            {renderTextarea()}
-            {renderMoreFeatures()}
-          </>
-        );
-      case "onlyText":
-        return <>{renderTextarea()}</>;
       default:
         break;
     }

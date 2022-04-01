@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { render } from "react-dom";
 
-import { EaseChat, EaseApp } from "../../src/index";
+import { EaseChat, EaseApp,EaseLivestream } from "../../src/index";
 // import WebIM from "./WebIM";
 import val from "./comm";
 // import initListen from "./WebIMListen";
@@ -26,9 +26,9 @@ export default class Demo extends Component {
     addSessionItem = () => {
     let session = {
       conversationType: "singleChat",
-      conversationId: "zd132",
+      conversationId: "qwk003",
     };
-    EaseApp.addConversationItem(session);
+    EaseLivestream.addConversationItem(session);
 
   };
   test = (res) =>{
@@ -43,6 +43,10 @@ export default class Demo extends Component {
   test4 = (val) =>{
     console.log('val',val);
   }
+
+  test5 = (res) =>{
+    console.log('val>>',res);
+  }
   render() {
     console.log("this.state.token>>", this.state.token);
     return (
@@ -50,16 +54,30 @@ export default class Demo extends Component {
           <button onClick={this.addSessionItem}> 测试 </button>
         <h3>EaseApp</h3>
         <div>
-          <EaseApp
+          {/* <EaseApp
             successLoginCallback={this.test}
             failCallback={this.test2}
             onAvatarChange={this.test3}
             onChatAvatarClick={this.test4}
+
+            closeChat={this.test5}
             
             appkey= "41117440#383391"
             username="test003"
-            agoraToken="007eJxTYDiw2fuKzNWjLzknllxuMkl+z+OTa5dxRZPB6fP1VGlGX1sFhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9NkPSnjJAUZBgbT1MfvGBlYGRiBEMRXYTBPsTAyMzc10LVMSjTVNTRMTda1NDdP1U0xT7Y0M0oztjC1NAMA7zUk8Q=="
-            header={<div style={{ height: "100px" }}>TestHeader</div>} />
+            agoraToken="007eJxTYIjT9z78Mq5gIWvimQDLneH87z8mcLoZzdrmUPg6jftWyD0FhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9Pk2FluSQoyDAy57Vv2MDKwMjACIYivwmCeYmFkZm5qoGuZlGiqa2iYmqxraW6eqptinmxpZpRmbGFqaQYAH2EmCg=="
+            header={<div style={{ height: "100px" }}>TestHeader</div>}
+             /> */}
+
+             <div style={{height:'500px'}}>
+             <EaseLivestream
+                  appkey= "41117440#383391"
+                  username="test003"
+                  agoraToken="007eJxTYDg62UPmqKCrFOtXE/5FW1ewhLL9MlMKrDCSe3bk3uvzV7YqMKQZpiSbm1skpaQkm5mYJaZYpBmZGViamyUnGqUYGJomu213S1KQYWBQzUtyYGRgZWAEQhBfhcE8xcLIzNzUQNcyKdFU19AwNVnX0tw8VTfFPNnSzCjN2MLU0gwAs7UkrA=="
+                  to="qwk003"
+                  chatType="singleChat"
+            />
+             </div>
+           
         </div>
       </div>
     );

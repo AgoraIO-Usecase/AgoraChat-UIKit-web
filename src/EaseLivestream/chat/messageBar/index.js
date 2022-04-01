@@ -1,5 +1,5 @@
 import React, { useState, useEffect,useContext } from "react";
-import { useSelector, useDispatch } from "../../../EaseApp/index";
+import { useSelector, useDispatch } from "react-redux";
 import { Menu, MenuItem, IconButton, Icon, InputBase } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles, fade } from "@material-ui/styles";
@@ -11,7 +11,7 @@ import i18next from "i18next";
 import MessageActions from "../../../redux/message";
 import SessionActions from "../../../redux/session";
 import GlobalPropsActions from "../../../redux/globalProps"
-import { EaseChatContext } from "../index";
+import { EaseLivestreamContext } from "../index";
 
 import _ from 'lodash'
 import avatarIcon1 from '../../../common/images/avatar1.png'
@@ -43,20 +43,16 @@ const useStyles = makeStyles((theme) => {
   };
 });
 const MessageBar = () => {
-  let easeChatProps = useContext(EaseChatContext);
-  const { onChatAvatarClick } = easeChatProps
+  let easeLivestreamProps = useContext(EaseLivestreamContext);
+  const { onChatAvatarClick ,closeChat} = easeLivestreamProps
   const classes = useStyles();
   const dispatch = useDispatch();
   const groupById = useSelector((state) => state.group?.group.byId) || {};
   const globalProps = useSelector((state) => state.global.globalProps);
 
-  const [sessionEl, setSessionEl] = useState(null);
-
   const { chatType, to, username } = globalProps;
-
-
-  const handleSessionInfoClick = (e) => {
-    setSessionEl(e.currentTarget);
+  const handleClick = (e) => {
+      closeChat && closeChat(e)
   };
 
   let userAvatars = {
@@ -83,8 +79,9 @@ const MessageBar = () => {
       </Box>
       <Box position="static">
         <IconButton
-          onClick={handleSessionInfoClick}
-          className="iconfont icon-hanbaobao icon"
+          onClick={handleClick}
+          className="iconfont icon-guanbi icon"
+          style={{color:'#fff',fontSize:'16px',marginRight:'10px'}}
         ></IconButton>
       </Box>
     </div>

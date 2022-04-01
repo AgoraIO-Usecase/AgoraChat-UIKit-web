@@ -8,7 +8,7 @@ import { renderTime } from "../../../utils";
 
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
-import { EaseChatContext } from "../index";
+import { EaseLivestreamContext } from "../index";
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
     display: "flex",
@@ -55,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 function TextMessage({ message }) {
-  let easeChatProps = useContext(EaseChatContext);
+  let easeLivestreamProps = useContext(EaseLivestreamContext);
   const classes = useStyles({
     bySelf: message.bySelf,
     chatType: message.chatType,
