@@ -7,7 +7,7 @@ const rnReactionEmoji = (reaction) => {
 	}
 	let rnReaction = [];
 	let match = null;
-	const regex = /(\[.*?\])/g;
+	const regex = /(.*?)/g;
 	let start = 0;
 	let index = 0;
 	while ((match = regex.exec(reaction))) {
