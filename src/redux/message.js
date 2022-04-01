@@ -32,8 +32,8 @@ const { Types, Creators } = createActions({
 	clearUnread: ["chatType", "sessionId"],
 	updateMessages: ["chatType", "sessionId", "messages"],
 	updateMessageMid: ["id", "mid"],
-	addReactions: ["message", "reaction"],
-	deleteReaction: ["message", "reaction"],
+	addReaction: ["message", "reaction"],
+	removeReaction: ["message", "reaction"],
 
 	// -async-
 	sendTxtMessage: (to, chatType, message = {}) => {
@@ -304,6 +304,28 @@ const { Types, Creators } = createActions({
 			WebIM.utils.download.call(WebIM.conn, options);
 		};
 	},
+
+	addReactions: (message, reaction) => {
+		return (dispatch, getState) => {
+			WebIM.conn.addReaction({messageId: message.id, reaction}).then(() => {
+				console.log('添加成功')
+				dispatch(Creators.addReaction(message, reaction))
+			}).catch((e) => {
+				console.log('添加失败',e)
+			})
+		}
+	},
+	deleteReaction: (message, reaction) => {
+		console.log('deleteReaction',message, reaction)
+		return (dispatch, getState) => {
+			WebIM.conn.deleteReaction({messageId: message.id, reaction}).then(() => {
+				console.log('删除成功')
+				dispatch(Creators.removeReaction(message, reaction))
+			}).catch((e) => {
+				console.log('删除失败')
+			})
+		}
+	}
 });
 
 /* ------------- Reducers ------------- */
@@ -497,7 +519,7 @@ export const updateMessageMid = (state, { id, mid }) => {
 	return state.setIn(["byMid", mid], { id });
 };
 
-export const addReactions = (state, { message, reaction }) => {
+export const addReaction = (state, { message, reaction }) => {
 	let { id, to, from } = message;
 	// TODO 回调会提供一个添加 reaction 的 from
 	let addReactionUser = "999222";
@@ -570,7 +592,7 @@ export const addReactions = (state, { message, reaction }) => {
 	return state;
 };
 
-export const deleteReaction = (state, { message, reaction }) => {
+export const removeReaction = (state, { message, reaction }) => {
 	let { id, from, to } = message;
 	let currentLoginUser = WebIM.conn.context.userId;
 	let sessionId = currentLoginUser === to ? from : to;
@@ -624,8 +646,8 @@ export const messageReducer = createReducer(INITIAL_STATE, {
 	[Types.UPDATE_MESSAGES]: updateMessages,
 	[Types.UPDATE_MESSAGE_MID]: updateMessageMid,
 	[Types.UPDATE_MESSAGE_STATUS]: updateMessageStatus,
-	[Types.ADD_REACTIONS]: addReactions,
-	[Types.DELETE_REACTION]: deleteReaction,
+	[Types.ADD_REACTION]: addReaction,
+	[Types.REMOVE_REACTION]: removeReaction,
 });
 
 export default Creators;

@@ -51,15 +51,16 @@ export default class Demo extends Component {
         <h3>EaseApp</h3>
         <div>
           <EaseApp
+            isShowReaction
             successLoginCallback={this.test}
             failCallback={this.test2}
             onAvatarChange={this.test3}
             onChatAvatarClick={this.test4}
             
-            appkey= "41117440#383391"
-            username="test003"
-            // password="1"
-            agoraToken="007eJxTYDiw2fuKzNWjLzknllxuMkl+z+OTa5dxRZPB6fP1VGlGX1sFhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9NkPSnjJAUZBgbT1MfvGBlYGRiBEMRXYTBPsTAyMzc10LVMSjTVNTRMTda1NDdP1U0xT7Y0M0oztjC1NAMA7zUk8Q=="
+            appkey= "5101220107132865#test"
+            username="zd1"
+            password="1"
+            // agoraToken="007eJxTYDiw2fuKzNWjLzknllxuMkl+z+OTa5dxRZPB6fP1VGlGX1sFhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9NkPSnjJAUZBgbT1MfvGBlYGRiBEMRXYTBPsTAyMzc10LVMSjTVNTRMTda1NDdP1U0xT7Y0M0oztjC1NAMA7zUk8Q=="
             header={<div style={{ height: "100px" }}>TestHeader</div>} />
         </div>
       </div>
