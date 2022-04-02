@@ -75,12 +75,12 @@ const ReactionIcon = ({ anchorEl, onClose, onSelected, message }) => {
 	const isStatus = (v) => {
 		reactionMsg.length > 0 &&
 			reactionMsg.forEach((val) => {
-				let { reaction, status, userList } = val;
+				let { reaction, userList } = val;
 				if (
 					reactionEmoji.map[reaction]?.includes(v) &&
 					userList.includes(currentLoginId)
 				) {
-					newStatus[v] = status;
+					newStatus[v] = true;
 				}
 			});
 		return newStatus[v];

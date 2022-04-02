@@ -32,8 +32,7 @@ const { Types, Creators } = createActions({
 	clearUnread: ["chatType", "sessionId"],
 	updateMessages: ["chatType", "sessionId", "messages"],
 	updateMessageMid: ["id", "mid"],
-	addReaction: ["message", "reaction"],
-	removeReaction: ["message", "reaction"],
+	updateReaction: ["message"],
 
 	// -async-
 	sendTxtMessage: (to, chatType, message = {}) => {
@@ -307,20 +306,17 @@ const { Types, Creators } = createActions({
 
 	addReactions: (message, reaction) => {
 		return (dispatch, getState) => {
-			WebIM.conn.addReaction({messageId: message.id, reaction}).then(() => {
-				console.log('添加成功')
-				dispatch(Creators.addReaction(message, reaction))
+			WebIM.conn.addReaction({ messageId: message.id, reaction}).then((res) => {
+				console.log('添加成功',res)
 			}).catch((e) => {
 				console.log('添加失败',e)
 			})
 		}
 	},
 	deleteReaction: (message, reaction) => {
-		console.log('deleteReaction',message, reaction)
 		return (dispatch, getState) => {
 			WebIM.conn.deleteReaction({messageId: message.id, reaction}).then(() => {
 				console.log('删除成功')
-				dispatch(Creators.removeReaction(message, reaction))
 			}).catch((e) => {
 				console.log('删除失败')
 			})
@@ -519,122 +515,35 @@ export const updateMessageMid = (state, { id, mid }) => {
 	return state.setIn(["byMid", mid], { id });
 };
 
-export const addReaction = (state, { message, reaction }) => {
-	let { id, to, from } = message;
-	// TODO 回调会提供一个添加 reaction 的 from
-	let addReactionUser = "999222";
-	let currentLoginUser = WebIM.conn.context.userId;
-	let sessionId = currentLoginUser === to ? from : to;
-	if (!id) id = state.getIn(["byMid", message.mid, "id"]);
+export const updateReaction = (state, { message, reaction }) => {
+	let { messageId, from,reactions } = message;
+
+	if (!messageId) messageId = state.getIn(["byMid", message.mid, "messageId"]);
 	let mids = state.getIn(["byMid"]) || {};
 	let mid;
 	for (var i in mids) {
-		if (mids[i].id === id) {
+		if (mids[i].messageId === messageId) {
 			mid = i;
 		}
 	}
-	const byId = state.getIn(["byId", id]);
+	const byId = state.getIn(["byId", messageId]);
 	if (!_.isEmpty(byId)) {
 		const { chatType } = byId;
-		let messages = state.getIn([chatType, sessionId]).asMutable();
-		let found = _.find(messages, { id: id });
-		let reactionMsgs = found?.reactions || [];
-		
-		let existReaction = _.find(reactionMsgs, { reaction: reaction });
-		let reactionList = [];
-		found.setIn(["reactions"], reactionList);
-		if (reactionMsgs.length > 0) {
-			let newFount = reactionMsgs.filter((item) => item.reaction !== reaction);
-			let { userList } = existReaction || '';
-			let myReaction = userList && userList.includes(currentLoginUser);
-			if (existReaction && myReaction) {
-				reactionList = [...reactionMsgs];
-			} else if (existReaction && !myReaction) {
-				let newUserList = existReaction.userList.concat(currentLoginUser);
-				let newCount = existReaction.count + 1;
-				reactionList = _.concat(newFount, [
-					{
-						reaction: reaction,
-						userList: newUserList,
-						status: true,
-						count: newCount,
-					},
-				]);
-			} else {
-				reactionList = _.concat(newFount, [
-					{
-						reaction: reaction,
-						userList: [currentLoginUser],
-						status: true,
-						count: 1,
-					},
-				]);
-			}
-		} else {
-			reactionList = [
-				{
-					reaction: reaction,
-					userList: [currentLoginUser],
-					status: true,
-					count: 1,
-				},
-			];
-		}
+		let messages = state.getIn([chatType, from]).asMutable();
+		let found = _.find(messages, { id: messageId });
+		found.setIn(["reactions"], reactions);
 		let msg = {
 			...found,
-			reactions: reactionList,
+			reactions: reactions,
 		};
 		messages.splice(messages.indexOf(found), 1, msg);
-		AppDB.updateMessageReaction(id, msg.reactions).then((res) => {});
+		AppDB.updateMessageReaction(messageId, msg.reactions).then((res) => {});
 
-		return state.setIn([chatType, sessionId], messages);
+		return state.setIn([chatType, from], messages);
 	}
 	return state;
 };
 
-export const removeReaction = (state, { message, reaction }) => {
-	let { id, from, to } = message;
-	let currentLoginUser = WebIM.conn.context.userId;
-	let sessionId = currentLoginUser === to ? from : to;
-	const byId = state.getIn(["byId", id]);
-	const { chatType } = byId;
-	let messages = state.getIn([chatType, sessionId]).asMutable({ deep: true });
-	let found = _.find(messages, { id: id });
-	let reactionMsgs = found.reactions || [];
-	let newFount = reactionMsgs.filter((item) => item.reaction !== reaction);
-	let existReaction = _.find(reactionMsgs, {reaction: reaction,});
-	let reactionList = [];
-	if (reactionMsgs.length > 0) {
-		let { reaction, userList, count } = existReaction;
-		let myReaction = userList.includes(currentLoginUser);
-		if (existReaction && myReaction) {
-			if (count > 1) {
-				reactionList = _.concat(newFount, [
-					{
-						reaction: reaction,
-						userList: userList.filter(
-							(item) => item !== currentLoginUser
-						),
-						status: false,
-						count: count - 1,
-					},
-				]);
-			} else {
-				reactionList = [...newFount];
-			}
-		} else {
-			reactionList = [...newFount];
-		}
-	}
-	const index = messages.indexOf(found);
-	messages.splice(index, 1, {
-		...found,
-		reactions: reactionList,
-	});
-	state = state.setIn([chatType, sessionId], messages);
-	AppDB.deleteReactions(id, reactionList);
-	return state;
-};
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const messageReducer = createReducer(INITIAL_STATE, {
@@ -646,8 +555,7 @@ export const messageReducer = createReducer(INITIAL_STATE, {
 	[Types.UPDATE_MESSAGES]: updateMessages,
 	[Types.UPDATE_MESSAGE_MID]: updateMessageMid,
 	[Types.UPDATE_MESSAGE_STATUS]: updateMessageStatus,
-	[Types.ADD_REACTION]: addReaction,
-	[Types.REMOVE_REACTION]: removeReaction,
+	[Types.UPDATE_REACTION]: updateReaction,
 });
 
 export default Creators;

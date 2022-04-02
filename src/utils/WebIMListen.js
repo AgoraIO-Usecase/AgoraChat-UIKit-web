@@ -111,6 +111,7 @@ export default function createlistener(props) {
 		},
 		onReactionUpdate: (message) => {
 			console.log("onReactionMessage", message);
+			store.dispatch(MessageActions.updateReaction(message));
 		},
 	});
 }
