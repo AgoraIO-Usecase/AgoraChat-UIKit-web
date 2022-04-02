@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { useState,memo } from "react";
 import rnReactionEmoji from "../../../utils/rnReactionEmoji";
 import { makeStyles } from "@material-ui/styles";
 
@@ -31,11 +31,15 @@ const RenderReactions = ({ message }) => {
 	const classes = useStyles({
 		rnReaction : reactionMsg.length > 1
 	});
+	let opStatus = false;
 	return (
 		<div className={classes.reaction}>
 			{reactionMsg.length > 0 &&
 				reactionMsg.map((item, i) => {
-					if (i > 3) return;
+					if (item.count === 0) {
+						return opStatus = true;
+					}
+					if (i > 4) return;
 					return (
 						<div key={i} className={classes.reactionItem}>
 							{rnReactionEmoji(item.reaction)}
@@ -46,7 +50,7 @@ const RenderReactions = ({ message }) => {
 				<span className={classes.reactionLingth}>...</span>
 			)}
 			{reactionMsg.length > 1 && <span className={classes.reactionLingth}>
-				{reactionMsg.length}
+				{opStatus ? reactionMsg.length - 1 : reactionMsg.length}
 			</span>}
 		</div>
 	);

@@ -1,4 +1,4 @@
-import React, { memo, useState } from "react";
+import React, { memo, useState,useEffect } from "react";
 import rnReactionEmoji from "../../../utils/rnReactionEmoji";
 import { makeStyles } from "@material-ui/styles";
 import store from "../../../redux/index";
@@ -135,7 +135,7 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 		3: avatarIcon3,
 	};
 
-	let newwInfoData = localStorage.getItem("usersInfo_1.0");
+	
 
 	const handleChange = (event, newValue) => {
 		setValue(newValue);
@@ -239,6 +239,7 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 						</Tabs>
 					</AppBar>
 					{reactionMsg.map((item, i) => {
+						if (item.count === 0 ) return
 						return (
 							<div>
 								<TabPanel
