@@ -502,6 +502,7 @@ export const updateMessageMid = (state, { id, mid }) => {
 			.getIn([chatType, chatId])
 			.asMutable({ deep: true });
 		let found = _.find(messages, { id: id });
+		found.id = mid;
 		found.toJid = mid;
 		found.mid = mid;
 		// let msg = found.setIn(['toJid'], mid)
@@ -510,15 +511,15 @@ export const updateMessageMid = (state, { id, mid }) => {
 	}
 
 	setTimeout(() => {
-		AppDB.updateMessageMid(mid, Number(id));
+		AppDB.updateMessageMid(mid, id);
 	}, 500);
 	return state.setIn(["byMid", mid], { id });
 };
 
 export const updateReaction = (state, { message, reaction }) => {
-	let { messageId, from,reactions } = message;
-
-	if (!messageId) messageId = state.getIn(["byMid", message.mid, "messageId"]);
+	let { messageId, from,to,reactions } = message;
+	let addReactionUser = WebIM.conn.context.userId === from ? to : from;
+	if (!messageId) messageId = state.getIn(["byMid", message.mid, "messageId"])
 	let mids = state.getIn(["byMid"]) || {};
 	let mid;
 	for (var i in mids) {
@@ -529,7 +530,7 @@ export const updateReaction = (state, { message, reaction }) => {
 	const byId = state.getIn(["byId", messageId]);
 	if (!_.isEmpty(byId)) {
 		const { chatType } = byId;
-		let messages = state.getIn([chatType, from]).asMutable();
+		let messages = state.getIn([chatType, addReactionUser]).asMutable();
 		let found = _.find(messages, { id: messageId });
 		found.setIn(["reactions"], reactions);
 		let msg = {
@@ -539,7 +540,7 @@ export const updateReaction = (state, { message, reaction }) => {
 		messages.splice(messages.indexOf(found), 1, msg);
 		AppDB.updateMessageReaction(messageId, msg.reactions).then((res) => {});
 
-		return state.setIn([chatType, from], messages);
+		return state.setIn([chatType, addReactionUser], messages);
 	}
 	return state;
 };
