@@ -161,6 +161,9 @@ const msgTpl = {
         type: 'custom',
         customEvent: '',
         customExts: {}
+    },
+    threadNotify: {
+        type: 'threadNotify'
     }
 }
 

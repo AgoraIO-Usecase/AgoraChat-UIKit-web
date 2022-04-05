@@ -620,16 +620,10 @@ export const updateMessageMid = (state, { id, mid,to }) => {
 export const updateThreadDetails = (state, {chatType,options,messageList}) => {
     const {operation,muc_parent_id} = options;
     if(operation === 'create'){
+        const formatMsg = formatLocalMessage(muc_parent_id, chatType,{}, 'threadNotify');
         const message = {
-            ...options,
-            isThread:false,
-            error:false,
-            chatType,
-            to:muc_parent_id,
+            ...formatMsg,
             time:options.create_timestamp,
-            body:{
-                type: 'threadNotify',
-            }
         }
         messageList.push(message);
         AppDB.addMessage(message)
