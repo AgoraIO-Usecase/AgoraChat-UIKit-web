@@ -121,7 +121,7 @@ const AppDB = {
 			$_TABLE
 				.where("id")
 				.equals(id)
-				.modify({ mid: mid })
+				.modify({ 'id': mid })
 				.then((res) => console.log("res", res));
 		});
 	},
