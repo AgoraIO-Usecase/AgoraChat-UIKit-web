@@ -108,11 +108,10 @@ const useStyles = makeStyles((theme) => ({
 	},
 	textReaction: {
 		position: "absolute",
-		right: (props) => (props.bySelf ? "" : "-50px"),
-		bottom: (props) => (props.bySelf ? "25px" : "20px"),
-		left: (props) => (props.bySelf ? "-50px" : ""),
-		marginRight: "5px",
-		width: '52px',
+		right: (props) => (props.bySelf ? "" : "0"),
+		left: (props) => (props.bySelf ? "0" : ""),
+		bottom: "0",
+		transform: (props) => (props.bySelf ? "translateX(-100%)":"translateX(100%)"),
 		height: '24px',
 	},
 	textReactionCon: {
@@ -191,6 +190,8 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	const createThread = ()=>{
 		onCreateThread(message)
 	}
+	const showThreaddInfo = (!isThreadPanel) && message.chatType ==="groupChat" && message.thread_overview&& (JSON.stringify(message.thread_overview)!=='{}')
+
 	
 	return (
 		<li
@@ -245,7 +246,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 						<></>
 					)}
 				</div>
-				{(!isThreadPanel) && message.chatType ==="groupChat" && message.thread_overview&& (JSON.stringify(message.thread_overview)!=='{}') ? <MsgThreadInfo message={message} />: null}
+				{showThreaddInfo ? <MsgThreadInfo message={message} />: null}
 				{reactionMsg.length > 0 && (
 					<div
 						className={classes.reactionBox}

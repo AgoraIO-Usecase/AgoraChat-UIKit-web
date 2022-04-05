@@ -91,13 +91,10 @@ const useStyles = makeStyles((theme) => ({
   },
   textReaction: {
     position: "absolute",
-    right: (props) => (props.bySelf ? "" : "-50px"),
-    left: (props) => (props.bySelf ? "-50px" : ""),
-    bottom: '0',
-    // bottom: (props) => (props.msgType ? "-15px" : "0"),
-    marginRight: "5px",
-    width: '52px',
-		height: '24px',
+    right: (props) => (props.bySelf ? "" : "0"),
+		left: (props) => (props.bySelf ? "0" : ""),
+		bottom: "0",
+		transform: (props) => (props.bySelf ? "translateX(-100%)":"translateX(100%)"),
   },
   reactionBox: {
     position: "absolute",
@@ -190,6 +187,8 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
   const createThread = ()=>{
     onCreateThread(message)
   }
+	const showThreaddInfo = (!isThreadPanel) && message.chatType ==="groupChat" && message.thread_overview&& (JSON.stringify(message.thread_overview)!=='{}')
+
   return (
     <li
       className={classes.pulldownListItem}
@@ -233,7 +232,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
             )}
           </div>
           
-          {(!isThreadPanel) && message.chatType ==="groupChat" && message.thread_overview&& (JSON.stringify(message.thread_overview)!=='{}') ? <MsgThreadInfo message={message} />: null}
+          {showThreaddInfo ? <MsgThreadInfo message={message} />: null}
           <div className={classes.textReaction}>
                   {hoverDeviceModule ? (
                     <div className={classes.textReactionCon}>

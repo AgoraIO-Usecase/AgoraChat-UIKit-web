@@ -15,6 +15,7 @@ const useStyles = makeStyles((theme) => {
         root: {
             position: 'relative',
             minWidth: "200px",
+            marginTop: "5px",
             width: '100%',
             height: "85px",
             display: "flex",

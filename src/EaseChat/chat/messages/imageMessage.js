@@ -36,19 +36,22 @@ const useStyles = makeStyles((theme) => ({
 		flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
 		maxWidth: "80%",
 		maxWidth: "40%",
+		marginLeft: "10px",
 		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
-		background: '#f2f2f2',
-		padding: '12px',
+		background: (props) => (props.showThreaddInfo ? "#f2f2f2": ''),
+		padding: (props) => (props.showThreaddInfo ? "12px": '0'),
 		borderRadius: (props) =>
 				props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-		},
+	},
 	imgBox: {
-		marginLeft: "10px",
+		// marginLeft: "10px",
 		// maxWidth: "50%",
 		"& img": {
 			maxWidth: "100%",
+			borderRadius: (props) => props.showThreaddInfo&&props.bySelf ? "8px 8px 4px 8px" : props.showThreaddInfo&& !props.bySelf ? "8px 8px 8px 4px" : props.bySelf?"16px 16px 4px 16px" : "16px 16px 16px 4px",
 		},
 		position: "relative",
+		
 	},
 	time: {
 		position: "absolute",
@@ -62,11 +65,10 @@ const useStyles = makeStyles((theme) => ({
 	},
 	textReaction: {
 		position: "absolute",
-		right: (props) => (props.bySelf ? "" : "-55px"),
-		bottom: "-5px",
-		left: (props) => (props.bySelf ? "-70px" : ""),
-		marginRight: "5px",
-		width: '52px',
+		right: (props) => (!props.bySelf&&props.showThreaddInfo? "-12px": !props.showThreaddInfo&&!props.bySelf ? "0":""),
+		bottom: "-10px",
+		transform: (props) => (props.bySelf ? "translateX(-100%)":"translateX(100%)"),
+		marginLeft: (props) => (props.bySelf ? "-15px" : ""),
 		height: '24px',
 	},
 	textReactionCon: {
@@ -116,11 +118,13 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
     customMessageClick,
     customMessageList,
   } = easeChatProps;
-	const classes = useStyles({ bySelf: message.bySelf });
+	const showThreaddInfo = (!isThreadPanel) && message.chatType ==="groupChat" && message.thread_overview&& (JSON.stringify(message.thread_overview)!=='{}')
+	const classes = useStyles({ bySelf: message.bySelf,showThreaddInfo:showThreaddInfo});
 	const [state, setState] = useState(initialState);
 	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
 	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
 	const reactionMsg = message?.reactions || [];
+	
 	const handleClose = () => {
 		setState(initialState);
 	};
@@ -186,7 +190,7 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 							<></>
 						)}
 					</div>
-					{(!isThreadPanel) && message.chatType ==="groupChat" && message.thread_overview&& (JSON.stringify(message.thread_overview)!=='{}') ? <MsgThreadInfo message={message} />: null}
+					{showThreaddInfo ? <MsgThreadInfo message={message} />: null}
 					{reactionMsg.length > 0 && (
 						<div
 							className={classes.reactionBox}

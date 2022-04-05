@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
 	textBody: {
 		// display: "flex",
 		margin: (props) => (props.bySelf ? "0 10px 10px 0" : "0 0 10px 10px"),
-		lineHeight: "20px",
+		lineHeight: "22px",
 		fontSize: "14px",
 		background: (props) =>
 			props.bySelf
@@ -85,11 +85,10 @@ const useStyles = makeStyles((theme) => ({
 	},
 	textReaction: {
 		position: "absolute",
-		right: (props) => (props.bySelf ? "" : "-50px"),
+		right: (props) => (props.bySelf ? "" : "0"),
 		bottom: "-10px",
-		left: (props) => (props.bySelf ? "-50px" : ""),
-		marginRight: "5px",
-		width: '52px',
+		transform: (props) => (props.bySelf ? "translateX(-100%)":"translateX(100%)"),
+		marginLeft: (props) => (props.bySelf ? "-15px" : ""),
 		height: '24px',
 	},
 	textReactionCon: {
@@ -137,6 +136,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	const { onAvatarChange, isShowReaction, customMessageClick, customMessageList } = easeChatProps;
 	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
 	const reactionMsg = message?.reactions || [];
+	const showThreaddInfo = (!isThreadPanel) && message.chatType ==="groupChat" && message.thread_overview&& (JSON.stringify(message.thread_overview)!=='{}')
 	const classes = useStyles({
 		bySelf: message.bySelf,
 		chatType: message.chatType,
@@ -210,6 +210,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 					<MessageStatus
 						status={message.status}
 						style={{
+							marginRight:'-30px',
 							marginTop:
 								message.chatType === "singleChat"
 									? "0"
@@ -260,7 +261,7 @@ const _customMessageClick = (val, option) => (e) => {
 					id={message.id}
 				>
 					{renderTxt(message.body.msg)}{message.isThread}
-          {(!isThreadPanel) && message.chatType ==="groupChat" && message.thread_overview&& (JSON.stringify(message.thread_overview)!=='{}') ? <MsgThreadInfo message={message} />: null}
+          {showThreaddInfo ? <MsgThreadInfo message={message} />: null}
 
 					{reactionMsg.length > 0 && (
 						<div
@@ -270,16 +271,16 @@ const _customMessageClick = (val, option) => (e) => {
 							<RenderReactions message={message} />
 						</div>
 					)}
+					
 					<div className={classes.textReaction}>
 						{hoverDeviceModule ? (
 							<div className={classes.textReactionCon}>
 								{isShowReaction && (
 									<Reaction message={message}/>
 								)}
-                {!message.thread_overview && !isThreadPanel && message.chatType === 'groupChat'&& <div className={classes.threadCon} onClick={createThread} title="Reply">
-                <div className={classes.thread}></div>
-               </div>}
-               
+								{!message.thread_overview && !isThreadPanel && message.chatType === 'groupChat'&& <div className={classes.threadCon} onClick={createThread} title="Reply">
+								<div className={classes.thread}></div>
+							</div>}
 							</div>
 						) : (
 							sentStatus()
