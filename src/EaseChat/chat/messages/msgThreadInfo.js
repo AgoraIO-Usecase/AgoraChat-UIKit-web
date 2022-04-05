@@ -66,6 +66,7 @@ const useStyles = makeStyles((theme) => {
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
             color: '#000',
+            textAlign:'left'
         },
         messageCount: {
             flex: '0 0 36px',
@@ -79,6 +80,7 @@ const useStyles = makeStyles((theme) => {
             width: '100%',
             height: '35px',
             overflow: 'hidden',
+            textAlign: 'left',
         },
         threadInfo: {
             display: 'flex',
@@ -205,7 +207,7 @@ const MsgThreadInfo = (props) => {
         })
         if (!hasJoined) {
             WebIM.conn.joinThread({ threadId: props.message.thread_overview.id }).then((res) => {
-                if(res.data.status !== 'ok') return 
+                // if(res.data.status !== 'ok') return //服务端字段缺失
                 changeThreadStatus()
             })
             return

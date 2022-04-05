@@ -1,5 +1,5 @@
 import React, { useCallback, createContext } from "react";
-import PropTypes from "prop-types";
+import PropTypes, { func } from "prop-types";
 import { makeStyles, styled } from "@material-ui/styles";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
@@ -58,7 +58,8 @@ const EaseApp = (props) => {
       );
       dispatch(SessionActions.setCurrentSession(sessionId));
       dispatch(MessageActions.clearUnreadAsync(sessionType, sessionId));
-      dispatch(ThreadActions.setShowThreadList(false));
+      dispatch(ThreadActions.updateThreadStates(false));
+      dispatch(ThreadActions.getCurrentGroupRole({sessionType, sessionId}));
     },
     [props.width]
   );
@@ -148,9 +149,19 @@ EaseAppProvider.getSdk = (props) => {
   }
   return WebIM
 };
+EaseAppProvider.thread = {
+  setHasThreadEditPanel:function(status){
+    store.dispatch(ThreadActions.setHasThreadEditPanel(status))
+  },
+  closeThreadPanel:function(){
+    store.dispatch(ThreadActions.updateThreadStates(false))
+  }
+}
+
+
 EaseAppProvider.propTypes = {
 	username: PropTypes.string,
-	// agoraToken: PropTypes.string,
+	agoraToken: PropTypes.string,
   password: PropTypes.string,
 	appkey: PropTypes.string,
 
@@ -167,7 +178,8 @@ EaseAppProvider.propTypes = {
   isShowReaction: PropTypes.bool,
   customMessageList:PropTypes.array,
   customMessageClick:PropTypes.func,
-  hasThreadEditPanel: PropTypes.bool,
+
+  //thread-click edit panel,get thread info
   onEditThreadPanel:PropTypes.func
 };
 EaseAppProvider.defaultProps = {

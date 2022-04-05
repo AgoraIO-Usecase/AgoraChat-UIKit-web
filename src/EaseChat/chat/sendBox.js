@@ -129,8 +129,6 @@ function SendBox(props) {
       }
       WebIM.conn.createThread(options).then(res=>{
         const threadId = res.data?.thread_id;
-        //change edit status of thread
-        dispatch(ThreadActions.setIsCreatingThread(false));
         //send message
         dispatch(
           MessageActions.sendTxtMessage(threadId, chatType, {

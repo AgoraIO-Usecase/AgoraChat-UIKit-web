@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
+import ReactDOM from "react-dom";
 import { useSelector, useDispatch } from "../../../EaseApp/index";
-import { Box } from "@material-ui/core";
+import { Box, Popover } from "@material-ui/core";
 import ThreadActions from "../../../redux/thread";
 import { getTimeDiff } from "../../../utils/index";
-import threadSearch from '../../../common/images/search.png'
 import close from '../../../common/images/threadClose.png'
 import "./index.css"
-import SearchBox from '../components/searchBox'
 import avatar from "../../../common/icons/avatar1.png";
 import "../../../i18n";
 import i18next from "i18next";
@@ -14,51 +13,28 @@ import { emoji } from "../../../common/emoji";
 import _ from "lodash";
 import AppDB from "../../../utils/AppDB";
 
-const ThreadListPanel = () => {
+const ThreadListPanel = ({ anchorEl, onClose }) => {
     const dispatch = useDispatch();
     const threadList = useSelector((state) => state.thread?.threadList) || [];
-    let [displayThreadList, changeDisplayThreadList] = useState([]);
-    useEffect(() => {
-        changeDisplayThreadList(threadList.concat());
-    }, [threadList])
-    const showThreadList = useSelector((state) => state.thread?.showThreadList) || false;
+    const curGroupRole = useSelector((state) => state.thread?.curGroupRole) || 'member';
     const { chatType, to } = useSelector((state) => state.global.globalProps);
-    const closeThreadList = () => {
-        dispatch(ThreadActions.setShowThreadList(false));
-    }
+
+    const threadListDom = useRef(null);
     useEffect(() => {
-        if (chatType === "groupChat") {
+        if (chatType === "groupChat" && anchorEl) {
+            const dom = threadListDom.current;
+            if (ReactDOM.findDOMNode(dom)) {
+                dom.scrollTop = 0;
+            }
+            dispatch(ThreadActions.setThreadListEnd(false));
             let options = {
                 groupId: to,
                 limit: 20,
             }
             dispatch(ThreadActions.getThreadsListOfGroup(options))
         }
-    }, [to])
-    const [showSearchBar, setSearchBarState] = useState(false);
+    }, [anchorEl])
 
-    const changeSearchBarState = (state) => {
-        setSearchBarState(state);
-    }
-    const searchThread = (searchValue) => {
-        let list = threadList.concat();
-        list = list.filter((item) => {
-            return item.name.indexOf(searchValue) > -1
-        })
-        changeDisplayThreadList(list.concat());
-    }
-    //The list is empty
-    const renderDefaultList = () => {
-        if (threadList.length === 0) return (
-            <Box className='tlp-default-tips'>
-                <div className='tlp-tips1'>{i18next.t('There are no Threads')}</div>
-                <div className='tlp-tips2'>{i18next.t('Create a Thread from a Group Chat Message')}</div>
-            </Box>
-        )
-        if (displayThreadList.length === 0) {
-            return (<Box className='tlp-default-tips'>{i18next.t('No Result')}</Box>)
-        }
-    }
     const renderMessage = (payload) => {
         if (payload?.bodies && payload.bodies.length > 0) {
             let message = payload.bodies[0]
@@ -97,7 +73,7 @@ const ThreadListPanel = () => {
                 const v = emoji.map[match[1]];
                 rnTxt.push(
                     <img
-                        key={v + Math.floor(Math.random()*99 + 1)}
+                        key={v + Math.floor(Math.random() * 99 + 1)}
                         alt={v}
                         src={require(`../../../common/faces/${v}`).default}
                         width={20}
@@ -113,7 +89,7 @@ const ThreadListPanel = () => {
 
         return rnTxt;
     };
-    const threadListDom = useRef(null);
+
     const [isPullingDown, setIsPullingDown] = useState(false);
     const handleScroll = (e) => {
         if (e.target.scrollHeight === (e.target.scrollTop + e.target.clientHeight)) {
@@ -133,67 +109,89 @@ const ThreadListPanel = () => {
             }
         }
     };
-    const changeMessage = (option) => {
-        WebIM.conn.joinThread({ threadId: option.id }).then((res) => {
-            //change the status of creatingThread
-            dispatch(ThreadActions.setIsCreatingThread(false));
-            //Find the muc message of the thread  you are clicking by the thread id
-            AppDB.findAppointedMessage('groupChat', option.id).then((res) => {
-                if (res.length === 1) {
-                    dispatch(ThreadActions.setCurrentThreadInfo(res[0]));
-                } else {
-                    const msg = {
-                        thread: option
-                    }
-                    dispatch(ThreadActions.setCurrentThreadInfo(msg));
-                }
+    const openThreadPanel = (option) => {
+        if (curGroupRole === 'member') {
+            changeCurrentThreadInfo(option)
+        } else {
+            WebIM.conn.joinThread({ threadId: option.id }).then((res) => {
+                changeCurrentThreadInfo(option)
             })
-            //open threadPanel
-            dispatch(ThreadActions.updateThreadStates(true));
-            //close threadListPanel
-            dispatch(ThreadActions.setShowThreadList(false));
+        }
+    }
+    const changeCurrentThreadInfo = (option) => {
+        //change the status of creatingThread
+        dispatch(ThreadActions.setIsCreatingThread(false));
+        //Find the muc message of the thread by the threadId
+        AppDB.findAppointedMessage('groupChat', option.id).then((res) => {
+            if (res.length === 1) {
+                dispatch(ThreadActions.setCurrentThreadInfo(res[0]));
+            } else {
+                const msg = {
+                    thread_overview: option
+                }
+                dispatch(ThreadActions.setCurrentThreadInfo(msg));
+            }
         })
+        //open threadPanel
+        dispatch(ThreadActions.updateThreadStates(true));
+        //close threadListPanel
+        onClose();
+    }
+    //The list is empty
+    const renderDefaultList = () => {
+        if (threadList.length === 0) return (
+            <Box className='tlp-default-tips'>
+                <div className='tlp-tips1'>{i18next.t('There are no Threads')}</div>
+                <div className='tlp-tips2'>{i18next.t('Create a Thread from a Group Chat Message')}</div>
+            </Box>
+        )
     }
 
     return (
-        <Box className='threadListPanel' style={{ display: showThreadList == 1 ? 'block' : 'none' }}>
-            <div className='tlp-header'>
-                <span className='tlp-header-title'>{i18next.t('Threads List')}</span>
-                <Box style={{ lineHeight: '60px', display: showSearchBar == 1 ? 'none' : 'flex' }}>
-                    <div className="tlp-header-icon">
-                        <img className="tlp-header-icon-search" alt="" src={threadSearch} onClick={(e) => changeSearchBarState(true)} />
+        <Popover
+            open={Boolean(anchorEl)}
+            onClose={onClose}
+            anchorEl={anchorEl}
+            anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+            }}
+            transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+            }}
+        >
+            <Box className='threadListPanel'>
+                <div className='tlp-header'>
+                    <span className='tlp-header-title'>{i18next.t('Threads List')}</span>
+                    <div className="tlp-header-icon" onClick={onClose}>
+                        <img className="tlp-header-icon-close" alt="closeIcon" src={close} />
                     </div>
-                    <div className="tlp-header-icon" onClick={closeThreadList}>
-                        <img className="tlp-header-icon-close" alt="" src={close} />
-                    </div>
-                </Box>
-                <Box style={{ marginTop: '12px', display: showSearchBar == 1 ? 'flex' : 'none' }}>
-                    <SearchBox changeSearchBarState={changeSearchBarState} searchThread={searchThread} />
-                </Box>
-            </div>
-            <ul className='tlp-list' ref={threadListDom} onScroll={handleScroll}>
-                {renderDefaultList()}
-                {displayThreadList.length > 0 && displayThreadList.map((option, index) => {
-                    return (
-                        <li className='tlp-item' key={index} onClick={(e) => changeMessage(option)}>
-                            <Box sx={{ padding: '8px 16px', width: '100%', height: '100%', boxSizing: 'border-box' }}>
-                                <div className="tpl-item-name">{option.name}</div>
-                                <Box style={{ display: 'flex', marginTop: '2px' }}>
-                                    <img
-                                        className='tlp-avatar'
-                                        alt="Remy Sharp"
-                                        src={avatar}
-                                    />
-                                    <span className="tpl-item-owner">{option.owner}</span>
-                                    <span className="tpl-item-msg">{renderMessage(option.last_message?.payload)}</span>
-                                    <span className="tpl-item-time">{getTimeDiff(option.last_message?.time)}</span>
+                </div>
+                <ul className='tlp-list' ref={threadListDom} onScroll={handleScroll}>
+                    {renderDefaultList()}
+                    {threadList.length > 0 && threadList.map((option, index) => {
+                        return (
+                            <li className='tlp-item' key={index} onClick={(e) => openThreadPanel(option)}>
+                                <Box sx={{ padding: '8px 16px', width: '100%', height: '100%', boxSizing: 'border-box' }}>
+                                    <div className="tpl-item-name">{option.name}</div>
+                                    <Box style={{ display: 'flex', marginTop: '2px' }}>
+                                        <img
+                                            className='tlp-avatar'
+                                            alt="Remy Sharp"
+                                            src={avatar}
+                                        />
+                                        <span className="tpl-item-owner">{option.owner}</span>
+                                        <span className="tpl-item-msg">{renderMessage(option.last_message?.payload)}</span>
+                                        <span className="tpl-item-time">{getTimeDiff(option.last_message?.timestamp)}</span>
+                                    </Box>
                                 </Box>
-                            </Box>
-                        </li>
-                    );
-                })}
-            </ul>
-        </Box>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </Box>
+        </Popover>
     );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useContext } from "react";
+import React, { useState, useEffect,useContext,useRef } from "react";
 import { useSelector, useDispatch } from "../../../EaseApp/index";
 import { Menu, MenuItem, IconButton, Icon, InputBase } from "@material-ui/core";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -11,9 +11,9 @@ import i18next from "i18next";
 
 import MessageActions from "../../../redux/message";
 import SessionActions from "../../../redux/session";
-import GlobalPropsActions from "../../../redux/globalProps"
 import ThreadActions from "../../../redux/thread";
-import ThreadListPanel from "../../thread/threadList/index.js"
+import GlobalPropsActions from "../../../redux/globalProps";
+import ThreadListPanel from "../../thread/threadList/index.js";
 import { EaseChatContext } from "../index";
 
 import _ from 'lodash'
@@ -102,9 +102,15 @@ const MessageBar = () => {
   const handleSessionInfoClick = (e) => {
     setSessionEl(e.currentTarget);
   };
-  const openThreadList = ()=>{
-    dispatch(ThreadActions.setShowThreadList(true));
+  const [anchorEl, setAnchorEl] = useState(null);
+  const onClose = ()=>{
+    setAnchorEl(null);
+    dispatch(ThreadActions.setThreadListPanelDisplay(false));
   }
+  const openThreadList = (e)=>{
+    setAnchorEl(e.currentTarget)
+  }
+  const threadListAnchorEl = useRef(null);
 
   let userAvatars = {
     1: avatarIcon1,
@@ -118,6 +124,14 @@ const MessageBar = () => {
     setUsersInfoData(newwInfoData)
     setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 1)
   }, [to])
+  const threadListPanelDisplay = useSelector((state) => state.thread?.threadListPanelDisplay) || false;
+  useEffect(()=>{
+    if(threadListPanelDisplay){
+      setAnchorEl(threadListAnchorEl.current)
+    }else{
+      onClose()
+    }
+  },[threadListPanelDisplay])
 
   return (
     <div className={classes.root}>
@@ -129,7 +143,7 @@ const MessageBar = () => {
         {to}
       </Box>
       <Box position="static">
-        <IconButton className="iconfont icon" style={{display: chatType === "groupChat" ? "inline-flex" : "none"}} onClick={openThreadList}>
+        <IconButton className="iconfont icon" style={{display: chatType === "groupChat" ? "inline-flex" : "none"}} onClick={openThreadList} ref={threadListAnchorEl}>
           <img alt="" className={classes.threadIcon} src={threadIcon} />
         </IconButton>
         <IconButton
@@ -138,7 +152,7 @@ const MessageBar = () => {
         ></IconButton>
       </Box>
       {renderSessionInfoMenu()}
-      <ThreadListPanel/>
+      <ThreadListPanel anchorEl={anchorEl} onClose={onClose}/>
     </div>
   );
 };

@@ -12,6 +12,7 @@ import AudioOrVideoMessage from "./messages/audioOrVideoMessage";
 import TextMessage from "./messages/textMessage";
 import ThreadActions from "../../redux/thread"
 import i18next from "i18next";
+import ThreadNotify from "./messages/threadNotify";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -132,6 +133,10 @@ function MessageList({ messageList, showByselfAvatar }) {
                 } else if (msg.body.type === "recall") {
                   return (
                     <RetractedMessage message={msg} key={msg.id + index}/>
+                  );
+                }else if (msg.body.type === "threadNotify") {
+                  return (
+                    <ThreadNotify message={msg} key={msg.id + index}/>
                   );
                 } else {
                   return null;

@@ -4,90 +4,93 @@ import _ from "lodash";
 import AppDB from '../utils/AppDB';
 import MessageActions from "./message";
 import WebIM from "../utils/WebIM";
-
-function getThreadList(options,state,dispatch){
-    const cursor = state.threadListCursor;
-    let paramsData = {
-        groupId: options.groupId,
-        limit: options.limit,
-    }
-    if (options.isScroll) {
-        paramsData.cursor = cursor
-    } else {
-        dispatch(Creators.setThreadListEnd(false))
-    }
-    const getThreadFun = state.curGroupRole.role === 'member' ? 'getJoinedThreadsOfGroup' : 'getThreadsOfGroup';
-    WebIM.conn[getThreadFun](paramsData).then((res) => {
-        const threadList = res.entities;
-        if (threadList.length === 0) {
-            dispatch(Creators.setThreadListEnd(true));
-            return
-        }
-        dispatch(Creators.setThreadListCursor(res.properties.cursor))
-        let pArr = []
-        for(let i = 0;i<threadList.length;i++){
-            threadList[i].last_message = {}
-            pArr.push(AppDB.findLastMessage(threadList[i].id).then((msg) => {
-                threadList[i].last_message = msg
-            }))
-        }
-        Promise.all(pArr).then(()=>{
-            dispatch(Creators.setThreadList(threadList, options.isScroll))
-        })
-    })
-}
+import { message } from '../EaseChat/common/alert'
+import i18next from "i18next";
 
 /* ------------- Initial State ------------- */
 export const INITIAL_STATE = Immutable({
+    hasThreadEditPanel: false,
     threadPanelStates: false,//show thread panel
     threadList: [],
     threadListCursor: '',//Tag for request thread list
     threadListEnd: false,//Are all data requested
-    showThreadList: false,//Show the thread list
     isCreatingThread: false,//Whether it is creating thread
     currentThreadInfo: {},
-    curGroupRole:{},//currentGrouprole{groupId:groupId,role: ''}
+    curGroupRole: {},//currentGrouprole 'admin' 'member' 'owner'
+    threadListPanelDisplay: false,//show thread panel
 });
 
 /* ------------- Types and Action Creators ------------- */
 const { Types, Creators } = createActions({
     updateThreadStates: ["options"],
     setThreadList: ["threadList", "isScroll"],
-    setShowThreadList: ['status'],
     setIsCreatingThread: ['status'],
     setCurrentThreadInfo: ['message'],
     setThreadListCursor: ['cursor'],
     setThreadListEnd: ['status'],
     setCurGroupRole: ['options'],
-    getThreadsListOfGroup: (options) => {
-        return  (dispatch) => {
-            const rootState = uikit_store.getState()
-            const { username } = _.get(rootState, ['global', 'globalProps'])
-            const threadListEnd = _.get(rootState, ['thread', 'threadListEnd'])
-            if (threadListEnd) return
-            if(rootState.thread.curGroupRole.groupId === options.groupId){
-                getThreadList(options,rootState.thread,dispatch);
-                return
-            }
-            WebIM.conn.getGroupInfo({ groupId: options.groupId }).then(res => {
+    setHasThreadEditPanel: ['status'],
+    setThreadListPanelDisplay: ['status'],
+
+    getCurrentGroupRole: (options) => {
+        return (dispatch) => {
+            const { sessionType, sessionId } = options;
+            if (sessionType !== "groupChat") return
+            const groupId = sessionId;
+            const rootState = uikit_store.getState();
+            const { username } = _.get(rootState, ['global', 'globalProps']);
+            WebIM.conn.getGroupInfo({ groupId }).then(res => {
+                let role = 'member'
                 const data = res.data ? res.data[0] : {};
-                if (data.id === options.groupId && data.owner === username) {
-                    if(data.owner === username){
-                        dispatch(Creators.setCurGroupRole({groupId: options.groupId,role:'owner'}))
+                if (data.id === groupId && data.owner === username) {
+                    if (data.owner === username) {
+                        role = 'owner';
+                        dispatch(Creators.setCurGroupRole(role))
                     }
-                }else {
-                    WebIM.conn.getGroupAdmin({ groupId: options.groupId }).then((res) => {
-                        if(res.data.indexOf(username) > -1 ){
-                            dispatch(Creators.setCurGroupRole({groupId: options.groupId,role:'admin'}))
-                        }else{
-                            dispatch(Creators.setCurGroupRole({groupId: options.groupId,role:'member'}))
+                } else {
+                    WebIM.conn.getGroupAdmin({ groupId }).then((res) => {
+                        if (res.data.indexOf(username) > -1) {
+                            role = 'admin';
                         }
+                        dispatch(Creators.setCurGroupRole(role))
                     })
                 }
-                getThreadList(options,rootState.thread,dispatch)
-                
             })
-
+        }
+    },
+    getThreadsListOfGroup: (options) => {
+        return (dispatch) => {
+            const rootState = uikit_store.getState();
+            const { threadListEnd, curGroupRole, threadListCursor } = _.get(rootState, ['thread']);
+            if (threadListEnd) return
+            const getThreadFun = curGroupRole === 'member' ? 'getJoinedThreadsOfGroup' : 'getThreadsOfGroup';
+            let paramsData = {
+                groupId: options.groupId,
+                limit: options.limit,
+            }
+            if (options.isScroll) {
+                paramsData.cursor = threadListCursor
+            }
+            WebIM.conn[getThreadFun](paramsData).then((res) => {
+                const threadList = res.entities;
+                if (threadList.length === 0) {
+                    dispatch(Creators.setThreadListEnd(true));
+                    return
+                }
+                dispatch(Creators.setThreadListCursor(res.properties.cursor))
+                let threadIdList = [];
+                threadList.forEach((item) => {
+                    threadIdList.push(item.id)
+                })
+                WebIM.conn.getThreadLastMsg({ threadIds: threadIdList }).then((res) => {
+                    const msgList = res.entities;
+                    threadList.forEach((item) => {
+                        let found = msgList.find(msgInfo => item.id === msgInfo.thread_id);
+                        item.last_message = found && found.last_msg ? found.last_msg : {}
+                    })
+                    dispatch(Creators.setThreadList(threadList, options.isScroll))
+                })
+            })
         }
     },
     updateThreadInfo: (options) => {
@@ -95,13 +98,15 @@ const { Types, Creators } = createActions({
             const rootState = uikit_store.getState();
             const { currentThreadInfo } = rootState.thread;
             let messageList = _.get(rootState, ['message', 'groupChat', options.muc_parent_id]).asMutable({ deep: true });
+            const { operation, msg_parent_id } = options
             messageList.forEach((msg) => {
-                if (msg.id === options.msg_parent_id && !msg.bySelf || msg.mid === options.msg_parent_id && msg.bySelf) {
-                    if(msg.thread_overview && msg.thread_overview.operation === options.operation && msg.thread_overview.timestamp>options.timestamp) return
-                    if (options.operation === 'delete') {//delete thread
+                if (msg.id === msg_parent_id && !msg.bySelf || msg.mid === msg_parent_id && msg.bySelf) {
+                    if (msg.thread_overview && msg.thread_overview.operation === operation && msg.thread_overview.timestamp > options.timestamp) return
+                    if (operation === 'delete') {//delete thread
                         msg.thread_overview = undefined;
-                        if (options.msg_parent_id === currentThreadInfo.thread_overview.id) {
+                        if (currentThreadInfo.thread_overview?.id === options.id) {
                             dispatch(Creators.updateThreadStates(false))
+                            message.warn(i18next.t('The thread has been disbanded'))
                         }
                     } else {//other operation
                         if (!msg.thread_overview || JSON.stringify(msg.thread_overview) === "{}") {//create
@@ -112,85 +117,78 @@ const { Types, Creators } = createActions({
                     }
                     //update Local database
                     AppDB.updateMessageThread(msg.id, msg.thread_overview)
-                    //update currentThreadInfo
-                    dispatch(Creators.setCurrentThreadInfo(msg))
+                    //update currentThreadInfo when thread created(update) by self or others
+                    if ((operation === 'create' || operation === 'update') && currentThreadInfo.mid === options.msg_parent_id || currentThreadInfo.id === options.msg_parent_id) {
+                        dispatch(Creators.setCurrentThreadInfo(msg))
+                        //change edit status of thread
+                        dispatch(Creators.setIsCreatingThread(false));
+                    }
                 }
             })
-            dispatch(MessageActions.updateThreadDetails('groupChat', options.muc_parent_id, messageList))
+            dispatch(MessageActions.updateThreadDetails('groupChat', options, messageList));
+
             //update threadList
             //options.operation: 'create'，'update'，'delete'，'update_msg'，'recall_msg'
             const { username } = _.get(rootState, ['global', 'globalProps'])
-            const threadList = _.get(rootState,['thread','threadList'], Immutable([])).asMutable()
-            switch(options.operation){
-                case 'create':{
-                    if(options.from === username && threadList.indexOf(options.id) < 0){//user created a thread
-                        threadList.push({
-                            created: options.create_timestamp,
-                            groupId: options.muc_parent_id,
-                            id: options.id,
-                            msgId: options.msg_parent_id,
-                            name: options.name,
-                            owner: options.from
-                        })
-                        dispatch(Creators.setThreadList(threadList))
+            const threadList = _.get(rootState, ['thread', 'threadList'], Immutable([])).asMutable()
+            let found = _.find(threadList, { id: options.id });
+            if (!found) return;
+            let newThread = {};
+            switch (operation) {
+                case 'create': {
+                    break;
+                }
+                case 'update': {
+                    newThread = {
+                        ...found,
+                        name: options.name
                     }
                     break;
                 }
-                case 'update':{
-                    let found = _.find(threadList, { id: options.id });
-                    if(found){
-                        let newThread = {
-                            ...found,
-                            name: options.name
-                        }
-                        threadList.splice(threadList.indexOf(found), 1, newThread)
-                        dispatch(Creators.setThreadList(threadList))
+                case 'delete': {
+                    newThread = {}
+                    break;
+                }
+                case 'update_msg': {
+                    newThread = {
+                        ...found,
+                        last_message: options.last_message
                     }
                     break;
                 }
-                case 'delete':{
-                    if(currentThreadInfo.thread_overview?.id === options.id){
-                        alert("delete thread")
-                        dispatch(Creators.threadPanelStates(false))
-                    }
-                    let found = _.find(threadList, { id: options.id });
-                    if(found){
-                        threadList.splice(threadList.indexOf(found), 1)
-                        rdispatch(Creators.setThreadList(threadList))
-                    }
-                    break;
-                }
-                case 'update_msg':{
-                    let found = _.find(threadList, { id: options.id });
-                    if(found){
-                        let newThread = {
+                case 'recall_msg': {
+                    if (JSON.stringify(options.last_message) === "{}") {
+                        newThread = {
                             ...found,
                             last_message: options.last_message
                         }
-                        threadList.splice(threadList.indexOf(found), 1,newThread)
-                        dispatch(Creators.setThreadList(threadList))
-                    }
-                    break;
-                }
-                case 'recall_msg':{
-                    if(JSON.stringify(options.last_message) === "{}"){
-                        let found = _.find(threadList, { id: options.id });
-                        if(found){
-                            let newThread = {
-                                ...found,
-                                last_message: options.last_message
-                            }
-                            threadList.splice(threadList.indexOf(found), 1,newThread)
-                            dispatch(Creators.setThreadList(threadList))
-                        } 
+                    } else {
+                        newThread = found
                     }
                     break;
                 }
                 default:
                     break;
             }
+            if (JSON.stringify(newThread) === '{}') {
+                threadList.splice(threadList.indexOf(found), 1)
+                dispatch(Creators.setThreadList(threadList))
+            } else if (JSON.stringify(newThread) !== '{}') {
+                threadList.splice(threadList.indexOf(found), 1, newThread)
+                dispatch(Creators.setThreadList(threadList))
+            }
         }
     },
+    //thread member received changed
+    updateaThreadMember: (msg) => {
+        return (dispatch) => {
+            const rootState = uikit_store.getState();
+            const { currentThreadInfo } = rootState.thread;
+            if (msg.type === 'threadKick' && currentThreadInfo.thread_overview?.id === msg.threadId) {
+                dispatch(Creators.updateThreadStates(false))
+            }
+        }
+    }
 });
 
 
@@ -215,9 +213,6 @@ export const setThreadList = (state, { threadList, isScroll }) => {
     }
     return state
 }
-export const setShowThreadList = (state, { status }) => {
-    return state.merge({ showThreadList: status })
-}
 export const setIsCreatingThread = (state, { status }) => {
     return state.merge({ isCreatingThread: status })
 }
@@ -233,18 +228,25 @@ export const setThreadListEnd = (state, { status }) => {
 export const setCurGroupRole = (state, { options }) => {
     return state = state.setIn(['curGroupRole'], options)
 }
+export const setHasThreadEditPanel = (state, { status }) => {
+    return state = state.setIn(['hasThreadEditPanel'], status)
+}
+export const setThreadListPanelDisplay = (state, { status }) => {
+    return state = state.setIn(['threadListPanelDisplay'], status)
+}
 
 
 /* ------------- Hookup Reducers To Types ------------- */
 export const threadReducer = createReducer(INITIAL_STATE, {
     [Types.UPDATE_THREAD_STATES]: updateThreadStates,
     [Types.SET_THREAD_LIST]: setThreadList,
-    [Types.SET_SHOW_THREAD_LIST]: setShowThreadList,
     [Types.SET_IS_CREATING_THREAD]: setIsCreatingThread,
     [Types.SET_CURRENT_THREAD_INFO]: setCurrentThreadInfo,
     [Types.SET_THREAD_LIST_CURSOR]: setThreadListCursor,
     [Types.SET_THREAD_LIST_END]: setThreadListEnd,
-    [Types.SET_CUR_GROUP_ROLE]: setCurGroupRole
+    [Types.SET_CUR_GROUP_ROLE]: setCurGroupRole,
+    [Types.SET_HAS_THREAD_EDIT_PANEL]: setHasThreadEditPanel,
+    [Types.SET_THREAD_LIST_PANEL_DISPLAY]: setThreadListPanelDisplay
 });
 
 export default Creators;

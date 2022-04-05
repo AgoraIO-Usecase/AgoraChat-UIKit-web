@@ -119,34 +119,7 @@ export default function createlistener(props) {
     //thread member received changed
     onThreadChange:(msg) =>{
       console.log("=======thread member received changed",msg)
-      switch(msg.type){
-        case 'threadCreate':
-          console.log("threadCreate")
-          break;
-        case 'threadDestroy':
-          console.log("threadDestroy")
-          break;
-        case 'threadJoin':
-          console.log("threadJoin")
-          break;
-        case 'threadLeave':
-          console.log("threadLeave")
-          break;
-        case 'threadKick':
-          console.log("threadKick")
-          break;
-        case 'threadNameUpdate':
-          console.log("threadNameUpdate")
-          break;
-        case 'threadPresence':
-          console.log("threadPresence")
-          break;
-        case 'threadAbsence':
-          console.log("threadAbsence")
-          break;
-      default:
-          console.log('error')
-      }
+      store.dispatch(ThreadActions.updateaThreadMember(msg));
     },
 	onReactionMessage: (message) => {
 		console.log("onReactionMessage", message);

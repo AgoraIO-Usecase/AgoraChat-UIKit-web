@@ -1,7 +1,4 @@
 .threadListPanel {
-    position:absolute;
-    top: 0;
-    right: 132px;
     width: 540px;
     overflow: hidden;
     background: #F0F1F2;
@@ -24,6 +21,7 @@
     display: flex;
     padding: 0 4px 0 24px;
     height: 60px;
+    line-height: 60px;
     background: #fff;
     justify-content: space-between;
 }
@@ -59,6 +57,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    text-align: left;
 }
 .tlp-item:hover{
     background: #F9FAFC;

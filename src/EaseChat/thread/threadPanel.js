@@ -7,13 +7,11 @@ import ThreadMessageList from "./threadMessageList";
 import { renderTimeWithDate } from "../../utils/index";
 import { useSelector, useDispatch } from "../../EaseApp/index";
 import deleteIcon from '../../common/images/delete.png'
-import ThreadActions from "../../redux/thread"
 import MessageActions from "../../redux/message"
 import { Box } from "@material-ui/core";
 import { EaseChatContext } from "../chat/index";
 import _ from "lodash";
 import avatar from "../../common/icons/avatar1.png";
-import emptyMsg from "../../common/images/noOriginalMsg.png";
 import "../../i18n";
 import i18next from "i18next";
 import { emoji } from "../../common/emoji";
@@ -54,6 +52,7 @@ const useStyles = makeStyles((theme) => {
             fontSize: '18px',
             fontWeight: '700',
             width: '100%',
+            textAlign: 'left',
         },
         threadNameClear: {
             position: 'absolute',
@@ -126,6 +125,7 @@ const useStyles = makeStyles((theme) => {
             lineHeight: '44px',
             fontWeight: '700',
             fontSize: '18px',
+            textAlign: 'left',
         },
         threadDesc: {
             lineHeight: '20px',
@@ -144,15 +144,15 @@ const useStyles = makeStyles((theme) => {
             border: 'none',
             borderBottom: '1px solid #e6e6e6',
         },
-        emptyMsg:{
+        emptyMsg: {
+            width: '100%',
             marginTop: '15px',
-            paddingLeft: '36px',
             height: '28px',
             lineHeight: '28px',
             color: '#999',
             fontSize: '16px',
             fontWeight: '600',
-            background: `url(${emptyMsg}) 0 center no-repeat`,
+            textAlign: 'left',
         }
 
     };
@@ -185,8 +185,8 @@ const ThreadPanel = (props) => {
     }
     const showThreadMessage = () => {
         return (<Box>
-            <div className={classes.threadName}>{currentMessage?.thread?.name || ''}</div>
-            <div className={classes.threadDesc}>{i18next.t('Started by')} <span className={classes.threadStartMember}>{currentMessage?.thread?.from || currentMessage?.thread?.owner||''}</span></div>
+            <div className={classes.threadName}>{currentMessage?.thread_overview?.name || ''}</div>
+            <div className={classes.threadDesc}>{i18next.t('Started by')} <span className={classes.threadStartMember}>{currentMessage?.thread_overview?.from || currentMessage?.thread_overview?.owner || ''}</span></div>
         </Box>)
     }
     const renderMessage = (body) => {
@@ -223,7 +223,7 @@ const ThreadPanel = (props) => {
                 const v = emoji.map[match[1]];
                 rnTxt.push(
                     <img
-                        key={v + Math.floor(Math.random()*99 + 1)}
+                        key={v + Math.floor(Math.random() * 99 + 1)}
                         alt={v}
                         src={require(`../../common/faces/${v}`).default}
                         width={20}
@@ -262,14 +262,14 @@ const ThreadPanel = (props) => {
     const renderEmptyMsg = () => {
         return (
             <Box>
-               <div className={classes.emptyMsg}>{i18next.t('Sorry,unable to load original message')}</div>
-               {isCreatingThread ? null : <hr className={classes.split} />}
+                <div className={classes.emptyMsg}>{i18next.t('Sorry,unable to load original message')}</div>
+                {isCreatingThread ? null : <hr className={classes.split} />}
             </Box>
         )
     }
-    
+
     let isThread = true;
-    
+
     const [isPullingDown, setIsPullingDown] = useState(false);
     const threadHasHistory = useSelector(state => state.message.threadHasHistory);
     const messageList =
@@ -279,7 +279,7 @@ const ThreadPanel = (props) => {
         }) || [];
     const scrollThreadEl = useRef(null);
     useEffect(() => {
-        if(currentMessage?.thread_overview?.id){
+        if (currentMessage?.thread_overview?.id) {
             dispatch(MessageActions.setThreadHasHistory(true));
             setThreadName('');
             setIsPullingDown(false)
@@ -292,13 +292,13 @@ const ThreadPanel = (props) => {
     useEffect(() => {
         const dom = scrollThreadEl.current;
         if (!ReactDOM.findDOMNode(dom)) return;
-        if (!threadHasHistory && messageList.length!==0 && dom.scrollHeight >= (dom.scrollTop + dom.clientHeight)) {//receive new message 
+        if (!threadHasHistory && messageList.length !== 0 && dom.scrollHeight >= (dom.scrollTop + dom.clientHeight)) {//receive new message 
             dom.scrollTop = dom.scrollHeight;
         }
     }, [messageList.length])
 
     const handleScroll = (e) => {
-        if (threadHasHistory && e.target.scrollTop!==0 && e.target.scrollHeight === (e.target.scrollTop + e.target.clientHeight)) {
+        if (threadHasHistory && e.target.scrollTop !== 0 && e.target.scrollHeight === (e.target.scrollTop + e.target.clientHeight)) {
             if (!isPullingDown) {
                 setIsPullingDown(true);
                 setTimeout(() => {
@@ -308,7 +308,7 @@ const ThreadPanel = (props) => {
             }
         }
     };
-    const cb = ()=>{
+    const cb = () => {
         setIsPullingDown(false)
     }
     return (
@@ -316,7 +316,7 @@ const ThreadPanel = (props) => {
             <ThreadBar />
             <Box ref={scrollThreadEl} className={classes.chat} onScroll={handleScroll}>
                 {isCreatingThread ? createThread() : showThreadMessage()}
-                {!currentMessage.id && !currentMessage.mid ? renderEmptyMsg() :renderOriginalMsg()}
+                {!currentMessage.id && !currentMessage.mid ? renderEmptyMsg() : renderOriginalMsg()}
                 <ThreadMessageList
                     messageList={messageList}
                     showByselfAvatar={showByselfAvatar}

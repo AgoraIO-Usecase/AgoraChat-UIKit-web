@@ -134,7 +134,7 @@ export default EaseChatProvider;
 EaseChatProvider.propTypes = {
 	appkey: PropTypes.string,
 	username: PropTypes.string,
-	// agoraToken: PropTypes.string,
+	agoraToken: PropTypes.string,
   password: PropTypes.string,
 	chatType: PropTypes.string,
 	to: PropTypes.string,
@@ -150,8 +150,6 @@ EaseChatProvider.propTypes = {
   isShowReaction: PropTypes.bool,
   customMessageList:PropTypes.array,
   customMessageClick:PropTypes.func,
-  hasThreadEditPanel: PropTypes.bool,
-  onEditThreadPanel:PropTypes.func
 };
 
 EaseChatProvider.defaultProps = {

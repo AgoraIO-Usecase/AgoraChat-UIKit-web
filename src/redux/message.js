@@ -35,13 +35,12 @@ const { Types, Creators } = createActions({
     clearUnread: ["chatType", "sessionId"],
     updateMessages: ["chatType", "sessionId", "messages"],
     updateMessageMid: ['id', 'mid', 'to'],
-    updateThreadDetails: ['chatType','groupId','messageList'],
+    updateThreadDetails: ['chatType','options','messageList'],
     updateThreadMessage: ['to','messageList','isScroll'],
 	addReactions: ["message", "reaction"],
 	deleteReaction: ["message", "reaction"],
     setThreadHistoryStart:['start'],
     setThreadHasHistory: ['status'],
-    
 
     // -async-
     sendTxtMessage: (to, chatType, message = {}, isThread=false) => {
@@ -618,8 +617,24 @@ export const updateMessageMid = (state, { id, mid,to }) => {
     }
     return state.setIn(['byMid', mid], { id })
 }
-export const updateThreadDetails = (state, {chatType,groupId,messageList}) => {
-    return state.setIn([chatType, groupId], messageList)
+export const updateThreadDetails = (state, {chatType,options,messageList}) => {
+    const {operation,muc_parent_id} = options;
+    if(operation === 'create'){
+        const message = {
+            ...options,
+            isThread:false,
+            error:false,
+            chatType,
+            to:muc_parent_id,
+            time:options.create_timestamp,
+            body:{
+                type: 'threadNotify',
+            }
+        }
+        messageList.push(message);
+        AppDB.addMessage(message)
+    }
+    return state = state.setIn([chatType, muc_parent_id], messageList)
 }
 export const addReactions = (state, { message, reaction }) => {
 	let { id, to, from } = message;
