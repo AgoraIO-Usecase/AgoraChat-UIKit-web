@@ -7,7 +7,6 @@ import AudioPlayer from "./audioPlayer/audioPlayer";
 import { EaseChatContext } from "../index";
 import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
-import ReactionInfo from "../reaction/reactionInfo";
 
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
@@ -111,7 +110,6 @@ function AudioMessage({ message, showByselfAvatar }) {
 	const audioRef = useRef(null);
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
-	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
 	const reactionMsg = message?.reactions || [];
 	const play = () => {
 		setIsPlaying(true);
@@ -120,10 +118,6 @@ function AudioMessage({ message, showByselfAvatar }) {
 		setTimeout(() => {
 			setIsPlaying(false);
 		}, time + 500);
-	};
-
-	const handleReaction = (e) => {
-		setReactionInfoVisible(e.currentTarget);
 	};
 
 	return (
@@ -162,7 +156,6 @@ function AudioMessage({ message, showByselfAvatar }) {
 				{reactionMsg.length > 0 && (
 					<div
 						className={classes.reactionBox}
-						onClick={handleReaction}
 					>
 						<RenderReactions message={message} />
 					</div>
@@ -171,11 +164,6 @@ function AudioMessage({ message, showByselfAvatar }) {
 
 			<div className={classes.time}>{renderTime(message.time)}</div>
 
-			<ReactionInfo
-				anchorEl={reactionInfoVisible}
-				onClose={() => setReactionInfoVisible(null)}
-				message={message}
-			/>
 		</li>
 	);
 }

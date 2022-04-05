@@ -134,9 +134,7 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 		2: avatarIcon2,
 		3: avatarIcon3,
 	};
-
 	
-
 	const handleChange = (event, newValue) => {
 		setValue(newValue);
 	};
@@ -221,6 +219,7 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 							className={classes.root}
 						>
 							{reactionMsg.map((item, i) => {
+								if (item.count === 0) return
 								let label = (
 									<div className={classes.reactionNumLabel}>
 										{rnReactionEmoji(item.reaction)}{" "}

@@ -9,7 +9,6 @@ import { EaseChatContext } from "../index";
 
 import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
-import ReactionInfo from "../reaction/reactionInfo";
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
     padding: "10px 0",
@@ -122,7 +121,6 @@ function AudioOrVideoMessage({ message, showByselfAvatar }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [state, setState] = useState(initialState);
   const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
-  const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
   const reactionMsg = message?.reactions || [];
   const handleClose = () => {
     setState(initialState);
@@ -149,9 +147,6 @@ function AudioOrVideoMessage({ message, showByselfAvatar }) {
     handleClose();
   };
 
-  const handleReaction = (e) => {
-    setReactionInfoVisible(e.currentTarget);
-  };
   return (
     <li
       className={classes.pulldownListItem}
@@ -186,7 +181,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar }) {
               )}
             </div>
             {reactionMsg.length > 0 && (
-              <div className={classes.reactionBox} onClick={handleReaction}>
+              <div className={classes.reactionBox}>
                 <RenderReactions message={message} />
               </div>
             )}
@@ -239,11 +234,6 @@ function AudioOrVideoMessage({ message, showByselfAvatar }) {
             );
           })}
       </Menu>
-      <ReactionInfo
-        anchorEl={reactionInfoVisible}
-        onClose={() => setReactionInfoVisible(null)}
-        message={message}
-      />
     </li>
   );
 }
