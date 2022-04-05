@@ -9,7 +9,6 @@ import { EaseChatContext } from "../index";
 
 import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
-import ReactionInfo from "../reaction/reactionInfo";
 
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
@@ -132,7 +131,6 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
   const classes = useStyles({ bySelf: message.bySelf });
   const [state, setState] = useState(initialState);
   const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
-  const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
   const reactionMsg = message?.reactions || [];
   const handleClose = () => {
     setState(initialState);
@@ -153,9 +151,6 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
     handleClose();
   };
 
-  const handleReaction = (e) => {
-    setReactionInfoVisible(e.currentTarget);
-  };
   return (
     <li
       className={classes.pulldownListItem}
@@ -197,7 +192,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
           )}
         </div>
         {reactionMsg.length > 0 && (
-          <div className={classes.reactionBox} onClick={handleReaction}>
+          <div className={classes.reactionBox}>
             <RenderReactions message={message} />
           </div>
         )}
@@ -227,12 +222,6 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
             );
           })}
       </Menu>
-
-      <ReactionInfo
-        anchorEl={reactionInfoVisible}
-        onClose={() => setReactionInfoVisible(null)}
-        message={message}
-      />
     </li>
   );
 }

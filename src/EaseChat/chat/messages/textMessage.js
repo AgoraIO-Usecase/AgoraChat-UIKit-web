@@ -11,7 +11,6 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 
 import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
-import ReactionInfo from "../reaction/reactionInfo";
 import { EaseChatContext } from "../index";
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
@@ -112,7 +111,6 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 		chatType: message.chatType,
 		rnReactions: reactionMsg.length > 1,
 	});
-	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
 	const [menuState, setMenuState] = useState(initialState);
   	const [copyMsgVal,setCopyMsgVal] = useState('')
 	
@@ -169,9 +167,6 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 		return rnTxt;
 	};
 
-	const handleReaction = (e) => {
-		setReactionInfoVisible(e.currentTarget);
-	};
 	const sentStatus = () => {
 		return (
 			<div>
@@ -227,7 +222,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
           {renderTxt(message.body.msg)}
 
           {reactionMsg.length > 0 && (
-            <div className={classes.reactionBox} onClick={handleReaction}>
+            <div className={classes.reactionBox}>
               <RenderReactions message={message} />
             </div>
           )}
@@ -276,13 +271,13 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
           })}
       </Menu>
 
-      {reactionMsg.length > 0 && (
+      {/* {reactionMsg.length > 0 && (
         <ReactionInfo
           anchorEl={reactionInfoVisible}
           onClose={() => setReactionInfoVisible(null)}
           message={message}
         />
-      )}
+      )} */}
     </li>
   );
 }
