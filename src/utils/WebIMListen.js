@@ -112,13 +112,13 @@ export default function createlistener(props) {
     },
     //thread notify
     onThreadUpdate:(msg) =>{
-      console.log("listener====msg:",msg)
+      console.log("notify====msg:",msg)
       store.dispatch(ThreadActions.updateThreadInfo(msg));
       //msg.type: 'create'，'update'，'delete'，'update_msg'，'recall_msg'
     },
     //thread member received changed
     onThreadChange:(msg) =>{
-      console.log("=======thread member received changed",msg)
+      console.log("muc====msg:",msg)
       store.dispatch(ThreadActions.updateaThreadMember(msg));
     },
 	onReactionMessage: (message) => {

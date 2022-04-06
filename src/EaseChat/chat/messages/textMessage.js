@@ -206,7 +206,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	const sentStatus = () => {
 		return (
 			<div>
-				{message.bySelf && (
+				{message.bySelf && !isThreadPanel && (
 					<MessageStatus
 						status={message.status}
 						style={{

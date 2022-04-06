@@ -86,8 +86,10 @@ const { Types, Creators } = createActions({
                     const msgList = res.entities;
                     threadList.forEach((item) => {
                         let found = msgList.find(msgInfo => item.id === msgInfo.thread_id);
-                        item.last_message = found && found.last_msg ? found.last_msg : {}
+                        item.last_message = found && found.last_message ? found.last_message : {}
                     })
+                    dispatch(Creators.setThreadList(threadList, options.isScroll))
+                }).catch(()=>{
                     dispatch(Creators.setThreadList(threadList, options.isScroll))
                 })
             })
@@ -100,7 +102,7 @@ const { Types, Creators } = createActions({
             let messageList = _.get(rootState, ['message', 'groupChat', options.muc_parent_id]).asMutable({ deep: true });
             const { operation, msg_parent_id } = options
             messageList.forEach((msg) => {
-                if (msg.id === msg_parent_id && !msg.bySelf || msg.mid === msg_parent_id && msg.bySelf) {
+                if (msg.id === msg_parent_id || msg.mid === msg_parent_id) {
                     if (msg.thread_overview && msg.thread_overview.operation === operation && msg.thread_overview.timestamp > options.timestamp) return
                     if (operation === 'delete') {//delete thread
                         msg.thread_overview = undefined;
@@ -129,7 +131,6 @@ const { Types, Creators } = createActions({
 
             //update threadList
             //options.operation: 'create'，'update'，'delete'，'update_msg'，'recall_msg'
-            const { username } = _.get(rootState, ['global', 'globalProps'])
             const threadList = _.get(rootState, ['thread', 'threadList'], Immutable([])).asMutable()
             let found = _.find(threadList, { id: options.id });
             if (!found) return;

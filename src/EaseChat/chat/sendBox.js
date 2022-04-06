@@ -124,7 +124,7 @@ function SendBox(props) {
       }
       const options = {
         name: props.threadName.replace(/(^\s*)|(\s*$)/g, ""),
-        msgId: currentThreadInfo.bySelf ? currentThreadInfo.mid: currentThreadInfo.id,
+        msgId: currentThreadInfo.bySelf&&currentThreadInfo.mid ? currentThreadInfo.mid: currentThreadInfo.id,
         groupId: currentThreadInfo.to,
       }
       WebIM.conn.createThread(options).then(res=>{
