@@ -75,12 +75,12 @@ const ReactionIcon = ({ anchorEl, onClose, onSelected, message }) => {
 	const isStatus = (v) => {
 		reactionMsg.length > 0 &&
 			reactionMsg.forEach((val) => {
-				let { reaction, userList } = val;
+				let { reaction, userList, isAddedBySelf } = val;
 				if (
 					reactionEmoji.map[reaction]?.includes(v) &&
 					userList.includes(currentLoginId)
 				) {
-					newStatus[v] = true;
+					newStatus[v] = isAddedBySelf;
 				}
 			});
 		return newStatus[v];
@@ -146,7 +146,7 @@ const ReactionIcon = ({ anchorEl, onClose, onSelected, message }) => {
 				<div className={classes.text}>Frequently</div>
 				<div
 					className={classes.defaultEmojiBox}
-					// onClick={handleEmojiClick}
+				// onClick={handleEmojiClick}
 				>
 					{renderReactions("default")}
 				</div>

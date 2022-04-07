@@ -28,7 +28,7 @@ export const INITIAL_STATE = Immutable({
 const { Types, Creators } = createActions({
 	addMessage: ["message", "messageType"],
 	deleteMessage: ["msgId", "to", "chatType"],
-	updateMessageStatus: ["message", "status"],
+	updateMessageStatus: ["message", "status", "localId"],
 	clearUnread: ["chatType", "sessionId"],
 	updateMessages: ["chatType", "sessionId", "messages"],
 	updateMessageMid: ["id", "mid"],
@@ -47,8 +47,9 @@ const { Types, Creators } = createActions({
 				msg,
 				chatType,
 				ext: message.ext,
-				success: () => {
-					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
+				success: (localId, serverId) => {
+					formatMsg.id = serverId
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
 				},
 				fail: (e) => {
 					console.error("Send private text error", e);
@@ -90,6 +91,10 @@ const { Types, Creators } = createActions({
 					dispatch(Creators.updateMessages(chatType, to, formatMsg));
 					fileEl.current.value = "";
 				},
+				success: (localId, serverId) => {
+					formatMsg.id = serverId
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
+				},
 				fail: function () {
 					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
 					fileEl.current.value = "";
@@ -130,6 +135,10 @@ const { Types, Creators } = createActions({
 					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
 					imageEl.current.value = "";
 				},
+				success: (localId, serverId) => {
+					formatMsg.id = serverId
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
+				},
 				fail: function () {
 					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
 					imageEl.current.value = "";
@@ -139,58 +148,61 @@ const { Types, Creators } = createActions({
 			dispatch(Creators.addMessage(formatMsg, "img"));
 		};
 	},
-
-	 sendVideoMessage: (to, chatType, file,videoEl) => {
-        return (dispatch, getState) => {
-            if (file.data.size > (1024 * 1024 * 10)) {
-                message.error(i18next.t('The video exceeds the upper limit'))
-                return
-            }
-            let allowType = {
-                'mp4': true,
-                'wmv': true,
-                'avi': true,
-                'rmvb': true,
-                'mkv': true
-            };
-            if (file.filetype.toLowerCase() in allowType) {
-                const formatMsg = formatLocalMessage(to, chatType, file, 'video')
-                const { id } = formatMsg
-                const msgObj = new WebIM.message('video', id)
-                msgObj.set({
-                    ext: {
-                        file_length: file.data.size,
-                        file_type: file.data.type,
-                    },
-                    file: file,
-                    length:file.length,
-                    file_length:file.data.size,
-                    to,
-                    chatType,
-                    onFileUploadError: function (error) {
-                        formatMsg.status = 'fail'
-                        dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
-                        videoEl.current.value =''
-                    },
-                    onFileUploadComplete: function (data) {
-                        let url = data.uri + '/' + data.entities[0].uuid
-                        formatMsg.url = url
-                        formatMsg.body.url = url
-                        formatMsg.status = 'sent'
-                        dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
-                        dispatch(Creators.updateMessages(chatType, to, formatMsg))
-                        videoEl.current.value =''
-                    },
-                    fail: function () {
-                        dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
-                        videoEl.current.value =''
-                    },
-                })
-                WebIM.conn.send(msgObj.body)
-                dispatch(Creators.addMessage(formatMsg, 'video'))
-            }
-        }
-    },
+	sendVideoMessage: (to, chatType, file, videoEl) => {
+		return (dispatch, getState) => {
+			if (file.data.size > (1024 * 1024 * 10)) {
+				message.error(i18next.t('The video exceeds the upper limit'))
+				return
+			}
+			let allowType = {
+				'mp4': true,
+				'wmv': true,
+				'avi': true,
+				'rmvb': true,
+				'mkv': true
+			};
+			if (file.filetype.toLowerCase() in allowType) {
+				const formatMsg = formatLocalMessage(to, chatType, file, 'video')
+				const { id } = formatMsg
+				const msgObj = new WebIM.message('video', id)
+				msgObj.set({
+					ext: {
+						file_length: file.data.size,
+						file_type: file.data.type,
+					},
+					file: file,
+					length: file.length,
+					file_length: file.data.size,
+					to,
+					chatType,
+					onFileUploadError: function (error) {
+						formatMsg.status = 'fail'
+						dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
+						videoEl.current.value = ''
+					},
+					onFileUploadComplete: function (data) {
+						let url = data.uri + '/' + data.entities[0].uuid
+						formatMsg.url = url
+						formatMsg.body.url = url
+						formatMsg.status = 'sent'
+						dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
+						dispatch(Creators.updateMessages(chatType, to, formatMsg))
+						videoEl.current.value = ''
+					},
+					success: (localId, serverId) => {
+						formatMsg.id = serverId
+						dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
+					},
+					fail: function () {
+						dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
+						videoEl.current.value = ''
+					},
+				})
+				WebIM.conn.send(msgObj.body)
+				dispatch(Creators.addMessage(formatMsg, 'video'))
+			}
+		}
+	},
 
 	sendRecorder: (to, chatType, file) => {
 		return (dispatch, getState) => {
@@ -225,6 +237,10 @@ const { Types, Creators } = createActions({
 					formatMsg.status = "sent";
 					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
 					dispatch(Creators.updateMessages(chatType, to, formatMsg));
+				},
+				success: (localId, serverId) => {
+					formatMsg.id = serverId
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
 				},
 				fail: function () {
 					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
@@ -395,8 +411,8 @@ export const addMessage = (state, { message, messageType = "txt" }) => {
 	return state;
 };
 
-export const updateMessageStatus = (state, { message, status = "" }) => {
-	let { id } = message;
+export const updateMessageStatus = (state, { message, status = "", localId }) => {
+	let id = localId;
 	if (!id) id = state.getIn(["byMid", message.mid, "id"]);
 	let mids = state.getIn(["byMid"]) || {};
 	let mid;
@@ -419,7 +435,7 @@ export const updateMessageStatus = (state, { message, status = "" }) => {
 		};
 		messages.splice(messages.indexOf(found), 1, msg);
 		setTimeout(() => {
-			AppDB.updateMessageStatus(id, status).then((res) => {});
+			AppDB.updateMessageStatus(id, status).then((res) => { });
 		}, 1000);
 
 		return state.setIn([chatType, chatId], messages);
@@ -496,8 +512,8 @@ export const updateMessages = (state, { chatType, sessionId, messages }) => {
 
 export const updateMessageMid = (state, { id, mid }) => {
 	const byId = state.getIn(["byId", id]);
+	const { chatType, chatId } = byId;
 	if (!_.isEmpty(byId)) {
-		const { chatType, chatId } = byId;
 		let messages = state
 			.getIn([chatType, chatId])
 			.asMutable({ deep: true });
@@ -513,12 +529,16 @@ export const updateMessageMid = (state, { id, mid }) => {
 	setTimeout(() => {
 		AppDB.updateMessageMid(mid, id);
 	}, 500);
-	return state.setIn(["byMid", mid], { id });
+	state = state.setIn(["byMid", mid], { id });
+	state = state.setIn(["byId", mid], { chatType, chatId })
+	return state;
 };
 
 export const updateReaction = (state, { message, reaction }) => {
-	let { messageId, from,to,reactions } = message;
-	let addReactionUser = WebIM.conn.context.userId === from ? to : from;
+	let { messageId, from, to, reactions } = message;
+	let newReactionsData = reactions
+	let currentLoginUser = WebIM.conn.context.userId;
+	let addReactionUser = currentLoginUser === from ? to : from;
 	if (!messageId) messageId = state.getIn(["byMid", message.mid, "messageId"])
 	let mids = state.getIn(["byMid"]) || {};
 	let mid;
@@ -528,17 +548,57 @@ export const updateReaction = (state, { message, reaction }) => {
 		}
 	}
 	const byId = state.getIn(["byId", messageId]);
+
+	function isAdded(reactionOp) {
+		let added = null
+		reactionOp.forEach((item) => {
+			if (item.reactionType === "create") {
+				if (item.operator === currentLoginUser) {
+					added = true
+				}
+			} else {
+				if (item.operator === currentLoginUser) {
+					added = false
+				}
+			}
+		})
+		return added
+	}
+
 	if (!_.isEmpty(byId)) {
 		const { chatType } = byId;
 		let messages = state.getIn([chatType, addReactionUser]).asMutable();
-		let found = _.find(messages, { id: messageId });
-		found.setIn(["reactions"], reactions);
+		let found = _.find(messages, { id: messageId })
+		let { reactions } = found;
+
+		let newReactions = [];
+		newReactionsData.map((item => {
+			let reactionOp = item?.op || [];
+			let added = isAdded(reactionOp)
+
+			reactions && reactions.forEach((msgReaction) => {
+				if (msgReaction.reaction === item.reaction && msgReaction.isAddedBySelf) {
+					item.isAddedBySelf = msgReaction.isAddedBySelf
+				}
+			})
+
+			if (added) {
+				item.isAddedBySelf = true
+			} else if (added === false) {
+				item.isAddedBySelf = false
+			}
+
+
+			newReactions.push(item)
+		}))
+
+
 		let msg = {
 			...found,
-			reactions: reactions,
+			reactions: newReactions,
 		};
 		messages.splice(messages.indexOf(found), 1, msg);
-		AppDB.updateMessageReaction(messageId, msg.reactions).then((res) => {});
+		AppDB.updateMessageReaction(messageId, msg.reactions).then((res) => { });
 
 		return state.setIn([chatType, addReactionUser], messages);
 	}
@@ -560,3 +620,4 @@ export const messageReducer = createReducer(INITIAL_STATE, {
 });
 
 export default Creators;
+
