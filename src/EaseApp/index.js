@@ -22,6 +22,7 @@ import "../common/iconfont.css";
 
 import SessionList from "../EaseChat/session/sessionList";
 import EaseChat from "../EaseChat/chat/index";
+import { changeIcon } from '../utils/index'
 const uikit_store = React.createContext();
 export const useDispatch = createDispatchHook(uikit_store);
 export const useSelector = createSelectorHook(uikit_store);
@@ -64,10 +65,36 @@ const EaseApp = (props) => {
           GlobalPropsActions.setGlobalProps({
             to: sessionId,
             chatType: sessionType,
-            presenceExt: {[data.uid] : data.ext}
+            presenceExt: {[data.uid]: {
+              ext: data.ext
+            }}
           })
         );
       });
+      // WebIM.conn.getNotDisturbDuration({userId: sessionId}).then(res => {
+      //   const data = res.data
+      //   if (data && (data.ignoreInterval || data.ignoreDuration)) {
+      //     dispatch(
+      //       GlobalPropsActions.setGlobalProps({
+      //         presenceExt: {[sessionId]: {
+      //           muteFlag: true
+      //         }}
+      //       })
+      //     )
+      //   }
+      // })
+      // WebIM.conn.getNotDisturbGroupDuration({groupId: sessionId}).then(res => {
+      //   const data = res.data
+      //   if (data && (data.ignoreInterval || data.ignoreDuration)) {
+      //     dispatch(
+      //       GlobalPropsActions.setGlobalProps({
+      //         presenceExt: {[sessionId]: {
+      //           muteFlag: true
+      //         }}
+      //       })
+      //     )
+      //   }
+      // })
       dispatch(SessionActions.setCurrentSession(sessionId));
       dispatch(MessageActions.clearUnreadAsync(sessionType, sessionId));
     },
@@ -148,7 +175,7 @@ EaseAppProvider.addConversationItem = (session) => {
       GlobalPropsActions.setGlobalProps({
         to: conversationId,
         chatType: conversationType,
-        presenceExt: {[conversationId] : ext }
+        presenceExt: {[conversationId]: ext }
       })
     );
     dispatch(MessageActions.clearUnreadAsync(conversationType, conversationId));
@@ -171,6 +198,9 @@ EaseAppProvider.getSdk = (props) => {
   }
   return WebIM
 };
+EaseAppProvider.changeIcon = (options) => {
+  changeIcon(options)
+}
 EaseAppProvider.propTypes = {
   username: PropTypes.string,
   agoraToken: PropTypes.string,

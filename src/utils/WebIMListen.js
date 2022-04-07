@@ -6,8 +6,6 @@ import MessageActions from "../redux/message";
 import SessionActions from "../redux/session";
 import GlobalPropsActions from "../redux/globalProps"
 
-import { notify } from './index'
-
 export default function createlistener(props) {
   WebIM.conn.addEventHandler('EaseChat',{
     onConnected: (msg) => {
@@ -30,7 +28,6 @@ export default function createlistener(props) {
       const sessionId = chatType === "singleChat" ? from : to;
       store.dispatch(MessageActions.addMessage(message, "txt"));
       store.dispatch(SessionActions.topSession(sessionId, chatType))
-      notify({body: `${message.from}: ${message.msg}`, tag: message.time})
     },
     onFileMessage: (message) => {
       console.log("onFileMessage", message);
