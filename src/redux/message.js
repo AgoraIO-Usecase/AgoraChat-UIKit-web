@@ -52,11 +52,13 @@ const { Types, Creators } = createActions({
 					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
 				},
 				fail: (e) => {
-					console.error("Send private text error", e);
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					// console.error("Send private text error", e);
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 				},
 			});
-			WebIM.conn.send(msgObj.body);
+			WebIM.conn.send(msgObj.body).catch(() => {
+				console.warn('Send private text error')
+			});
 			dispatch(Creators.addMessage(formatMsg));
 		};
 	},
@@ -80,7 +82,7 @@ const { Types, Creators } = createActions({
 				chatType,
 				onFileUploadError: function (error) {
 					formatMsg.status = "fail";
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 					fileEl.current.value = "";
 				},
 				onFileUploadComplete: function (data) {
@@ -96,7 +98,7 @@ const { Types, Creators } = createActions({
 					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
 				},
 				fail: function () {
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 					fileEl.current.value = "";
 				},
 			});
@@ -124,7 +126,7 @@ const { Types, Creators } = createActions({
 				chatType,
 				onFileUploadError: function (error) {
 					formatMsg.status = "fail";
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 					imageEl.current.value = "";
 				},
 				onFileUploadComplete: function (data) {
@@ -140,7 +142,7 @@ const { Types, Creators } = createActions({
 					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
 				},
 				fail: function () {
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 					imageEl.current.value = "";
 				},
 			});
@@ -229,7 +231,7 @@ const { Types, Creators } = createActions({
 					console.log(error);
 					// dispatch(Creators.updateMessageStatus(pMessage, "fail"))
 					formatMsg.status = "fail";
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 				},
 				onFileUploadComplete: function (data) {
 					let url = data.uri + "/" + data.entities[0].uuid;
@@ -243,7 +245,7 @@ const { Types, Creators } = createActions({
 					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
 				},
 				fail: function () {
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 				},
 			});
 
