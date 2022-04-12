@@ -590,8 +590,9 @@ export const updateReaction = (state, { message, reaction }) => {
 				item.isAddedBySelf = false
 			}
 
-
-			newReactions.push(item)
+			if(item.count > 0){
+				newReactions.push(item)
+			}
 		}))
 
 
