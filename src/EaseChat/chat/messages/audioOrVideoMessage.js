@@ -227,11 +227,25 @@ function AudioOrVideoMessage({ message, showByselfAvatar }) {
       >
         {customMessageList &&
           customMessageList.map((val, key) => {
-            return (
+            const bySelf = message.bySelf;
+            let show = false
+            if(val.position === 'others'){}
+            switch(val.position){
+              case 'others':
+                show = bySelf ? false : true
+                break;
+              case 'self':
+                show = bySelf ? true : false
+                break;
+              default:
+                show = true
+                break;
+            }
+            return show ?(
               <MenuItem key={key} onClick={_customMessageClick(val, message)}>
                 {val.name}
               </MenuItem>
-            );
+            ):null;
           })}
       </Menu>
     </li>
