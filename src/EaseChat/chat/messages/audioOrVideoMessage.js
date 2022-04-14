@@ -205,7 +205,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar }) {
               )}
             </div>
             {reactionMsg.length > 0 && (
-              <div className={classes.reactionBox} onClick={handleReaction}>
+              <div className={classes.reactionBox}>
                 <RenderReactions message={message} />
               </div>
             )}

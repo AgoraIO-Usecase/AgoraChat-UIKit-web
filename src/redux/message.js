@@ -8,6 +8,24 @@ import AppDB from "../utils/AppDB";
 import i18next from "i18next";
 import { message } from "../EaseChat/common/alert";
 
+
+function isAdded(reactionOp) {
+	let added = null
+	let currentLoginUser = WebIM.conn.context.userId;
+	reactionOp.forEach((item) => {
+		if (item.reactionType === "create") {
+			if (item.operator === currentLoginUser) {
+				added = true
+			}
+		} else {
+			if (item.operator === currentLoginUser) {
+				added = false
+			}
+		}
+	})
+	return added
+}
+
 /* ------------- Initial State ------------- */
 export const INITIAL_STATE = Immutable({
 	byId: {},
@@ -32,7 +50,7 @@ const { Types, Creators } = createActions({
 	clearUnread: ["chatType", "sessionId"],
 	updateMessages: ["chatType", "sessionId", "messages"],
 	updateMessageMid: ["id", "mid"],
-	updateReaction: ["message"],
+	updateReactionData: ["message", "reaction"],
 
 	// -async-
 	sendTxtMessage: (to, chatType, message = {}) => {
@@ -322,22 +340,59 @@ const { Types, Creators } = createActions({
 		};
 	},
 
-	addReactions: (message, reaction) => {
+	addReactions: (msg, reaction) => {
 		return (dispatch, getState) => {
-			WebIM.conn.addReaction({ messageId: message.id, reaction}).then((res) => {
-				console.log('添加成功',res)
+			WebIM.conn.addReaction({ messageId: msg.id, reaction}).then((res) => {
 			}).catch((e) => {
-				console.log('添加失败',e)
+				message.error('add reaction fail')
 			})
 		}
 	},
-	deleteReaction: (message, reaction) => {
+	deleteReaction: (msg, reaction) => {
 		return (dispatch, getState) => {
-			WebIM.conn.deleteReaction({messageId: message.id, reaction}).then(() => {
-				console.log('删除成功')
+			WebIM.conn.deleteReaction({messageId: msg.id, reaction}).then(() => {
 			}).catch((e) => {
-				console.log('删除失败')
+				message.error('delete reaction fail')
 			})
+		}
+	},
+	updateReaction: (message) => {
+		const {messageId, chatType, from ,to, reactions} = message
+
+		return (dispatch, getState) => {
+			const state = getState().message
+			const byId = state.getIn(["byId", messageId]);
+			if(!byId && messageId){
+				AppDB.findMessageById(messageId).then((res) => {
+					const dbMessage = res[0]
+					let msgReactions = dbMessage?.reactions
+					// if(!msgReactions) return;
+					let newReactions = []
+					reactions.map((item => {
+						let reactionOp = item.op || [];
+						let added = isAdded(reactionOp)
+
+						msgReactions.forEach((msgReaction) => {
+							if (msgReaction.reaction === item.reaction && msgReaction.isAddedBySelf) {
+								item.isAddedBySelf = msgReaction.isAddedBySelf
+							}
+						})
+						if (added) {
+							item.isAddedBySelf = true
+						} else if (added === false) {
+							item.isAddedBySelf = false
+						}
+
+						if(item.count > 0){
+							newReactions.push(item)
+						}
+					}))
+					dispatch(Creators.updateReactionData(message, newReactions))
+
+				})
+			}else{
+				dispatch(Creators.updateReactionData(message))
+			}
 		}
 	}
 });
@@ -536,11 +591,16 @@ export const updateMessageMid = (state, { id, mid }) => {
 	return state;
 };
 
-export const updateReaction = (state, { message, reaction }) => {
-	let { messageId, from, to, reactions } = message;
+export const updateReactionData = (state, { message, reaction }) => {
+	let { messageId, from, to, reactions, chatType } = message;
 	let newReactionsData = reactions
+
 	let currentLoginUser = WebIM.conn.context.userId;
+
 	let addReactionUser = currentLoginUser === from ? to : from;
+
+	if(chatType === 'groupChat'){addReactionUser = to}
+
 	if (!messageId) messageId = state.getIn(["byMid", message.mid, "messageId"])
 	let mids = state.getIn(["byMid"]) || {};
 	let mid;
@@ -549,25 +609,11 @@ export const updateReaction = (state, { message, reaction }) => {
 			mid = i;
 		}
 	}
+
 	const byId = state.getIn(["byId", messageId]);
 
-	function isAdded(reactionOp) {
-		let added = null
-		reactionOp.forEach((item) => {
-			if (item.reactionType === "create") {
-				if (item.operator === currentLoginUser) {
-					added = true
-				}
-			} else {
-				if (item.operator === currentLoginUser) {
-					added = false
-				}
-			}
-		})
-		return added
-	}
 
-	if (!_.isEmpty(byId)) {
+	if (byId) {
 		const { chatType } = byId;
 		let messages = state.getIn([chatType, addReactionUser]).asMutable();
 		let found = _.find(messages, { id: messageId })
@@ -604,6 +650,9 @@ export const updateReaction = (state, { message, reaction }) => {
 		AppDB.updateMessageReaction(messageId, msg.reactions).then((res) => { });
 
 		return state.setIn([chatType, addReactionUser], messages);
+	}else{
+		// state 里没有这条消息，更新数据库里消息的 reation
+		AppDB.updateMessageReaction(messageId, reaction)
 	}
 	return state;
 };
@@ -619,7 +668,7 @@ export const messageReducer = createReducer(INITIAL_STATE, {
 	[Types.UPDATE_MESSAGES]: updateMessages,
 	[Types.UPDATE_MESSAGE_MID]: updateMessageMid,
 	[Types.UPDATE_MESSAGE_STATUS]: updateMessageStatus,
-	[Types.UPDATE_REACTION]: updateReaction,
+	[Types.UPDATE_REACTION_DATA]: updateReactionData,
 });
 
 export default Creators;
