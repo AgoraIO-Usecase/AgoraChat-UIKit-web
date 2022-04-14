@@ -110,7 +110,7 @@ export default function createlistener(props) {
 			store.dispatch(GlobalPropsActions.setGlobalProps({ to: null }));
 		},
 		onReactionUpdate: (message) => {
-			console.log("onReactionMessage", message);
+			console.log("onReactionUpdate", message);
 			store.dispatch(MessageActions.updateReaction(message));
 		},
 	});
