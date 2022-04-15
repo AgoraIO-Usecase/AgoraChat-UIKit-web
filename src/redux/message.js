@@ -491,9 +491,7 @@ export const updateMessageStatus = (state, { message, status = "", localId }) =>
 			toJid: mid,
 		};
 		messages.splice(messages.indexOf(found), 1, msg);
-		setTimeout(() => {
-			AppDB.updateMessageStatus(id, status).then((res) => { });
-		}, 1000);
+		AppDB.updateMessageStatus(id, status).then((res) => { });
 
 		return state.setIn([chatType, chatId], messages);
 	}
@@ -583,9 +581,7 @@ export const updateMessageMid = (state, { id, mid }) => {
 		state = state.setIn([chatType, chatId], messages);
 	}
 
-	setTimeout(() => {
-		AppDB.updateMessageMid(mid, id);
-	}, 500);
+	AppDB.updateMessageMid(mid, id);
 	state = state.setIn(["byMid", mid], { id });
 	state = state.setIn(["byId", mid], { chatType, chatId })
 	return state;
