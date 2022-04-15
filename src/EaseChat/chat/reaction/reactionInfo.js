@@ -240,7 +240,7 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 					{reactionMsg.map((item, i) => {
 						if (item.count === 0 ) return
 						return (
-							<div>
+							<div key={item.reaction}>
 								<TabPanel
 									value={value}
 									index={i}
