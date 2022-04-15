@@ -365,7 +365,7 @@ const { Types, Creators } = createActions({
 			if(!byId && messageId){
 				AppDB.findMessageById(messageId).then((res) => {
 					const dbMessage = res[0]
-					let msgReactions = dbMessage?.reactions
+					let msgReactions = dbMessage?.reactions || []
 					// if(!msgReactions) return;
 					let newReactions = []
 					reactions.map((item => {
