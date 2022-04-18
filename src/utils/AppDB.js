@@ -186,7 +186,7 @@ const AppDB = {
                                 sessionType: element.chatType
                             })
                         }
-                        else if(!sessionObj[element.to]){
+                        else if(!sessionObj[element.to] && element.to !== id){
                             sessionObj[element.to] = true
                             sessionList.push({
                                 sessionId:element.to,
