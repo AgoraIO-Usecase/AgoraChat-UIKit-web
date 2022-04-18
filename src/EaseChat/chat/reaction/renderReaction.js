@@ -52,14 +52,14 @@ const RenderReactions = ({ message }) => {
 					if (item.count === 0) {
 						return opStatus = true;
 					}
-					if (i > 4) return;
+					if (i > 3 && reactionMsg.length != 5) return;
 					return (
 						<div key={i} className={classes.reactionItem} onClick={() => handleDeleteReaction(item.reaction)}>
 							{rnReactionEmoji(item.reaction)}
 						</div>
 					);
 				})}
-			{reactionMsg.length > 4 && (
+			{reactionMsg.length > 4 && reactionMsg.length != 5 && (
 				<span className={classes.reactionLingth}>...</span>
 			)}
 			{reactionMsg.length > 1 && <span className={classes.reactionLingth} onClick={handleReactionInfo}>
