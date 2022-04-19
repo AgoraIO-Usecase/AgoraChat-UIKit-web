@@ -156,18 +156,14 @@ function AudioOrVideoMessage({ message, showByselfAvatar }) {
       {!message.bySelf && (
         <Avatar
           src={avatar}
-          onClick={() => onAvatarChange && onAvatarChange(message)}
+          onClick={(e) => onAvatarChange && onAvatarChange(e,message)}
         ></Avatar>
       )}
       {showByselfAvatar && message.bySelf && <Avatar src={avatar}></Avatar>}
       <div className={classes.textBodyBox}>
         <span className={classes.userName}>{message.from}</span>
-        {audioType ? (
-          <div
-            className={classes.audioBox}
-            onClick={play}
-            onContextMenu={handleClick}
-          >
+        {message.type === "audio" ? (
+          <div className={classes.audioBox} onClick={play} onContextMenu={handleClick}>
             <AudioPlayer play={isPlaying} reverse={message.bySelf} />
             <span className={classes.duration}>
               {Math.floor(message.body.length) + "''"}

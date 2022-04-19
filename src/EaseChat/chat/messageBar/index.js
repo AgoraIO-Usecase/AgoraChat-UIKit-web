@@ -52,7 +52,7 @@ const MessageBar = () => {
 
   const [sessionEl, setSessionEl] = useState(null);
 
-  const { chatType, to, username } = globalProps;
+  const { chatType, to, name } = globalProps;
   const renderSessionInfoMenu = () => {
     const handleClickClearMessage = () => {
       dispatch(MessageActions.clearMessage(chatType, to));
@@ -116,7 +116,7 @@ const MessageBar = () => {
         src={chatType === "singleChat" ? userAvatars[userAvatarIndex] : groupAvatarIcon}
           style={{ borderRadius: chatType === "singleChat" ? "50%" : 'inherit'}}
         ></Avatar>
-        {to}
+        {name || to}
       </Box>
       <Box position="static">
         <IconButton
