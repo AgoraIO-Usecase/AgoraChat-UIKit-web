@@ -63,6 +63,7 @@
         "The thread has been disbanded": "该子区已被解散",
         "Threads":"子区",
         "Started a Thread":"创建了一个子区",
-        "See all":"查看全部"
+        "See all":"查看全部",
+        "You have been removed from the thread":"你已经被移除子区"
     }
 }

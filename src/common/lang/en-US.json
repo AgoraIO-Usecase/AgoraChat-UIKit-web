@@ -58,6 +58,7 @@
         "The thread has been disbanded":"The thread has been disbanded",
         "Threads":"Threads",
         "Started a Thread":"Started a Thread",
-        "See all":"See all"
+        "See all":"See all",
+        "You have been removed from the thread":"You have been removed from the thread"
     }
 }

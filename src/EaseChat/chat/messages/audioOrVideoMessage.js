@@ -135,7 +135,7 @@ const initialState = {
   mouseX: null,
   mouseY: null,
 };
-function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThreadPanel }) {
+function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThreadPanel,showThread }) {
   let audioType = message.body.type === "audio";
   let easeChatProps = useContext(EaseChatContext);
   const {
@@ -187,7 +187,8 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
   const createThread = ()=>{
     onCreateThread(message)
   }
-	const showThreaddInfo = (!isThreadPanel) && message.chatType ==="groupChat" && message.thread_overview&& (JSON.stringify(message.thread_overview)!=='{}')
+	const showThreadEntry = showThread && !message.chatThreadOverview && !isThreadPanel && message.chatType === 'groupChat';
+	const showThreaddInfo = showThread && (!isThreadPanel) && message.chatType ==="groupChat" && message.chatThreadOverview&& (JSON.stringify(message.chatThreadOverview)!=='{}')
 
   return (
     <li
@@ -239,7 +240,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
                     {isShowReaction && (
                       <Reaction message={message}/>
                     )}
-                    {!message.thread_overview && !isThreadPanel && message.chatType === 'groupChat'&& <div className={classes.threadCon} onClick={createThread} title="Reply">
+                    { showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
                     <div className={classes.thread}></div>
                   </div>}
                   

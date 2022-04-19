@@ -114,7 +114,6 @@ const EaseChatProvider = (props) => {
           </div>
           <div style={{flex: '0 0 392px',overflow:'hidden',display: threadPanelStates?'flex':'none',height: '100%'}}>
             <hr style={{width:0,height:'100%',border:'none',borderRight:'8px solid #edeff2'}}/>
-            {/* <ThreadPanel {...props} /> */}
             <Thread {...props}/>
           </div>
         </div>
@@ -155,7 +154,7 @@ EaseChatProvider.propTypes = {
 EaseChatProvider.defaultProps = {
   showByselfAvatar:false,
   easeInputMenu:'all',
-  isThread: false,
+  isChatThread: false,
   menuList: [
     { name: i18next.t('send-image'), value: "img", key: "1" },
     { name: i18next.t('send-file'), value: "file", key: "2" },

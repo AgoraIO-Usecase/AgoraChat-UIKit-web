@@ -150,6 +150,9 @@ EaseAppProvider.getSdk = (props) => {
   return WebIM
 };
 EaseAppProvider.thread = {
+  setShowThread: function(status){
+    store.dispatch(ThreadActions.setShowThread(status))
+  },
   setHasThreadEditPanel:function(status){
     store.dispatch(ThreadActions.setHasThreadEditPanel(status))
   },

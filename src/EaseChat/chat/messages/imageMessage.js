@@ -110,7 +110,7 @@ const initialState = {
   mouseX: null,
   mouseY: null,
 };
-function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread, isThreadPanel  }) {
+function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread, isThreadPanel,showThread  }) {
 	let easeChatProps = useContext(EaseChatContext);
 	const {
     onAvatarChange,
@@ -118,7 +118,8 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
     customMessageClick,
     customMessageList,
   } = easeChatProps;
-	const showThreaddInfo = (!isThreadPanel) && message.chatType ==="groupChat" && message.thread_overview&& (JSON.stringify(message.thread_overview)!=='{}')
+	const showThreadEntry = showThread && !message.chatThreadOverview && !isThreadPanel && message.chatType === 'groupChat';
+	const showThreaddInfo = showThread && (!isThreadPanel) && message.chatType ==="groupChat" && message.chatThreadOverview&& (JSON.stringify(message.chatThreadOverview)!=='{}')
 	const classes = useStyles({ bySelf: message.bySelf,showThreaddInfo:showThreaddInfo});
 	const [state, setState] = useState(initialState);
 	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
@@ -183,7 +184,7 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 								{isShowReaction && (
 									<Reaction message={message}/>
 								)}
-							{!message.thread_overview && !isThreadPanel && message.chatType === 'groupChat'&& <div className={classes.threadCon} onClick={createThread}>
+							{showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
 							  <div className={classes.thread}></div></div>}
                				</div>
 						) : (

@@ -27,7 +27,6 @@ import Recorder from "./messages/recorder";
 import icon_emoji from "../../common/icons/emoji@2x.png";
 import icon_yuyin from "../../common/icons/voice@2x.png";
 import attachment from "../../common/icons/attachment@2x.png";
-import ThreadActions from "../../redux/thread"
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -115,41 +114,43 @@ function SendBox(props) {
   };
   const isCreatingThread = useSelector((state) => state.thread?.isCreatingThread);
   const currentThreadInfo = useSelector((state) => state.thread?.currentThreadInfo);
+  const threadOriginalMsg = useSelector((state) => state.thread?.threadOriginalMsg);
+  const createChatThread = ()=>{
+    return new Promise((resolve,reject) => {
+      if (isCreatingThread && props.isChatThread) {
+        if (!props.threadName) {
+          console.log('threadName can not empty')
+          return;
+        }
+      }
+      if(isCreatingThread){
+        const options = {
+          name: props.threadName.replace(/(^\s*)|(\s*$)/g, ""),
+          messageId: threadOriginalMsg.bySelf && threadOriginalMsg.mid  ? threadOriginalMsg.mid :threadOriginalMsg.id,
+          parentId: threadOriginalMsg.to,
+        }
+        WebIM.conn.createChatThread(options).then(res=>{
+          const threadId = res.data?.chatThreadId;
+          resolve(threadId)
+        })
+      }else if(props.isChatThread){
+        resolve(currentThreadInfo.id)
+      }else {
+        resolve(to)
+      }
+    })
+  }
   const sendMessage = useCallback(() => {
     if (!inputValue) return;
-    if (isCreatingThread && props.isThread) {
-      if (!props.threadName) {
-        console.log('threadName can not empty')
-        return;
-      }
-      const options = {
-        name: props.threadName.replace(/(^\s*)|(\s*$)/g, ""),
-        msgId: currentThreadInfo.bySelf&&currentThreadInfo.mid ? currentThreadInfo.mid: currentThreadInfo.id,
-        groupId: currentThreadInfo.to,
-      }
-      WebIM.conn.createThread(options).then(res=>{
-        const threadId = res.data?.thread_id;
-        //send message
-        dispatch(
-          MessageActions.sendTxtMessage(threadId, chatType, {
-            msg: inputValue,
-          },props.isThread )
-        );
-        setInputValue("");
-        inputRef.current.focus();
-      })
-      return 
-    }
-    if(props.isThread) {
-      to = currentThreadInfo.thread_overview.id
-    }
-    dispatch(
-      MessageActions.sendTxtMessage(to, chatType, {
-        msg: inputValue,
-      }, props.isThread)
-    );
-    setInputValue("");
-    inputRef.current.focus();
+    createChatThread().then(to=>{
+      dispatch(
+        MessageActions.sendTxtMessage(to, chatType, {
+          msg: inputValue,
+        }, props.isChatThread)
+      );
+      setInputValue("");
+      inputRef.current.focus();
+    })
   }, [inputValue, to, chatType, dispatch,currentThreadInfo ]);
 
   const onKeyDownEvent = useCallback(
@@ -197,8 +198,9 @@ function SendBox(props) {
     if (!file.filename) {
       return false;
     }
-    const receiveId = props.isThread ? currentThreadInfo.thread_overview.id: to
-    dispatch(MessageActions.sendFileMessage(receiveId, chatType, file, fileEl, props.isThread));
+    createChatThread().then(to=>{
+      dispatch(MessageActions.sendFileMessage(to, chatType, file, fileEl, props.isChatThread));
+    })
   };
 
   const handleVideoChange = (e) => {
@@ -206,16 +208,19 @@ function SendBox(props) {
     if (!file.filename) {
       return false;
     }
-    const receiveId = props.isThread ? currentThreadInfo.thread_overview.id: to
-    dispatch(MessageActions.sendVideoMessage(receiveId, chatType, file,videoEl, props.isThread));
+    createChatThread().then(to=>{
+      dispatch(MessageActions.sendVideoMessage(to, chatType, file,videoEl, props.isChatThread));
+    })
   }
   const handleImageChange = (e) => {
     let file = WebIM.utils.getFileUrl(e.target);
     if (!file.filename) {
       return false;
     }
-    const receiveId = props.isThread ? currentThreadInfo.thread_overview.id: to
-    dispatch(MessageActions.sendImgMessage(receiveId, chatType, file, imageEl, props.isThread));
+    createChatThread().then(to=>{
+      dispatch(MessageActions.sendImgMessage(to, chatType, file, imageEl, props.isChatThread));
+    })
+    
   };
 
   const handleClickMenu = (e) => {
@@ -302,7 +307,8 @@ function SendBox(props) {
           onClose={() => {
             setShowRecorder(false);
           }}
-          isThread = {props.isThread}
+          isChatThread = {props.isChatThread}
+          threadName = {props.threadName}
         />
       </>
     );

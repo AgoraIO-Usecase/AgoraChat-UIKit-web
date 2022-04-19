@@ -36,6 +36,11 @@ const useStyles = makeStyles((theme) => {
         },
         leftBar: {
             fontWeight: '600',
+            textAlign: 'left',
+            width: '315px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
         },
         rightBar: {
             display: 'flex',
@@ -55,9 +60,13 @@ const ThreadBar = () => {
     const dispatch = useDispatch();
     const closeThreadPanel = () => {
         dispatch(ThreadActions.updateThreadStates(false));
+        dispatch(ThreadActions.setCurrentThreadInfo({}));
     }
-    const threadName = useSelector((state) => state.thread?.currentThreadInfo?.thread_overview?.name) || i18next.t('New thread');
-    const threadId = useSelector((state) => state.thread?.currentThreadInfo?.thread_overview?.id) || '';
+    const threadName = useSelector((state) => state.thread?.currentThreadInfo?.name) || i18next.t('New thread');
+    const threadId = useSelector((state) => state.thread?.currentThreadInfo?.id) || '';
+    const threadOwner = useSelector(state => {
+        return state.thread?.currentThreadInfo?.from || state.thread?.currentThreadInfo?.owner
+    })
     const isCreatingThread = useSelector((state) => state.thread?.isCreatingThread) || false;
     const to = useSelector((state) => state.global.globalProps?.to);
     const hasThreadEditPanel = useSelector((state) => state.thread?.hasThreadEditPanel) || false;
@@ -65,7 +74,8 @@ const ThreadBar = () => {
         onEditThreadPanel(e, {
             groupId: to,
             threadId,
-            threadName
+            threadName,
+            threadOwner
         });
     }
     return (

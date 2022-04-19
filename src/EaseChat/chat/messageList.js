@@ -31,6 +31,7 @@ function MessageList({ messageList, showByselfAvatar }) {
   const classes = useStyles();
   const dispatch = useDispatch();
   const globalProps = useSelector((state) => state.global.globalProps);
+  const showThread = useSelector((state) => state.thread.showThread);
   const { to, chatType } = globalProps;
   console.log("** Render MessageList **", messageList);
   const scrollEl = useRef(null);
@@ -76,7 +77,10 @@ function MessageList({ messageList, showByselfAvatar }) {
 
   const createThread = (message)=>{
     //update currentThreadInfo
-    dispatch(ThreadActions.setCurrentThreadInfo(message));
+    dispatch(ThreadActions.setThreadOriginalMsg(message));
+    dispatch(ThreadActions.setCurrentThreadInfo({}));
+    //updated the historyStatus of Newly created chatThread
+    dispatch(MessageActions.setThreadHasHistory(false));
     //change the status of threadPanel
     dispatch(ThreadActions.updateThreadStates(true));
     //change the status of creatingThread
@@ -106,6 +110,7 @@ function MessageList({ messageList, showByselfAvatar }) {
                       onRecallMessage={handleRecallMsg}
                       onCreateThread={createThread}
                       showByselfAvatar={showByselfAvatar}
+                      showThread={showThread}
                     />
                   );
                 } else if (msg.body.type === "file") {
@@ -116,6 +121,7 @@ function MessageList({ messageList, showByselfAvatar }) {
                       onRecallMessage={handleRecallMsg}
                       onCreateThread={createThread}
                       showByselfAvatar={showByselfAvatar}
+                      showThread={showThread}
                     />
                   );
                 } else if (msg.body.type === "img") {
@@ -126,10 +132,11 @@ function MessageList({ messageList, showByselfAvatar }) {
                       onRecallMessage={handleRecallMsg}
                       onCreateThread={createThread}
                       showByselfAvatar={showByselfAvatar}
+                      showThread={showThread}
                     />
                   );
                 } else if (msg.body.type === "audio" || msg.body.type === "video") {
-                  return <AudioOrVideoMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}  onCreateThread={createThread}/>;
+                  return <AudioOrVideoMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}  onCreateThread={createThread} showThread={showThread}/>;
                 } else if (msg.body.type === "recall") {
                   return (
                     <RetractedMessage message={msg} key={msg.id + index}/>

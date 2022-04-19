@@ -16,7 +16,7 @@ import AppDB from "../../../utils/AppDB";
 const ThreadListPanel = ({ anchorEl, onClose }) => {
     const dispatch = useDispatch();
     const threadList = useSelector((state) => state.thread?.threadList) || [];
-    const curGroupRole = useSelector((state) => state.thread?.curGroupRole) || 'member';
+    const curGroupRole = useSelector((state) => state.thread?.curGroupRole) || '';
     const { chatType, to } = useSelector((state) => state.global.globalProps);
 
     const threadListDom = useRef(null);
@@ -35,25 +35,21 @@ const ThreadListPanel = ({ anchorEl, onClose }) => {
         }
     }, [anchorEl])
 
-    const renderMessage = (payload) => {
-        if (payload?.bodies && payload.bodies.length > 0) {
-            let message = payload.bodies[0]
-            switch (message.type) {
-                case 'txt':
-                    return renderTxt(message.msg)
-                case 'file':
-                    return `[${i18next.t('File Message')}]`
-                case 'img':
-                    return `[${i18next.t('Image Message')}]`
-                case 'audio':
-                    return `[${i18next.t('Audio Message')}]`
-                case 'video':
-                    return `[${i18next.t('Video Message')}]`
-                default:
-                    return ''
-            }
+    const renderMessage = (message) => {
+        switch (message.type) {
+            case 'txt':
+                return renderTxt(message.msg)
+            case 'file':
+                return `[${i18next.t('File Message')}]`
+            case 'img':
+                return `[${i18next.t('Image Message')}]`
+            case 'audio':
+                return `[${i18next.t('Audio Message')}]`
+            case 'video':
+                return `[${i18next.t('Video Message')}]`
+            default:
+                return ''
         }
-        return ''
     }
     const renderTxt = (txt) => {
         if (txt === undefined) {
@@ -113,25 +109,26 @@ const ThreadListPanel = ({ anchorEl, onClose }) => {
         if (curGroupRole === 'member') {
             changeCurrentThreadInfo(option)
         } else {
-            WebIM.conn.joinThread({ threadId: option.id }).then((res) => {
+            WebIM.conn.joinChatThread({ chatThreadId: option.id }).then((res) => {
                 changeCurrentThreadInfo(option)
+            }).catch(e=>{
+                if(e.type === 1301){
+                    changeCurrentThreadInfo(option)
+                }
             })
         }
     }
     const changeCurrentThreadInfo = (option) => {
-        //change the status of creatingThread
+        dispatch(ThreadActions.setCurrentThreadInfo(option));
+        //updatea setThreadOriginalMsg
+        if(option.messageId){
+            AppDB.findLocalMessage('groupChat', option.messageId).then((res) => {
+                let msg = res.length === 1 ? res[0] : {};
+                dispatch(ThreadActions.setThreadOriginalMsg(msg));
+            })
+        }
+        //update the status of creatingThread
         dispatch(ThreadActions.setIsCreatingThread(false));
-        //Find the muc message of the thread by the threadId
-        AppDB.findAppointedMessage('groupChat', option.id).then((res) => {
-            if (res.length === 1) {
-                dispatch(ThreadActions.setCurrentThreadInfo(res[0]));
-            } else {
-                const msg = {
-                    thread_overview: option
-                }
-                dispatch(ThreadActions.setCurrentThreadInfo(msg));
-            }
-        })
         //open threadPanel
         dispatch(ThreadActions.updateThreadStates(true));
         //close threadListPanel
@@ -146,7 +143,6 @@ const ThreadListPanel = ({ anchorEl, onClose }) => {
             </Box>
         )
     }
-
     return (
         <Popover
             open={Boolean(anchorEl)}
@@ -173,17 +169,17 @@ const ThreadListPanel = ({ anchorEl, onClose }) => {
                     {threadList.length > 0 && threadList.map((option, index) => {
                         return (
                             <li className='tlp-item' key={index} onClick={(e) => openThreadPanel(option)}>
-                                <Box sx={{ padding: '8px 16px', width: '100%', height: '100%', boxSizing: 'border-box' }}>
+                                <Box className="tpl-item-con">
                                     <div className="tpl-item-name">{option.name}</div>
-                                    <Box style={{ display: 'flex', marginTop: '2px' }}>
+                                    <Box className="tpl-item-bottom">
                                         <img
                                             className='tlp-avatar'
                                             alt="Remy Sharp"
                                             src={avatar}
                                         />
                                         <span className="tpl-item-owner">{option.owner}</span>
-                                        <span className="tpl-item-msg">{renderMessage(option.last_message?.payload)}</span>
-                                        <span className="tpl-item-time">{getTimeDiff(option.last_message?.timestamp)}</span>
+                                        <span className="tpl-item-msg">{renderMessage(option.lastMessage)}</span>
+                                        <span className="tpl-item-time">{getTimeDiff(option.lastMessage?.time)}</span>
                                     </Box>
                                 </Box>
                             </li>

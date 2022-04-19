@@ -2,18 +2,11 @@ import moment from 'moment'
 import WebIM from '../utils/WebIM'
 import Cookie from 'js-cookie';
 import qs from 'qs'
-export function renderTime(time) {
+export function renderTime(time,timeStyle) {
     if (!time) return ''
     const localStr = new Date(time)
     const localMoment = moment(localStr)
-    const localFormat = localMoment.format('MM-DD HH:mm')
-    return localFormat
-}
-export function renderTimeWithDate(time){
-    if (!time) return ''
-    const localStr = new Date(time)
-    const localMoment = moment(localStr)
-    const localFormat = localMoment.format('MMM D, YYYY, HH:mm')
+    const localFormat = timeStyle? localMoment.format(timeStyle):localMoment.format('MM-DD HH:mm')
     return localFormat
 }
 
@@ -167,7 +160,7 @@ const msgTpl = {
     }
 }
 
-export function formatLocalMessage(to, chatType, message = {}, messageType, isThread) {
+export function formatLocalMessage(to, chatType, message = {}, messageType, isChatThread) {
     const ext = message.ext || {}
     const formatMsg = Object.assign(JSON.parse(JSON.stringify(msgTpl.base)), message)
     const body = Object.assign(JSON.parse(JSON.stringify(msgTpl[messageType])), message)
@@ -181,7 +174,7 @@ export function formatLocalMessage(to, chatType, message = {}, messageType, isTh
         from: WebIM.conn.context.userId,
         chatType,
         session: to,
-        isThread,
+        isChatThread,
         body: {
             ...body,
             ...ext

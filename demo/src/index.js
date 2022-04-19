@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component,useState } from "react";
 import { render } from "react-dom";
 
 import { EaseChat, EaseApp } from "../../src/index";
@@ -9,24 +9,6 @@ import { times } from "lodash";
 export default class Demo extends Component {
   state = {
     token: val,
-    type:'',
-    showMemberList: false,
-    list:[
-      { nickName: 'test000', role: 'GroupOwner' },
-      { nickName: 'test111', role: 'Admin' },
-      { nickName: 'test222', role: 'Admin' },
-      { nickName: 'test333', role: 'member' },
-      { nickName: 'test444', role: 'member' },
-      { nickName: 'test444', role: 'member' },
-      { nickName: 'test444', role: 'member' },
-      { nickName: 'test444', role: 'member' },
-      { nickName: 'test444', role: 'member' },
-      { nickName: 'test444', role: 'member' },
-      { nickName: 'test444', role: 'member' },
-      { nickName: 'test444', role: 'member' },
-      { nickName: 'test444', role: 'member' },
-      { nickName: 'test444', role: 'member' },
-  ],
   };
 
   postData = (url, data) => {
@@ -48,6 +30,7 @@ export default class Demo extends Component {
       conversationId: "zd132",
     };
     EaseApp.addConversationItem(session);
+    EaseApp.thread.setShowThread(true)
     // EaseApp.thread.closeThreadPanel()
     // EaseApp.thread.setHasThreadEditPanel(true)
   };
@@ -66,7 +49,6 @@ export default class Demo extends Component {
   test5 = (val1,val2) => {
     console.log('val',val1,val2)
   }
-  
   render() {
     console.log("this.state.token>>", this.state.token);
     return (
@@ -81,7 +63,7 @@ export default class Demo extends Component {
             onChatAvatarClick={this.test4}
             onEditThreadPanel={this.test5}
             appkey= "easemob-demo#chatdemoui"
-            username="hk88"
+            username="wy8"
             password="1"
             isShowReaction
             // agoraToken="007eJxTYPCe51Vb5Rl3kCX/veizhwyel9f7fNp0e2mBNGd157ut3zUVGNIMU5LNzS2SUlKSzUzMElMs0ozMDCzNzZITjVIMDE2To7ItkxRkGBhONNtwMzKwMjACIYivwmBiaJxoYWxgoJtoZpmqa2iYmqybZG5oqWtpbGJsmpaWbGpmbgIAfPMmSQ=="

@@ -43,10 +43,10 @@ const { Types, Creators } = createActions({
     setThreadHasHistory: ['status'],
 
     // -async-
-    sendTxtMessage: (to, chatType, message = {}, isThread=false) => {
+    sendTxtMessage: (to, chatType, message = {}, isChatThread=false) => {
         if (!to || !chatType) return
         return (dispatch, getState) => {
-            const formatMsg = formatLocalMessage(to, chatType, message, 'txt', isThread)
+            const formatMsg = formatLocalMessage(to, chatType, message, 'txt', isChatThread)
             const { body, id } = formatMsg
             const { msg } = body
             const msgObj = new WebIM.message('txt', id)
@@ -55,7 +55,7 @@ const { Types, Creators } = createActions({
                 msg,
                 chatType,
                 ext: message.ext,
-                isThread,
+                isChatThread,
                 success: () => {
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
                 },
@@ -69,14 +69,14 @@ const { Types, Creators } = createActions({
         }
     },
 
-    sendFileMessage: (to, chatType, file,fileEl, isThread=false) => {
+    sendFileMessage: (to, chatType, file,fileEl, isChatThread=false) => {
         return (dispatch, getState) => {
             if (file.data.size > (1024 * 1024 * 10)) {
                 message.error(i18next.t('The file exceeds the upper limit'))
                 return
             }
             
-            const formatMsg = formatLocalMessage(to, chatType, file, 'file', isThread)
+            const formatMsg = formatLocalMessage(to, chatType, file, 'file', isChatThread)
             const { id } = formatMsg
             const msgObj = new WebIM.message('file', id)
             msgObj.set({
@@ -87,7 +87,7 @@ const { Types, Creators } = createActions({
                 file: file,
                 to,
                 chatType,
-                isThread,
+                isChatThread,
                 onFileUploadError: function (error) {
                     formatMsg.status = 'fail'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
@@ -99,7 +99,7 @@ const { Types, Creators } = createActions({
                     formatMsg.status = 'sent'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
                     // dispatch(Creators.updateMessages(chatType, to, formatMsg))
-                    if(isThread){
+                    if(isChatThread){
                         dispatch(Creators.updateMessages('threadMessage', to, formatMsg ))
                     }else{
                         dispatch(Creators.updateMessages(chatType, to, formatMsg ))
@@ -116,13 +116,13 @@ const { Types, Creators } = createActions({
         }
     },
 
-    sendImgMessage: (to, chatType, file,imageEl, isThread=false) => {
+    sendImgMessage: (to, chatType, file,imageEl, isChatThread=false) => {
         return (dispatch, getState) => {
             if (file.data.size > (1024 * 1024 * 10)) {
                 message.error(i18next.t('The file exceeds the upper limit'))
                 return
             }
-            const formatMsg = formatLocalMessage(to, chatType, file, 'img', isThread)
+            const formatMsg = formatLocalMessage(to, chatType, file, 'img', isChatThread)
             const { id } = formatMsg
             const msgObj = new WebIM.message('img', id)
             msgObj.set({
@@ -133,7 +133,7 @@ const { Types, Creators } = createActions({
                 file: file,
                 to,
                 chatType,
-                isThread,
+                isChatThread,
                 onFileUploadError: function (error) {
                     formatMsg.status = 'fail'
                     dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
@@ -144,7 +144,7 @@ const { Types, Creators } = createActions({
                     formatMsg.url = formatMsg.body.url = url;
                     formatMsg.status = 'sent'
                     // dispatch(Creators.updateMessages(chatType, to, formatMsg ))
-                    if(isThread){
+                    if(isChatThread){
                         dispatch(Creators.updateMessages('threadMessage', to, formatMsg ))
                     }else{
                         dispatch(Creators.updateMessages(chatType, to, formatMsg ))
@@ -162,7 +162,7 @@ const { Types, Creators } = createActions({
         }
     },
 
-    sendVideoMessage: (to, chatType, file,videoEl, isThread=false) => {
+    sendVideoMessage: (to, chatType, file,videoEl, isChatThread=false) => {
         return (dispatch, getState) => {
             if (file.data.size > (1024 * 1024 * 10)) {
                 message.error(i18next.t('The video exceeds the upper limit'))
@@ -176,7 +176,7 @@ const { Types, Creators } = createActions({
                 'mkv': true
             };
             if (file.filetype.toLowerCase() in allowType) {
-                const formatMsg = formatLocalMessage(to, chatType, file, 'video')
+                const formatMsg = formatLocalMessage(to, chatType, file, 'video',isChatThread)
                 const { id } = formatMsg
                 const msgObj = new WebIM.message('video', id)
                 msgObj.set({
@@ -189,7 +189,7 @@ const { Types, Creators } = createActions({
                     file_length:file.data.size,
                     to,
                     chatType,
-                    isThread,
+                    isChatThread,
                     onFileUploadError: function (error) {
                         formatMsg.status = 'fail'
                         dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
@@ -202,7 +202,7 @@ const { Types, Creators } = createActions({
                         formatMsg.status = 'sent'
                         dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
                         // dispatch(Creators.updateMessages(chatType, to, formatMsg))
-                        if(isThread){
+                        if(isChatThread){
                             dispatch(Creators.updateMessages('threadMessage', to, formatMsg ))
                         }else{
                             dispatch(Creators.updateMessages(chatType, to, formatMsg ))
@@ -219,13 +219,13 @@ const { Types, Creators } = createActions({
             }
         }
     },
-    sendRecorder: (to, chatType, file, isThread=false ) => {
+    sendRecorder: (to, chatType, file, isChatThread = false ) => {
 		return (dispatch, getState) => {
 			if (file.data.size > 1024 * 1024 * 10) {
 				message.error(i18next.t("The file exceeds the upper limit"));
 				return;
 			}
-			const formatMsg = formatLocalMessage(to, chatType, file, "audio");
+			const formatMsg = formatLocalMessage(to, chatType, file, "audio",isChatThread);
 			const { id } = formatMsg;
 			const msgObj = new WebIM.message("audio", id);
 			msgObj.set({
@@ -240,7 +240,7 @@ const { Types, Creators } = createActions({
 				file_length: file.data.size,
 				to,
 				chatType,
-                isThread,
+                isChatThread,
 				onFileUploadError: function (error) {
 					console.log(error);
 					// dispatch(Creators.updateMessageStatus(pMessage, "fail"))
@@ -253,7 +253,7 @@ const { Types, Creators } = createActions({
 					formatMsg.status = "sent";
 					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
 					// dispatch(Creators.updateMessages(chatType, to, formatMsg));
-                    if(isThread){
+                    if(isChatThread){
                         dispatch(Creators.updateMessages('threadMessage', to, formatMsg ))
                     }else{
                         dispatch(Creators.updateMessages(chatType, to, formatMsg ))
@@ -263,19 +263,18 @@ const { Types, Creators } = createActions({
 					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
 				},
 			});
-
 			WebIM.conn.send(msgObj.body);
 			dispatch(Creators.addMessage(formatMsg, "audio"));
 		};
 	},
-    recallMessage: (to, chatType, msg, isThread = false) => {
+    recallMessage: (to, chatType, msg, isChatThread = false) => {
         return (dispatch, getState) => {
             const { id, toJid, mid } = msg
             WebIM.conn.recallMessage({
                 to: to,
-                mid: toJid || mid, // message id
+                mid: toJid || mid || id, // message id
                 type: chatType,
-                isThread,
+                isChatThread,
                 success: () => {
                     dispatch(Creators.deleteMessage(id, to, chatType))
                 },
@@ -313,15 +312,17 @@ const { Types, Creators } = createActions({
         if(!rootState.message.threadHasHistory && isScroll) return
         return (dispatch) => {
             let options = {
-                queue: to,
-                start: isScroll ? rootState.message.threadHistoryStart : -1,
-                pull_number: 20,
-                isGroup: true,
-                format: true,
-                is_positive: true,
+                targetId: to,
+                cursor: isScroll ? rootState.message.threadHistoryStart : -1,
+                pageSize: 20,
+                chatType: 'groupChat',
+                searchDirection: 'down',
             }
             WebIM.conn.getHistoryMessages(options).then((res)=>{
-                let msgList = res.msgs;
+                let msgList = res.messages;
+                if(msgList.length < options.pageSize || msgList.length === 0){
+                    dispatch(Creators.setThreadHasHistory(false));
+                }
                 const newMsgList  = [];
                 if(msgList.length>0) {
                     msgList.forEach((item)=>{
@@ -329,11 +330,8 @@ const { Types, Creators } = createActions({
                         msg.bySelf = msg.from === username;
                         newMsgList.push(msg)
                     })
-                    dispatch(Creators.setThreadHistoryStart(res.next_key));
+                    dispatch(Creators.setThreadHistoryStart(res.cursor));
                     dispatch(Creators.updateThreadMessage(to,newMsgList,isScroll));
-                    if(newMsgList.length < options.pull_number || newMsgList.length === 0){
-                        dispatch(Creators.setThreadHasHistory(false));
-                    }
                 }
                 cb && cb(newMsgList.length);
             })
@@ -384,7 +382,7 @@ export const addMessage = (state, { message, messageType = 'txt' }) => {
     const rootState = uikit_store.getState()
     !message.status && (message = formatServerMessage(message, messageType))
     const username = WebIM.conn.context.userId
-    const { id, to, status, isThread, thread } = message
+    const { id, to, status, isChatThread, chatThread } = message
     let { chatType } = message
     // where the message comes from, when from current user, it is null
     const from = message.from || username
@@ -392,15 +390,15 @@ export const addMessage = (state, { message, messageType = 'txt' }) => {
     const bySelf = from === username
     // root id: when sent by current user or in group chat, is id of receiver. Otherwise is id of sender
     let chatId = bySelf || chatType !== 'singleChat' ? to : from
-    if(isThread || (thread && JSON.stringify(thread)!=='{}')){
+    if(isChatThread || (chatThread && JSON.stringify(chatThread)!=='{}')){
         if(state.threadHasHistory) return state
-        //The message is sent byself when isThread is true or the thread is not null when receiving a thread message
+        //The message is sent byself when isChatThread is true or the chatThread is not null when receiving a thread message
         //save the thread message  indexDB & threadMessageList
         const chatData = state.getIn(['threadMessage', chatId], Immutable([])).asMutable()
         const _message = {
             ...message,
             bySelf,
-            isThread:true,//is thread message
+            isChatThread:true,//is thread message
             time: +new Date(),
             status: status
         }
@@ -410,10 +408,10 @@ export const addMessage = (state, { message, messageType = 'txt' }) => {
                 isPushed = true
             }
         })
-    
+
         !isPushed && chatData.push(_message)
         state = state.setIn(['threadMessage', chatId], chatData)
-        !isPushed && AppDB.addMessage(_message, !bySelf ? 1 : 0,isThread)
+        !isPushed && AppDB.addMessage(_message, !bySelf ? 1 : 0, isChatThread)
         return state
     }
     const chatData = state.getIn([chatType, chatId], Immutable([])).asMutable()
@@ -539,13 +537,6 @@ export const deleteMessage = (state, { msgId, to, chatType }) => {
 	});
 	state = state.setIn([sessionType, chatId], messages);
 	AppDB.deleteMessage(msgId);
-    //update currentThreadInfo after recalling group message
-    if(msgId === rootState.thread.currentThreadInfo?.id){
-        const newMsg = {
-            thread_overview :rootState.thread.currentThreadInfo.thread_overview
-        }
-        rootState.thread = rootState.thread.setIn(['currentThreadInfo'],newMsg)
-    }
 	return state;
 };
 
@@ -618,17 +609,17 @@ export const updateMessageMid = (state, { id, mid,to }) => {
     return state.setIn(['byMid', mid], { id })
 }
 export const updateThreadDetails = (state, {chatType,options,messageList}) => {
-    const {operation,muc_parent_id} = options;
+    const {operation,parentId} = options;
     if(operation === 'create'){
-        const formatMsg = formatLocalMessage(muc_parent_id, chatType,{}, 'threadNotify');
+        const formatMsg = formatLocalMessage(parentId, chatType,{}, 'threadNotify');
         const message = {
             ...formatMsg,
-            time:options.create_timestamp,
+            time:options.createTimestamp,
         }
         messageList.push(message);
         AppDB.addMessage(message)
     }
-    return state = state.setIn([chatType, muc_parent_id], messageList)
+    return state.setIn([chatType, parentId], messageList)
 }
 export const addReactions = (state, { message, reaction }) => {
 	let { id, to, from } = message;

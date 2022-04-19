@@ -1,9 +1,10 @@
 import Dexie from 'dexie'
 import _ from 'lodash'
+import { message } from '../EaseChat/common/alert'
 
 const DB_VERSION = '1'
 const TABLE_NAME = 'IM_message'
-const TABLE_INDEX_KEYS = ['id', 'from', 'to', 'chatType', 'isUnread', 'status', 'mid', 'session', 'thread_overview']
+const TABLE_INDEX_KEYS = ['id', 'from', 'to', 'chatType', 'isUnread', 'status', 'mid', 'session', 'chatThreadOverview']
 const DB_ENABLE = true
 const PAGE_NUM = 20
 const AppDB = {
@@ -78,24 +79,13 @@ const AppDB = {
                 })
         })
     },
-    findLastMessage(to){
-        const $_TABLE = this.$_TABLE
-        return this.exec(resolve => {
-            $_TABLE.where('to')
-                .equals(to)
-                .last()
-                .then(res => {
-                    resolve(res)
-                })
-        })
-    },
-    findAppointedMessage(chatType,threadId){
+    findLocalMessage(chatType,messageId){
         const $_TABLE = this.$_TABLE
         return this.exec(resolve => {
             $_TABLE.where('chatType')
                 .equals(chatType)
                 .filter(item => {
-                    return item.thread_overview?.id === threadId
+                    return item.id === messageId || item.mid === messageId
                 })
                 .toArray()
                 .then(res => {
@@ -169,21 +159,21 @@ const AppDB = {
         return this.exec(resolve => {
             $_TABLE.where('id')
                 .equals(id)
-                .modify({ 'thread_overview': thread })
+                .modify({ 'chatThreadOverview': thread })
                 .then(res => console.log('res', res))
         })
     },
 	
 
     // add a message to the database
-    addMessage(message, isUnread = 0,isThread = false) {
+    addMessage(message, isUnread = 0,isChatThread = false) {
         const $_TABLE = this.$_TABLE
         if ($_TABLE === undefined) return
         if (!message.error) {
             return this.exec(resolve => {
                 $_TABLE.where('id').equals(message.id).count().then(res => {
                     if (res === 0) {
-                        !isThread ? message.isUnread = isUnread:null
+                        !isChatThread ? message.isUnread = isUnread:null
                         $_TABLE.add(message)
                             .then(res => resolve(res))
                             .catch(e => console.log('add messaga:', e))
@@ -239,7 +229,7 @@ const AppDB = {
                                 sessionType: element.chatType
                             })
                         }
-                        else if(!sessionObj[element.to] && !element.isThread){
+                        else if(!sessionObj[element.to] && !element.isChatThread){
                             sessionObj[element.to] = true
                             sessionList.push({
                                 sessionId:element.to,

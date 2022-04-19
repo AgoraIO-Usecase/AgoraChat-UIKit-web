@@ -57,11 +57,11 @@ export default function createlistener(props) {
 			// When log in, have received the Recall message before get Message from db. so retract after 2 seconds
 			if (!uikit_store.getState().message.byId[message.mid]) {
 				setTimeout(() => {
-					store.dispatch(MessageActions.deleteMessage(message));
+					store.dispatch(MessageActions.deleteMessage(message.mid,message.to,message.chatType));
 				}, 2000);
 				return;
 			}
-			store.dispatch(MessageActions.deleteMessage(message));
+			store.dispatch(MessageActions.deleteMessage(message.mid,message.to,message.chatType));
 		},
 		// The other has read the message
 		onReadMessage: (message) => {
@@ -111,15 +111,13 @@ export default function createlistener(props) {
       store.dispatch(GlobalPropsActions.setGlobalProps({to:null}))
     },
     //thread notify
-    onThreadUpdate:(msg) =>{
-      console.log("notify====msg:",msg)
+    onChatThreadChange:(msg) =>{
+      console.log("====thread change:",msg)
       store.dispatch(ThreadActions.updateThreadInfo(msg));
-      //msg.type: 'create'，'update'，'delete'，'update_msg'，'recall_msg'
     },
-    //thread member received changed
-    onThreadChange:(msg) =>{
-      console.log("muc====msg:",msg)
-      store.dispatch(ThreadActions.updateaThreadMember(msg));
+    onMultiDeviceEvent: (msg) => {
+      console.log("====thread mutiDeviceEvent：",msg)
+      store.dispatch(ThreadActions.updateMultiDeviceEvent(msg));
     },
 	onReactionMessage: (message) => {
 		console.log("onReactionMessage", message);

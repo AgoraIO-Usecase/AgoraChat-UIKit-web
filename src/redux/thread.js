@@ -9,6 +9,7 @@ import i18next from "i18next";
 
 /* ------------- Initial State ------------- */
 export const INITIAL_STATE = Immutable({
+    showThread: true,//thread entry
     hasThreadEditPanel: false,
     threadPanelStates: false,//show thread panel
     threadList: [],
@@ -16,16 +17,19 @@ export const INITIAL_STATE = Immutable({
     threadListEnd: false,//Are all data requested
     isCreatingThread: false,//Whether it is creating thread
     currentThreadInfo: {},
+    threadOriginalMsg: {},
     curGroupRole: {},//currentGrouprole 'admin' 'member' 'owner'
     threadListPanelDisplay: false,//show thread panel
 });
 
 /* ------------- Types and Action Creators ------------- */
 const { Types, Creators } = createActions({
+    setShowThread: ["status"],
     updateThreadStates: ["options"],
     setThreadList: ["threadList", "isScroll"],
     setIsCreatingThread: ['status'],
     setCurrentThreadInfo: ['message'],
+    setThreadOriginalMsg: ['message'],
     setThreadListCursor: ['cursor'],
     setThreadListEnd: ['status'],
     setCurGroupRole: ['options'],
@@ -63,33 +67,28 @@ const { Types, Creators } = createActions({
             const rootState = uikit_store.getState();
             const { threadListEnd, curGroupRole, threadListCursor } = _.get(rootState, ['thread']);
             if (threadListEnd) return
-            const getThreadFun = curGroupRole === 'member' ? 'getJoinedThreadsOfGroup' : 'getThreadsOfGroup';
+            const getThreadFun = curGroupRole === 'member' ? 'getJoinedChatThreads' : 'getChatThreads';
             let paramsData = {
-                groupId: options.groupId,
-                limit: options.limit,
+                parentId: options.groupId,
+                pageSize: options.limit,
             }
-            if (options.isScroll) {
-                paramsData.cursor = threadListCursor
-            }
+            options.isScroll ? paramsData.cursor = threadListCursor : null;
             WebIM.conn[getThreadFun](paramsData).then((res) => {
                 const threadList = res.entities;
                 if (threadList.length === 0) {
                     dispatch(Creators.setThreadListEnd(true));
                     return
                 }
-                dispatch(Creators.setThreadListCursor(res.properties.cursor))
-                let threadIdList = [];
-                threadList.forEach((item) => {
-                    threadIdList.push(item.id)
-                })
-                WebIM.conn.getThreadLastMsg({ threadIds: threadIdList }).then((res) => {
+                dispatch(Creators.setThreadListCursor(res.properties.cursor));
+                const chatThreadIds = threadList.map((item) => item.id);
+                WebIM.conn.getChatThreadLastMessage({ chatThreadIds }).then((res) => {
                     const msgList = res.entities;
                     threadList.forEach((item) => {
-                        let found = msgList.find(msgInfo => item.id === msgInfo.thread_id);
-                        item.last_message = found && found.last_message ? found.last_message : {}
+                        let found = msgList.find(msgInfo => item.id === msgInfo.chatThreadId);
+                        item.lastMessage = found && found.lastMessage ? found.lastMessage : {}
                     })
                     dispatch(Creators.setThreadList(threadList, options.isScroll))
-                }).catch(()=>{
+                }).catch(() => {
                     dispatch(Creators.setThreadList(threadList, options.isScroll))
                 })
             })
@@ -98,94 +97,71 @@ const { Types, Creators } = createActions({
     updateThreadInfo: (options) => {
         return (dispatch) => {
             const rootState = uikit_store.getState();
-            const { currentThreadInfo } = rootState.thread;
-            let messageList = _.get(rootState, ['message', 'groupChat', options.muc_parent_id]).asMutable({ deep: true });
-            const { operation, msg_parent_id } = options
-            messageList.forEach((msg) => {
-                if (msg.id === msg_parent_id || msg.mid === msg_parent_id) {
-                    if (msg.thread_overview && msg.thread_overview.operation === operation && msg.thread_overview.timestamp > options.timestamp) return
-                    if (operation === 'delete') {//delete thread
-                        msg.thread_overview = undefined;
-                        if (currentThreadInfo.thread_overview?.id === options.id) {
-                            dispatch(Creators.updateThreadStates(false))
-                            message.warn(i18next.t('The thread has been disbanded'))
+            const { currentThreadInfo, threadOriginalMsg } = rootState.thread;
+            const { operation, messageId } = options;
+            const groupChat = rootState['message']['groupChat'];
+            //handle the threadPanel and warn
+            if ((operation === 'userRemove' || operation === 'destroy') && currentThreadInfo?.id === options.id) {
+                dispatch(Creators.updateThreadStates(false));
+                const warnText = operation === 'userRemove' ? i18next.t('You have been removed from the thread') : i18next.t('The thread has been disbanded')
+                message.warn(warnText);
+            }
+            if (currentThreadInfo.id === options.id) {
+                const info = currentThreadInfo.asMutable({ deep: true});
+                dispatch(Creators.setCurrentThreadInfo(Object.assign(info,options,{source:'notify'})));
+            }
+            //handler messageList and indexDB
+            if (groupChat && groupChat[options.parentId]) {
+                let messageList = _.get(groupChat, [options.parentId]).asMutable({ deep: true });
+                messageList.forEach((msg) => {
+                    if (msg.id === messageId || msg.mid === messageId) {
+                        if (msg.chatThreadOverview && msg.chatThreadOverview.timestamp > options.timestamp) return
+                        if (operation === 'destroy' || operation === 'userRemove') {//threadDestroyed
+                            msg.chatThreadOverview = undefined;
+                        } else {//other operation
+                            if (!msg.chatThreadOverview || JSON.stringify(msg.chatThreadOverview) === "{}") {
+                                msg.chatThreadOverview = options;
+                            } else {//update_msg or recall_msg or update threadName
+                                msg.chatThreadOverview = Object.assign(msg.chatThreadOverview, options)
+                            }
                         }
-                    } else {//other operation
-                        if (!msg.thread_overview || JSON.stringify(msg.thread_overview) === "{}") {//create
-                            msg.thread_overview = options;
-                        } else {//update_msg or recall_msg or update threadName
-                            msg.thread_overview = Object.assign(msg.thread_overview, options)
+                        //update Local database
+                        AppDB.updateMessageThread(msg.id, msg.chatThreadOverview)
+                        //update currentThreadInfo when thread created(update) by self or others
+                        if ((operation === 'create' || operation === 'update') && (threadOriginalMsg.id === options.messageId || threadOriginalMsg.mid === options.messageId)) {
+                            // dispatch(Creators.setCurrentThreadInfo(msg.chatThreadOverview))
+                            dispatch(Creators.setCurrentThreadInfo(Object.assign(msg.chatThreadOverview,{source:'notify'})))
+                            //change edit status of thread
+                            dispatch(Creators.setIsCreatingThread(false));
                         }
                     }
-                    //update Local database
-                    AppDB.updateMessageThread(msg.id, msg.thread_overview)
-                    //update currentThreadInfo when thread created(update) by self or others
-                    if ((operation === 'create' || operation === 'update') && currentThreadInfo.mid === options.msg_parent_id || currentThreadInfo.id === options.msg_parent_id) {
-                        dispatch(Creators.setCurrentThreadInfo(msg))
-                        //change edit status of thread
-                        dispatch(Creators.setIsCreatingThread(false));
-                    }
-                }
-            })
-            dispatch(MessageActions.updateThreadDetails('groupChat', options, messageList));
+                })
+                dispatch(MessageActions.updateThreadDetails('groupChat', options, messageList));
+            }
 
             //update threadList
-            //options.operation: 'create'，'update'，'delete'，'update_msg'，'recall_msg'
             const threadList = _.get(rootState, ['thread', 'threadList'], Immutable([])).asMutable()
             let found = _.find(threadList, { id: options.id });
             if (!found) return;
-            let newThread = {};
-            switch (operation) {
-                case 'create': {
-                    break;
+            if (operation === 'update') {
+                let newThread = {
+                    ...found,
+                    name: options.name
                 }
-                case 'update': {
-                    newThread = {
-                        ...found,
-                        name: options.name
-                    }
-                    break;
-                }
-                case 'delete': {
-                    newThread = {}
-                    break;
-                }
-                case 'update_msg': {
-                    newThread = {
-                        ...found,
-                        last_message: options.last_message
-                    }
-                    break;
-                }
-                case 'recall_msg': {
-                    if (JSON.stringify(options.last_message) === "{}") {
-                        newThread = {
-                            ...found,
-                            last_message: options.last_message
-                        }
-                    } else {
-                        newThread = found
-                    }
-                    break;
-                }
-                default:
-                    break;
-            }
-            if (JSON.stringify(newThread) === '{}') {
-                threadList.splice(threadList.indexOf(found), 1)
-                dispatch(Creators.setThreadList(threadList))
-            } else if (JSON.stringify(newThread) !== '{}') {
+                options.last_message ? newThread.last_message = options.last_message : null;
                 threadList.splice(threadList.indexOf(found), 1, newThread)
-                dispatch(Creators.setThreadList(threadList))
+            } else {// 'threadUpdated' 'threadDestroyed'  'threadUserRemoved';
+                threadList.splice(threadList.indexOf(found), 1)
             }
+            dispatch(Creators.setThreadList(threadList))
         }
     },
     //thread member received changed
-    updateaThreadMember: (msg) => {
+    updateMultiDeviceEvent: (msg) => {
         return (dispatch) => {
             const rootState = uikit_store.getState();
             const { currentThreadInfo } = rootState.thread;
-            if (msg.type === 'threadKick' && currentThreadInfo.thread_overview?.id === msg.threadId) {
+            if ((msg.operation === 'chatThreadLeave') && currentThreadInfo?.id === msg.chatThreadId) {
                 dispatch(Creators.updateThreadStates(false))
             }
         }
@@ -200,9 +176,11 @@ export const setThreadMessage = (state, { theadId, message }) => {
     data = data.concat(message);
     return state.setIn([threadMessage, theadId], data);
 }
+export const setShowThread = (state, { status }) => {
+    return state.setIn(["showThread"], status);
+}
 export const updateThreadStates = (state, { options }) => {
-    state = state.setIn(["threadPanelStates"], options);
-    return state
+    return state.setIn(["threadPanelStates"], options);
 };
 export const setThreadList = (state, { threadList, isScroll }) => {
     let data = state['threadList'].asMutable()
@@ -218,31 +196,37 @@ export const setIsCreatingThread = (state, { status }) => {
     return state.merge({ isCreatingThread: status })
 }
 export const setCurrentThreadInfo = (state, { message }) => {
-    return state.merge({ currentThreadInfo: message })
+    return state.merge({ currentThreadInfo: message });
+}
+export const setThreadOriginalMsg = (state, { message }) => {
+    return state.merge({ threadOriginalMsg: message });
+
 }
 export const setThreadListCursor = (state, { cursor }) => {
-    return state = state.setIn(['threadListCursor'], cursor)
+    return state.setIn(['threadListCursor'], cursor)
 }
 export const setThreadListEnd = (state, { status }) => {
-    return state = state.setIn(['threadListEnd'], status)
+    return state.setIn(['threadListEnd'], status)
 }
 export const setCurGroupRole = (state, { options }) => {
-    return state = state.setIn(['curGroupRole'], options)
+    return state.setIn(['curGroupRole'], options)
 }
 export const setHasThreadEditPanel = (state, { status }) => {
-    return state = state.setIn(['hasThreadEditPanel'], status)
+    return state.setIn(['hasThreadEditPanel'], status)
 }
 export const setThreadListPanelDisplay = (state, { status }) => {
-    return state = state.setIn(['threadListPanelDisplay'], status)
+    return state.setIn(['threadListPanelDisplay'], status)
 }
 
 
 /* ------------- Hookup Reducers To Types ------------- */
 export const threadReducer = createReducer(INITIAL_STATE, {
+    [Types.SET_SHOW_THREAD]: setShowThread,
     [Types.UPDATE_THREAD_STATES]: updateThreadStates,
     [Types.SET_THREAD_LIST]: setThreadList,
     [Types.SET_IS_CREATING_THREAD]: setIsCreatingThread,
     [Types.SET_CURRENT_THREAD_INFO]: setCurrentThreadInfo,
+    [Types.SET_THREAD_ORIGINAL_MSG]: setThreadOriginalMsg,
     [Types.SET_THREAD_LIST_CURSOR]: setThreadListCursor,
     [Types.SET_THREAD_LIST_END]: setThreadListEnd,
     [Types.SET_CUR_GROUP_ROLE]: setCurGroupRole,
