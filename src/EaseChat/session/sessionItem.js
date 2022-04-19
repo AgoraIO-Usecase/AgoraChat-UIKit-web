@@ -118,6 +118,7 @@ function SessionItem(props) {
 
             index === currentSessionIndex && dispatch(GlobalPropsActions.setGlobalProps({to:null}))
             setSessionEl(null)
+            setIsShowMoreVertStyle(false)
             break;
 
           default:
