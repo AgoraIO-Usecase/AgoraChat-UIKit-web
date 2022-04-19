@@ -608,21 +608,61 @@ export const updateReactionData = (state, { message, reaction }) => {
 
 	const byId = state.getIn(["byId", messageId]);
 
+	function calculateUserList(reactions = []){
+		reactions.forEach((item) => {
+			if(item.op){
+				item.op.forEach((operator) => {
+					if(operator.reactionType === 'create' && (!item.userList.includes(operator.operator))){
+						item.userList.push(operator.operator)
+					}
+					if(operator.reactionType === 'delete'){
+						item.userList.forEach((user, index) => {
+							if(user === operator.operator){
+								userList.splice(index, 1)
+							}
+						})
+					}
+				})
+			}
+		})
+	}
+
+	function mergeArray (arr1, arr2){
+      var _arr = new Array()
+      for (var i = 0; i < arr1.length; i++) {
+        _arr.push(arr1[i])
+      }
+      for (var i = 0; i < arr2.length; i++) {
+        var flag = true
+        for (var j = 0; j < arr1.length; j++) {
+          if (arr2[i] === arr1[j]) {
+            flag = false
+            break
+          }
+        }
+        if (flag) {
+          _arr.push(arr2[i])
+        }
+      }
+      return _arr
+    }
 
 	if (byId) {
 		const { chatType } = byId;
 		let messages = state.getIn([chatType, addReactionUser]).asMutable();
 		let found = _.find(messages, { id: messageId })
 		let { reactions } = found;
-
 		let newReactions = [];
 		newReactionsData.map((item => {
 			let reactionOp = item?.op || [];
 			let added = isAdded(reactionOp)
-
 			reactions && reactions.forEach((msgReaction) => {
-				if (msgReaction.reaction === item.reaction && msgReaction.isAddedBySelf) {
-					item.isAddedBySelf = msgReaction.isAddedBySelf
+				if (msgReaction.reaction === item.reaction) {
+					
+					item.userList = mergeArray(item.userList, msgReaction.userList)
+					if(msgReaction.isAddedBySelf){
+						item.isAddedBySelf = msgReaction.isAddedBySelf
+					}
 				}
 			})
 
@@ -636,7 +676,7 @@ export const updateReactionData = (state, { message, reaction }) => {
 				newReactions.push(item)
 			}
 		}))
-
+		calculateUserList(newReactions)
 
 		let msg = {
 			...found,
@@ -647,6 +687,7 @@ export const updateReactionData = (state, { message, reaction }) => {
 
 		return state.setIn([chatType, addReactionUser], messages);
 	}else{
+		calculateUserList(reaction)
 		// state 里没有这条消息，更新数据库里消息的 reation
 		AppDB.updateMessageReaction(messageId, reaction)
 	}

@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
 		textAlign: "Center",
 		color: "#000000",
 		marginLeft: "5px",
-		width: "20px",
+		width: "27px",
 		height: "20px",
 	},
 }));
@@ -44,30 +44,35 @@ const RenderReactions = ({ message }) => {
 		setReactionInfoVisible(e.currentTarget);
 	}
 
-	let opStatus = false;
+	let reactiontotalNum = reactionMsg.reduce((total, item) => total + item.count, 0)
+
 	return (
 		<div className={classes.reaction}>
-			{reactionMsg.length > 0 &&
-				reactionMsg.map((item, i) => {
-					if (item.count === 0) {
-						return opStatus = true;
-					}
+			<span onClick={handleReactionInfo} style={{display: 'flex'}}>
+			{reactionMsg.map((item, i) => {
 					if (i > 3 && reactionMsg.length != 5) return;
 					return (
-						<div key={i} className={classes.reactionItem} onClick={() => handleDeleteReaction(item.reaction)}>
+						<div key={i} className={classes.reactionItem}>
 							{rnReactionEmoji(item.reaction)}
 						</div>
 					);
-				})}
-			{reactionMsg.length > 4 && reactionMsg.length != 5 && (
+				})
+			}
+
+			{reactionMsg.length > 5 && (
 				<span className={classes.reactionLingth}>...</span>
 			)}
-			{reactionMsg.length > 1 && <span className={classes.reactionLingth} onClick={handleReactionInfo}>
-				{opStatus ? reactionMsg.length - 1 : reactionMsg.length}
+			{reactiontotalNum > 1 && <span className={classes.reactionLingth} style={{width: reactiontotalNum > 99 ? '30px': '20px'}} >
+				{reactiontotalNum > 99 ? '99+' : reactiontotalNum}
 			</span>}
+			</span>
 			<ReactionInfo
 				anchorEl={reactionInfoVisible}
-				onClose={() => setReactionInfoVisible(null)}
+				onClose={
+					() => {
+						setReactionInfoVisible(null)
+					}
+				}
 				message={message}
 			/>
 		</div>
