@@ -77,8 +77,7 @@ const MessageBar = () => {
 
   const [sessionEl, setSessionEl] = useState(null);
 
-  const { chatType, to, username, presenceExt } = globalProps;
-  console.log(globalProps, 'messagebar')
+  const { chatType, to, name, presenceExt } = globalProps;
   const renderSessionInfoMenu = () => {
     const handleClickClearMessage = () => {
       dispatch(MessageActions.clearMessage(chatType, to));
@@ -157,7 +156,7 @@ const MessageBar = () => {
             </div>
             : null
           }
-        {to}
+        {name || to}
       </Box>
       <Box position="static">
         <IconButton

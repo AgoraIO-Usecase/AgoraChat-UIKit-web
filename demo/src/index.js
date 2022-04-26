@@ -25,9 +25,9 @@ export default class Demo extends Component {
   };
     addSessionItem = () => {
     let session = {
-      conversationType: "singleChat",
-      conversationId: "zd123",
-    };
+		conversationType: "singleChat",
+		conversationId: "test0001",
+	};
     EaseApp.addConversationItem(session);
     EaseApp.changePresenceStatus({[session.conversationId] : 'Online'})
   };
@@ -51,17 +51,18 @@ export default class Demo extends Component {
         <h3>EaseApp</h3>
         <div>
           <EaseApp
+            customMessageList={ [{name: 'report', value: 'report', position: 'others'}]}
+            isShowReaction
             successLoginCallback={this.test}
             failCallback={this.test2}
             onAvatarChange={this.test3}
             onChatAvatarClick={this.test4}
-            appkey="5101220107132865#test"
-            username="lu1"
+            
+            appkey= "5101220107132865#test"
+            username="zd3"
             password="1"
-            // appkey= "41117440#383391"
-            // username="test0001"
-            // agoraToken="007eJxTYNDx92Fqf35CjT194rFDe+x+bT0dcN3yJM+05l13Nx7Z/V5RgSHNMCXZ3NwiKSUl2czELDHFIs3IzMDS3Cw50SjFwNA0+d6GL4kKMgwM8t933WJkYGVgBEIQX4XB3DDRwswwzUDXwiDJUNfQMDVZNzHZNFHXMs3Y2MLU2NDQxNAMAGn7Ka8="
-            header={<div style={{ height: "100px", position: 'relative' }}>TestHeader <EasePresence style={{position: 'absolute', top: '0px', left: '90px'}}  /></div>} />
+            // agoraToken="007eJxTYDiw2fuKzNWjLzknllxuMkl+z+OTa5dxRZPB6fP1VGlGX1sFhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9NkPSnjJAUZBgbT1MfvGBlYGRiBEMRXYTBPsTAyMzc10LVMSjTVNTRMTda1NDdP1U0xT7Y0M0oztjC1NAMA7zUk8Q=="
+            header={<div style={{ height: "100px" }}>TestHeader</div>} />
         </div>
 
       

@@ -34,6 +34,7 @@ const useStyles = makeStyles((theme) => ({
   },
   grid: {
     backgroundColor: "rgba(206, 211, 217, 0.3)",
+    width:'360px'
   },
 }));
 const Item = styled(Grid)(({ theme }) => ({}));
@@ -44,7 +45,7 @@ const EaseApp = (props) => {
   const handleClickItem = useCallback(
     (session) => {
       props.onConversationClick && props.onConversationClick(session);
-      const { sessionType, sessionId } = session;
+      const { sessionType, sessionId, name } = session;
       if (!session.lastMessage) {
         dispatch(MessageActions.fetchMessage(sessionId, sessionType));
       }
@@ -63,6 +64,7 @@ const EaseApp = (props) => {
           GlobalPropsActions.setGlobalProps({
             to: sessionId,
             chatType: sessionType,
+            name: name,
             presenceExt: {[data.uid] : data.ext}
           })
         );
@@ -85,8 +87,6 @@ const EaseApp = (props) => {
       >
         <Grid
           item
-          xs={6}
-          md={3}
           className={classes.grid}
         >
           <div
@@ -95,6 +95,7 @@ const EaseApp = (props) => {
               overflowY: "auto",
               display: "flex",
               flexDirection: "column",
+              width:'360px'
             }}
           >
             <div>{props.header}</div>
@@ -103,7 +104,9 @@ const EaseApp = (props) => {
             </EaseAppContext.Provider>
           </div>
         </Grid>
-        <Grid item xs={6} md={9}>
+        <Grid 
+        style={{width:'100%'}}
+        >
           <EaseChat {...props} />
         </Grid>
       </div>
@@ -170,10 +173,10 @@ EaseAppProvider.getSdk = (props) => {
   return WebIM
 };
 EaseAppProvider.propTypes = {
-  username: PropTypes.string,
-  agoraToken: PropTypes.string,
+	username: PropTypes.string,
+	agoraToken: PropTypes.string,
   password: PropTypes.string,
-  appkey: PropTypes.string,
+	appkey: PropTypes.string,
 
   header: PropTypes.node,
   addConversationItem: PropTypes.func,
@@ -185,6 +188,9 @@ EaseAppProvider.propTypes = {
   menuList: PropTypes.array,
   handleMenuItem: PropTypes.func,
   onChatAvatarClick:PropTypes.func,
+  isShowReaction: PropTypes.bool,
+  customMessageList:PropTypes.array,
+  customMessageClick:PropTypes.func
 };
 EaseAppProvider.defaultProps = {
   isShowUnread: true,

@@ -8,7 +8,7 @@ import MessageActions from "../../redux/message";
 import RetractedMessage from "./messages/retractedMessage";
 import FileMessage from "./messages/fileMessage";
 import ImgMessage from "./messages/imageMessage";
-import AudioMessage from "./messages/audioMessage";
+import AudioOrVideoMessage from "./messages/audioOrVideoMessage";
 import TextMessage from "./messages/textMessage";
 import i18next from "i18next";
 
@@ -44,7 +44,7 @@ function MessageList({ messageList, showByselfAvatar }) {
         dom.scrollTop = dom.scrollHeight;
       }, 0);
     }
-  });
+  }, [messageList.length]);
 
   const handleRecallMsg = useCallback(
     (message) => {
@@ -114,8 +114,8 @@ function MessageList({ messageList, showByselfAvatar }) {
                       showByselfAvatar={showByselfAvatar}
                     />
                   );
-                } else if (msg.body.type === "audio") {
-                  return <AudioMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}/>;
+                } else if (msg.body.type === "audio" || msg.body.type === "video") {
+                  return <AudioOrVideoMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}/>;
                 } else if (msg.body.type === "recall") {
                   return (
                     <RetractedMessage message={msg} key={msg.id + index}/>
