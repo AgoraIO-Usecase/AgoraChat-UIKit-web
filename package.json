@@ -1,6 +1,6 @@
 {
   "name": "chat-uikit",
-  "version": "1.0.84",
+  "version": "1.1.2",
   "description": "chat-uikit React component",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -26,7 +26,7 @@
     "cpx": "^1.5.0",
     "cross-env": "^7.0.3",
     "dexie": "^3.0.3",
-    "easemob-websdk": "^4.0.1",
+    "easemob-websdk": "^4.0.3",
     "i18next": "^21.3.3",
     "i18next-browser-languagedetector": "^6.1.2",
     "js-cookie": "^3.0.1",

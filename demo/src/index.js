@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { render } from "react-dom";
-import { EaseChat, EaseApp, EasePresence } from "../../src/index";
+import { EaseChat, EaseApp } from "../../src/index";
 // import WebIM from "./WebIM";
 import val from "./comm";
 // import initListen from "./WebIMListen";
@@ -64,8 +64,6 @@ export default class Demo extends Component {
             // agoraToken="007eJxTYDiw2fuKzNWjLzknllxuMkl+z+OTa5dxRZPB6fP1VGlGX1sFhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9NkPSnjJAUZBgbT1MfvGBlYGRiBEMRXYTBPsTAyMzc10LVMSjTVNTRMTda1NDdP1U0xT7Y0M0oztjC1NAMA7zUk8Q=="
             header={<div style={{ height: "100px" }}>TestHeader</div>} />
         </div>
-
-      
       </div>
     );
   }
