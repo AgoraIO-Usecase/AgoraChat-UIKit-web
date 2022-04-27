@@ -44,7 +44,7 @@ const Chat = (props) => {
       noLogin &&
       WebIM.conn.open({
         user: props.username,
-        // agoraToken: props.agoraToken,
+        agoraToken: props.agoraToken,
         pwd: props.password,
         appKey: WebIM.config.appkey,
       });
@@ -116,7 +116,7 @@ EaseChatProvider.propTypes = {
 	appkey: PropTypes.string,
 	username: PropTypes.string,
 	agoraToken: PropTypes.string,
-  password: PropTypes.string,
+  	password: PropTypes.string,
 	chatType: PropTypes.string,
 	to: PropTypes.string,
 
