@@ -49,13 +49,26 @@ const EaseApp = (props) => {
       if (!session.lastMessage) {
         dispatch(MessageActions.fetchMessage(sessionId, sessionType));
       }
-      dispatch(
-        GlobalPropsActions.setGlobalProps({
-          to: sessionId,
-          chatType: sessionType,
-          name: name,
+      WebIM.conn.getPresenceStatus({usernames: [sessionId]}).then(res => {
+        let extFlag = false
+        const data = res.result[0]
+        Object.values(data.status).forEach(val => {
+          if (Number(val) === 1) {
+            extFlag = true
+          }
         })
-      );
+        if (!extFlag) {
+          data.ext = 'Offline'
+        }
+        dispatch(
+          GlobalPropsActions.setGlobalProps({
+            to: sessionId,
+            chatType: sessionType,
+            name: name,
+            presenceExt: {[data.uid] : data.ext}
+          })
+        );
+      });
       dispatch(SessionActions.setCurrentSession(sessionId));
       dispatch(MessageActions.clearUnreadAsync(sessionType, sessionId));
     },
@@ -114,7 +127,8 @@ export default EaseAppProvider;
 
 EaseAppProvider.addConversationItem = (session) => {
   if (session && Object.keys(session).length > 0) {
-    const { conversationType, conversationId } = session;
+    const { conversationType, conversationId, ext } = session;
+    console.log(session, 'session')
     const { dispatch } = store;
     const storeSessionList = store.getState().session;
     const { sessionList } = storeSessionList;
@@ -135,10 +149,21 @@ EaseAppProvider.addConversationItem = (session) => {
       GlobalPropsActions.setGlobalProps({
         to: conversationId,
         chatType: conversationType,
+        presenceExt: {[conversationId] : ext }
       })
     );
     dispatch(MessageActions.clearUnreadAsync(conversationType, conversationId));
   }
+};
+EaseAppProvider.changePresenceStatus = (ext) => {
+  console.log(ext, 'changePresenceStatus')
+  const { dispatch, getState } = store;
+  dispatch(
+    GlobalPropsActions.setGlobalProps({
+      ...getState().global.globalProps,
+      presenceExt: ext
+    })
+  )
 };
 EaseAppProvider.getSdk = (props) => {
   if (!WebIM.conn) {
