@@ -13,7 +13,6 @@ const { Types, Creators } = createActions({
   },
 
   setGlobalProps: (options) => {
-    console.log(options, 'options==setGlobalProps')
     return (dispatch) => {
       dispatch(Creators.updateGlobalProps(options));
     };
