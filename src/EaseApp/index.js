@@ -65,7 +65,7 @@ const EaseApp = (props) => {
             to: sessionId,
             chatType: sessionType,
             name: name,
-            presenceExt: {[data.uid] : data.ext}
+            presenceExt: {[sessionId] : data.ext}
           })
         );
       });
