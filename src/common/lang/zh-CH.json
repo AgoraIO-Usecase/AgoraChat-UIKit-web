@@ -61,9 +61,9 @@
         "No Result":"无结果",
         "Sorry,unable to load original message":"抱歉，无法加载原始消息",
         "The thread has been disbanded": "该子区已被解散",
-        "Threads":"子区",
         "Started a Thread":"创建了一个子区",
-        "See all":"查看全部",
-        "You have been removed from the thread":"你已经被移除子区"
+        "Join the thread":"查看全部",
+        "You have been removed from the thread":"你已经被移除子区",
+        "Someone else created a thread for this message":"其他人已经创建了该消息的子区"
     }
 }

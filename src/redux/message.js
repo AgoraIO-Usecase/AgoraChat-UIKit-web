@@ -614,7 +614,10 @@ export const updateThreadDetails = (state, {chatType,options,messageList}) => {
         const formatMsg = formatLocalMessage(parentId, chatType,{}, 'threadNotify');
         const message = {
             ...formatMsg,
+            from:options.operator,
+            name:options.name,
             time:options.createTimestamp,
+            threadId:options.id
         }
         messageList.push(message);
         AppDB.addMessage(message)

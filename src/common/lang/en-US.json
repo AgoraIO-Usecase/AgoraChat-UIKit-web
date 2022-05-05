@@ -56,9 +56,9 @@
         "No Result":"No Result",
         "Sorry,unable to load original message": "Sorry,unable to load original message",
         "The thread has been disbanded":"The thread has been disbanded",
-        "Threads":"Threads",
         "Started a Thread":"Started a Thread",
-        "See all":"See all",
-        "You have been removed from the thread":"You have been removed from the thread"
+        "Join the thread":"Join the thread",
+        "You have been removed from the thread":"You have been removed from the thread",
+        "Someone else created a thread for this message":"Someone else created a thread for this message"
     }
 }

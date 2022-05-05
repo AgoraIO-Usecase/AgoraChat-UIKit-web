@@ -21,8 +21,10 @@ export const initIMSDK = (appkey) => {
     //公有云 isHttpDNS 默认配置为true
     // isHttpDNS: WebIM.config.isHttpDNS,
     isHttpDNS: false,
-    url: 'http://im-api-test-hsb.easemob.com:8280/ws',
-    apiUrl: 'http://a1-hsb.easemob.com'
+    url: (window.location.protocol === "https:" ? "https:" : "http:") + "//im-api-v2-hsb.easemob.com/ws",
+    apiUrl: (window.location.protocol === "https:" ? "https:" : "http:") + "//a1-hsb.easemob.com",
+    // url: 'http://im-api-test-hsb.easemob.com:8280/ws',
+    // apiUrl: 'http://a1-hsb.easemob.com'
   };
 
   WebIM.conn = new websdk.connection(options);

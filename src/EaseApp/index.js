@@ -140,6 +140,8 @@ EaseAppProvider.addConversationItem = (session) => {
       })
     );
     dispatch(MessageActions.clearUnreadAsync(conversationType, conversationId));
+    dispatch(ThreadActions.updateThreadStates(false));
+    dispatch(ThreadActions.getCurrentGroupRole({sessionType:conversationType, sessionId:conversationId}));
   }
 };
 EaseAppProvider.getSdk = (props) => {

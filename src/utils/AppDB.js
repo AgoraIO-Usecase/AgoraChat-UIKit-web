@@ -66,19 +66,7 @@ const AppDB = {
                 })
         })
     },
-    fetchThreadMessage(to,offset = 0,limit = PAGE_NUM){
-        const $_TABLE = this.$_TABLE
-        return this.exec(resolve => {
-            $_TABLE.where('to')
-                .equals(to)
-                .offset(offset)
-                .limit(limit)
-                .toArray()
-                .then(res => {
-                    resolve(res)
-                })
-        })
-    },
+    
     findLocalMessage(chatType,messageId){
         const $_TABLE = this.$_TABLE
         return this.exec(resolve => {
@@ -157,10 +145,17 @@ const AppDB = {
     updateMessageThread(id, thread){
         const $_TABLE = this.$_TABLE
         return this.exec(resolve => {
-            $_TABLE.where('id')
-                .equals(id)
-                .modify({ 'chatThreadOverview': thread })
-                .then(res => console.log('res', res))
+            $_TABLE.where('chatType')
+            .equals('groupChat')
+            .filter(item => {
+                return item.id === id || item.mid === id
+            })
+            .modify({ 'chatThreadOverview': thread })
+            .then(res => console.log('res', res))
+            // $_TABLE.where('id')
+            //     .equals(id)
+            //     .modify({ 'chatThreadOverview': thread })
+            //     .then(res => console.log('res', res))
         })
     },
 	

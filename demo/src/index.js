@@ -63,7 +63,7 @@ export default class Demo extends Component {
             onChatAvatarClick={this.test4}
             onEditThreadPanel={this.test5}
             appkey= "easemob-demo#chatdemoui"
-            username="wy8"
+            username="wy6"
             password="1"
             isShowReaction
             // agoraToken="007eJxTYPCe51Vb5Rl3kCX/veizhwyel9f7fNp0e2mBNGd157ut3zUVGNIMU5LNzS2SUlKSzUzMElMs0ozMDCzNzZITjVIMDE2To7ItkxRkGBhONNtwMzKwMjACIYivwmBiaJxoYWxgoJtoZpmqa2iYmqybZG5oqWtpbGJsmpaWbGpmbgIAfPMmSQ=="

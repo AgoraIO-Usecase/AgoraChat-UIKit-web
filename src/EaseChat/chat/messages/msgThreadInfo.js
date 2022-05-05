@@ -11,6 +11,7 @@ import avatar from "../../../common/icons/avatar1.png";
 import i18next from "i18next";
 import { emoji } from "../../../common/emoji";
 import AppDB from "../../../utils/AppDB"
+import { message as Alert } from '../../../EaseChat/common/alert'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -92,8 +93,8 @@ const useStyles = makeStyles((theme) => ({
     },
     messageInfo: {
         display: 'inline-block',
-        lineHeight: '16px',
-        marginTop: '3px',
+        height: '20px',
+        lineHeight: '20px',
         color: '#4d4d4d',
         fontSize: '12px',
         overflow: 'hidden',
@@ -140,7 +141,7 @@ const useStyles = makeStyles((theme) => ({
         marginTop: '8px',
         color: '#4d4d4d',
         textAlign: 'left',
-    }
+    },
 }));
 
 const MsgThreadInfo = (props) => {
@@ -186,6 +187,7 @@ const MsgThreadInfo = (props) => {
                         src={require(`../../../common/faces/${v}`).default}
                         width={20}
                         height={20}
+                        style={{verticalAlign:'middle'}}
                     />
                 );
             } else {
@@ -209,6 +211,8 @@ const MsgThreadInfo = (props) => {
             }).catch(e=>{
                 if(e.type === 1301){
                     changeThreadStatus()
+                }else if( e.type === 1300){
+                    Alert.warn(i18next.t('The thread has been disbanded'));
                 }
             })
             return

@@ -115,6 +115,12 @@ function SendBox(props) {
   const isCreatingThread = useSelector((state) => state.thread?.isCreatingThread);
   const currentThreadInfo = useSelector((state) => state.thread?.currentThreadInfo);
   const threadOriginalMsg = useSelector((state) => state.thread?.threadOriginalMsg);
+  const threadPanelStates = useSelector((state) => state.thread?.threadPanelStates);
+  useEffect(()=>{
+    if(threadPanelStates){
+      setInputValue('')
+    }
+  },[isCreatingThread,currentThreadInfo?.id,threadOriginalMsg?.mid,threadOriginalMsg?.id,threadPanelStates])
   const createChatThread = ()=>{
     return new Promise((resolve,reject) => {
       if (isCreatingThread && props.isChatThread) {
@@ -122,8 +128,6 @@ function SendBox(props) {
           console.log('threadName can not empty')
           return;
         }
-      }
-      if(isCreatingThread){
         const options = {
           name: props.threadName.replace(/(^\s*)|(\s*$)/g, ""),
           messageId: threadOriginalMsg.bySelf && threadOriginalMsg.mid  ? threadOriginalMsg.mid :threadOriginalMsg.id,
@@ -151,7 +155,7 @@ function SendBox(props) {
       setInputValue("");
       inputRef.current.focus();
     })
-  }, [inputValue, to, chatType, dispatch,currentThreadInfo ]);
+  }, [inputValue, to, chatType, dispatch,currentThreadInfo,props ]);
 
   const onKeyDownEvent = useCallback(
     (e) => {
@@ -201,8 +205,7 @@ function SendBox(props) {
     createChatThread().then(to=>{
       dispatch(MessageActions.sendFileMessage(to, chatType, file, fileEl, props.isChatThread));
     })
-  };
-
+  }
   const handleVideoChange = (e) => {
     let file = WebIM.utils.getFileUrl(e.target);
     if (!file.filename) {

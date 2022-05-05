@@ -77,6 +77,9 @@ const { Types, Creators } = createActions({
                 const threadList = res.entities;
                 if (threadList.length === 0) {
                     dispatch(Creators.setThreadListEnd(true));
+                    if(!options.isScroll){
+                        dispatch(Creators.setThreadList(threadList, options.isScroll))
+                    }
                     return
                 }
                 dispatch(Creators.setThreadListCursor(res.properties.cursor));
@@ -100,39 +103,59 @@ const { Types, Creators } = createActions({
             const { currentThreadInfo, threadOriginalMsg } = rootState.thread;
             const { operation, messageId } = options;
             const groupChat = rootState['message']['groupChat'];
+            let chatThreadOverview = {};
+            if(operation === 'userRemove' || operation === 'destroy'){
+                chatThreadOverview = undefined;
+            }else if(operation === 'create' || operation === 'update'){
+                chatThreadOverview = Object.assign({},options,{source:'notify'})
+            }
             //handle the threadPanel and warn
             if ((operation === 'userRemove' || operation === 'destroy') && currentThreadInfo?.id === options.id) {
                 dispatch(Creators.updateThreadStates(false));
+                dispatch(Creators.setCurrentThreadInfo({}));
                 const warnText = operation === 'userRemove' ? i18next.t('You have been removed from the thread') : i18next.t('The thread has been disbanded')
                 message.warn(warnText);
-            }
-            if (currentThreadInfo.id === options.id) {
+            }else if(currentThreadInfo.id === options.id || threadOriginalMsg.id === options.messageId || threadOriginalMsg.mid === options.messageId) {
                 const info = currentThreadInfo.asMutable({ deep: true});
-                dispatch(Creators.setCurrentThreadInfo(Object.assign(info,options,{source:'notify'})));
+                //othrer create the chatThread of the message
+                if(operation === 'create'){
+                    if(WebIM.conn.context.userId!== options.operator){
+                        dispatch(Creators.updateThreadStates(false));
+                        dispatch(Creators.setCurrentThreadInfo({}));
+                        dispatch(Creators.setThreadOriginalMsg({}));
+                        message.warn(i18next.t('Someone else created a thread for this message'));
+                    }else{
+                        //update the owner
+                        dispatch(Creators.setCurrentThreadInfo(Object.assign({}, info,{owner: chatThreadOverview.operator})));
+                    }
+                }
+                //create 事件下发时间大部分晚于update，收到create不处理，防止覆盖 messageCount 字段
+                if(operation === 'update' || operation === 'create' && info.timestamp < options.timestamp){
+                    dispatch(Creators.setCurrentThreadInfo(Object.assign({}, info,chatThreadOverview)));
+                }
+                dispatch(Creators.setIsCreatingThread(false));
             }
-            //handler messageList and indexDB
+            //update Local database
+            AppDB.findLocalMessage('groupChat', messageId).then((res) => {
+                let msg = res.length === 1 ? res[0] : {};
+                const info = msg.chatThreadOverview && chatThreadOverview ? msg.chatThreadOverview: {}
+                //create 事件下发时间大部分晚于update，收到create不处理，防止覆盖 messageCount 字段
+                if(operation === 'destroy'){
+                    AppDB.updateMessageThread(messageId, undefined)
+                }else if(operation !== 'create' || operation === 'create' && info.timestamp < options.timestamp){
+                    AppDB.updateMessageThread(messageId, Object.assign({}, info, chatThreadOverview))
+                }
+            })
+            //handler messageList
             if (groupChat && groupChat[options.parentId]) {
                 let messageList = _.get(groupChat, [options.parentId]).asMutable({ deep: true });
                 messageList.forEach((msg) => {
                     if (msg.id === messageId || msg.mid === messageId) {
-                        if (msg.chatThreadOverview && msg.chatThreadOverview.timestamp > options.timestamp) return
-                        if (operation === 'destroy' || operation === 'userRemove') {//threadDestroyed
+                        const info = msg.chatThreadOverview && chatThreadOverview? msg.chatThreadOverview: {}
+                        if(operation === 'destroy'){
                             msg.chatThreadOverview = undefined;
-                        } else {//other operation
-                            if (!msg.chatThreadOverview || JSON.stringify(msg.chatThreadOverview) === "{}") {
-                                msg.chatThreadOverview = options;
-                            } else {//update_msg or recall_msg or update threadName
-                                msg.chatThreadOverview = Object.assign(msg.chatThreadOverview, options)
-                            }
-                        }
-                        //update Local database
-                        AppDB.updateMessageThread(msg.id, msg.chatThreadOverview)
-                        //update currentThreadInfo when thread created(update) by self or others
-                        if ((operation === 'create' || operation === 'update') && (threadOriginalMsg.id === options.messageId || threadOriginalMsg.mid === options.messageId)) {
-                            // dispatch(Creators.setCurrentThreadInfo(msg.chatThreadOverview))
-                            dispatch(Creators.setCurrentThreadInfo(Object.assign(msg.chatThreadOverview,{source:'notify'})))
-                            //change edit status of thread
-                            dispatch(Creators.setIsCreatingThread(false));
+                        }else if(operation !== 'create' || operation === 'create' && info.timestamp < options.timestamp){
+                            msg.chatThreadOverview = Object.assign({}, info, chatThreadOverview)
                         }
                     }
                 })

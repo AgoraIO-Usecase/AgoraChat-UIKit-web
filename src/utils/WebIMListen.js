@@ -6,6 +6,7 @@ import MessageActions from "../redux/message";
 import SessionActions from "../redux/session";
 import GlobalPropsActions from "../redux/globalProps";
 import ThreadActions from "../redux/thread"
+import uikit_store from "../redux/index";
 export default function createlistener(props) {
 	WebIM.conn.addEventHandler("EaseChat", {
 		onConnected: (msg) => {
@@ -28,7 +29,7 @@ export default function createlistener(props) {
       const { chatType, from, to} = message;
       const sessionId = chatType === "singleChat" ? from : to;
       store.dispatch(MessageActions.addMessage(message, "txt"));
-      store.dispatch(SessionActions.topSession(sessionId, chatType))
+      store.dispatch(SessionActions.topSession(sessionId, chatType, message))
     },
     onFileMessage: (message) => {
       console.log("onFileMessage", message);
@@ -43,7 +44,7 @@ export default function createlistener(props) {
       const { chatType, from, to } = message;
       const sessionId = chatType === "singleChat" ? from : to;
       store.dispatch(MessageActions.addMessage(message, "img"));
-      store.dispatch(SessionActions.topSession(sessionId, chatType))
+      store.dispatch(SessionActions.topSession(sessionId, chatType, message))
     },
 
 		onAudioMessage: (message) => {
@@ -70,6 +71,7 @@ export default function createlistener(props) {
 		},
 
 		onReceivedMessage: function (message) {
+      console.log("updateMessageMid",message)
 			const { id, mid, to } = message;
 			store.dispatch(MessageActions.updateMessageMid(id, mid, to));
 		},
@@ -93,6 +95,7 @@ export default function createlistener(props) {
       store.dispatch(GlobalPropsActions.logout())
     },
     onGroupChange: (event) => {
+      console.log("onGroupChange",event);
       if(event.type === 'direct_joined'){
         store.dispatch(SessionActions.getJoinedGroupList())
       }else if(event.type === 'joinPublicGroupSuccess'){
@@ -102,6 +105,12 @@ export default function createlistener(props) {
         })
         if(!result){
           store.dispatch(SessionActions.getJoinedGroupList())
+        }
+      }
+      if(event.type === 'addAdmin' || event.type === 'removeAdmin' || event.type === 'changeOwner'){
+        const { chatType, to } = uikit_store.getState().global.globalProps;
+        if( chatType === 'groupChat' && to === event.gid){
+          dispatch(ThreadActions.getCurrentGroupRole({chatType, to}));
         }
       }
     },

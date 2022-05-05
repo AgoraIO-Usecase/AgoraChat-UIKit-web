@@ -12,6 +12,7 @@ import i18next from "i18next";
 import { emoji } from "../../../common/emoji";
 import _ from "lodash";
 import AppDB from "../../../utils/AppDB";
+import { message as Alert } from '../../../EaseChat/common/alert'
 
 const ThreadListPanel = ({ anchorEl, onClose }) => {
     const dispatch = useDispatch();
@@ -114,6 +115,8 @@ const ThreadListPanel = ({ anchorEl, onClose }) => {
             }).catch(e=>{
                 if(e.type === 1301){
                     changeCurrentThreadInfo(option)
+                }else if( e.type === 1300){
+                    Alert.warn(i18next.t('The thread has been disbanded'));
                 }
             })
         }

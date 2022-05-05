@@ -141,8 +141,6 @@ function Recorder({ open, onClose, isChatThread,threadName }) {
           console.log('threadName can not empty')
           return;
         }
-      }
-      if(isCreatingThread){
         const options = {
           name: threadName.replace(/(^\s*)|(\s*$)/g, ""),
           messageId: threadOriginalMsg.bySelf && threadOriginalMsg.mid  ? threadOriginalMsg.mid :threadOriginalMsg.id,

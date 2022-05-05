@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection:'column',
     // flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
-    minWidth: "40%",
+    // minWidth: "40%",
     maxWidth: "80%",
     alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
     background: '#f2f2f2',
@@ -219,10 +219,10 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
                 <audio src={url} ref={audioRef} />
               </div>
             ) : (
-              <div style={{ position: "relative" }}>
+              <div style={{ position: "relative",width:'100%', maxWidth: '320px'}}>
                 <video
                   style={{
-                    width: "320px",
+                    width: "100%",
                     borderRadius: "20px",
                   }}
                   controls

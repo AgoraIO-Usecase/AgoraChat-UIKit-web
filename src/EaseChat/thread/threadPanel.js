@@ -8,13 +8,14 @@ import { renderTime } from "../../utils/index";
 import { useSelector, useDispatch } from "../../EaseApp/index";
 import deleteIcon from '../../common/images/delete.png'
 import MessageActions from "../../redux/message"
-import { Box } from "@material-ui/core";
+import { Box, IconButton } from "@material-ui/core";
 import { EaseChatContext } from "../chat/index";
 import _ from "lodash";
 import avatar from "../../common/icons/avatar1.png";
 import "../../i18n";
 import i18next from "i18next";
 import { emoji } from "../../common/emoji";
+import AudioPlayer from "../chat/messages/audioPlayer/audioPlayer";
 
 const useStyles = makeStyles((theme) => {
     return {
@@ -89,6 +90,7 @@ const useStyles = makeStyles((theme) => {
             paddingLeft: '8px',
             flex: '1 1 calc(100% - 36px)',
             overflow: 'hidden',
+            textAlign:'left',
         },
         info: {
             display: 'flex',
@@ -126,9 +128,6 @@ const useStyles = makeStyles((theme) => {
             fontSize: '18px',
             textAlign: 'left',
             maxWidth: '350px',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
         },
         threadDesc: {
             lineHeight: '20px',
@@ -160,8 +159,52 @@ const useStyles = makeStyles((theme) => {
             fontSize: '16px',
             fontWeight: '600',
             textAlign: 'left',
-        }
-
+        },
+        fileCard: {
+            width: "252px",
+            height: "72px",
+            backgroundColor: "rgba(0,0,0,0.05)",
+            display: "flex",
+            alignItems: "center",
+            marginLeft: "10px",
+            marginBottom: "6px",
+        },
+        fileIcon: {
+            width: "59px",
+            height: "59px",
+            background: "rgba(35, 195, 129, 0.06)",
+            borderRadius: "4px",
+            border: "1px solid rgba(35, 195, 129, 0.06)",
+            textAlign: "center",
+            lineHeight: "59px",
+            margin: "0 7px 0 7px",
+            flexShrink: 0,
+        },
+        fileInfo: {
+            "& p": {
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis",
+                width: "126px",
+                margin: "0",
+            },
+            "& span": {
+                fontSize: "12px",
+                color: "#010101",
+                lineHeight: "16px",
+            },
+        },
+        download: {
+            fontSize: "16px",
+            color: "rgba(0,0,0,.6)",
+            fontWeight: "bold",
+            cursor: "pointer",
+        },
+        duration: {
+            margin: "0 4px",
+            position: "relative",
+            left: '15px',
+          },
     };
 });
 
@@ -233,7 +276,7 @@ const ThreadPanel = () => {
     const createThread = () => {
         return (<Box>
             <div className={classes.createThreadCon}>
-                <input className={classes.threadNameInput} style={{ color: threadName.length === 0 ? '#ccc' : '#000' }} placeholder={i18next.t('Thread Name')} maxLength={100} value={threadName} onChange={(e) => changeThreadName(e)}></input>
+                <input className={classes.threadNameInput} style={{ color: threadName.length === 0 ? '#ccc' : '#000' }} placeholder={i18next.t('Thread Name')} maxLength={64} value={threadName} onChange={(e) => changeThreadName(e)}></input>
                 <span className={classes.threadNameClear} style={{ opacity: threadName.length === 0 ? '15%' : '100%' }} onClick={clearThreadName}></span>
             </div>
             <div className={classes.startTips} style={{ color: threadName.length === 0 ? '#ccc' : '#4d4d4d' }}>
@@ -258,15 +301,81 @@ const ThreadPanel = () => {
                     <div className={classes.threadOwnerMsg}>
                         <div className={classes.info}>
                             <span>{threadOriginalMsg.from}</span>
-                            <span>{renderTime(threadOriginalMsg.time,timeSyle)}</span>
+                            <span>{renderTime(threadOriginalMsg.time, timeSyle)}</span>
                         </div>
-                        <div className={classes.threadReplayMessage}>{renderMessage(threadOriginalMsg.body)}</div>
+                        {JSON.stringify(threadOriginalMsg) !== '{}' && renderMsgDom(threadOriginalMsg)}
+                        {/* <div className={classes.threadReplayMessage}>{renderMessage(threadOriginalMsg.body)}</div> */}
                         <div className={classes.threadOriginalMessage}>{i18next.t('Original message from Group Chat')}</div>
                     </div>
                 </div>
                 {isCreatingThread ? null : <hr className={classes.split} />}
             </Box>
         )
+    }
+    const audioRef = useRef(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const play = (e,message) => {
+        setIsPlaying(true);
+        // audioRef.current.play();
+        const time = message.body.length * 1000;
+        setTimeout(() => {
+            setIsPlaying(false);
+        }, time + 500);
+    };
+    const renderMsgDom = (message) => {
+        if (message.body.type === "txt") {
+            return (
+                <div className={classes.threadReplayMessage}>{renderMessage(threadOriginalMsg.body)}</div>
+            );
+        } else if (message.body.type === "file") {
+            return (
+                <div className={classes.fileCard}>
+                    <div className={classes.fileIcon}>
+                        {i18next.t("file")}
+                    </div>
+                    <div className={classes.fileInfo}>
+                        <p>{message.filename}</p>
+                        <span>
+                            {Math.floor(message.body.size / 1024) + "kb"}
+                        </span>
+                    </div>
+                    <div className={classes.download}>
+						<a href={message.body.url} download={message.filename}>
+							<IconButton className="iconfont icon-xiazai"></IconButton>
+						</a>
+					</div>
+                </div>
+            );
+        } else if (message.body.type === "img") {
+            return (
+                <img src={message.url} alt="img message" style={{ display: 'inline-block', maxWidth: '80%' }}></img>
+            );
+        } else if (message.body.type === "audio") {
+            return (
+                <div style={{ display: "flex",position:'relative', width: '80px', backgroundColor:"rgba(0,0,0,0.05)",lineHeight: '38px',borderRadius:'4px'}} onClick={(e)=>play(e,message)}>
+                    <span className={classes.duration}>
+                        {Math.floor(message.body.length) + "''"}
+                    </span>
+                    <AudioPlayer play={isPlaying} />
+                    <audio src={message.body.url} ref={audioRef} />
+                </div>
+            )
+        } else if (message.body.type === "video") {
+            return (
+                <div style={{ position: "relative", maxWidth: '80%' }}>
+                    <video
+                        style={{
+                            width: "100%",
+                            borderRadius: "20px",
+                        }}
+                        controls
+                        src={message.url}
+                    />
+                </div>
+            )
+        } else {
+            return null;
+        }
     }
     const renderEmptyMsg = () => {
         return (
@@ -292,7 +401,7 @@ const ThreadPanel = () => {
             if (!ReactDOM.findDOMNode(dom)) return;
             dom.scrollTop = 0;
         }
-        if(currentMessage.source !== 'notify'){
+        if (currentMessage.source !== 'notify') {
             currentMessage.id && dispatch(MessageActions.setThreadHasHistory(true));
             currentMessage.id && dispatch(MessageActions.fetchThreadMessage(currentMessage.id))
         }
@@ -300,13 +409,14 @@ const ThreadPanel = () => {
     useEffect(() => {
         const dom = scrollThreadEl.current;
         if (!ReactDOM.findDOMNode(dom)) return;
-        if (!threadHasHistory && dom.scrollTop !==0 && messageList.length !== 0 && dom.scrollHeight >= (dom.scrollTop + dom.clientHeight)) {//receive new message
+        // if (!threadHasHistory && dom.scrollTop !==0 && messageList.length !== 0 && dom.scrollHeight >= (dom.scrollTop + dom.clientHeight)) {//receive new message
+        if (!threadHasHistory && messageList.length !== 0 && dom.scrollHeight >= (dom.scrollTop + dom.clientHeight)) {//receive new message
             dom.scrollTop = dom.scrollHeight;
         }
     }, [messageList.length])
 
     const handleScroll = (e) => {
-        if (threadHasHistory && e.target.scrollTop !== 0 && e.target.scrollHeight === (e.target.scrollTop + e.target.clientHeight)) {
+        if (threadHasHistory && e.target.scrollTop !== 0 && e.target.scrollHeight - 1 >= (e.target.scrollTop + e.target.clientHeight)) {
             if (!isPullingDown) {
                 setIsPullingDown(true);
                 setTimeout(() => {
