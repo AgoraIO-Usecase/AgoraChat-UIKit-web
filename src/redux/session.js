@@ -32,7 +32,7 @@ const { Types, Creators } = createActions({
         return (dispatch) =>{
             dispatch(Creators.pushSession(session))
         }
-    }
+    },
 })
 export default Creators
 export const INITIAL_STATE = Immutable({
@@ -92,5 +92,5 @@ export const sessionReducer = createReducer(INITIAL_STATE, {
     [Types.TOP_SESSION]: topSession,
     [Types.DELETE_SESSION]: deleteSession,
     [Types.PUSH_SESSION]:pushSession,
-    [Types.SET_JOINED_GROUPS]: setJoinedGroups
+    [Types.SET_JOINED_GROUPS]: setJoinedGroups,
 })

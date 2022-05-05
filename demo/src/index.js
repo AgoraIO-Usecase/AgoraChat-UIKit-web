@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { render } from "react-dom";
-
 import { EaseChat, EaseApp } from "../../src/index";
 // import WebIM from "./WebIM";
 import val from "./comm";
 // import initListen from "./WebIMListen";
+
 export default class Demo extends Component {
   state = {
     token: val,
@@ -29,7 +29,7 @@ export default class Demo extends Component {
 		conversationId: "test0001",
 	};
     EaseApp.addConversationItem(session);
-
+    EaseApp.changePresenceStatus({[session.conversationId] : 'Online'})
   };
   test = (res) =>{
     console.log('test登录成功',res);
