@@ -6,17 +6,8 @@ const rnReactionEmoji = (reaction) => {
 		return [];
 	}
 	let rnReaction = [];
-	let match = null;
-	const regex = /(\[.*?\])/g;
-	let start = 0;
-	let index = 0;
-	while ((match = regex.exec(reaction))) {
-		index = match.index;
-		if (index > start) {
-			rnReaction.push(reaction.substring(start, index));
-		}
-		if (match[1] in reactionEmoji.map) {
-			const v = reactionEmoji.map[match[1]];
+		if (reaction in reactionEmoji.map) {
+			const v = reactionEmoji.map[reaction];
 			rnReaction.push(
 				<img
 					key={WebIM.conn.getUniqueId()}
@@ -29,12 +20,7 @@ const rnReactionEmoji = (reaction) => {
 					alt=""
 				/>
 			);
-		} else {
-			rnReaction.push(match[1]);
 		}
-		start = index + match[1].length;
-	}
-	rnReaction.push(reaction.substring(start, reaction.length));
 	return rnReaction;
 };
 export default rnReactionEmoji;

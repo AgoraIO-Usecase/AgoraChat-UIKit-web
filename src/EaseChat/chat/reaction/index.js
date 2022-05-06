@@ -13,9 +13,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Reaction = ({ message }) => {
-	const classes = useStyles({
-		bySelf: message.bySelf,
-	});
+	const classes = useStyles({});
 	const [reactionVisible, setReactionVisible] = useState(null);
 	const handleClickEmoji = (e) => {
 		setReactionVisible(e.currentTarget);
@@ -25,6 +23,7 @@ const Reaction = ({ message }) => {
 	};
 	const handleEmojiSelected = (emoji) => {
 		if (!emoji) return;
+		console.log('>>> handleEomji');
 		store.dispatch(MessageActions.addReactions(message, emoji));
 	};
 

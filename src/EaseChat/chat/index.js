@@ -3,8 +3,7 @@ import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/styles";
 import MessageList from "./messageList";
 import MessageBar from "./messageBar/index";
-import { useSelector } from "../../EaseApp/index";
-import { Provider } from "react-redux";
+import { Provider, useSelector } from "react-redux";
 import SendBox from "./sendBox";
 import WebIM, { initIMSDK } from "../../utils/WebIM";
 import store from "../../redux/index";
@@ -46,6 +45,7 @@ const Chat = (props) => {
       WebIM.conn.open({
         user: props.username,
         agoraToken: props.agoraToken,
+        pwd: props.password,
         appKey: WebIM.config.appkey,
       });
     }else if(props.password){

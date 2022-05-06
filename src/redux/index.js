@@ -8,7 +8,7 @@ const logger = createLogger();
 const rootReducer = combineReducers({
   global: globalPropsReducer,
   session: sessionReducer,
-  message: messageReducer,
+  message: messageReducer
 });
 const middlewares = [thunk, logger];
 const enhancers = [];

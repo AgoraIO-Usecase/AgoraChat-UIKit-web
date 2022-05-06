@@ -11,7 +11,6 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 
 import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
-import ReactionInfo from "../reaction/reactionInfo";
 import { EaseChatContext } from "../index";
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
@@ -112,7 +111,6 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 		chatType: message.chatType,
 		rnReactions: reactionMsg.length > 1,
 	});
-	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
 	const [menuState, setMenuState] = useState(initialState);
   	const [copyMsgVal,setCopyMsgVal] = useState('')
 	
@@ -169,9 +167,6 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 		return rnTxt;
 	};
 
-	const handleReaction = (e) => {
-		setReactionInfoVisible(e.currentTarget);
-	};
 	const sentStatus = () => {
 		return (
 			<div>
@@ -210,7 +205,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
           <img
             className={classes.avatarStyle}
             src={avatar}
-            onClick={() => onAvatarChange && onAvatarChange(message)}
+            onClick={(e) => onAvatarChange && onAvatarChange(e,message)}
           ></img>
         )}
         {showByselfAvatar && message.bySelf && (
@@ -227,7 +222,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
           {renderTxt(message.body.msg)}
 
           {reactionMsg.length > 0 && (
-            <div className={classes.reactionBox} onClick={handleReaction}>
+            <div className={classes.reactionBox}>
               <RenderReactions message={message} />
             </div>
           )}
@@ -268,23 +263,38 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
         }
         {customMessageList &&
           customMessageList.map((val, key) => {
-            return (
+          	const bySelf = message.bySelf;
+          	let show = false
+          	if(val.position === 'others'){}
+          	switch(val.position){
+          		case 'others':
+          			show = bySelf ? false : true
+          			break;
+          		case 'self':
+          			show = bySelf ? true : false
+          			break;
+          		default:
+          			show = true
+          			break;
+          	}
+            return show ? (
               <MenuItem key={key} onClick={_customMessageClick(val, message)}>
                 {val.name}
               </MenuItem>
-            );
+            ): null;
           })}
       </Menu>
 
-      {reactionMsg.length > 0 && (
+      {/* {reactionMsg.length > 0 && (
         <ReactionInfo
           anchorEl={reactionInfoVisible}
           onClose={() => setReactionInfoVisible(null)}
           message={message}
         />
-      )}
+      )} */}
     </li>
   );
 }
 
 export default memo(TextMessage);
+

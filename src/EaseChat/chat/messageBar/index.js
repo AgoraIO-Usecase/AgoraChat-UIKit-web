@@ -1,6 +1,6 @@
 import React, { useState, useEffect,useContext } from "react";
 import { useSelector, useDispatch } from "../../../EaseApp/index";
-import { Menu, MenuItem, IconButton, Icon, InputBase } from "@material-ui/core";
+import { Menu, MenuItem, IconButton, Icon, InputBase, Tooltip } from "@material-ui/core";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles, fade } from "@material-ui/styles";
@@ -20,6 +20,13 @@ import avatarIcon2 from '../../../common/images/avatar2.png'
 import avatarIcon3 from '../../../common/images/avatar3.png'
 import groupAvatarIcon from '../../../common/images/groupAvatar.png'
 
+import offlineImg from '../../../common/images/Offline.png'
+import onlineIcon from '../../../common/images/Online.png'
+import busyIcon from '../../../common/images/Busy.png'
+import donotdisturbIcon from '../../../common/images/Do_not_Disturb.png'
+import customIcon from '../../../common/images/custom.png'
+import leaveIcon from '../../../common/images/leave.png'
+
 const useStyles = makeStyles((theme) => {
   return {
     root: {
@@ -36,9 +43,27 @@ const useStyles = makeStyles((theme) => {
     leftBar: {
       display: "flex",
       alignItems: "center",
+      position: 'relative'
     },
     avatar: {
       margin: "0 20px 0 16px",
+    },
+    imgBox: {
+      position: 'absolute',
+      bottom: '0px',
+      left: '45px',
+      zIndex: 1,
+      borderRadius: '50%',
+      width: '20px',
+      height: '20px',
+      lineHeight: '26px',
+      textAlign: 'center',
+      background: '#fff',
+    },
+    imgStyle: {
+      width: '18px',
+      height: '18px',
+      borderRadius: '50%',
     },
   };
 });
@@ -52,7 +77,7 @@ const MessageBar = () => {
 
   const [sessionEl, setSessionEl] = useState(null);
 
-  const { chatType, to, username } = globalProps;
+  const { chatType, to, name, presenceExt } = globalProps;
   const renderSessionInfoMenu = () => {
     const handleClickClearMessage = () => {
       dispatch(MessageActions.clearMessage(chatType, to));
@@ -96,6 +121,14 @@ const MessageBar = () => {
     setSessionEl(e.currentTarget);
   };
 
+  const getUserOnlineStatus = {
+    'Offline': offlineImg,
+    'Online': onlineIcon,
+    'Busy': busyIcon,
+    'Do not Disturb': donotdisturbIcon,
+    'Leave': leaveIcon,
+    '': onlineIcon
+  }
   let userAvatars = {
     1: avatarIcon1,
     2: avatarIcon2,
@@ -108,15 +141,22 @@ const MessageBar = () => {
     setUsersInfoData(newwInfoData)
     setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 1)
   }, [to])
-
+ 
   return (
     <div className={classes.root}>
       <Box position="static" className={classes.leftBar}>
-        <Avatar className={classes.avatar} onClick={(e) => onChatAvatarClick && onChatAvatarClick(e,{chatType, to})}
+        <Avatar className={classes.avatar} onClick={(e) => onChatAvatarClick && onChatAvatarClick(e,{chatType, to})} 
         src={chatType === "singleChat" ? userAvatars[userAvatarIndex] : groupAvatarIcon}
           style={{ borderRadius: chatType === "singleChat" ? "50%" : 'inherit'}}
         ></Avatar>
-        {to}
+          {
+            chatType === "singleChat" ?
+            <div className={classes.imgBox}>
+              <img alt="" src={getUserOnlineStatus[presenceExt[to]] || customIcon} className={classes.imgStyle} />
+            </div>
+            : null
+          }
+        {name || to}
       </Box>
       <Box position="static">
         <IconButton

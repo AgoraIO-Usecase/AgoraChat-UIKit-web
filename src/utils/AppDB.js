@@ -121,7 +121,7 @@ const AppDB = {
 			$_TABLE
 				.where("id")
 				.equals(id)
-				.modify({ mid: mid })
+				.modify({ 'id': mid })
 				.then((res) => console.log("res", res));
 		});
 	},
@@ -138,6 +138,28 @@ const AppDB = {
 				.equals(id)
 				.modify({ url: url })
 				.then((res) => console.log("res", res));
+		});
+	},
+
+	updateMessageReaction(id, reaction){
+		const $_TABLE = this.$_TABLE;
+		return this.exec((resolve) => {
+			$_TABLE
+				.where("id")
+				.equals(id)
+				.modify({ 'reactions': reaction })
+				.then((res) => console.log("updateMessageReaction", res));
+		});
+	},
+
+	findMessageById(id){
+		const $_TABLE = this.$_TABLE;
+		return this.exec((resolve) => {
+			$_TABLE
+				.where("id")
+				.equals(id)
+				.toArray()
+				.then((res) => resolve(res));
 		});
 	},
 
@@ -230,35 +252,16 @@ const AppDB = {
 		});
 	},
 
-	updateMessageReaction(id, reactions) {
-		const $_TABLE = this.$_TABLE;
-		return this.exec((resolve) => {
-			const $_TABLE = this.$_TABLE;
-			return this.exec((resolve) => {
-				$_TABLE
-					.where("id")
-					.equals(id)
-					.modify({ reactions: reactions })
-					.then((res) => {
-						console.log("updateMessageReaction", res);
-					});
-			});
-		});
-	},
-
 	deleteReactions(id, reactions) {
 		const $_TABLE = this.$_TABLE;
 		return this.exec((resolve) => {
-			const $_TABLE = this.$_TABLE;
-			return this.exec((resolve) => {
-				$_TABLE
-					.where("id")
-					.equals(id)
-					.modify({ reactions: reactions })
-					.then((res) => {
-						console.log("deleteReactions", res);
-					});
-			});
+			$_TABLE
+				.where("id")
+				.equals(id)
+				.modify({ reactions: reactions })
+				.then((res) => {
+					console.log("deleteReactions", res);
+				});
 		});
 	},
 };

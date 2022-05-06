@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { render } from "react-dom";
-
 import { EaseChat, EaseApp } from "../../src/index";
 // import WebIM from "./WebIM";
 import val from "./comm";
 // import initListen from "./WebIMListen";
+
 export default class Demo extends Component {
   state = {
     token: val,
@@ -29,7 +29,7 @@ export default class Demo extends Component {
 		conversationId: "test0001",
 	};
     EaseApp.addConversationItem(session);
-
+    EaseApp.changePresenceStatus({[session.conversationId] : 'Online'})
   };
   test = (res) =>{
     console.log('test登录成功',res);
@@ -51,15 +51,17 @@ export default class Demo extends Component {
         <h3>EaseApp</h3>
         <div>
           <EaseApp
+            customMessageList={ [{name: 'report', value: 'report', position: 'others'}]}
+            isShowReaction
             successLoginCallback={this.test}
             failCallback={this.test2}
             onAvatarChange={this.test3}
             onChatAvatarClick={this.test4}
             
-            appkey= "41117440#383391"
-            username="test003"
-            // password="1"
-            agoraToken="007eJxTYDiw2fuKzNWjLzknllxuMkl+z+OTa5dxRZPB6fP1VGlGX1sFhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9NkPSnjJAUZBgbT1MfvGBlYGRiBEMRXYTBPsTAyMzc10LVMSjTVNTRMTda1NDdP1U0xT7Y0M0oztjC1NAMA7zUk8Q=="
+            appkey= "5101220107132865#test"
+            username="zd3"
+            password="1"
+            // agoraToken="007eJxTYDiw2fuKzNWjLzknllxuMkl+z+OTa5dxRZPB6fP1VGlGX1sFhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9NkPSnjJAUZBgbT1MfvGBlYGRiBEMRXYTBPsTAyMzc10LVMSjTVNTRMTda1NDdP1U0xT7Y0M0oztjC1NAMA7zUk8Q=="
             header={<div style={{ height: "100px" }}>TestHeader</div>} />
         </div>
       </div>

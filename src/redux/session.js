@@ -32,7 +32,7 @@ const { Types, Creators } = createActions({
         return (dispatch) =>{
             dispatch(Creators.pushSession(session))
         }
-    }
+    },
 })
 export default Creators
 export const INITIAL_STATE = Immutable({
@@ -74,7 +74,9 @@ export const deleteSession = (state, { sessionId }) => {
     sessionList = sessionList.filter((item) => {
         return item.sessionId !== sessionId
     })
-    return state.setIn(['sessionList'], sessionList)
+    state = state.setIn(['sessionList'], sessionList);
+    state = state.setIn(['currentSession', ''])
+    return state
 }
 
 export const pushSession = (state, {session}) =>{
@@ -90,5 +92,5 @@ export const sessionReducer = createReducer(INITIAL_STATE, {
     [Types.TOP_SESSION]: topSession,
     [Types.DELETE_SESSION]: deleteSession,
     [Types.PUSH_SESSION]:pushSession,
-    [Types.SET_JOINED_GROUPS]: setJoinedGroups
+    [Types.SET_JOINED_GROUPS]: setJoinedGroups,
 })

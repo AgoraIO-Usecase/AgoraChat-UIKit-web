@@ -8,6 +8,24 @@ import AppDB from "../utils/AppDB";
 import i18next from "i18next";
 import { message } from "../EaseChat/common/alert";
 
+
+function isAdded(reactionOp) {
+	let added = null
+	let currentLoginUser = WebIM.conn.context.userId;
+	reactionOp.forEach((item) => {
+		if (item.reactionType === "create") {
+			if (item.operator === currentLoginUser) {
+				added = true
+			}
+		} else {
+			if (item.operator === currentLoginUser) {
+				added = false
+			}
+		}
+	})
+	return added
+}
+
 /* ------------- Initial State ------------- */
 export const INITIAL_STATE = Immutable({
 	byId: {},
@@ -28,12 +46,11 @@ export const INITIAL_STATE = Immutable({
 const { Types, Creators } = createActions({
 	addMessage: ["message", "messageType"],
 	deleteMessage: ["msgId", "to", "chatType"],
-	updateMessageStatus: ["message", "status"],
+	updateMessageStatus: ["message", "status", "localId"],
 	clearUnread: ["chatType", "sessionId"],
 	updateMessages: ["chatType", "sessionId", "messages"],
 	updateMessageMid: ["id", "mid"],
-	addReactions: ["message", "reaction"],
-	deleteReaction: ["message", "reaction"],
+	updateReactionData: ["message", "reaction"],
 
 	// -async-
 	sendTxtMessage: (to, chatType, message = {}) => {
@@ -48,15 +65,18 @@ const { Types, Creators } = createActions({
 				msg,
 				chatType,
 				ext: message.ext,
-				success: () => {
-					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
+				success: (localId, serverId) => {
+					formatMsg.id = serverId
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
 				},
 				fail: (e) => {
-					console.error("Send private text error", e);
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					// console.error("Send private text error", e);
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 				},
 			});
-			WebIM.conn.send(msgObj.body);
+			WebIM.conn.send(msgObj.body).catch(() => {
+				console.warn('Send private text error')
+			});
 			dispatch(Creators.addMessage(formatMsg));
 		};
 	},
@@ -80,7 +100,7 @@ const { Types, Creators } = createActions({
 				chatType,
 				onFileUploadError: function (error) {
 					formatMsg.status = "fail";
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 					fileEl.current.value = "";
 				},
 				onFileUploadComplete: function (data) {
@@ -91,8 +111,12 @@ const { Types, Creators } = createActions({
 					dispatch(Creators.updateMessages(chatType, to, formatMsg));
 					fileEl.current.value = "";
 				},
+				success: (localId, serverId) => {
+					formatMsg.id = serverId
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
+				},
 				fail: function () {
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 					fileEl.current.value = "";
 				},
 			});
@@ -120,7 +144,7 @@ const { Types, Creators } = createActions({
 				chatType,
 				onFileUploadError: function (error) {
 					formatMsg.status = "fail";
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 					imageEl.current.value = "";
 				},
 				onFileUploadComplete: function (data) {
@@ -131,8 +155,12 @@ const { Types, Creators } = createActions({
 					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
 					imageEl.current.value = "";
 				},
+				success: (localId, serverId) => {
+					formatMsg.id = serverId
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
+				},
 				fail: function () {
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 					imageEl.current.value = "";
 				},
 			});
@@ -140,58 +168,61 @@ const { Types, Creators } = createActions({
 			dispatch(Creators.addMessage(formatMsg, "img"));
 		};
 	},
-
-	 sendVideoMessage: (to, chatType, file,videoEl) => {
-        return (dispatch, getState) => {
-            if (file.data.size > (1024 * 1024 * 10)) {
-                message.error(i18next.t('The video exceeds the upper limit'))
-                return
-            }
-            let allowType = {
-                'mp4': true,
-                'wmv': true,
-                'avi': true,
-                'rmvb': true,
-                'mkv': true
-            };
-            if (file.filetype.toLowerCase() in allowType) {
-                const formatMsg = formatLocalMessage(to, chatType, file, 'video')
-                const { id } = formatMsg
-                const msgObj = new WebIM.message('video', id)
-                msgObj.set({
-                    ext: {
-                        file_length: file.data.size,
-                        file_type: file.data.type,
-                    },
-                    file: file,
-                    length:file.length,
-                    file_length:file.data.size,
-                    to,
-                    chatType,
-                    onFileUploadError: function (error) {
-                        formatMsg.status = 'fail'
-                        dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
-                        videoEl.current.value =''
-                    },
-                    onFileUploadComplete: function (data) {
-                        let url = data.uri + '/' + data.entities[0].uuid
-                        formatMsg.url = url
-                        formatMsg.body.url = url
-                        formatMsg.status = 'sent'
-                        dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
-                        dispatch(Creators.updateMessages(chatType, to, formatMsg))
-                        videoEl.current.value =''
-                    },
-                    fail: function () {
-                        dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
-                        videoEl.current.value =''
-                    },
-                })
-                WebIM.conn.send(msgObj.body)
-                dispatch(Creators.addMessage(formatMsg, 'video'))
-            }
-        }
-    },
+	sendVideoMessage: (to, chatType, file, videoEl) => {
+		return (dispatch, getState) => {
+			if (file.data.size > (1024 * 1024 * 10)) {
+				message.error(i18next.t('The video exceeds the upper limit'))
+				return
+			}
+			let allowType = {
+				'mp4': true,
+				'wmv': true,
+				'avi': true,
+				'rmvb': true,
+				'mkv': true
+			};
+			if (file.filetype.toLowerCase() in allowType) {
+				const formatMsg = formatLocalMessage(to, chatType, file, 'video')
+				const { id } = formatMsg
+				const msgObj = new WebIM.message('video', id)
+				msgObj.set({
+					ext: {
+						file_length: file.data.size,
+						file_type: file.data.type,
+					},
+					file: file,
+					length: file.length,
+					file_length: file.data.size,
+					to,
+					chatType,
+					onFileUploadError: function (error) {
+						formatMsg.status = 'fail'
+						dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
+						videoEl.current.value = ''
+					},
+					onFileUploadComplete: function (data) {
+						let url = data.uri + '/' + data.entities[0].uuid
+						formatMsg.url = url
+						formatMsg.body.url = url
+						formatMsg.status = 'sent'
+						dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
+						dispatch(Creators.updateMessages(chatType, to, formatMsg))
+						videoEl.current.value = ''
+					},
+					success: (localId, serverId) => {
+						formatMsg.id = serverId
+						dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
+					},
+					fail: function () {
+						dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
+						videoEl.current.value = ''
+					},
+				})
+				WebIM.conn.send(msgObj.body)
+				dispatch(Creators.addMessage(formatMsg, 'video'))
+			}
+		}
+	},
 
 	sendRecorder: (to, chatType, file) => {
 		return (dispatch, getState) => {
@@ -218,7 +249,7 @@ const { Types, Creators } = createActions({
 					console.log(error);
 					// dispatch(Creators.updateMessageStatus(pMessage, "fail"))
 					formatMsg.status = "fail";
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 				},
 				onFileUploadComplete: function (data) {
 					let url = data.uri + "/" + data.entities[0].uuid;
@@ -227,8 +258,12 @@ const { Types, Creators } = createActions({
 					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
 					dispatch(Creators.updateMessages(chatType, to, formatMsg));
 				},
+				success: (localId, serverId) => {
+					formatMsg.id = serverId
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
+				},
 				fail: function () {
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 				},
 			});
 
@@ -304,6 +339,62 @@ const { Types, Creators } = createActions({
 			WebIM.utils.download.call(WebIM.conn, options);
 		};
 	},
+
+	addReactions: (msg, reaction) => {
+		return (dispatch, getState) => {
+			WebIM.conn.addReaction({ messageId: msg.id, reaction}).then((res) => {
+			}).catch((e) => {
+				message.error('add reaction fail')
+			})
+		}
+	},
+	deleteReaction: (msg, reaction) => {
+		return (dispatch, getState) => {
+			WebIM.conn.deleteReaction({messageId: msg.id, reaction}).then(() => {
+			}).catch((e) => {
+				message.error('delete reaction fail')
+			})
+		}
+	},
+	updateReaction: (message) => {
+		const {messageId, chatType, from ,to, reactions} = message
+
+		return (dispatch, getState) => {
+			const state = getState().message
+			const byId = state.getIn(["byId", messageId]);
+			if(!byId && messageId){
+				AppDB.findMessageById(messageId).then((res) => {
+					const dbMessage = res[0]
+					let msgReactions = dbMessage?.reactions || []
+					// if(!msgReactions) return;
+					let newReactions = []
+					reactions.map((item => {
+						let reactionOp = item.op || [];
+						let added = isAdded(reactionOp)
+
+						msgReactions.forEach((msgReaction) => {
+							if (msgReaction.reaction === item.reaction && msgReaction.isAddedBySelf) {
+								item.isAddedBySelf = msgReaction.isAddedBySelf
+							}
+						})
+						if (added) {
+							item.isAddedBySelf = true
+						} else if (added === false) {
+							item.isAddedBySelf = false
+						}
+
+						if(item.count > 0){
+							newReactions.push(item)
+						}
+					}))
+					dispatch(Creators.updateReactionData(message, newReactions))
+
+				})
+			}else{
+				dispatch(Creators.updateReactionData(message))
+			}
+		}
+	}
 });
 
 /* ------------- Reducers ------------- */
@@ -377,8 +468,8 @@ export const addMessage = (state, { message, messageType = "txt" }) => {
 	return state;
 };
 
-export const updateMessageStatus = (state, { message, status = "" }) => {
-	let { id } = message;
+export const updateMessageStatus = (state, { message, status = "", localId }) => {
+	let id = localId;
 	if (!id) id = state.getIn(["byMid", message.mid, "id"]);
 	let mids = state.getIn(["byMid"]) || {};
 	let mid;
@@ -400,9 +491,7 @@ export const updateMessageStatus = (state, { message, status = "" }) => {
 			toJid: mid,
 		};
 		messages.splice(messages.indexOf(found), 1, msg);
-		setTimeout(() => {
-			AppDB.updateMessageStatus(id, status).then((res) => {});
-		}, 1000);
+		AppDB.updateMessageStatus(id, status).then((res) => { });
 
 		return state.setIn([chatType, chatId], messages);
 	}
@@ -478,12 +567,13 @@ export const updateMessages = (state, { chatType, sessionId, messages }) => {
 
 export const updateMessageMid = (state, { id, mid }) => {
 	const byId = state.getIn(["byId", id]);
+	const { chatType, chatId } = byId;
 	if (!_.isEmpty(byId)) {
-		const { chatType, chatId } = byId;
 		let messages = state
 			.getIn([chatType, chatId])
 			.asMutable({ deep: true });
 		let found = _.find(messages, { id: id });
+		found.id = mid;
 		found.toJid = mid;
 		found.mid = mid;
 		// let msg = found.setIn(['toJid'], mid)
@@ -491,128 +581,119 @@ export const updateMessageMid = (state, { id, mid }) => {
 		state = state.setIn([chatType, chatId], messages);
 	}
 
-	setTimeout(() => {
-		AppDB.updateMessageMid(mid, Number(id));
-	}, 500);
-	return state.setIn(["byMid", mid], { id });
+	AppDB.updateMessageMid(mid, id);
+	state = state.setIn(["byMid", mid], { id });
+	state = state.setIn(["byId", mid], { chatType, chatId })
+	return state;
 };
 
-export const addReactions = (state, { message, reaction }) => {
-	let { id, to, from } = message;
-	// TODO 回调会提供一个添加 reaction 的 from
-	let addReactionUser = "999222";
+export const updateReactionData = (state, { message, reaction }) => {
+	let { messageId, from, to, reactions, chatType } = message;
+	let newReactionsData = reactions
+
 	let currentLoginUser = WebIM.conn.context.userId;
-	let sessionId = currentLoginUser === to ? from : to;
-	if (!id) id = state.getIn(["byMid", message.mid, "id"]);
+
+	let addReactionUser = currentLoginUser === from ? to : from;
+
+	if(chatType === 'groupChat'){addReactionUser = to}
+
+	if (!messageId) messageId = state.getIn(["byMid", message.mid, "messageId"])
 	let mids = state.getIn(["byMid"]) || {};
 	let mid;
 	for (var i in mids) {
-		if (mids[i].id === id) {
+		if (mids[i].messageId === messageId) {
 			mid = i;
 		}
 	}
-	const byId = state.getIn(["byId", id]);
-	if (!_.isEmpty(byId)) {
-		const { chatType } = byId;
-		let messages = state.getIn([chatType, sessionId]).asMutable();
-		let found = _.find(messages, { id: id });
-		let reactionMsgs = found?.reactions || [];
-		
-		let existReaction = _.find(reactionMsgs, { reaction: reaction });
-		let reactionList = [];
-		found.setIn(["reactions"], reactionList);
-		if (reactionMsgs.length > 0) {
-			let newFount = reactionMsgs.filter((item) => item.reaction !== reaction);
-			let { userList } = existReaction || '';
-			let myReaction = userList && userList.includes(currentLoginUser);
-			if (existReaction && myReaction) {
-				reactionList = [...reactionMsgs];
-			} else if (existReaction && !myReaction) {
-				let newUserList = existReaction.userList.concat(currentLoginUser);
-				let newCount = existReaction.count + 1;
-				reactionList = _.concat(newFount, [
-					{
-						reaction: reaction,
-						userList: newUserList,
-						status: true,
-						count: newCount,
-					},
-				]);
-			} else {
-				reactionList = _.concat(newFount, [
-					{
-						reaction: reaction,
-						userList: [currentLoginUser],
-						status: true,
-						count: 1,
-					},
-				]);
+
+	const byId = state.getIn(["byId", messageId]);
+
+	function calculateUserList(reactions = []){
+		reactions.forEach((item) => {
+			if(item.op){
+				item.op.forEach((operator) => {
+					if(operator.reactionType === 'create' && (!item.userList.includes(operator.operator))){
+						item.userList.push(operator.operator)
+					}
+					if(operator.reactionType === 'delete'){
+						item.userList.forEach((user, index) => {
+							if(user === operator.operator){
+								userList.splice(index, 1)
+							}
+						})
+					}
+				})
 			}
-		} else {
-			reactionList = [
-				{
-					reaction: reaction,
-					userList: [currentLoginUser],
-					status: true,
-					count: 1,
-				},
-			];
-		}
+		})
+	}
+
+	function mergeArray (arr1, arr2){
+      var _arr = new Array()
+      for (var i = 0; i < arr1.length; i++) {
+        _arr.push(arr1[i])
+      }
+      for (var i = 0; i < arr2.length; i++) {
+        var flag = true
+        for (var j = 0; j < arr1.length; j++) {
+          if (arr2[i] === arr1[j]) {
+            flag = false
+            break
+          }
+        }
+        if (flag) {
+          _arr.push(arr2[i])
+        }
+      }
+      return _arr
+    }
+
+	if (byId) {
+		const { chatType } = byId;
+		let messages = state.getIn([chatType, addReactionUser]).asMutable();
+		let found = _.find(messages, { id: messageId })
+		let { reactions } = found;
+		let newReactions = [];
+		newReactionsData.map((item => {
+			let reactionOp = item?.op || [];
+			let added = isAdded(reactionOp)
+			reactions && reactions.forEach((msgReaction) => {
+				if (msgReaction.reaction === item.reaction) {
+					
+					item.userList = mergeArray(item.userList, msgReaction.userList)
+					if(msgReaction.isAddedBySelf){
+						item.isAddedBySelf = msgReaction.isAddedBySelf
+					}
+				}
+			})
+
+			if (added) {
+				item.isAddedBySelf = true
+			} else if (added === false) {
+				item.isAddedBySelf = false
+			}
+
+			if(item.count > 0){
+				newReactions.push(item)
+			}
+		}))
+		calculateUserList(newReactions)
+
 		let msg = {
 			...found,
-			reactions: reactionList,
+			reactions: newReactions,
 		};
 		messages.splice(messages.indexOf(found), 1, msg);
-		AppDB.updateMessageReaction(id, msg.reactions).then((res) => {});
+		AppDB.updateMessageReaction(messageId, msg.reactions).then((res) => { });
 
-		return state.setIn([chatType, sessionId], messages);
+		return state.setIn([chatType, addReactionUser], messages);
+	}else{
+		calculateUserList(reaction)
+		// state 里没有这条消息，更新数据库里消息的 reation
+		AppDB.updateMessageReaction(messageId, reaction)
 	}
 	return state;
 };
 
-export const deleteReaction = (state, { message, reaction }) => {
-	let { id, from, to } = message;
-	let currentLoginUser = WebIM.conn.context.userId;
-	let sessionId = currentLoginUser === to ? from : to;
-	const byId = state.getIn(["byId", id]);
-	const { chatType } = byId;
-	let messages = state.getIn([chatType, sessionId]).asMutable({ deep: true });
-	let found = _.find(messages, { id: id });
-	let reactionMsgs = found.reactions || [];
-	let newFount = reactionMsgs.filter((item) => item.reaction !== reaction);
-	let existReaction = _.find(reactionMsgs, {reaction: reaction,});
-	let reactionList = [];
-	if (reactionMsgs.length > 0) {
-		let { reaction, userList, count } = existReaction;
-		let myReaction = userList.includes(currentLoginUser);
-		if (existReaction && myReaction) {
-			if (count > 1) {
-				reactionList = _.concat(newFount, [
-					{
-						reaction: reaction,
-						userList: userList.filter(
-							(item) => item !== currentLoginUser
-						),
-						status: false,
-						count: count - 1,
-					},
-				]);
-			} else {
-				reactionList = [...newFount];
-			}
-		} else {
-			reactionList = [...newFount];
-		}
-	}
-	const index = messages.indexOf(found);
-	messages.splice(index, 1, {
-		...found,
-		reactions: reactionList,
-	});
-	state = state.setIn([chatType, sessionId], messages);
-	AppDB.deleteReactions(id, reactionList);
-	return state;
-};
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const messageReducer = createReducer(INITIAL_STATE, {
@@ -624,8 +705,8 @@ export const messageReducer = createReducer(INITIAL_STATE, {
 	[Types.UPDATE_MESSAGES]: updateMessages,
 	[Types.UPDATE_MESSAGE_MID]: updateMessageMid,
 	[Types.UPDATE_MESSAGE_STATUS]: updateMessageStatus,
-	[Types.ADD_REACTIONS]: addReactions,
-	[Types.DELETE_REACTION]: deleteReaction,
+	[Types.UPDATE_REACTION_DATA]: updateReactionData,
 });
 
 export default Creators;
+
