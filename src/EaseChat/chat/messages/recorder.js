@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 let MediaStream
-function Recorder({ open, onClose }) {
+function Recorder({ open, onClose, isChatThread,threadName }) {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [status, setStatus] = useState("");
@@ -40,6 +40,10 @@ function Recorder({ open, onClose }) {
   const [recorderObj, setRecorderObj] = useState({});
   const [timeInterval, setTimeInterval] = useState("");
   const [startTime, setStartTime] = useState("");
+  const currentThreadInfo = useSelector((state) => state.thread?.currentThreadInfo);
+  const threadOriginalMsg = useSelector((state) => state.thread?.threadOriginalMsg);
+  const isCreatingThread = useSelector((state) => state.thread?.isCreatingThread);
+
   let mounted;
   useEffect(() => {
     mounted = true;
@@ -122,12 +126,37 @@ function Recorder({ open, onClose }) {
           length: duration,
           duration: duration,
         };
-        dispatch(MessageActions.sendRecorder(to, chatType, uri));
+        createChatThread().then(to=>{
+          dispatch(MessageActions.sendRecorder(to, chatType, uri, isChatThread));
+        })
         onClose();
         MediaStream.getTracks()[0].stop()
       }
     }
   };
+  const createChatThread = ()=>{
+    return new Promise((resolve,reject) => {
+      if (isCreatingThread && isChatThread) {
+        if (!threadName) {
+          console.log('threadName can not empty')
+          return;
+        }
+        const options = {
+          name: threadName.replace(/(^\s*)|(\s*$)/g, ""),
+          messageId: threadOriginalMsg.bySelf && threadOriginalMsg.mid  ? threadOriginalMsg.mid :threadOriginalMsg.id,
+          parentId: threadOriginalMsg.to,
+        }
+        WebIM.conn.createChatThread(options).then(res=>{
+          const threadId = res.data?.chatThreadId;
+          resolve(threadId)
+        })
+      }else if(isChatThread){
+        resolve(currentThreadInfo.id)
+      }else {
+        resolve(to)
+      }
+    })
+  }
   return (
     <Dialog
       onClose={handleClose}

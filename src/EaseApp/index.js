@@ -1,5 +1,5 @@
 import React, { useCallback, createContext } from "react";
-import PropTypes from "prop-types";
+import PropTypes, { func } from "prop-types";
 import { makeStyles, styled } from "@material-ui/styles";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
@@ -16,6 +16,7 @@ import GlobalPropsActions from "../redux/globalProps";
 import createlistener from "../utils/WebIMListen";
 import MessageActions from "../redux/message";
 import SessionActions from "../redux/session";
+import ThreadActions from "../redux/thread"
 import _ from "lodash";
 import "../i18n";
 import "../common/iconfont.css";
@@ -68,9 +69,19 @@ const EaseApp = (props) => {
             presenceExt: {[data.uid] : data.ext}
           })
         );
+      }).catch(e=>{
+        console.log(e);
+        dispatch(
+          GlobalPropsActions.setGlobalProps({
+            to: sessionId,
+            chatType: sessionType,
+          })
+        );
       });
       dispatch(SessionActions.setCurrentSession(sessionId));
       dispatch(MessageActions.clearUnreadAsync(sessionType, sessionId));
+      dispatch(ThreadActions.updateThreadStates(false));
+      dispatch(ThreadActions.getCurrentGroupRole({sessionType, sessionId}));
     },
     [props.width]
   );
@@ -153,6 +164,8 @@ EaseAppProvider.addConversationItem = (session) => {
       })
     );
     dispatch(MessageActions.clearUnreadAsync(conversationType, conversationId));
+    dispatch(ThreadActions.updateThreadStates(false));
+    dispatch(ThreadActions.getCurrentGroupRole({sessionType:conversationType, sessionId:conversationId}));
   }
 };
 EaseAppProvider.changePresenceStatus = (ext) => {
@@ -172,6 +185,19 @@ EaseAppProvider.getSdk = (props) => {
   }
   return WebIM
 };
+EaseAppProvider.thread = {
+  setShowThread: function(status){
+    store.dispatch(ThreadActions.setShowThread(status))
+  },
+  setHasThreadEditPanel:function(status){
+    store.dispatch(ThreadActions.setHasThreadEditPanel(status))
+  },
+  closeThreadPanel:function(){
+    store.dispatch(ThreadActions.updateThreadStates(false))
+  }
+}
+
+
 EaseAppProvider.propTypes = {
 	username: PropTypes.string,
 	agoraToken: PropTypes.string,
@@ -190,7 +216,10 @@ EaseAppProvider.propTypes = {
   onChatAvatarClick:PropTypes.func,
   isShowReaction: PropTypes.bool,
   customMessageList:PropTypes.array,
-  customMessageClick:PropTypes.func
+  customMessageClick:PropTypes.func,
+
+  //thread-click edit panel,get thread info
+  onEditThreadPanel:PropTypes.func
 };
 EaseAppProvider.defaultProps = {
   isShowUnread: true,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useContext } from "react";
+import React, { useState, useEffect,useContext,useRef } from "react";
 import { useSelector, useDispatch } from "../../../EaseApp/index";
 import { Menu, MenuItem, IconButton, Icon, InputBase, Tooltip } from "@material-ui/core";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -11,7 +11,9 @@ import i18next from "i18next";
 
 import MessageActions from "../../../redux/message";
 import SessionActions from "../../../redux/session";
-import GlobalPropsActions from "../../../redux/globalProps"
+import ThreadActions from "../../../redux/thread";
+import GlobalPropsActions from "../../../redux/globalProps";
+import ThreadListPanel from "../../thread/threadList/index.js";
 import { EaseChatContext } from "../index";
 
 import _ from 'lodash'
@@ -19,6 +21,7 @@ import avatarIcon1 from '../../../common/images/avatar1.png'
 import avatarIcon2 from '../../../common/images/avatar2.png'
 import avatarIcon3 from '../../../common/images/avatar3.png'
 import groupAvatarIcon from '../../../common/images/groupAvatar.png'
+import threadIcon from '../../../common/images/thread.png'
 
 import offlineImg from '../../../common/images/Offline.png'
 import onlineIcon from '../../../common/images/Online.png'
@@ -65,6 +68,10 @@ const useStyles = makeStyles((theme) => {
       height: '18px',
       borderRadius: '50%',
     },
+    threadIcon: {
+      width: '21px',
+      height: '20px',
+    }
   };
 });
 const MessageBar = () => {
@@ -74,6 +81,7 @@ const MessageBar = () => {
   const dispatch = useDispatch();
   const groupById = useSelector((state) => state.group?.group.byId) || {};
   const globalProps = useSelector((state) => state.global.globalProps);
+  const showThread = useSelector((state) => state.thread.showThread);
 
   const [sessionEl, setSessionEl] = useState(null);
 
@@ -120,6 +128,15 @@ const MessageBar = () => {
   const handleSessionInfoClick = (e) => {
     setSessionEl(e.currentTarget);
   };
+  const [anchorEl, setAnchorEl] = useState(null);
+  const onClose = ()=>{
+    setAnchorEl(null);
+    dispatch(ThreadActions.setThreadListPanelDisplay(false));
+  }
+  const openThreadList = (e)=>{
+    setAnchorEl(e.currentTarget)
+  }
+  const threadListAnchorEl = useRef(null);
 
   const getUserOnlineStatus = {
     'Offline': offlineImg,
@@ -141,7 +158,15 @@ const MessageBar = () => {
     setUsersInfoData(newwInfoData)
     setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 1)
   }, [to])
- 
+  const threadListPanelDisplay = useSelector((state) => state.thread?.threadListPanelDisplay) || false;
+  useEffect(()=>{
+    if(threadListPanelDisplay){
+      setAnchorEl(threadListAnchorEl.current)
+    }else{
+      onClose()
+    }
+  },[threadListPanelDisplay])
+
   return (
     <div className={classes.root}>
       <Box position="static" className={classes.leftBar}>
@@ -159,12 +184,16 @@ const MessageBar = () => {
         {name || to}
       </Box>
       <Box position="static">
+        <IconButton className="iconfont icon" style={{display: chatType === "groupChat" && showThread ? "inline-flex" : "none"}} onClick={openThreadList} ref={threadListAnchorEl}>
+          <img alt="" className={classes.threadIcon} src={threadIcon} />
+        </IconButton>
         <IconButton
           onClick={handleSessionInfoClick}
           className="iconfont icon-hanbaobao icon"
         ></IconButton>
       </Box>
       {renderSessionInfoMenu()}
+      <ThreadListPanel anchorEl={anchorEl} onClose={onClose}/>
     </div>
   );
 };
