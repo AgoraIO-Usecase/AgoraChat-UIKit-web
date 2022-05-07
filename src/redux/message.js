@@ -73,10 +73,10 @@ const { Types, Creators } = createActions({
 				isChatThread,
 			};
 			let msgObj = WebIM.message.create(option);
+			formatMsg.id = msgObj.id;
 			WebIM.conn.send(msgObj).then((res) => {
 				console.log("send private text Success",res);
-				let { localMsgId, serverMsgId } = res;
-				formatMsg.id = serverMsgId
+				let { localMsgId } = res;
 				dispatch(Creators.updateMessageStatus(formatMsg, "sent", localMsgId));
 			}).catch((e) => {
 				console.log("Send private text error", e);
@@ -113,7 +113,7 @@ const { Types, Creators } = createActions({
 				onFileUploadProgress: function (progress) {
 					console.log(progress);
 				},
-				onFileUploadComplete: function () {
+				onFileUploadComplete: function (data) {
 					console.log("onFileUploadComplete");
 					let url = data.uri + '/' + data.entities[0].uuid
                     formatMsg.url = formatMsg.body.url = url;
@@ -125,6 +125,7 @@ const { Types, Creators } = createActions({
 				},
 			};
 			let msg = WebIM.message.create(option);
+			formatMsg.id = msg.id;
 			WebIM.conn.send(msg).then((data) => {
 				console.log("success");
 				let url = data.uri + "/" + data.entities[0].uuid;
@@ -178,6 +179,7 @@ const { Types, Creators } = createActions({
 				},
 			};
 			let msg = WebIM.message.create(option);
+			formatMsg.id = msg.id;
 			WebIM.conn.send(msg).then(() => {
 				console.log("Success");
 			}).catch((e) => {
@@ -237,6 +239,7 @@ const { Types, Creators } = createActions({
 					},
 				};
 				let msg = WebIM.message.create(option);
+				formatMsg.id = msg.id;
 				WebIM.conn.send(msg).then(() => {
 					console.log("Success");
 				}).catch((e) => {
@@ -261,6 +264,7 @@ const { Types, Creators } = createActions({
 				to,
 				file: file,
 				filename: file.filename,
+				isChatThread,
 				ext: {
 					file_length: file.data.size,
 					file_type: file.data.type,
@@ -289,6 +293,7 @@ const { Types, Creators } = createActions({
 				},
 			};
 			let msg = WebIM.message.create(option);
+			formatMsg.id = msg.id;
 			WebIM.conn.send(msg).then(() => {
 				console.log("success");
 			}).catch((e) => {
@@ -524,7 +529,6 @@ export const addMessage = (state, { message, messageType = "txt" }) => {
 		byId = _.omit(byId, _.map(deletedChats, "id"));
 		state = state.setIn(["byId"], byId);
 	}
-
 	state = state.setIn([chatType, chatId], chatData);
 
 	// unread
@@ -585,7 +589,9 @@ export const updateMessageStatus = (state, { message, status = "", localId }) =>
 		};
 		messages.splice(messages.indexOf(found), 1, msg);
 		AppDB.updateMessageStatus(id, status).then((res) => { });
+		return state.setIn([chatType, chatId], messages)
 	}
+	return state;
 }
 
 export const deleteMessage = (state, { msgId, to, chatType }) => {
@@ -683,7 +689,7 @@ export const updateMessageMid = (state, { id, mid,to }) => {
         let messages = state.getIn([chatType, chatId]).asMutable({ deep: true })
         let found = _.find(messages, { id: id })
         found.toJid = mid
-        found.mid = mid
+        found.id = mid
         // let msg = found.setIn(['toJid'], mid)
         messages.splice(messages.indexOf(found), 1, found)
         state = state.setIn([chatType, chatId], messages)
@@ -696,7 +702,7 @@ export const updateMessageMid = (state, { id, mid,to }) => {
         threadMsg = _.find(threadMsgList, { id: id })
         if(threadMsg && threadMsg.id){
             threadMsg.toJid = mid;
-            threadMsg.mid = mid;
+            threadMsg.id = mid;
             state = state.setIn(['threadMessage',to],threadMsgList)
             return state
         }

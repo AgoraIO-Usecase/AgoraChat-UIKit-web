@@ -141,7 +141,7 @@ const ThreadListPanel = ({ anchorEl, onClose }) => {
     const renderDefaultList = () => {
         if (threadList.length === 0) return (
             <Box className='tlp-default-tips'>
-                <div className='tlp-tips1'>{i18next.t('There are no Threads')}</div>
+                <div className='tlp-tips1'><span className='tlp-tips1-img'></span>{i18next.t('There are no Threads')}</div>
                 <div className='tlp-tips2'>{i18next.t('Create a Thread from a Group Chat Message')}</div>
             </Box>
         )

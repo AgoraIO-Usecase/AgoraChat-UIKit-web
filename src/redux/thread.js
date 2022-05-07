@@ -115,7 +115,7 @@ const { Types, Creators } = createActions({
                 dispatch(Creators.setCurrentThreadInfo({}));
                 const warnText = operation === 'userRemove' ? i18next.t('You have been removed from the thread') : i18next.t('The thread has been disbanded')
                 message.warn(warnText);
-            }else if(currentThreadInfo.id === options.id || threadOriginalMsg.id === options.messageId || threadOriginalMsg.mid === options.messageId) {
+            }else if(currentThreadInfo.id === options.id || threadOriginalMsg.id === options.messageId) {
                 const info = currentThreadInfo.asMutable({ deep: true});
                 //othrer create the chatThread of the message
                 if(operation === 'create'){
@@ -150,7 +150,7 @@ const { Types, Creators } = createActions({
             if (groupChat && groupChat[options.parentId]) {
                 let messageList = _.get(groupChat, [options.parentId]).asMutable({ deep: true });
                 messageList.forEach((msg) => {
-                    if (msg.id === messageId || msg.mid === messageId) {
+                    if (msg.id === messageId) {
                         const info = msg.chatThreadOverview && chatThreadOverview? msg.chatThreadOverview: {}
                         if(operation === 'destroy'){
                             msg.chatThreadOverview = undefined;

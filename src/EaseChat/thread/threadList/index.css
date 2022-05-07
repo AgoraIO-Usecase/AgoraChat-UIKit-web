@@ -120,7 +120,14 @@
     font-size: 18px;
     font-weight: 600;
     line-height: 28px;
-    background: url("../../../common/images/threadgray.png") 151px center no-repeat;
+}
+.tlp-tips1-img{
+    display: inline-block;
+    margin-right: 5px;
+    vertical-align: -4px;
+    width: 21px;
+    height: 20px;
+    background: url("../../../common/images/threadgray.png") center center no-repeat;
 }
 .tlp-tips2 {
     color: #999;

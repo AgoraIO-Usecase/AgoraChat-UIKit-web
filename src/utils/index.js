@@ -169,7 +169,7 @@ export function formatLocalMessage(to, chatType, message = {}, messageType, isCh
     }
     return {
         ...formatMsg,
-        id: WebIM.conn.getUniqueId(),
+        // id: WebIM.conn.getUniqueId(),
         to,
         from: WebIM.conn.context.userId,
         chatType,

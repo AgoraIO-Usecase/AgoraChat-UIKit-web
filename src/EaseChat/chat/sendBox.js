@@ -120,7 +120,7 @@ function SendBox(props) {
     if(threadPanelStates){
       setInputValue('')
     }
-  },[isCreatingThread,currentThreadInfo?.id,threadOriginalMsg?.mid,threadOriginalMsg?.id,threadPanelStates])
+  },[isCreatingThread,currentThreadInfo?.id,threadOriginalMsg?.id,threadPanelStates])
   const createChatThread = ()=>{
     return new Promise((resolve,reject) => {
       if (isCreatingThread && props.isChatThread) {
@@ -130,7 +130,7 @@ function SendBox(props) {
         }
         const options = {
           name: props.threadName.replace(/(^\s*)|(\s*$)/g, ""),
-          messageId: threadOriginalMsg.bySelf && threadOriginalMsg.mid  ? threadOriginalMsg.mid :threadOriginalMsg.id,
+          messageId: threadOriginalMsg.id,
           parentId: threadOriginalMsg.to,
         }
         WebIM.conn.createChatThread(options).then(res=>{

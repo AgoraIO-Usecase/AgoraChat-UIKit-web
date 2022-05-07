@@ -73,7 +73,7 @@ const AppDB = {
             $_TABLE.where('chatType')
                 .equals(chatType)
                 .filter(item => {
-                    return item.id === messageId || item.mid === messageId
+                    return item.id === messageId
                 })
                 .toArray()
                 .then(res => {
@@ -149,7 +149,7 @@ const AppDB = {
             $_TABLE.where('chatType')
             .equals('groupChat')
             .filter(item => {
-                return item.id === id || item.mid === id
+                return item.id === id
             })
             .modify({ 'chatThreadOverview': thread })
             .then(res => console.log('res', res))

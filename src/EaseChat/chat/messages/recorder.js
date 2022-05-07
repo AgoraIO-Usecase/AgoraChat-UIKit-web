@@ -143,7 +143,7 @@ function Recorder({ open, onClose, isChatThread,threadName }) {
         }
         const options = {
           name: threadName.replace(/(^\s*)|(\s*$)/g, ""),
-          messageId: threadOriginalMsg.bySelf && threadOriginalMsg.mid  ? threadOriginalMsg.mid :threadOriginalMsg.id,
+          messageId: threadOriginalMsg.id,
           parentId: threadOriginalMsg.to,
         }
         WebIM.conn.createChatThread(options).then(res=>{

@@ -67,7 +67,6 @@ const Chat = (props) => {
       const chatType = state.global.globalProps.chatType;
       return _.get(state, ["message", chatType, to], []);
     }) || [];
-console.log("======messageList:",messageList)
   const to = useSelector((state) => state.global.globalProps.to);
 
   return to ? (

@@ -71,7 +71,7 @@ export default function createlistener(props) {
 		},
 
 		onReceivedMessage: function (message) {
-      console.log("updateMessageMid",message)
+      		console.log("updateMessageMid",message)
 			const { id, mid, to } = message;
 			store.dispatch(MessageActions.updateMessageMid(id, mid, to));
 		},

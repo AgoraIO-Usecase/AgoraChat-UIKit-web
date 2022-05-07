@@ -435,7 +435,7 @@ const ThreadPanel = () => {
             <ThreadBar />
             <Box ref={scrollThreadEl} className={classes.chat} onScroll={handleScroll}>
                 {isCreatingThread ? createThread() : showThreadMessage()}
-                {(threadOriginalMsg.id === currentMessage.messageId || threadOriginalMsg.mid === currentMessage.messageId) || JSON.stringify(currentMessage) == '{}' ? renderOriginalMsg() : renderEmptyMsg()}
+                {(threadOriginalMsg.id === currentMessage.messageId) || JSON.stringify(currentMessage) == '{}' ? renderOriginalMsg() : renderEmptyMsg()}
                 <ThreadMessageList
                     messageList={messageList}
                     showByselfAvatar={showByselfAvatar}

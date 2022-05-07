@@ -239,7 +239,9 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 					<img
 						className={classes.avatarStyle}
 						src={avatar}
-						onClick={(e) => onAvatarChange && onAvatarChange(e, message)}
+						onClick={() =>
+							onAvatarChange && onAvatarChange(message)
+						}
 					></img>
 				)}
 				{showByselfAvatar && message.bySelf && (
@@ -254,16 +256,27 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 					id={message.id}
 				>
 					{renderTxt(message.body.msg)}{message.isThread}
-					{showThreaddInfo ? <MsgThreadInfo message={message} /> : null}
+          {showThreaddInfo ? <MsgThreadInfo message={message} />: null}
 
 					{reactionMsg.length > 0 && (
-						<div className={classes.reactionBox}>
+						<div
+							className={classes.reactionBox}
+							onClick={handleReaction}
+						>
 							<RenderReactions message={message} />
 						</div>
 					)}
+					
 					<div className={classes.textReaction}>
 						{hoverDeviceModule ? (
-							<div>{isShowReaction && <Reaction message={message} />}</div>
+							<div className={classes.textReactionCon}>
+								{isShowReaction && (
+									<Reaction message={message}/>
+								)}
+								{showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
+								<div className={classes.thread}></div>
+							</div>}
+							</div>
 						) : (
 							sentStatus()
 						)}
@@ -274,36 +287,6 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 			{message.status === "read" ? (
 				<div className={classes.read}>{i18next.t("Read")}</div>
 			) : null}
-
-			{reactionMsg.length > 0 && (
-				<div
-					className={classes.reactionBox}
-					onClick={handleReaction}
-				>
-					<RenderReactions message={message} />
-				</div>
-			)}
-
-			<div className={classes.textReaction}>
-				{hoverDeviceModule ? (
-					<div className={classes.textReactionCon}>
-						{isShowReaction && (
-							<Reaction message={message} />
-						)}
-						{showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
-							<div className={classes.thread}></div>
-						</div>}
-					</div>
-				) : (
-					sentStatus()
-				)}
-			</div>
-		<div className={classes.time}>{renderTime(message.time)}</div>
-	{
-		message.status === "read" ? (
-			<div className={classes.read}>{i18next.t("Read")}</div>
-		) : null
-	}
 
 	<Menu
 		keepMounted
@@ -349,14 +332,6 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 				) : null;
 			})}
 	</Menu>
-
-	{/* {reactionMsg.length > 0 && (
-        <ReactionInfo
-          anchorEl={reactionInfoVisible}
-          onClose={() => setReactionInfoVisible(null)}
-          message={message}
-        />
-      )} */}
     </li >
   );
 }
