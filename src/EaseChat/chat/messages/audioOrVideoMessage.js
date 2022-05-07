@@ -33,22 +33,21 @@ const useStyles = makeStyles((theme) => ({
   textBodyBox: {
     position: 'relative',
     display: "flex",
+    marginLeft: (props) => props.showThreadEntry? '0':'12px',
     flexDirection:'column',
-    // flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
-    // minWidth: "40%",
+    background: (props) => props.showThreadEntry? '#fff':'#f2f2f2',
     maxWidth: "80%",
     alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
-    background: '#f2f2f2',
-    padding: '12px',
+    padding:  (props) => props.showThreadEntry? '0':'12px',
     borderRadius: (props) =>
 			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
   },
 
   audioBox: {
     margin: (props) => (props.bySelf ? "0 10px 6px 0" : "0 0 6px 10px"),
-    maxWidth: "50%",
-    minWidth: "50px",
     width: (props) => `calc(208px * ${props.duration / 15})`,
+    minWidth: '40px',
+    maxWidth: '100%',
     height: "34px",
     background: (props) =>
       props.bySelf
@@ -58,7 +57,8 @@ const useStyles = makeStyles((theme) => ({
       props.bySelf ? "16px 16px 4px" : "16px 16px 16px 4px",
     color: (props) => (props.bySelf ? "#fff" : "rgb(0, 0, 0)"),
     textAlign: (props) => (props.bySelf ? "left" : "right"),
-    flexDirection: (props) => (props.bySelf ? "row" : "row-reverse"),
+    // flexDirection: (props) => (props.bySelf ? "row" : "row-reverse"),
+    flexDirection:"row",
     alignItems: "center",
     minHeight: "40px",
     lineHeight: "34px",
@@ -92,7 +92,7 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     right: (props) => (props.bySelf ? "" : "0"),
 		left: (props) => (props.bySelf ? "0" : ""),
-		bottom: "0",
+		bottom: (props) => (props.showThreadEntry ? "12px" : "0"),
 		transform: (props) => (props.bySelf ? "translateX(-100%)":"translateX(100%)"),
   },
   reactionBox: {
@@ -143,11 +143,6 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
     customMessageClick,
     customMessageList,
   } = easeChatProps;
-  const classes = useStyles({
-    bySelf: message.bySelf,
-    duration: Math.round(message.body.length),
-    msgType: audioType,
-  });
   const url = message.body.url;
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -183,7 +178,13 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
   }
 	const showThreadEntry = showThread && !message.chatThreadOverview && !isThreadPanel && message.chatType === 'groupChat';
 	const showThreaddInfo = showThread && (!isThreadPanel) && message.chatType ==="groupChat" && message.chatThreadOverview&& (JSON.stringify(message.chatThreadOverview)!=='{}')
-
+  const classes = useStyles({
+    bySelf: message.bySelf,
+    duration: Math.round(message.body.length),
+    msgType: audioType,
+    showThreadEntry,
+  });
+  
   return (
     <li
       className={classes.pulldownListItem}

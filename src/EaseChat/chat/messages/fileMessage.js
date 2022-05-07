@@ -41,6 +41,7 @@ const useStyles = makeStyles((theme) => ({
 		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
 		position: "relative",
 		background: '#f2f2f2',
+		marginLeft:'12px',
 		padding: '12px',
 		borderRadius: (props) =>
 			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
@@ -158,7 +159,6 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 		isShowReaction,
 		customMessageClick,
 		customMessageList, } = easeChatProps;
-	const classes = useStyles({ bySelf: message.bySelf });
 	const [state, setState] = useState(initialState);
 	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
 	const reactionMsg = message?.reactions || [];
@@ -187,6 +187,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	}
 	const showThreadEntry = showThread && !message.chatThreadOverview && !isThreadPanel && message.chatType === 'groupChat';
 	const showThreaddInfo = showThread && (!isThreadPanel) && message.chatType === "groupChat" && message.chatThreadOverview && (JSON.stringify(message.chatThreadOverview) !== '{}')
+	const classes = useStyles({ bySelf: message.bySelf ,showThreadEntry});
 
 
 	return (

@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
 		display: "flex",
 		flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
 		minWidth: "40%",
-		maxWidth: "80%",
+		maxWidth: "75%",
 		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
 	},
 	time: {
@@ -75,12 +75,15 @@ const useStyles = makeStyles((theme) => ({
 		border: "1px solid #fff",
 		borderRadius: (props) =>
 			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-		padding: "15px",
-		maxWidth: "80%",
-		minWidth: "40%",
+		padding: "12px",
+		width: "100%",
+		maxWidth: "100%",
+		// maxWidth: "80%",
+		// minWidth: "40%",
 		wordBreak: "break-all",
 		textAlign: "initial",
 		position: "relative",
+		boxSizing: "border-box",
 	},
 	textReaction: {
 		position: "absolute",
@@ -256,7 +259,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 					id={message.id}
 				>
 					{renderTxt(message.body.msg)}{message.isThread}
-          {showThreaddInfo ? <MsgThreadInfo message={message} />: null}
+					{showThreaddInfo ? <MsgThreadInfo message={message} /> : null}
 
 					{reactionMsg.length > 0 && (
 						<div
@@ -266,16 +269,16 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 							<RenderReactions message={message} />
 						</div>
 					)}
-					
+
 					<div className={classes.textReaction}>
 						{hoverDeviceModule ? (
 							<div className={classes.textReactionCon}>
 								{isShowReaction && (
-									<Reaction message={message}/>
+									<Reaction message={message} />
 								)}
 								{showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
-								<div className={classes.thread}></div>
-							</div>}
+									<div className={classes.thread}></div>
+								</div>}
 							</div>
 						) : (
 							sentStatus()
@@ -288,52 +291,52 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 				<div className={classes.read}>{i18next.t("Read")}</div>
 			) : null}
 
-	<Menu
-		keepMounted
-		open={menuState.mouseY !== null}
-		onClose={handleClose}
-		anchorReference="anchorPosition"
-		anchorPosition={
-			menuState.mouseY !== null && menuState.mouseX !== null
-				? { top: menuState.mouseY, left: menuState.mouseX }
-				: undefined
-		}
-	>
-		{message.bySelf && (
-			<MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
-		)}
-		{
-			<MenuItem onClick={changeCopyVal}>
-				<CopyToClipboard text={copyMsgVal}>
-					<span>{i18next.t("Copy")}</span>
-				</CopyToClipboard>
-			</MenuItem>
-		}
-		{customMessageList &&
-			customMessageList.map((val, key) => {
-				const bySelf = message.bySelf;
-				let show = false
-				if (val.position === 'others') { }
-				switch (val.position) {
-					case 'others':
-						show = bySelf ? false : true
-						break;
-					case 'self':
-						show = bySelf ? true : false
-						break;
-					default:
-						show = true
-						break;
+			<Menu
+				keepMounted
+				open={menuState.mouseY !== null}
+				onClose={handleClose}
+				anchorReference="anchorPosition"
+				anchorPosition={
+					menuState.mouseY !== null && menuState.mouseX !== null
+						? { top: menuState.mouseY, left: menuState.mouseX }
+						: undefined
 				}
-				return show ? (
-					<MenuItem key={key} onClick={_customMessageClick(val, message)}>
-						{val.name}
+			>
+				{message.bySelf && (
+					<MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
+				)}
+				{
+					<MenuItem onClick={changeCopyVal}>
+						<CopyToClipboard text={copyMsgVal}>
+							<span>{i18next.t("Copy")}</span>
+						</CopyToClipboard>
 					</MenuItem>
-				) : null;
-			})}
-	</Menu>
-    </li >
-  );
+				}
+				{customMessageList &&
+					customMessageList.map((val, key) => {
+						const bySelf = message.bySelf;
+						let show = false
+						if (val.position === 'others') { }
+						switch (val.position) {
+							case 'others':
+								show = bySelf ? false : true
+								break;
+							case 'self':
+								show = bySelf ? true : false
+								break;
+							default:
+								show = true
+								break;
+						}
+						return show ? (
+							<MenuItem key={key} onClick={_customMessageClick(val, message)}>
+								{val.name}
+							</MenuItem>
+						) : null;
+					})}
+			</Menu>
+		</li >
+	);
 }
 
 export default memo(TextMessage);

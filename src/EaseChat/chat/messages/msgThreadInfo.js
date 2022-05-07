@@ -16,7 +16,7 @@ import { message as Alert } from '../../../EaseChat/common/alert'
 const useStyles = makeStyles((theme) => ({
     root: {
         position: 'relative',
-        minWidth: "200px",
+        minWidth: "134px",
         marginTop: "5px",
         width: '100%',
         height: "85px",

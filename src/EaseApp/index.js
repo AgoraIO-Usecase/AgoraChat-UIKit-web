@@ -116,7 +116,7 @@ const EaseApp = (props) => {
           </div>
         </Grid>
         <Grid 
-        style={{width:'100%'}}
+        style={{width:'100%',  minWidth: '788px'}}
         >
           <EaseChat {...props} />
         </Grid>

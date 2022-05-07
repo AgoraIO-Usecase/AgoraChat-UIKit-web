@@ -43,8 +43,6 @@ const useStyles = makeStyles((theme) => ({
 				props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
 	},
 	imgBox: {
-		// marginLeft: "10px",
-		// maxWidth: "50%",
 		"& img": {
 			maxWidth: "100%",
 			borderRadius: (props) => props.showThreaddInfo&&props.bySelf ? "8px 8px 4px 8px" : props.showThreaddInfo&& !props.bySelf ? "8px 8px 8px 4px" : props.bySelf?"16px 16px 4px 16px" : "16px 16px 16px 4px",
