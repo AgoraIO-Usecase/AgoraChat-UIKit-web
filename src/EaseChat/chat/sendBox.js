@@ -126,6 +126,9 @@ function SendBox(props) {
       if (isCreatingThread && props.isChatThread) {
         if (!props.threadName) {
           console.log('threadName can not empty')
+          imageEl.current.value = null;
+          fileEl.current.value = null;
+          videoEl.current.value = null;
           return;
         }
         const options = {
@@ -225,7 +228,6 @@ function SendBox(props) {
     })
     
   };
-
   const handleClickMenu = (e) => {
     setSessionEl(e.currentTarget);
   };

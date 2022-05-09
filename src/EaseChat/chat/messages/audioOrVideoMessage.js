@@ -33,12 +33,12 @@ const useStyles = makeStyles((theme) => ({
   textBodyBox: {
     position: 'relative',
     display: "flex",
-    marginLeft: (props) => props.showThreadEntry? '0':'12px',
+    marginLeft: (props) => props.showThreaddInfo? '12px':'0',
     flexDirection:'column',
-    background: (props) => props.showThreadEntry? '#fff':'#f2f2f2',
+    background: (props) => props.showThreaddInfo? '#f2f2f2':'#fff',
     maxWidth: "80%",
     alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
-    padding:  (props) => props.showThreadEntry? '0':'12px',
+    padding:  (props) => props.showThreaddInfo? '12px':'0',
     borderRadius: (props) =>
 			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
   },
@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
   audioBox: {
     margin: (props) => (props.bySelf ? "0 10px 6px 0" : "0 0 6px 10px"),
     width: (props) => `calc(208px * ${props.duration / 15})`,
-    minWidth: '40px',
+    minWidth: '70px',
     maxWidth: '100%',
     height: "34px",
     background: (props) =>
@@ -92,7 +92,7 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     right: (props) => (props.bySelf ? "" : "0"),
 		left: (props) => (props.bySelf ? "0" : ""),
-		bottom: (props) => (props.showThreadEntry ? "12px" : "0"),
+		bottom: '0',
 		transform: (props) => (props.bySelf ? "translateX(-100%)":"translateX(100%)"),
   },
   reactionBox: {
@@ -182,7 +182,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
     bySelf: message.bySelf,
     duration: Math.round(message.body.length),
     msgType: audioType,
-    showThreadEntry,
+    showThreaddInfo,
   });
   
   return (

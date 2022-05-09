@@ -49,7 +49,7 @@ export const INITIAL_STATE = Immutable({
 const { Types, Creators } = createActions({
 	addMessage: ["message", "messageType"],
 	deleteMessage: ["msgId", "to", "chatType"],
-	updateMessageStatus: ["message", "status", "localId"],
+	updateMessageStatus: ["message", "status", "localId", "serverMsgId"],
 	clearUnread: ["chatType", "sessionId"],
 	updateMessages: ["chatType", "sessionId", "messages"],
 	updateReactionData: ["message", "reaction"],
@@ -76,8 +76,8 @@ const { Types, Creators } = createActions({
 			formatMsg.id = msgObj.id;
 			WebIM.conn.send(msgObj).then((res) => {
 				console.log("send private text Success",res);
-				let { localMsgId } = res;
-				dispatch(Creators.updateMessageStatus(formatMsg, "sent", localMsgId));
+				let { localMsgId, serverMsgId } = res;
+				dispatch(Creators.updateMessageStatus(formatMsg, "sent", localMsgId, serverMsgId));
 			}).catch((e) => {
 				console.log("Send private text error", e);
 				dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
@@ -565,7 +565,7 @@ export const updateThreadMessage = (state,{to,messageList,isScroll}) =>{
     return state
 }
 
-export const updateMessageStatus = (state, { message, status = "", localId }) => {
+export const updateMessageStatus = (state, { message, status = "", localId, serverMsgId }) => {
 	let id = localId;
 	if (!id) id = state.getIn(["byMid", message.mid, "id"]);
 	let mids = state.getIn(["byMid"]) || {};
@@ -579,7 +579,7 @@ export const updateMessageStatus = (state, { message, status = "", localId }) =>
 	if (!_.isEmpty(byId)) {
 		const { chatType, chatId } = byId;
 		let messages = state.getIn([chatType, chatId]).asMutable();
-		let found = _.find(messages, { id: id });
+		let found = _.find(messages, { id: id }) || _.find(messages, { id: serverMsgId });
 		found.setIn(["status"], status);
 		found.setIn(["toJid"], mid);
 		let msg = {

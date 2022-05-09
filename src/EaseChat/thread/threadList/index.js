@@ -41,13 +41,13 @@ const ThreadListPanel = ({ anchorEl, onClose }) => {
             case 'txt':
                 return renderTxt(message.msg)
             case 'file':
-                return `[${i18next.t('File Message')}]`
+                return `[${i18next.t('File')}]`
             case 'img':
-                return `[${i18next.t('Image Message')}]`
+                return `[${i18next.t('Image')}]`
             case 'audio':
-                return `[${i18next.t('Audio Message')}]`
+                return `[${i18next.t('Audio')}]`
             case 'video':
-                return `[${i18next.t('Video Message')}]`
+                return `[${i18next.t('Video')}]`
             default:
                 return ''
         }

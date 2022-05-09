@@ -228,13 +228,13 @@ const ThreadPanel = () => {
             case 'txt':
                 return renderTxt(body.msg)
             case 'file':
-                return `[${i18next.t('File Message')}]`
+                return `[${i18next.t('File')}]`
             case 'img':
-                return `[${i18next.t('Image Message')}]`
+                return `[${i18next.t('Image')}]`
             case 'audio':
-                return `[${i18next.t('Audio Message')}]`
+                return `[${i18next.t('Audio')}]`
             case 'video':
-                return `[${i18next.t('Video Message')}]`
+                return `[${i18next.t('Video')}]`
             default:
                 return ''
         }
@@ -312,11 +312,11 @@ const ThreadPanel = () => {
             </Box>
         )
     }
-    const audioRef = useRef(null);
+    const threadAudioRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const play = (e,message) => {
         setIsPlaying(true);
-        // audioRef.current.play();
+        threadAudioRef.current.play();
         const time = message.body.length * 1000;
         setTimeout(() => {
             setIsPlaying(false);
@@ -357,7 +357,7 @@ const ThreadPanel = () => {
                         {Math.floor(message.body.length) + "''"}
                     </span>
                     <AudioPlayer play={isPlaying} />
-                    <audio src={message.body.url} ref={audioRef} />
+                    <audio src={message.body.url} ref={threadAudioRef} />
                 </div>
             )
         } else if (message.body.type === "video") {
