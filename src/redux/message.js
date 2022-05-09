@@ -573,6 +573,7 @@ export const updateMessages = (state, { chatType, sessionId, messages }) => {
 
 export const updateMessageMid = (state, { id, mid }) => {
 	const byId = state.getIn(["byId", id]);
+	if(!byId) return state;
 	const { chatType, chatId } = byId;
 	if (!_.isEmpty(byId)) {
 		let messages = state

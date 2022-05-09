@@ -1,4 +1,4 @@
-import React, { useEffect, memo, createContext } from "react";
+import React, { useEffect, memo, createContext, useState } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/styles";
 import MessageList from "./messageList";
@@ -13,6 +13,7 @@ import "../../i18n";
 import "../../common/iconfont.css";
 import noMessage from "../../common/images/nomessage.png";
 import i18next from "i18next";
+import CallKit from 'zd-callkit'
 
 export const EaseChatContext = createContext();
 const useStyles = makeStyles((theme) => ({
@@ -66,17 +67,23 @@ const Chat = (props) => {
       return _.get(state, ["message", chatType, to], []);
     }) || [];
 
+  const [showInviteModal, setShowInvite] = useState(false)
+  const showInvite = () => {
+    setShowInvite(true)
+  }
+
   const to = useSelector((state) => state.global.globalProps.to);
 
   return to ? (
     <div className={classes.root}>
       <EaseChatContext.Provider value={props}>
-        <MessageBar />
+        <MessageBar showinvite={showInviteModal}/>
         <MessageList
           messageList={messageList}
           showByselfAvatar={props.showByselfAvatar}
         />
         <SendBox />
+        <CallKit onAddPerson={showInvite}></CallKit>
       </EaseChatContext.Provider>
     </div>
   ) : (
