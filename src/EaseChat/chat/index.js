@@ -14,7 +14,7 @@ import "../../common/iconfont.css";
 import noMessage from "../../common/images/nomessage.png";
 import i18next from "i18next";
 import CallKit from 'zd-callkit'
-
+import MessageActions from "../../redux/message";
 export const EaseChatContext = createContext();
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -72,6 +72,39 @@ const Chat = (props) => {
     setShowInvite(true)
   }
 
+  const handleCallStateChange = (info) => {
+    console.log('info ----', info)
+    switch(info.type){
+      case 'hangup':
+      case 'refuse':
+        const chatType = 'singleChat'
+        let to =''
+        if(info.callInfo.groupId){
+          to = groupId
+        }else if(info.callInfo.callerIMName == WebIM.conn.context.userId){
+          to = info.callInfo.calleeIMName
+        }else{
+          to = info.callInfo.callerIMName
+        }
+        var id = WebIM.conn.getUniqueId(); 
+        let message = {
+           id: id,
+           status: 'sent',
+           body: {
+             type: 'custom',
+             info: info.callInfo
+           },
+           from: WebIM.conn.context.userId,
+           to: to,
+           chatType: chatType
+        }
+        store.dispatch(MessageActions.addMessage(message))
+        break;
+      default:
+        break;
+    }
+  }
+
   const to = useSelector((state) => state.global.globalProps.to);
 
   return to ? (
@@ -83,7 +116,7 @@ const Chat = (props) => {
           showByselfAvatar={props.showByselfAvatar}
         />
         <SendBox />
-        <CallKit onAddPerson={showInvite}></CallKit>
+        <CallKit onAddPerson={showInvite} onStateChange={handleCallStateChange}></CallKit>
       </EaseChatContext.Provider>
     </div>
   ) : (
@@ -97,6 +130,7 @@ const Chat = (props) => {
       }}
     >
       <img src={noMessage} alt="" style={{ height: "200px", width: "200px" }} />
+      <CallKit onAddPerson={showInvite} onStateChange={handleCallStateChange}></CallKit>
     </div>
   );
 };

@@ -10,6 +10,8 @@ import FileMessage from "./messages/fileMessage";
 import ImgMessage from "./messages/imageMessage";
 import AudioOrVideoMessage from "./messages/audioOrVideoMessage";
 import TextMessage from "./messages/textMessage";
+import NoticeMessage from './messages/noticeMessage'
+import CustomMessage from './messages/customMessage'
 import i18next from "i18next";
 
 const useStyles = makeStyles((theme) => ({
@@ -116,11 +118,21 @@ function MessageList({ messageList, showByselfAvatar }) {
                   );
                 } else if (msg.body.type === "audio" || msg.body.type === "video") {
                   return <AudioOrVideoMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}/>;
-                } else if (msg.body.type === "recall") {
+                } else if (msg.body.type === "recall2") {
                   return (
                     <RetractedMessage message={msg} key={msg.id + index}/>
                   );
-                } else {
+                } else if(msg.body.type === "notice"){
+                    return (
+                      <NoticeMessage message={msg} key={msg.id + index}/>
+                    )
+                } else if(msg.body.type === 'custom'){
+                  return (
+                      <CustomMessage message={msg} key={msg.id + index}/>
+                    )
+                }
+
+                else {
                   return null;
                 }
               })

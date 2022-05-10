@@ -405,6 +405,17 @@ const { Types, Creators } = createActions({
 
 /* ------------- Reducers ------------- */
 export const addMessage = (state, { message, messageType = "txt" }) => {
+	// message = {
+	// 	id: '1234556',
+	// 	status: 'sent',
+	// 	body: {
+	// 		msg: 'hello',
+	// 		type: 'notice'
+	// 	},
+	// 	from: 'zd3',
+	// 	to: 'test0001',
+	// 	chatType: 'singleChat'
+	// }
 	const rootState = uikit_store.getState();
 	!message.status && (message = formatServerMessage(message, messageType));
 	const username = WebIM.conn.context.userId;
@@ -420,6 +431,7 @@ export const addMessage = (state, { message, messageType = "txt" }) => {
 		time: +new Date(),
 		status: status,
 	};
+	console.log('_message', _message)
 	if (_message.chatType === "chatRoom" && bySelf) {
 		const oid = state.getIn(["byMid", _message.id, "id"]);
 		if (oid) {
