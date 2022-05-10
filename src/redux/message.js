@@ -778,7 +778,6 @@ export const updateReactionData = (state, { message, reaction }) => {
     }
 
 	if (byId) {
-		debugger
 		const { chatType } = byId;
 		let messages = state.getIn([chatType, addReactionUser]).asMutable();
 		let found = _.find(messages, { id: messageId })
