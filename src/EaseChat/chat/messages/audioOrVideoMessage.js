@@ -143,7 +143,8 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
     customMessageClick,
     customMessageList,
   } = easeChatProps;
-  const url = message.body.url;
+  // const url = message.body.url;
+  const url = message.bySelf? message.url: message.audioSrcUrl;
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [state, setState] = useState(initialState);

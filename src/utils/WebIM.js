@@ -25,10 +25,10 @@ export const initIMSDK = (appkey) => {
     // apiUrl: 'https://a1-test.easemob.com'
     // isHttpDNS: WebIM.config.isHttpDNS,
     isHttpDNS: false,
-    url: (window.location.protocol === "https:" ? "https:" : "http:") + "//im-api-v2-hsb.easemob.com/ws",
-    apiUrl: (window.location.protocol === "https:" ? "https:" : "http:") + "//a1-hsb.easemob.com",
-    // url: 'http://im-api-test-hsb.easemob.com:8280/ws',
-    // apiUrl: 'http://a1-hsb.easemob.com'
+    url: (window.location.protocol === "https:" ? "https:" : "http:") + "//msync-api-a1-test.easemob.com/ws",
+    apiUrl: (window.location.protocol === "https:" ? "https:" : "http:") + "//a1-test.easemob.com",
+    // url: (window.location.protocol === "https:" ? "https:" : "http:") + "//im-api-v2-hsb.easemob.com/ws",
+    // apiUrl: (window.location.protocol === "https:" ? "https:" : "http:") + "//a1-hsb.easemob.com",
   };
 
   WebIM.conn = new websdk.connection(options);
