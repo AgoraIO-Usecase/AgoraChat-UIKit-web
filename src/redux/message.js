@@ -683,20 +683,22 @@ export const updateMessages = (state, { chatType, sessionId, messages }) => {
 };
 
 export const updateMessageMid = (state, { id, mid,to }) => {
-    const byId = state.getIn(['byId', id])
-    if (!_.isEmpty(byId)) {
-        const { chatType, chatId } = byId
-        let messages = state.getIn([chatType, chatId]).asMutable({ deep: true })
-        let found = _.find(messages, { id: id })
-        found.toJid = mid
-        found.id = mid
-        // let msg = found.setIn(['toJid'], mid)
-        messages.splice(messages.indexOf(found), 1, found)
-        state = state.setIn([chatType, chatId], messages)
-    }
-    setTimeout(() => { AppDB.updateMessageMid(mid, id) }, 500)
-    //update the mid of thread message 
-    if(state.threadMessage[to]){
+	const byId = state.getIn(["byId", id]);
+	const { chatType, chatId } = byId;
+	if (!_.isEmpty(byId)) {
+		let messages = state
+			.getIn([chatType, chatId])
+			.asMutable({ deep: true });
+		let found = _.find(messages, { id: id });
+		found.id = mid;
+		found.toJid = mid;
+		found.mid = mid;
+		// let msg = found.setIn(['toJid'], mid)
+		messages.splice(messages.indexOf(found), 1, found);
+		state = state.setIn([chatType, chatId], messages);
+	}
+
+	if(state.threadMessage[to]){
         let threadMsg = {}
         const threadMsgList = state.getIn(['threadMessage', to]).asMutable({ deep: true })
         threadMsg = _.find(threadMsgList, { id: id })
@@ -707,10 +709,15 @@ export const updateMessageMid = (state, { id, mid,to }) => {
             return state
         }
     }
-    return state.setIn(['byMid', mid], { id })
+
+	AppDB.updateMessageMid(mid, id);
+	state = state.setIn(["byMid", mid], { id });
+	state = state.setIn(["byId", mid], { chatType, chatId })
+	return state;
 }
 
 export const updateReactionData = (state, { message, reaction }) => {
+	console.log('updateReactionData>>>', message, reaction);
 	let { messageId, from, to, reactions, chatType } = message;
 	let newReactionsData = reactions
 
@@ -771,6 +778,7 @@ export const updateReactionData = (state, { message, reaction }) => {
     }
 
 	if (byId) {
+		debugger
 		const { chatType } = byId;
 		let messages = state.getIn([chatType, addReactionUser]).asMutable();
 		let found = _.find(messages, { id: messageId })
