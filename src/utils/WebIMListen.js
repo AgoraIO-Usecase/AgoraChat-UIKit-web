@@ -119,8 +119,8 @@ export default function createlistener(props) {
 			store.dispatch(SessionActions.deleteSession(msg.from));
 			store.dispatch(GlobalPropsActions.setGlobalProps({ to: null }));
 		},
-		onReactionUpdate: (message) => {
-			console.log("onReactionUpdate", message);
+		onReactionChange: (message) => {
+			console.log("onReactionChange", message);
 			store.dispatch(MessageActions.updateReaction(message));
 		},
 		//thread notify

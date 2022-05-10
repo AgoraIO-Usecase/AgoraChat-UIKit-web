@@ -41,6 +41,7 @@ const useStyles = makeStyles((theme) => ({
 		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
 		position: "relative",
 		background: '#f2f2f2',
+		padding:  (props) => props.showThreadEntry? '0':'12px',
 		marginLeft:'12px',
 		padding: '12px',
 		borderRadius: (props) =>
@@ -49,10 +50,10 @@ const useStyles = makeStyles((theme) => ({
 	fileCard: {
 		width: "252px",
 		height: "72px",
+		marginTop: (props) => (!props.bySelf && props.rnReactions ? "15px" : "0"),
 		backgroundColor: "#fff",
 		display: "flex",
 		alignItems: "center",
-		// marginLeft: "10px",
 		marginBottom: "6px",
 	},
 	fileIcon: {
@@ -121,7 +122,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 	reactionBox: {
 		position: "absolute",
-		top: (props) => (props.bySelf ? "-15px" : "15px"),
+		top: (props) => (props.bySelf ? "-15px" : "33px"),
 		right: (props) => (props.bySelf ? "0px" : ""),
 		left: (props) => (props.bySelf ? "" : "5px"),
 		background: "#F2F2F2",
@@ -187,7 +188,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	}
 	const showThreadEntry = showThread && !message.chatThreadOverview && !isThreadPanel && message.chatType === 'groupChat';
 	const showThreaddInfo = showThread && (!isThreadPanel) && message.chatType === "groupChat" && message.chatThreadOverview && (JSON.stringify(message.chatThreadOverview) !== '{}')
-	const classes = useStyles({ bySelf: message.bySelf ,showThreadEntry});
+	const classes = useStyles({ bySelf: message.bySelf ,showThreadEntry,rnReactions: reactionMsg.length > 0,});
 
 
 	return (

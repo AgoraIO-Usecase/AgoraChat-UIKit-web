@@ -64,7 +64,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 	textBody: {
 		// display: "flex",
-		margin: (props) => (props.bySelf ? "0 10px 10px 0" : "0 0 10px 10px"),
+		margin: (props) => (props.bySelf ? "0 10px 10px 0" : props.rnReactions? "15px 0 10px 10px": "0 0 10px 10px"),
 		lineHeight: "22px",
 		fontSize: "14px",
 		background: (props) =>
@@ -100,7 +100,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 	reactionBox: {
 		position: "absolute",
-		top: (props) => (props.bySelf ? "-15px" : "-10px"),
+		top: (props) => (props.bySelf ? "-15px" : "-18px"),
 		right: (props) => (props.bySelf ? "0px" : ""),
 		left: (props) => (props.bySelf ? "" : "0px"),
 		background: "#F2F2F2",
@@ -143,7 +143,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	const classes = useStyles({
 		bySelf: message.bySelf,
 		chatType: message.chatType,
-		rnReactions: reactionMsg.length > 1,
+		rnReactions: reactionMsg.length > 0,
 	});
 	const [menuState, setMenuState] = useState(initialState);
 	const [copyMsgVal, setCopyMsgVal] = useState('')
@@ -262,10 +262,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 					{showThreaddInfo ? <MsgThreadInfo message={message} /> : null}
 
 					{reactionMsg.length > 0 && (
-						<div
-							className={classes.reactionBox}
-							onClick={handleReaction}
-						>
+						<div className={classes.reactionBox} >
 							<RenderReactions message={message} />
 						</div>
 					)}

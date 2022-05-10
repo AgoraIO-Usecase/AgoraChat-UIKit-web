@@ -187,10 +187,7 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 					</div>
 					{showThreaddInfo ? <MsgThreadInfo message={message} />: null}
 					{reactionMsg.length > 0 && (
-						<div
-							className={classes.reactionBox}
-							onClick={handleReaction}
-						>
+						<div className={classes.reactionBox}>
 							<RenderReactions message={message} />
 						</div>
 					)}
