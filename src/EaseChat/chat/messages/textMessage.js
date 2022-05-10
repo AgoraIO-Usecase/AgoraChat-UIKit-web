@@ -264,7 +264,6 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 					{reactionMsg.length > 0 && (
 						<div
 							className={classes.reactionBox}
-							onClick={handleReaction}
 						>
 							<RenderReactions message={message} />
 						</div>
