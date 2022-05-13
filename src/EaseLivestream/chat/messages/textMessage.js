@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     maxWidth: "65%",
-    alignItems:"unset",
+    alignItems: "unset",
   },
   textBody: {
     padding: "0 15px",
@@ -56,6 +56,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 function TextMessage({ message }) {
   let easeLivestreamProps = useContext(EaseLivestreamContext);
+  const { roomUserInfo } = easeLivestreamProps;
   const classes = useStyles({
     bySelf: message.bySelf,
     chatType: message.chatType,
@@ -101,17 +102,14 @@ function TextMessage({ message }) {
 
     return rnTxt;
   };
-
   return (
     <li className={classes.pulldownListItem}>
       <div>
-        <img className={classes.avatarStyle} src={avatar}></img>
+        <img className={classes.avatarStyle} src={ roomUserInfo && roomUserInfo[message.avatar] || avatar}></img>
       </div>
       <div className={classes.textBodyBox}>
-        <span className={classes.userName}>{message.from}</span>
-        <div className={classes.textBody}>
-          {renderTxt(message.body.msg)}
-        </div>
+        <span className={classes.userName}>{roomUserInfo && roomUserInfo[message.from] || message.from}</span>
+        <div className={classes.textBody}>{renderTxt(message.body.msg)}</div>
       </div>
     </li>
   );

@@ -124,6 +124,7 @@ EaseLivestreamProvider.propTypes = {
   customMessageClick: PropTypes.func,
 
   closeChat: PropTypes.func,
+  roomUserInfo: PropTypes.object,
 };
 
 EaseLivestreamProvider.defaultProps = {

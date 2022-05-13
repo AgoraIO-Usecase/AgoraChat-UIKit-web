@@ -54,25 +54,11 @@ export default class Demo extends Component {
           <button onClick={this.addSessionItem}> 测试 </button>
         <h3>EaseApp</h3>
         <div>
-          {/* <EaseApp
-            successLoginCallback={this.test}
-            failCallback={this.test2}
-            onAvatarChange={this.test3}
-            onChatAvatarClick={this.test4}
-
-            closeChat={this.test5}
-            
-            appkey= "41117440#383391"
-            username="test003"
-            agoraToken="007eJxTYIjT9z78Mq5gIWvimQDLneH87z8mcLoZzdrmUPg6jftWyD0FhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9Pk2FluSQoyDAy57Vv2MDKwMjACIYivwmCeYmFkZm5qoGuZlGiqa2iYmqxraW6eqptinmxpZpRmbGFqaQYAH2EmCg=="
-            header={<div style={{ height: "100px" }}>TestHeader</div>}
-             /> */}
-
              <div style={{height:'500px'}}>
              <EaseLivestream
                   appkey= "41117440#383391"
-                  username="test003"
-                  agoraToken="007eJxTYDg62UPmqKCrFOtXE/5FW1ewhLL9MlMKrDCSe3bk3uvzV7YqMKQZpiSbm1skpaQkm5mYJaZYpBmZGViamyUnGqUYGJomu213S1KQYWBQzUtyYGRgZWAEQhBfhcE8xcLIzNzUQNcyKdFU19AwNVnX0tw8VTfFPNnSzCjN2MLU0gwAs7UkrA=="
+                  username="test004"
+                  agoraToken="007eJxTYJihkLVHfmaA+Yb9LtN+7NZ4GdWX6tL7MG5ma+fKEh6mdDUFhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9PkJv26JAUZBob7KvP9GRlYGRiBEMRXYUhOTUsyM0o20E1OSU3WNTQEEkkpSSa6RuZAsywSU8wSDc0BOP4nVg=="
                   to="qwk003"
                   chatType="singleChat"
             />
