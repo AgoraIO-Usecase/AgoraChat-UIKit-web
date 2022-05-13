@@ -83,8 +83,7 @@ const MessageBar = () => {
 
   const [sessionEl, setSessionEl] = useState(null);
 
-  const { chatType, to, username, presenceExt } = globalProps;
-  console.log(globalProps, 'messagebar')
+  const { chatType, to, name, presenceExt } = globalProps;
   const renderSessionInfoMenu = () => {
     const handleClickClearMessage = () => {
       dispatch(MessageActions.clearMessage(chatType, to));
@@ -159,13 +158,13 @@ const MessageBar = () => {
           {
             chatType === "singleChat" ?
             <div className={classes.imgBox}>
-              <img alt="" src={getUserOnlineStatus[presenceExt[to]?.ext] || customIcon} className={classes.imgStyle} />
+              <img alt="" src={presenceExt ? getUserOnlineStatus[presenceExt[to]?.ext] : customIcon} className={classes.imgStyle} />
             </div>
             : null
           }
-        {to}
+        {name || to}
         {
-          presenceExt[to]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
+          presenceExt && presenceExt[to]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
         }
       </Box>
       <Box position="static">

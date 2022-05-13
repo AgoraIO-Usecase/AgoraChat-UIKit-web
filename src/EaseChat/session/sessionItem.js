@@ -107,22 +107,35 @@ const useStyles = makeStyles((theme) => ({
 function SessionItem(props) {
     let easeAppProps = useContext(EaseAppContext)
     const {isShowUnread,unreadType} = easeAppProps
-    const {currentVal,handleListItemClick} = props
+    const {currentVal,handleListItemClick,deleteSessionClick} = props
     const {session,index,currentSessionIndex,avatarSrc} = currentVal
     const classes = useStyles();
     const dispatch = useDispatch();
     const [isShowMoreVertStyle,setIsShowMoreVertStyle] = useState(false)
     const [sessionEl, setSessionEl] = useState(null);
-    const menuList = [{name: i18next.t('Delete Session')}]
+    const menuList = [{name: i18next.t('Delete Session'),key:'0',value:'deleteSession'}]
     const globalProps = useSelector((state) => state.global?.globalProps)
     const { presenceExt } = globalProps
-    const onClickMenuItem = (e,index) =>{
+    const onClickMenuItem = (option,_session) => (e) =>{
+      const {value} = option
         e.preventDefault()
         e.stopPropagation()
-        dispatch(MessageActions.clearMessage(session.sessionType, session.sessionId));
-        dispatch(SessionActions.deleteSession(session.sessionId));
-        dispatch(GlobalPropsActions.setGlobalProps({to:null}))
-        setSessionEl(null)
+        switch (value) {
+          case 'deleteSession':
+            deleteSessionClick(_session)
+            dispatch(MessageActions.clearMessage(_session.sessionType, _session.sessionId));
+            dispatch(SessionActions.deleteSession(_session.sessionId));
+
+            index === currentSessionIndex && dispatch(GlobalPropsActions.setGlobalProps({to:null}))
+            setSessionEl(null)
+            setIsShowMoreVertStyle(false)
+            break;
+
+          default:
+            break;
+        }
+        
+   
     }
     const showMoreVert = (e) =>{
         e.preventDefault()
@@ -134,7 +147,7 @@ function SessionItem(props) {
         e.stopPropagation()
         setSessionEl(null)
     }
-    const renderMenu = () => {
+    const renderMenu = (_session) => {
         return (
           <Menu
             id="simple-menu"
@@ -153,7 +166,7 @@ function SessionItem(props) {
           >
             {menuList && menuList.map((option, index) => {
               return (
-                <MenuItem onClick={(e)=>onClickMenuItem(e,index)} key={index}>
+                <MenuItem onClick={onClickMenuItem(option,_session)} key={index}>
                   <Typography variant="inherit" noWrap>
                     {i18next.t(option.name)}
                   </Typography>
@@ -213,7 +226,7 @@ function SessionItem(props) {
               {isShowMoreVertStyle && <IconButton className={classes.moreVertStyle} onClick={(e) => showMoreVert(e)}>
                 <MoreVertIcon fontSize="small"/>
               </IconButton>}
-              {renderMenu()}
+              {renderMenu(session)}
             </Typography>
           </Box>
         </Box>

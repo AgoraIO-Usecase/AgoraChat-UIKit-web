@@ -4,7 +4,11 @@ import { Avatar, Icon } from "@material-ui/core";
 import { renderTime } from "../../../utils/index";
 import avatar from "../../../common/icons/avatar1.png";
 import AudioPlayer from "./audioPlayer/audioPlayer";
+import { Menu, MenuItem } from "@mui/material";
 import { EaseChatContext } from "../index";
+
+import Reaction from "../reaction";
+import RenderReactions from "../reaction/renderReaction";
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
     padding: "10px 0",
@@ -53,6 +57,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     cursor: "pointer",
     fontSize: "14px",
+    position: "relative",
   },
   time: {
     position: "absolute",
@@ -74,18 +79,59 @@ const useStyles = makeStyles((theme) => ({
     display: "block",
     height: "34px",
   },
+  textReaction: {
+    position: "absolute",
+    right: (props) => (props.bySelf ? "" : "-25px"),
+    left: (props) => (props.bySelf ? "-25px" : ""),
+    bottom: (props) => (props.msgType ? "-15px" : "0"),
+    marginRight: "5px",
+  },
+  reactionBox: {
+    position: "absolute",
+    top: "-15px",
+    right: (props) => (props.bySelf ? "0" : ""),
+    left: (props) => (props.bySelf ? "" : "0"),
+    background: "#F2F2F2",
+    borderRadius: "17.5px",
+    padding: "3px",
+    border: "solid 2px #FFFFFF",
+    boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
+  },
 }));
-
+const initialState = {
+  mouseX: null,
+  mouseY: null,
+};
 function AudioOrVideoMessage({ message, showByselfAvatar }) {
+  let audioType = message.body.type === "audio";
   let easeChatProps = useContext(EaseChatContext);
-  const { onAvatarChange } = easeChatProps;
+  const {
+    onAvatarChange,
+    isShowReaction,
+    customMessageClick,
+    customMessageList,
+  } = easeChatProps;
   const classes = useStyles({
     bySelf: message.bySelf,
     duration: Math.round(message.body.length),
+    msgType: audioType,
   });
   const url = message.body.url;
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [state, setState] = useState(initialState);
+  const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
+  const reactionMsg = message?.reactions || [];
+  const handleClose = () => {
+    setState(initialState);
+  };
+  const handleClick = (event) => {
+    event.preventDefault();
+    setState({
+      mouseX: event.clientX - 2,
+      mouseY: event.clientY - 4,
+    });
+  };
 
   const play = () => {
     setIsPlaying(true);
@@ -96,8 +142,17 @@ function AudioOrVideoMessage({ message, showByselfAvatar }) {
     }, time + 500);
   };
 
+  const _customMessageClick = (val, option) => (e) => {
+    customMessageClick && customMessageClick(e, val, option);
+    handleClose();
+  };
+
   return (
-    <li className={classes.pulldownListItem}>
+    <li
+      className={classes.pulldownListItem}
+      onMouseOver={() => setHoverDeviceModule(true)}
+      onMouseLeave={() => setHoverDeviceModule(false)}
+    >
       {!message.bySelf && (
         <Avatar
           src={avatar}
@@ -108,25 +163,87 @@ function AudioOrVideoMessage({ message, showByselfAvatar }) {
       <div className={classes.textBodyBox}>
         <span className={classes.userName}>{message.from}</span>
         {message.type === "audio" ? (
-          <div className={classes.audioBox} onClick={play}>
+          <div className={classes.audioBox} onClick={play} onContextMenu={handleClick}>
             <AudioPlayer play={isPlaying} reverse={message.bySelf} />
             <span className={classes.duration}>
               {Math.floor(message.body.length) + "''"}
             </span>
             <audio src={url} ref={audioRef} />
+            <div className={classes.textReaction}>
+              {hoverDeviceModule ? (
+                <div>{isShowReaction && <Reaction message={message} />}</div>
+              ) : (
+                <></>
+              )}
+            </div>
+            {reactionMsg.length > 0 && (
+              <div className={classes.reactionBox}>
+                <RenderReactions message={message} />
+              </div>
+            )}
           </div>
         ) : (
-          <div>
+          <div style={{ position: "relative" }}>
             <video
-              style={{width:'320px',borderRadius:'20px'}}
+              style={{
+                width: "320px",
+                borderRadius: "20px",
+              }}
               controls
               src={message.url}
+              onContextMenu={handleClick}
             />
+            <div className={classes.textReaction}>
+              {hoverDeviceModule ? (
+                <div>{isShowReaction && <Reaction message={message} />}</div>
+              ) : (
+                <></>
+              )}
+            </div>
+            {reactionMsg.length > 0 && (
+              <div className={classes.reactionBox}>
+                <RenderReactions message={message} />
+              </div>
+            )}
           </div>
         )}
       </div>
 
       <div className={classes.time}>{renderTime(message.time)}</div>
+      <Menu
+        keepMounted
+        open={state.mouseY !== null}
+        onClose={handleClose}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          state.mouseY !== null && state.mouseX !== null
+            ? { top: state.mouseY, left: state.mouseX }
+            : undefined
+        }
+      >
+        {customMessageList &&
+          customMessageList.map((val, key) => {
+            const bySelf = message.bySelf;
+            let show = false
+            if(val.position === 'others'){}
+            switch(val.position){
+              case 'others':
+                show = bySelf ? false : true
+                break;
+              case 'self':
+                show = bySelf ? true : false
+                break;
+              default:
+                show = true
+                break;
+            }
+            return show ?(
+              <MenuItem key={key} onClick={_customMessageClick(val, message)}>
+                {val.name}
+              </MenuItem>
+            ):null;
+          })}
+      </Menu>
     </li>
   );
 }

@@ -7,6 +7,9 @@ import { IconButton, Icon, Menu, MenuItem } from "@material-ui/core";
 import { renderTime } from "../../../utils";
 import { EaseChatContext } from "../index";
 
+import Reaction from "../reaction";
+import RenderReactions from "../reaction/renderReaction";
+
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
     padding: "10px 0",
@@ -32,6 +35,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
     maxWidth: "65%",
     alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
+    position: "relative",
   },
   fileCard: {
     width: "252px",
@@ -93,6 +97,24 @@ const useStyles = makeStyles((theme) => ({
     width: "40px",
     borderRadius: "50%",
   },
+  textReaction: {
+    position: "absolute",
+    right: (props) => (props.bySelf ? "" : "-28px"),
+    bottom: (props) => (props.bySelf ? "25px" : "20px"),
+    left: (props) => (props.bySelf ? "-15px" : ""),
+    marginRight: "5px",
+  },
+  reactionBox: {
+    position: "absolute",
+    top: (props) => (props.bySelf ? "-15px" : "15px"),
+    right: (props) => (props.bySelf ? "0px" : ""),
+    left: (props) => (props.bySelf ? "" : "5px"),
+    background: "#F2F2F2",
+    borderRadius: "17.5px",
+    padding: "3px",
+    border: "solid 3px #FFFFFF",
+    boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
+  },
 }));
 const initialState = {
   mouseX: null,
@@ -100,9 +122,16 @@ const initialState = {
 };
 function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
   let easeChatProps = useContext(EaseChatContext);
-  const { onAvatarChange } = easeChatProps;
+  const {
+    onAvatarChange,
+    isShowReaction,
+    customMessageClick,
+    customMessageList,
+  } = easeChatProps;
   const classes = useStyles({ bySelf: message.bySelf });
   const [state, setState] = useState(initialState);
+  const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
+  const reactionMsg = message?.reactions || [];
   const handleClose = () => {
     setState(initialState);
   };
@@ -117,14 +146,22 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
       mouseY: event.clientY - 4,
     });
   };
+  const _customMessageClick = (val, option) => (e) => {
+    customMessageClick && customMessageClick(e, val, option);
+    handleClose();
+  };
 
   return (
-    <li className={classes.pulldownListItem}>
+    <li
+      className={classes.pulldownListItem}
+      onMouseOver={() => setHoverDeviceModule(true)}
+      onMouseLeave={() => setHoverDeviceModule(false)}
+    >
       {!message.bySelf && (
         <img
           className={classes.avatarStyle}
           src={avatar}
-          onClick={(e) => onAvatarChange && onAvatarChange(e,message)}
+          onClick={(e) => onAvatarChange && onAvatarChange(e, message)}
         ></img>
       )}
       {showByselfAvatar && message.bySelf && (
@@ -142,29 +179,63 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar }) {
             <span>{Math.floor(message.body.size / 1024) + "kb"}</span>
           </div>
           <div className={classes.download}>
-            <a href={message.url} download={message.filename}>
+            <a href={message.body.url} download={message.filename}>
               <IconButton className="iconfont icon-xiazai"></IconButton>
             </a>
           </div>
+        </div>
+        <div className={classes.textReaction}>
+          {hoverDeviceModule ? (
+            <div>{isShowReaction && <Reaction message={message} />}</div>
+          ) : (
+            <></>
+          )}
+        </div>
+        {reactionMsg.length > 0 && (
+          <div className={classes.reactionBox}>
+            <RenderReactions message={message} />
           </div>
+        )}
       </div>
-   
+
       <div className={classes.time}>{renderTime(message.time)}</div>
-      {message.bySelf ? (
-        <Menu
-          keepMounted
-          open={state.mouseY !== null}
-          onClose={handleClose}
-          anchorReference="anchorPosition"
-          anchorPosition={
-            state.mouseY !== null && state.mouseX !== null
-              ? { top: state.mouseY, left: state.mouseX }
-              : undefined
-          }
-        >
+      <Menu
+        keepMounted
+        open={state.mouseY !== null}
+        onClose={handleClose}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          state.mouseY !== null && state.mouseX !== null
+            ? { top: state.mouseY, left: state.mouseX }
+            : undefined
+        }
+      >
+        {message.bySelf && (
           <MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
-        </Menu>
-      ) : null}
+        )}
+        {customMessageList &&
+          customMessageList.map((val, key) => {
+            const bySelf = message.bySelf;
+            let show = false
+            if(val.position === 'others'){}
+            switch(val.position){
+              case 'others':
+                show = bySelf ? false : true
+                break;
+              case 'self':
+                show = bySelf ? true : false
+                break;
+              default:
+                show = true
+                break;
+            }
+            return show ?(
+              <MenuItem key={key} onClick={_customMessageClick(val, message)}>
+                {val.name}
+              </MenuItem>
+            ): null;
+          })}
+      </Menu>
     </li>
   );
 }

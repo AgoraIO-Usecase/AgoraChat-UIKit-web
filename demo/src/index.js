@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { render } from "react-dom";
-import { EaseChat, EaseApp, EasePresence } from "../../src/index";
+import { EaseChat, EaseApp } from "../../src/index";
 // import WebIM from "./WebIM";
 import val from "./comm";
 // import initListen from "./WebIMListen";
@@ -25,9 +25,9 @@ export default class Demo extends Component {
   };
     addSessionItem = () => {
     let session = {
-      conversationType: "singleChat",
-      conversationId: "zd132",
-    };
+		conversationType: "singleChat",
+		conversationId: "test0001",
+	};
     EaseApp.addConversationItem(session);
     EaseApp.changePresenceStatus({[session.conversationId] : 'Online'})
   };
@@ -51,6 +51,8 @@ export default class Demo extends Component {
         <h3>EaseApp</h3>
         <div>
           <EaseApp
+            customMessageList={ [{name: 'report', value: 'report', position: 'others'}]}
+            isShowReaction
             successLoginCallback={this.test}
             failCallback={this.test2}
             onAvatarChange={this.test3}
@@ -61,8 +63,6 @@ export default class Demo extends Component {
             agoraToken="007eJxTYDiw2fuKzNWjLzknllxuMkl+z+OTa5dxRZPB6fP1VGlGX1sFhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9NkPSnjJAUZBgbT1MfvGBlYGRiBEMRXYTBPsTAyMzc10LVMSjTVNTRMTda1NDdP1U0xT7Y0M0oztjC1NAMA7zUk8Q=="
             header={<div style={{ height: "100px" }}>TestHeader</div>} />
         </div>
-
-      
       </div>
     );
   }

@@ -46,7 +46,7 @@ const EaseApp = (props) => {
   const handleClickItem = useCallback(
     (session) => {
       props.onConversationClick && props.onConversationClick(session);
-      const { sessionType, sessionId } = session;
+      const { sessionType, sessionId, name } = session;
       if (!session.lastMessage) {
         dispatch(MessageActions.fetchMessage(sessionId, sessionType));
       }
@@ -65,7 +65,8 @@ const EaseApp = (props) => {
           GlobalPropsActions.setGlobalProps({
             to: sessionId,
             chatType: sessionType,
-            presenceExt: {[data.uid]: {
+            name: name,
+            presenceExt: {[sessionId]: {
               ext: data.ext
             }}
           })
@@ -175,10 +176,10 @@ EaseAppProvider.getSdk = (props) => {
   return WebIM
 };
 EaseAppProvider.propTypes = {
-  username: PropTypes.string,
-  agoraToken: PropTypes.string,
+	username: PropTypes.string,
+	agoraToken: PropTypes.string,
   password: PropTypes.string,
-  appkey: PropTypes.string,
+	appkey: PropTypes.string,
 
   header: PropTypes.node,
   addConversationItem: PropTypes.func,
@@ -190,6 +191,9 @@ EaseAppProvider.propTypes = {
   menuList: PropTypes.array,
   handleMenuItem: PropTypes.func,
   onChatAvatarClick:PropTypes.func,
+  isShowReaction: PropTypes.bool,
+  customMessageList:PropTypes.array,
+  customMessageClick:PropTypes.func
 };
 EaseAppProvider.defaultProps = {
   isShowUnread: true,

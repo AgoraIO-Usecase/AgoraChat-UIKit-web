@@ -12,6 +12,7 @@ var config = {
     loglevel: 'ERROR',
     enableLocalStorage: true,
     deviceId: 'webim',
+    https: true,
   };
   export default config;
   

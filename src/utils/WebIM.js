@@ -20,10 +20,10 @@ export const initIMSDK = (appkey) => {
     useOwnUploadFun: WebIM.config.useOwnUploadFun,
     deviceId: WebIM.config.deviceId,
     //公有云 isHttpDNS 默认配置为true
-    // isHttpDNS: WebIM.config.isHttpDNS,
-    isHttpDNS: false,
-    url: 'https://msync-api-a1-test.easemob.com/ws', // 设置为私有云的websocket server url
-    apiUrl: 'https://a1-test.easemob.com', // 设置为私有云的rest server url 
+    isHttpDNS: WebIM.config.isHttpDNS,
+    // isHttpDNS: false,
+    // url: 'https://msync-api-a1-test.easemob.com/ws', // 设置为私有云的websocket server url
+    // apiUrl: 'https://a1-test.easemob.com', // 设置为私有云的rest server url 
     // a1-hsb.easemob.com
   };
 
