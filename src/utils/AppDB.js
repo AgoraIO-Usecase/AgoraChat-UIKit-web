@@ -97,12 +97,14 @@ const AppDB = {
 
     // update message status
     updateMessageStatus(id, status) {
+        console.log(id, status, 'status')
         const $_TABLE = this.$_TABLE
         return this.exec(resolve => {
             $_TABLE.where('id')
                 .equals(id)
                 .modify({ 'status': status })
                 .then(res => {
+                    console.log(res, 'res')
                     resolve(res)
                 })
         })
@@ -271,7 +273,7 @@ const AppDB = {
                                 sessionType: element.chatType
                             })
                         }
-                        else if(!sessionObj[element.to] && !element.isChatThread){
+                        else if(!sessionObj[element.to] && !element.isChatThread && element.to !== id){
                             sessionObj[element.to] = true
                             sessionList.push({
                                 sessionId:element.to,
