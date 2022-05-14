@@ -63,7 +63,7 @@ export const updateGlobalProps = (state, { options }) => {
 
 /* ------------- Hookup Reducers To Types ------------- */
 export const globalPropsReducer = createReducer(INITIAL_STATE, {
-  [Types.UPDATE_GLOBAL_PROPS]: addGlobalProps,
+  [Types.ADD_GLOBAL_PROPS]: addGlobalProps,
   [Types.UPDATE_GLOBAL_PROPS]: updateGlobalProps,
   [Types.LOGOUT]: logout,
 });

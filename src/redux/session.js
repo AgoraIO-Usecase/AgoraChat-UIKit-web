@@ -7,7 +7,7 @@ import WebIM from '../utils/WebIM';
 const { Types, Creators } = createActions({
     setSessionList: ['sessionList'],
     setCurrentSession: ['userId'],
-    topSession: ['sessionId', 'sessionType'],
+    topSession: ['sessionId', 'sessionType', 'message'],
     deleteSession: ['sessionId'],
     pushSession:['session'],
     setJoinedGroups: ["joinedGroups"],
@@ -56,7 +56,10 @@ export const setJoinedGroups = (state, {joinedGroups}) => {
     return state.merge({ joinedGroups })
 }
 
-export const topSession = (state, { sessionId, sessionType }) => {
+export const topSession = (state, { sessionId, sessionType, message }) => {
+    if(message?.chatThread && (JSON.stringify(message.chatThread)!=='{}')){
+        return state;
+    }
     const sessionList = state.getIn(['sessionList'], Immutable([])).asMutable()
     let topSession = { sessionId, sessionType }
     sessionList.forEach((element, index) => {

@@ -2,12 +2,51 @@ import moment from 'moment'
 import WebIM from '../utils/WebIM'
 import Cookie from 'js-cookie';
 import qs from 'qs'
-export function renderTime(time) {
+export function renderTime(time,timeStyle) {
     if (!time) return ''
     const localStr = new Date(time)
     const localMoment = moment(localStr)
-    const localFormat = localMoment.format('MM-DD hh:mm')
+    const localFormat = timeStyle? localMoment.format(timeStyle):localMoment.format('MM-DD HH:mm')
     return localFormat
+}
+
+// 小于一分钟：1m ago
+// 60分钟以内：XXm ago，忽略下一级单位，下同；
+// 24小时以内：XXh ago；
+// 本周之内：Xd ago；
+// 本月之内：Xwk ago;
+// 超过本月不满一年：Xmo ago
+// 超过一年：Xyr ago
+//Get time difference 
+export function getTimeDiff(time){
+    if(!time) return ''
+    const localTime = new Date()
+    const MsgTime = new Date(time);
+    const spanYear = localTime.getFullYear() - MsgTime.getFullYear()
+    const spanMonth = localTime.getMonth() - MsgTime.getMonth()
+    const spanDate= localTime.getDate() - MsgTime.getDate()
+    const spanDay= localTime.getDay() - MsgTime.getDay()
+    let spanWeek = 0;
+    if (spanDate >= localTime.getDay()){
+        spanWeek = Math.ceil((spanDate+1 - localTime.getDay())/7)
+    }
+    const spanHour = localTime.getHours() - MsgTime.getHours()
+    const spanMinute = localTime.getMinutes() - MsgTime.getMinutes()
+    if(spanYear !== 0){
+        return `${spanYear}yr ago`
+    }else if(spanMonth !== 0){
+        return `${spanMonth}mo ago`
+    }else if(spanWeek !== 0){
+        return `${spanWeek}wk ago`
+    }else if(spanDay !== 0){
+        return `${spanDay}d ago`
+    }else if(spanHour !== 0){
+        return `${spanHour}h ago`
+    }else if(spanMinute !== 0){
+        return `${spanMinute}m ago`
+    }else {
+        return '1m ago'
+    }
 }
 
 const { username } = qs.parse(window.location.hash.split('?')[1]);
@@ -115,10 +154,13 @@ const msgTpl = {
         type: 'custom',
         customEvent: '',
         customExts: {}
+    },
+    threadNotify: {
+        type: 'threadNotify'
     }
 }
 
-export function formatLocalMessage(to, chatType, message = {}, messageType) {
+export function formatLocalMessage(to, chatType, message = {}, messageType, isChatThread) {
     const ext = message.ext || {}
     const formatMsg = Object.assign({}, msgTpl.base, message)
     const body = Object.assign({}, msgTpl[messageType], message)
@@ -127,11 +169,12 @@ export function formatLocalMessage(to, chatType, message = {}, messageType) {
     }
     return {
         ...formatMsg,
-        id: WebIM.conn.getUniqueId(),
+        // id: WebIM.conn.getUniqueId(),
         to,
         from: WebIM.conn.context.userId,
         chatType,
         session: to,
+        isChatThread,
         body: {
             ...body,
             ...ext

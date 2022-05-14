@@ -75,11 +75,11 @@ const useStyles = makeStyles((theme) => ({
 
 function SendBox(props) {
   let easeChatProps = useContext(EaseChatContext);
-  const { easeInputMenu,menuList,handleMenuItem } = easeChatProps;
+  const { easeInputMenu, menuList, handleMenuItem } = easeChatProps;
   const dispatch = useDispatch();
   const classes = useStyles();
   const globalProps = useSelector((state) => state.global.globalProps);
-  const { chatType, to } = globalProps;
+  let { chatType, to } = globalProps;
   const emojiRef = useRef(null);
   const fileEl = useRef(null);
   const videoEl = useRef(null)
@@ -112,16 +112,53 @@ function SendBox(props) {
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
   };
+  const isCreatingThread = useSelector((state) => state.thread?.isCreatingThread);
+  const currentThreadInfo = useSelector((state) => state.thread?.currentThreadInfo);
+  const threadOriginalMsg = useSelector((state) => state.thread?.threadOriginalMsg);
+  const threadPanelStates = useSelector((state) => state.thread?.threadPanelStates);
+  useEffect(()=>{
+    if(threadPanelStates){
+      setInputValue('')
+    }
+  },[isCreatingThread,currentThreadInfo?.id,threadOriginalMsg?.id,threadPanelStates])
+  const createChatThread = ()=>{
+    return new Promise((resolve,reject) => {
+      if (isCreatingThread && props.isChatThread) {
+        if (!props.threadName) {
+          console.log('threadName can not empty')
+          imageEl.current.value = null;
+          fileEl.current.value = null;
+          videoEl.current.value = null;
+          return;
+        }
+        const options = {
+          name: props.threadName.replace(/(^\s*)|(\s*$)/g, ""),
+          messageId: threadOriginalMsg.id,
+          parentId: threadOriginalMsg.to,
+        }
+        WebIM.conn.createChatThread(options).then(res=>{
+          const threadId = res.data?.chatThreadId;
+          resolve(threadId)
+        })
+      }else if(props.isChatThread){
+        resolve(currentThreadInfo.id)
+      }else {
+        resolve(to)
+      }
+    })
+  }
   const sendMessage = useCallback(() => {
     if (!inputValue) return;
-    dispatch(
-      MessageActions.sendTxtMessage(to, chatType, {
-        msg: inputValue,
-      })
-    );
-    setInputValue("");
-    inputRef.current.focus();
-  }, [inputValue, to, chatType, dispatch]);
+    createChatThread().then(to=>{
+      dispatch(
+        MessageActions.sendTxtMessage(to, chatType, {
+          msg: inputValue,
+        }, props.isChatThread)
+      );
+      setInputValue("");
+      inputRef.current.focus();
+    })
+  }, [inputValue, to, chatType, dispatch,currentThreadInfo,props ]);
 
   const onKeyDownEvent = useCallback(
     (e) => {
@@ -168,24 +205,29 @@ function SendBox(props) {
     if (!file.filename) {
       return false;
     }
-    dispatch(MessageActions.sendFileMessage(to, chatType, file,fileEl));
-  };
-
+    createChatThread().then(to=>{
+      dispatch(MessageActions.sendFileMessage(to, chatType, file, fileEl, props.isChatThread));
+    })
+  }
   const handleVideoChange = (e) => {
     let file = WebIM.utils.getFileUrl(e.target);
     if (!file.filename) {
       return false;
     }
-    dispatch(MessageActions.sendVideoMessage(to, chatType, file,videoEl));
+    createChatThread().then(to=>{
+      dispatch(MessageActions.sendVideoMessage(to, chatType, file,videoEl, props.isChatThread));
+    })
   }
   const handleImageChange = (e) => {
     let file = WebIM.utils.getFileUrl(e.target);
     if (!file.filename) {
       return false;
     }
-    dispatch(MessageActions.sendImgMessage(to, chatType, file,imageEl));
+    createChatThread().then(to=>{
+      dispatch(MessageActions.sendImgMessage(to, chatType, file, imageEl, props.isChatThread));
+    })
+    
   };
-
   const handleClickMenu = (e) => {
     setSessionEl(e.currentTarget);
   };
@@ -270,6 +312,8 @@ function SendBox(props) {
           onClose={() => {
             setShowRecorder(false);
           }}
+          isChatThread = {props.isChatThread}
+          threadName = {props.threadName}
         />
       </>
     );

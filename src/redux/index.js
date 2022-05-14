@@ -4,11 +4,13 @@ import thunk from "redux-thunk";
 import { messageReducer } from "./message";
 import { sessionReducer } from "./session";
 import { globalPropsReducer } from "./globalProps";
+import { threadReducer } from "./thread"
 const logger = createLogger();
 const rootReducer = combineReducers({
   global: globalPropsReducer,
   session: sessionReducer,
   message: messageReducer,
+  thread: threadReducer,
 });
 const middlewares = [thunk, logger];
 const enhancers = [];

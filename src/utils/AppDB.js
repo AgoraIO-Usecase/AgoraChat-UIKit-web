@@ -1,9 +1,10 @@
 import Dexie from 'dexie'
 import _ from 'lodash'
+import { message } from '../EaseChat/common/alert'
 
 const DB_VERSION = '1'
 const TABLE_NAME = 'IM_message'
-const TABLE_INDEX_KEYS = ['id', 'from', 'to', 'chatType', 'isUnread', 'status', 'mid', 'session']
+const TABLE_INDEX_KEYS = ['id', 'from', 'to', 'chatType', 'isUnread', 'status', 'mid', 'session', 'chatThreadOverview']
 const DB_ENABLE = true
 const PAGE_NUM = 20
 const AppDB = {
@@ -65,6 +66,21 @@ const AppDB = {
                 })
         })
     },
+    
+    findLocalMessage(chatType,messageId){
+        const $_TABLE = this.$_TABLE
+        return this.exec(resolve => {
+            $_TABLE.where('chatType')
+                .equals(chatType)
+                .filter(item => {
+                    return item.id === messageId
+                })
+                .toArray()
+                .then(res => {
+                    resolve(res)
+                })
+        })
+    },
 
     // read all messages of conversation
     readMessage(chatType, userId) {
@@ -81,12 +97,14 @@ const AppDB = {
 
     // update message status
     updateMessageStatus(id, status) {
+        console.log(id, status, 'status')
         const $_TABLE = this.$_TABLE
         return this.exec(resolve => {
             $_TABLE.where('id')
                 .equals(id)
                 .modify({ 'status': status })
                 .then(res => {
+                    console.log(res, 'res')
                     resolve(res)
                 })
         })
@@ -102,43 +120,112 @@ const AppDB = {
         })
     },
 
-    updateMessageMid(mid, id) {
-        const $_TABLE = this.$_TABLE
-        return this.exec(resolve => {
-            $_TABLE.where('id')
-                .equals(id)
-                .modify({ 'mid': mid })
-                .then(res => console.log('res', res))
-        })
-    },
-    
-    updateMessageUrl(id, url){
-        const $_TABLE = this.$_TABLE
-        return this.exec(resolve => {
-            $_TABLE.where('id')
-                .equals(id)
-                .modify({ 'url': url })
-                .then(res => console.log('res', res))
-        })
-    },
+	updateMessageMid(mid, id) {
+		const $_TABLE = this.$_TABLE;
+		return this.exec((resolve) => {
+			$_TABLE
+				.where("id")
+				.equals(id)
+				.modify({ 'id': mid })
+				.then((res) => console.log("res", res));
+		});
+	},
 
-    // add a message to the database
-    addMessage(message, isUnread = 0) {
+	updateMessageUrl(id, url) {
+		const $_TABLE = this.$_TABLE;
+		return this.exec((resolve) => {
+			console.log(
+				">>>>>msgUrl>>>",
+				$_TABLE.where("id").equals(id).modify({ url: url })
+			);
+			$_TABLE
+				.where("id")
+				.equals(id)
+				.modify({ url: url })
+				.then((res) => console.log("res", res));
+		});
+	},
+    updateMessageThread(id, thread){
         const $_TABLE = this.$_TABLE
-        if ($_TABLE === undefined) return
-        if (!message.error) {
-            return this.exec(resolve => {
-                $_TABLE.where('id').equals(message.id).count().then(res => {
-                    if (res === 0) {
-                        message.isUnread = isUnread
-                        $_TABLE.add(message)
-                            .then(res => resolve(res))
-                            .catch(e => console.log('add messaga:', e))
-                    }
-                })
+        return this.exec(resolve => {
+            $_TABLE.where('chatType')
+            .equals('groupChat')
+            .filter(item => {
+                return item.id === id
             })
-        }
+            .modify({ 'chatThreadOverview': thread })
+            .then(res => console.log('res', res))
+            // $_TABLE.where('id')
+            //     .equals(id)
+            //     .modify({ 'chatThreadOverview': thread })
+            //     .then(res => console.log('res', res))
+        })
     },
+	
+
+	updateMessageReaction(id, reaction){
+		const $_TABLE = this.$_TABLE;
+		return this.exec((resolve) => {
+			$_TABLE
+				.where("id")
+				.equals(id)
+				.modify({ 'reactions': reaction })
+				.then((res) => console.log("updateMessageReaction", res));
+		});
+	},
+
+	findMessageById(id){
+		const $_TABLE = this.$_TABLE;
+		return this.exec((resolve) => {
+			$_TABLE
+				.where("id")
+				.equals(id)
+				.toArray()
+				.then((res) => resolve(res));
+		});
+	},
+
+	// add a message to the database
+	addMessage(message, isUnread = 0) {
+		const $_TABLE = this.$_TABLE;
+		if ($_TABLE === undefined) return;
+		if (!message.error) {
+			return this.exec((resolve) => {
+				$_TABLE
+					.where("id")
+					.equals(message.id)
+					.count()
+					.then((res) => {
+						if (res === 0) {
+							message.isUnread = isUnread;
+							$_TABLE
+								.add(message)
+								.then((res) => resolve(res))
+								.catch((e) => console.log("add messaga:", e));
+						}
+					});
+			});
+		}
+	},
+
+	// clear all messages of specified conversation
+	clearMessage(chatType, id) {
+		const $_TABLE = this.$_TABLE;
+		return this.exec((resolve) => {
+			$_TABLE
+				.where("chatType")
+				.equals(chatType)
+				.filter((item) => {
+					if (chatType === "chat") {
+						return item.from === id || item.to === id;
+					} else {
+						return item.to === id;
+					}
+				})
+				.delete()
+				.then((res) => resolve(res));
+		});
+	},
 
     // clear all messages of specified conversation
     clearMessage(chatType, id) {
@@ -147,7 +234,7 @@ const AppDB = {
             $_TABLE.where('chatType')
                 .equals(chatType)
                 .filter(item => {
-                    if (chatType === 'chat') {
+                    if (chatType === 'singleChat') {
                         return item.from === id || item.to === id
                     } else {
                         return item.to === id
@@ -186,7 +273,7 @@ const AppDB = {
                                 sessionType: element.chatType
                             })
                         }
-                        else if(!sessionObj[element.to] && element.to !== id){
+                        else if(!sessionObj[element.to] && !element.isChatThread && element.to !== id){
                             sessionObj[element.to] = true
                             sessionList.push({
                                 sessionId:element.to,
@@ -198,8 +285,37 @@ const AppDB = {
                     resolve(sessionList)
                 })
         })
-    }
+    },
+	updateMessageReaction(id, reactions) {
+		const $_TABLE = this.$_TABLE;
+		return this.exec((resolve) => {
+			const $_TABLE = this.$_TABLE;
+			return this.exec((resolve) => {
+				$_TABLE
+					.where("id")
+					.equals(id)
+					.modify({ reactions: reactions })
+					.then((res) => {
+						console.log("updateMessageReaction", res);
+					});
+			});
+		});
+	},
+
+	deleteReactions(id, reactions) {
+		const $_TABLE = this.$_TABLE;
+		return this.exec((resolve) => {
+			$_TABLE
+				.where("id")
+				.equals(id)
+				.modify({ reactions: reactions })
+				.then((res) => {
+					console.log("deleteReactions", res);
+				});
+		});
+	},
 }
+
 
 export default AppDB
 

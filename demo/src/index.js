@@ -1,10 +1,9 @@
-import React, { Component } from "react";
+import React, { Component,useState } from "react";
 import { render } from "react-dom";
 import { EaseChat, EaseApp } from "../../src/index";
 // import WebIM from "./WebIM";
 import val from "./comm";
 // import initListen from "./WebIMListen";
-
 export default class Demo extends Component {
   state = {
     token: val,
@@ -25,11 +24,14 @@ export default class Demo extends Component {
   };
     addSessionItem = () => {
     let session = {
-		conversationType: "singleChat",
-		conversationId: "test0001",
-	};
+      conversationType: "singleChat",
+      conversationId: "zd132",
+    };
     EaseApp.addConversationItem(session);
     EaseApp.changePresenceStatus({[session.conversationId] : 'Online'})
+    EaseApp.thread.setShowThread(true)
+    // EaseApp.thread.closeThreadPanel()
+    // EaseApp.thread.setHasThreadEditPanel(true)
   };
   test = (res) =>{
     console.log('test登录成功',res);
@@ -42,6 +44,9 @@ export default class Demo extends Component {
   }
   test4 = (val) =>{
     console.log('val',val);
+  }
+  test5 = (val1,val2) => {
+    console.log('val',val1,val2)
   }
   render() {
     console.log("this.state.token>>", this.state.token);
@@ -57,11 +62,13 @@ export default class Demo extends Component {
             failCallback={this.test2}
             onAvatarChange={this.test3}
             onChatAvatarClick={this.test4}
-            
-            appkey= "41117440#383391"
-            username="test003"
-            agoraToken="007eJxTYDiw2fuKzNWjLzknllxuMkl+z+OTa5dxRZPB6fP1VGlGX1sFhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9NkPSnjJAUZBgbT1MfvGBlYGRiBEMRXYTBPsTAyMzc10LVMSjTVNTRMTda1NDdP1U0xT7Y0M0oztjC1NAMA7zUk8Q=="
-            header={<div style={{ height: "100px" }}>TestHeader</div>} />
+            onEditThreadPanel={this.test5}
+            // appkey= "easemob-demo#chatdemoui"
+            appkey= "5101220107132865#test"
+            username="wy1"
+            password="1"
+            // agoraToken="007eJxTYPCe51Vb5Rl3kCX/veizhwyel9f7fNp0e2mBNGd157ut3zUVGNIMU5LNzS2SUlKSzUzMElMs0ozMDCzNzZITjVIMDE2To7ItkxRkGBhONNtwMzKwMjACIYivwmBiaJxoYWxgoJtoZpmqa2iYmqybZG5oqWtpbGJsmpaWbGpmbgIAfPMmSQ=="
+            header={<div style={{ height: "100px" }}>TestHeader</div>}/>
         </div>
       </div>
     );
