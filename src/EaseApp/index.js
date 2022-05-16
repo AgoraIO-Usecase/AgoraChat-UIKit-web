@@ -1,5 +1,5 @@
 import React, { useCallback, createContext } from "react";
-import PropTypes, { func } from "prop-types";
+import PropTypes from "prop-types";
 import { makeStyles, styled } from "@material-ui/styles";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";

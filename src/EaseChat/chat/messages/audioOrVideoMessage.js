@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
   },
 
   audioBox: {
-    margin: (props) => (props.bySelf ? "0 10px 6px 0" : "0 0 6px 10px"),
+    margin: (props) => (props.bySelf ? "0 10px 6px 0" : props.rnReactions? "15px 0 10px 10px": "0 0 6px 10px"),
     width: (props) => `calc(208px * ${props.duration / 15})`,
     minWidth: '70px',
     maxWidth: '100%',
@@ -97,7 +97,7 @@ const useStyles = makeStyles((theme) => ({
   },
   reactionBox: {
     position: "absolute",
-    top: "-15px",
+    top:  (props) =>(props.bySelf? "-26px": "22px"),
     right: (props) => (props.bySelf ? "0" : ""),
     left: (props) => (props.bySelf ? "" : "0"),
     background: "#F2F2F2",
@@ -184,6 +184,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
     duration: Math.round(message.body.length),
     msgType: audioType,
     showThreaddInfo,
+    rnReactions: reactionMsg.length > 0,
   });
   
   return (
