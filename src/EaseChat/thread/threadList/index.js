@@ -181,7 +181,7 @@ const ThreadListPanel = ({ anchorEl, onClose }) => {
                                             src={avatar}
                                         />
                                         <span className="tpl-item-owner">{option.owner}</span>
-                                        <span className="tpl-item-msg">{renderMessage(option.lastMessage)}</span>
+                                        {option.lastMessage && <span className="tpl-item-msg">{renderMessage(option.lastMessage)}</span>}
                                         <span className="tpl-item-time">{getTimeDiff(option.lastMessage?.time)}</span>
                                     </Box>
                                 </Box>
