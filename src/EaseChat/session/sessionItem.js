@@ -19,6 +19,9 @@ import SessionActions from "../../redux/session";
 import GlobalPropsActions from "../../redux/globalProps"
 
 import i18next from "i18next";
+
+import muteImg from '../../common/images/gray@2x.png'
+
 const useStyles = makeStyles((theme) => ({
       paper:{
         margin:'5px',
@@ -94,6 +97,11 @@ const useStyles = makeStyles((theme) => ({
         position: "absolute",
         right: "0",
       },
+      muteImgStyle: {
+        width: '12px',
+        marginLeft: '2px',
+        height: '12px',
+      }
 }));
 
 function SessionItem(props) {
@@ -106,6 +114,8 @@ function SessionItem(props) {
     const [isShowMoreVertStyle,setIsShowMoreVertStyle] = useState(false)
     const [sessionEl, setSessionEl] = useState(null);
     const menuList = [{name: i18next.t('Delete Session'),key:'0',value:'deleteSession'}]
+    const globalProps = useSelector((state) => state.global?.globalProps)
+    const { presenceExt } = globalProps
     const onClickMenuItem = (option,_session) => (e) =>{
       const {value} = option
         e.preventDefault()
@@ -187,7 +197,12 @@ function SessionItem(props) {
           </ListItemAvatar>
           <Box className={classes.itemRightBox}>
             <Typography className={classes.itemName}>
-              <span>{session.name || session.sessionId}</span>
+              <span>
+                  {session.name || session.sessionId}
+                  {
+                    presenceExt && presenceExt[session.sessionId]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
+                  }
+                </span>
               <span className={classes.time}>
                 {renderTime(session?.lastMessage?.time)}
               </span>
@@ -198,7 +213,7 @@ function SessionItem(props) {
                 {session?.lastMessage?.body?.msg}
               </span>
 
-              {isShowUnread &&
+              {isShowUnread && presenceExt && !presenceExt[session.sessionId]?.muteFlag &&
                 <span
                 className={classes.unreadNum}
                 style={{

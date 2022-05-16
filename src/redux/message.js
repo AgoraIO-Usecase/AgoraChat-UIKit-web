@@ -513,7 +513,7 @@ export const addMessage = (state, { message, messageType = "txt" }) => {
 			isPushed = true;
 		}
 	});
-
+console.log(_message, '_message')
 	!isPushed && chatData.push(_message);
 	// add a message to db, if by myselt, isUnread equals 0
 	!isPushed && AppDB.addMessage(_message, !bySelf ? 1 : 0);
@@ -567,9 +567,11 @@ export const updateThreadMessage = (state,{to,messageList,isScroll}) =>{
 }
 
 export const updateMessageStatus = (state, { message, status = "", localId, serverMsgId }) => {
+	console.log(message, status, localId, serverMsgId, 'messages', state)
 	let id = localId;
 	if (!id) id = state.getIn(["byMid", message.mid, "id"]);
 	let mids = state.getIn(["byMid"]) || {};
+	console.log(mids, 'messages')
 	let mid;
 	for (var i in mids) {
 		if (mids[i].id === id) {
@@ -577,10 +579,12 @@ export const updateMessageStatus = (state, { message, status = "", localId, serv
 		}
 	}
 	const byId = state.getIn(["byId", id]);
+	console.log(byId, 'messages', mid)
 	if (!_.isEmpty(byId)) {
 		const { chatType, chatId } = byId;
 		let messages = state.getIn([chatType, chatId]).asMutable();
 		let found = _.find(messages, { id: id }) || _.find(messages, { id: serverMsgId });
+		console.log(found, 'found')
 		found.setIn(["status"], status);
 		found.setIn(["toJid"], mid);
 		let msg = {
@@ -588,8 +592,20 @@ export const updateMessageStatus = (state, { message, status = "", localId, serv
 			status: status,
 			toJid: mid,
 		};
+		console.log(found, 'found')
 		messages.splice(messages.indexOf(found), 1, msg);
-		AppDB.updateMessageStatus(id, status).then((res) => { });
+		console.log(messages, 'messages')
+		AppDB.updateMessageStatus(id, status).then((res) => {
+			console.log(res, 'res')
+			if (res === 0) {
+				AppDB.updateMessageStatus(serverMsgId, status).then(res => {
+					if (res === 0) {
+						AppDB.updateMessageStatus(id, status)
+					}
+				})
+			}
+		});
+		
 		return state.setIn([chatType, chatId], messages)
 	}
 	return state;

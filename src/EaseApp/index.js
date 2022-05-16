@@ -23,6 +23,7 @@ import "../common/iconfont.css";
 
 import SessionList from "../EaseChat/session/sessionList";
 import EaseChat from "../EaseChat/chat/index";
+
 const uikit_store = React.createContext();
 export const useDispatch = createDispatchHook(uikit_store);
 export const useSelector = createSelectorHook(uikit_store);
@@ -66,7 +67,9 @@ const EaseApp = (props) => {
             to: sessionId,
             chatType: sessionType,
             name: name,
-            presenceExt: {[data.uid] : data.ext}
+            presenceExt: {[sessionId]: {
+              ext: data.ext
+            }}
           })
         );
       }).catch(e=>{
@@ -160,7 +163,7 @@ EaseAppProvider.addConversationItem = (session) => {
       GlobalPropsActions.setGlobalProps({
         to: conversationId,
         chatType: conversationType,
-        presenceExt: {[conversationId] : ext }
+        presenceExt: {[conversationId]: ext }
       })
     );
     dispatch(MessageActions.clearUnreadAsync(conversationType, conversationId));
