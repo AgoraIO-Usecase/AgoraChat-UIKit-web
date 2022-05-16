@@ -492,6 +492,7 @@ export const addMessage = (state, { message, messageType = "txt" }) => {
         !isPushed && chatData.push(_message)
         state = state.setIn(['threadMessage', chatId], chatData)
         !isPushed && AppDB.addMessage(_message, !bySelf ? 1 : 0, isChatThread)
+		state = state.setIn(["byId", id], { chatType, chatId });
         return state
     }
 	const chatData = state.getIn([chatType, chatId], Immutable([])).asMutable();
@@ -582,7 +583,12 @@ export const updateMessageStatus = (state, { message, status = "", localId, serv
 	console.log(byId, 'messages', mid)
 	if (!_.isEmpty(byId)) {
 		const { chatType, chatId } = byId;
-		let messages = state.getIn([chatType, chatId]).asMutable();
+		let messages = []
+		if(message.isChatThread){
+			messages = state.getIn(['threadMessage', chatId]).asMutable();
+		}else{
+			messages = state.getIn([chatType, chatId]).asMutable();
+		}
 		let found = _.find(messages, { id: id }) || _.find(messages, { id: serverMsgId });
 		console.log(found, 'found')
 		found.setIn(["status"], status);
@@ -595,6 +601,7 @@ export const updateMessageStatus = (state, { message, status = "", localId, serv
 		console.log(found, 'found')
 		messages.splice(messages.indexOf(found), 1, msg);
 		console.log(messages, 'messages')
+
 		AppDB.updateMessageStatus(id, status).then((res) => {
 			console.log(res, 'res')
 			if (res === 0) {
@@ -606,7 +613,12 @@ export const updateMessageStatus = (state, { message, status = "", localId, serv
 			}
 		});
 		
-		return state.setIn([chatType, chatId], messages)
+		if(message.isChatThread){
+			state = state.setIn(['threadMessage', chatId], messages)
+		}else{
+			state = state.setIn([chatType, chatId], messages)
+		}
+		return state
 	}
 	return state;
 }
@@ -709,6 +721,7 @@ export const updateMessageMid = (state, { id, mid,to }) => {
             threadMsg.id = mid;
             state = state.setIn(['threadMessage',to],threadMsgList)
         }
+		AppDB.updateMessageMid(mid, id);
 		return state
     }
 	const byId = state.getIn(["byId", id]);

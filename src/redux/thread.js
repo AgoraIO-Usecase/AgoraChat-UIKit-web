@@ -130,7 +130,7 @@ const { Types, Creators } = createActions({
                     }
                 }
                 //create 事件下发时间大部分晚于update，收到create不处理，防止覆盖 messageCount 字段
-                if(operation === 'update' || operation === 'create' && info.timestamp < options.timestamp){
+                if(operation === 'update' || operation === 'create' && !info.timestamp){
                     dispatch(Creators.setCurrentThreadInfo(Object.assign({}, info,chatThreadOverview)));
                 }
                 dispatch(Creators.setIsCreatingThread(false));
@@ -142,7 +142,7 @@ const { Types, Creators } = createActions({
                 //create 事件下发时间大部分晚于update，收到create不处理，防止覆盖 messageCount 字段
                 if(operation === 'destroy'){
                     AppDB.updateMessageThread(messageId, undefined)
-                }else if(operation !== 'create' || operation === 'create' && info.timestamp < options.timestamp){
+                }else if(operation !== 'create' || operation === 'create' && !info.timestamp){
                     AppDB.updateMessageThread(messageId, Object.assign({}, info, chatThreadOverview))
                 }
             })
@@ -154,7 +154,7 @@ const { Types, Creators } = createActions({
                         const info = msg.chatThreadOverview && chatThreadOverview? msg.chatThreadOverview: {}
                         if(operation === 'destroy'){
                             msg.chatThreadOverview = undefined;
-                        }else if(operation !== 'create' || operation === 'create' && info.timestamp < options.timestamp){
+                        }else if(operation !== 'create' || operation === 'create' && !info.timestamp ){
                             msg.chatThreadOverview = Object.assign({}, info, chatThreadOverview)
                         }
                     }
