@@ -264,6 +264,7 @@ const { Types, Creators } = createActions({
 				to,
 				file: file,
 				filename: file.filename,
+				length: file.length,
 				isChatThread,
 				ext: {
 					file_length: file.data.size,
@@ -683,6 +684,17 @@ export const updateMessages = (state, { chatType, sessionId, messages }) => {
 };
 
 export const updateMessageMid = (state, { id, mid,to }) => {
+	if(state.threadMessage[to]){
+        let threadMsg = {}
+        const threadMsgList = state.getIn(['threadMessage', to]).asMutable({ deep: true })
+        threadMsg = _.find(threadMsgList, { id: id })
+        if(threadMsg && threadMsg.id){
+            threadMsg.toJid = mid;
+            threadMsg.id = mid;
+            state = state.setIn(['threadMessage',to],threadMsgList)
+        }
+		return state
+    }
 	const byId = state.getIn(["byId", id]);
 	const { chatType, chatId } = byId;
 	if (!_.isEmpty(byId)) {
@@ -697,18 +709,6 @@ export const updateMessageMid = (state, { id, mid,to }) => {
 		messages.splice(messages.indexOf(found), 1, found);
 		state = state.setIn([chatType, chatId], messages);
 	}
-
-	if(state.threadMessage[to]){
-        let threadMsg = {}
-        const threadMsgList = state.getIn(['threadMessage', to]).asMutable({ deep: true })
-        threadMsg = _.find(threadMsgList, { id: id })
-        if(threadMsg && threadMsg.id){
-            threadMsg.toJid = mid;
-            threadMsg.id = mid;
-            state = state.setIn(['threadMessage',to],threadMsgList)
-            return state
-        }
-    }
 
 	AppDB.updateMessageMid(mid, id);
 	state = state.setIn(["byMid", mid], { id });
