@@ -29,6 +29,7 @@ import busyIcon from '../../../common/images/Busy.png'
 import donotdisturbIcon from '../../../common/images/Do_not_Disturb.png'
 import customIcon from '../../../common/images/custom.png'
 import leaveIcon from '../../../common/images/leave.png'
+import muteImg from '../../../common/images/gray@2x.png'
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -67,6 +68,11 @@ const useStyles = makeStyles((theme) => {
       width: '18px',
       height: '18px',
       borderRadius: '50%',
+    },
+    muteImgStyle: {
+      width: '12px',
+      marginLeft: '2px',
+      height: '12px',
     },
     threadIcon: {
       width: '21px',
@@ -177,11 +183,14 @@ const MessageBar = () => {
           {
             chatType === "singleChat" ?
             <div className={classes.imgBox}>
-              <img alt="" src={getUserOnlineStatus[presenceExt[to]] || customIcon} className={classes.imgStyle} />
+              <img alt="" src={presenceExt ? getUserOnlineStatus[presenceExt[to]?.ext] : customIcon} className={classes.imgStyle} />
             </div>
             : null
           }
         {name || to}
+        {
+          presenceExt && presenceExt[to]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
+        }
       </Box>
       <Box position="static">
         <IconButton className="iconfont icon" style={{display: chatType === "groupChat" && showThread ? "inline-flex" : "none"}} onClick={openThreadList} ref={threadListAnchorEl}>
