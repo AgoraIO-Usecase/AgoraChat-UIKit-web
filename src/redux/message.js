@@ -50,15 +50,23 @@ const { Types, Creators } = createActions({
                 chatType,
                 ext: message.ext,
                 success: () => {
-                    dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
+					// chatRoom render message  --  will update
+					if (chatType === "chatRoom") {
+						dispatch(Creators.addMessage(formatMsg))
+						setTimeout(() => {
+							dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
+						}, 300);
+					}else {
+						dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
+					}
                 },
                 fail: (e) => {
                     console.error("Send private text error", e);
                     dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
                 }
             })
-            WebIM.conn.send(msgObj.body)
-            dispatch(Creators.addMessage(formatMsg))
+            WebIM.conn.send(msgObj.body);
+			(chatType !== "chatRoom") && dispatch(Creators.addMessage(formatMsg))
         }
     },
 
