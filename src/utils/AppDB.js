@@ -96,12 +96,13 @@ const AppDB = {
     },
 
     // update message status
-    updateMessageStatus(id, status) {
+    updateMessageStatus(id,serverId,status) {
         console.log(id, status, 'status')
         const $_TABLE = this.$_TABLE
         return this.exec(resolve => {
-            $_TABLE.where('id')
-                .equals(id)
+            $_TABLE.filter((item)=>{
+                return item.id === id||item.id === serverId
+            })
                 .modify({ 'status': status })
                 .then(res => {
                     console.log(res, 'res')

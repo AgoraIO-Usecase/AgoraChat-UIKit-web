@@ -80,7 +80,7 @@ const { Types, Creators } = createActions({
 				dispatch(Creators.updateMessageStatus(formatMsg, "sent", localMsgId, serverMsgId));
 			}).catch((e) => {
 				console.log("Send private text error", e);
-				dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+				dispatch(Creators.updateMessageStatus(formatMsg, "fail",msgObj.id));
 			});
 			dispatch(Creators.addMessage(formatMsg))
 		}
@@ -104,10 +104,10 @@ const { Types, Creators } = createActions({
 					file_length: file.data.size,
 					file_type: file.data.type,
 				},
-				onFileUploadError: function () {
-					console.log("onFileUploadError");
+				onFileUploadError: function (e) {
+					console.log("onFileUploadError",e);
 					formatMsg.status = "fail";
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", msg.id));
 					fileEl.current.value = "";
 				},
 				onFileUploadProgress: function (progress) {
@@ -117,8 +117,6 @@ const { Types, Creators } = createActions({
 					console.log("onFileUploadComplete");
 					let url = data.uri + '/' + data.entities[0].uuid
                     formatMsg.url = formatMsg.body.url = url;
-                    formatMsg.status = 'sent';
-                    dispatch(Creators.updateMessageStatus(formatMsg, 'sent'));
 					const type = isChatThread? 'threadMessage' : chatType;
 					dispatch(Creators.updateMessages(type, to, formatMsg ));
                     fileEl.current.value ='';
@@ -126,18 +124,15 @@ const { Types, Creators } = createActions({
 			};
 			let msg = WebIM.message.create(option);
 			formatMsg.id = msg.id;
-			WebIM.conn.send(msg).then((data) => {
+			WebIM.conn.send(msg).then((res) => {
+				let { localMsgId, serverMsgId } = res;
 				console.log("success");
-				let url = data.uri + "/" + data.entities[0].uuid;
-				formatMsg.url = url;
-				formatMsg.body.url = url;
 				formatMsg.status = "sent";
-				dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
-				dispatch(Creators.updateMessages(chatType, to, formatMsg));
+				dispatch(Creators.updateMessageStatus(formatMsg, "sent", localMsgId, serverMsgId));
 				fileEl.current.value = "";
 			}).catch((e) => {
-				console.log("fail");
-				dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+				console.log("fail",e);
+				dispatch(Creators.updateMessageStatus(formatMsg, "fail",msg.id));
 				fileEl.current.value = "";
 			});
 			dispatch(Creators.addMessage(formatMsg, 'file'))
@@ -160,7 +155,7 @@ const { Types, Creators } = createActions({
 				onFileUploadError: function () {
 					console.log("onFileUploadError");
 					formatMsg.status = "fail";
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", msg.id));
 					imageEl.current.value = "";
 				},
 				onFileUploadProgress: function (progress) {
@@ -171,20 +166,21 @@ const { Types, Creators } = createActions({
 					let url = data.uri + "/" + data.entities[0].uuid;
 					formatMsg.url = url;
 					formatMsg.body.url = url;
-					formatMsg.status = "sent";
 					const type = isChatThread? 'threadMessage' : chatType;
 					dispatch(Creators.updateMessages(type, to, formatMsg ));
-					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
 					imageEl.current.value = "";
 				},
 			};
 			let msg = WebIM.message.create(option);
 			formatMsg.id = msg.id;
-			WebIM.conn.send(msg).then(() => {
+			WebIM.conn.send(msg).then((res) => {
 				console.log("Success");
+				let { localMsgId, serverMsgId } = res;
+				formatMsg.status = "sent";
+				dispatch(Creators.updateMessageStatus(formatMsg, "sent", localMsgId, serverMsgId));
 			}).catch((e) => {
 				console.log("Fail");
-				dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+				dispatch(Creators.updateMessageStatus(formatMsg, "fail",  msg.id));
 				imageEl.current.value = "";
 			});
 			dispatch(Creators.addMessage(formatMsg, 'img'))
@@ -220,7 +216,7 @@ const { Types, Creators } = createActions({
 					onFileUploadError: function () {
 						console.log("onFileUploadError");
 						formatMsg.status = "fail";
-						dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+						dispatch(Creators.updateMessageStatus(formatMsg, "fail", msg.id));
 						videoEl.current.value = "";
 					},
 					onFileUploadProgress: function (e) {
@@ -231,8 +227,6 @@ const { Types, Creators } = createActions({
 						let url = data.uri + "/" + data.entities[0].uuid;
 						formatMsg.url = url;
 						formatMsg.body.url = url;
-						formatMsg.status = "sent";
-						dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
 						const type = isChatThread? 'threadMessage' : chatType;
 						dispatch(Creators.updateMessages(type, to, formatMsg ));
 						videoEl.current.value = "";
@@ -240,11 +234,14 @@ const { Types, Creators } = createActions({
 				};
 				let msg = WebIM.message.create(option);
 				formatMsg.id = msg.id;
-				WebIM.conn.send(msg).then(() => {
+				WebIM.conn.send(msg).then((res) => {
 					console.log("Success");
+					let { localMsgId, serverMsgId } = res;
+					formatMsg.status = "sent";
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localMsgId, serverMsgId));
 				}).catch((e) => {
 					console.log("Fail");
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", msg.id));
 					videoEl.current.value = "";
 				});
 				dispatch(Creators.addMessage(formatMsg, "video"));
@@ -272,12 +269,10 @@ const { Types, Creators } = createActions({
 					length: file.length,
 					duration: file.duration,
 				},
-				onFileUploadError: function () {
-					console.log("onFileUploadError");
-					console.log(error);
-					// dispatch(Creators.updateMessageStatus(pMessage, "fail"))
+				onFileUploadError: function (error) {
+					console.log("onFileUploadError",error);
 					formatMsg.status = "fail";
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", msg.id));
 				},
 				onFileUploadProgress: function (e) {
 					console.log(e);
@@ -287,19 +282,20 @@ const { Types, Creators } = createActions({
 					let url = data.uri + "/" + data.entities[0].uuid;
 					formatMsg.url = url;
 					formatMsg.body.url = url;
-					formatMsg.status = "sent";
-					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
                     const type = isChatThread? 'threadMessage' : chatType;
 					dispatch(Creators.updateMessages(type, to, formatMsg ));
 				},
 			};
 			let msg = WebIM.message.create(option);
 			formatMsg.id = msg.id;
-			WebIM.conn.send(msg).then(() => {
+			WebIM.conn.send(msg).then((res) => {
 				console.log("success");
+				let { localMsgId, serverMsgId } = res;
+				formatMsg.status = "sent";
+				dispatch(Creators.updateMessageStatus(formatMsg, "sent", localMsgId, serverMsgId));
 			}).catch((e) => {
 				console.log("fail");
-				dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+				dispatch(Creators.updateMessageStatus(formatMsg, "fail", msg.id));
 			});
 			dispatch(Creators.addMessage(formatMsg, "audio"));
 		};
@@ -492,6 +488,7 @@ export const addMessage = (state, { message, messageType = "txt" }) => {
         !isPushed && chatData.push(_message)
         state = state.setIn(['threadMessage', chatId], chatData)
         !isPushed && AppDB.addMessage(_message, !bySelf ? 1 : 0, isChatThread)
+		state = state.setIn(["byId", id], { chatType, chatId });
         return state
     }
 	const chatData = state.getIn([chatType, chatId], Immutable([])).asMutable();
@@ -569,44 +566,31 @@ export const updateThreadMessage = (state,{to,messageList,isScroll}) =>{
 export const updateMessageStatus = (state, { message, status = "", localId, serverMsgId }) => {
 	console.log(message, status, localId, serverMsgId, 'messages', state)
 	let id = localId;
-	if (!id) id = state.getIn(["byMid", message.mid, "id"]);
-	let mids = state.getIn(["byMid"]) || {};
-	console.log(mids, 'messages')
-	let mid;
-	for (var i in mids) {
-		if (mids[i].id === id) {
-			mid = i;
-		}
-	}
 	const byId = state.getIn(["byId", id]);
-	console.log(byId, 'messages', mid)
 	if (!_.isEmpty(byId)) {
 		const { chatType, chatId } = byId;
-		let messages = state.getIn([chatType, chatId]).asMutable();
+		let messages = []
+		if(message.isChatThread){
+			messages = state.getIn(['threadMessage', chatId]).asMutable();
+		}else{
+			messages = state.getIn([chatType, chatId]).asMutable();
+		}
 		let found = _.find(messages, { id: id }) || _.find(messages, { id: serverMsgId });
 		console.log(found, 'found')
 		found.setIn(["status"], status);
-		found.setIn(["toJid"], mid);
 		let msg = {
 			...found,
 			status: status,
-			toJid: mid,
 		};
-		console.log(found, 'found')
 		messages.splice(messages.indexOf(found), 1, msg);
-		console.log(messages, 'messages')
-		AppDB.updateMessageStatus(id, status).then((res) => {
-			console.log(res, 'res')
-			if (res === 0) {
-				AppDB.updateMessageStatus(serverMsgId, status).then(res => {
-					if (res === 0) {
-						AppDB.updateMessageStatus(id, status)
-					}
-				})
-			}
-		});
+		AppDB.updateMessageStatus(id, serverMsgId, status)
 		
-		return state.setIn([chatType, chatId], messages)
+		if(message.isChatThread){
+			state = state.setIn(['threadMessage', chatId], messages)
+		}else{
+			state = state.setIn([chatType, chatId], messages)
+		}
+		return state
 	}
 	return state;
 }
@@ -690,9 +674,10 @@ export const updateMessages = (state, { chatType, sessionId, messages }) => {
 	let messagesArr = state
 		.getIn([chatType, sessionId])
 		.asMutable({ deep: true });
-	messagesArr.forEach((msg) => {
+	messagesArr.forEach((msg,index) => {
 		if (msg.id === messages.id) {
-			msg = messages;
+			messages.bySelf = true;
+			messagesArr.splice(index, 1, messages);
 			AppDB.updateMessageUrl(msg.id, messages.url);
 		}
 	});
@@ -709,11 +694,13 @@ export const updateMessageMid = (state, { id, mid,to }) => {
             threadMsg.id = mid;
             state = state.setIn(['threadMessage',to],threadMsgList)
         }
+		AppDB.updateMessageMid(mid, id);
 		return state
     }
 	const byId = state.getIn(["byId", id]);
-	const { chatType, chatId } = byId;
+	
 	if (!_.isEmpty(byId)) {
+	    const { chatType, chatId } = byId;
 		let messages = state
 			.getIn([chatType, chatId])
 			.asMutable({ deep: true });
@@ -724,11 +711,10 @@ export const updateMessageMid = (state, { id, mid,to }) => {
 		// let msg = found.setIn(['toJid'], mid)
 		messages.splice(messages.indexOf(found), 1, found);
 		state = state.setIn([chatType, chatId], messages);
+		state = state.setIn(["byId", mid], { chatType, chatId })
 	}
-
 	AppDB.updateMessageMid(mid, id);
 	state = state.setIn(["byMid", mid], { id });
-	state = state.setIn(["byId", mid], { chatType, chatId })
 	return state;
 }
 
