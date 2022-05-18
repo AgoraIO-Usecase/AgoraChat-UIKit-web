@@ -88,7 +88,7 @@ function TextMessage({ message }) {
           <img
             key={v}
             alt={v}
-            src={require(`../../../common/faces/${v}`).default}
+            src={require(`../../../common/faces/${v}`)}
             width={20}
             height={20}
           />
@@ -105,10 +105,10 @@ function TextMessage({ message }) {
   return (
     <li className={classes.pulldownListItem}>
       <div>
-        <img className={classes.avatarStyle} src={ roomUserInfo && roomUserInfo[message.avatar] || avatar}></img>
+        <img className={classes.avatarStyle} src={roomUserInfo && roomUserInfo[message.from]?.avatarurl || avatar}></img>
       </div>
       <div className={classes.textBodyBox}>
-        <span className={classes.userName}>{roomUserInfo && roomUserInfo[message.from] || message.from}</span>
+        <span className={classes.userName}>{roomUserInfo && roomUserInfo[message.from]?.nickname || message.from}</span>
         <div className={classes.textBody}>{renderTxt(message.body.msg)}</div>
       </div>
     </li>
