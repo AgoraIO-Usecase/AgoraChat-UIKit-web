@@ -230,11 +230,8 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 				</div>
 				<div className={classes.textReaction}>
 					{hoverDeviceModule ? (
-						// <div>
-						// 	{isShowReaction && <Reaction message={message} />}
-						// </div>
 						<div className={classes.textReactionCon}>
-							{isShowReaction && (
+							{!isThreadPanel && isShowReaction && (
 								<Reaction message={message} />
 							)}
 							{showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">

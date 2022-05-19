@@ -169,13 +169,8 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 					<img src={message.url} alt="img message"></img>
 					<div className={classes.textReaction}>
 						{hoverDeviceModule ? (
-							// <div>
-							// 	{isShowReaction && (
-							// 		<Reaction message={message} />
-							// 	)}
-							// </div>
 							<div className={classes.textReactionCon}>
-								{isShowReaction && (
+								{!isThreadPanel && isShowReaction && (
 									<Reaction message={message}/>
 								)}
 							{showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">

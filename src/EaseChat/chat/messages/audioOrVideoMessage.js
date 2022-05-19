@@ -234,7 +234,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
           <div className={classes.textReaction}>
                   {hoverDeviceModule ? (
                     <div className={classes.textReactionCon}>
-                    {isShowReaction && (
+                    {!isThreadPanel && isShowReaction && (
                       <Reaction message={message}/>
                     )}
                     { showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
