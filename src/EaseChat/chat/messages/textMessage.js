@@ -63,7 +63,6 @@ const useStyles = makeStyles((theme) => ({
 		borderRadius: "50%",
 	},
 	textBody: {
-		// display: "flex",
 		margin: (props) => (props.bySelf ? "0 10px 10px 0" : props.rnReactions? "15px 0 10px 10px": "0 0 10px 10px"),
 		lineHeight: "22px",
 		fontSize: "14px",
@@ -189,6 +188,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 						src={require(`../../../common/faces/${v}`).default}
 						width={20}
 						height={20}
+						style={{verticalAlign:'middle'}}
 					/>
 				);
 			} else {

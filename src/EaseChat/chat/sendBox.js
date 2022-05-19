@@ -27,6 +27,7 @@ import Recorder from "./messages/recorder";
 import icon_emoji from "../../common/icons/emoji@2x.png";
 import icon_yuyin from "../../common/icons/voice@2x.png";
 import attachment from "../../common/icons/attachment@2x.png";
+import { message } from '../common/alert' 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -125,7 +126,7 @@ function SendBox(props) {
     return new Promise((resolve,reject) => {
       if (isCreatingThread && props.isChatThread) {
         if (!props.threadName) {
-          console.log('threadName can not empty')
+          message.warn(i18next.t('ThreadName can not empty'));
           imageEl.current.value = null;
           fileEl.current.value = null;
           videoEl.current.value = null;

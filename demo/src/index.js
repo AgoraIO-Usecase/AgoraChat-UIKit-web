@@ -56,7 +56,7 @@ export default class Demo extends Component {
         <h3>EaseApp</h3>
         <div>
           <EaseApp
-            customMessageList={ [{name: 'report', value: 'report', position: 'others'}]}
+            // customMessageList={ [{name: 'report', value: 'report', position: 'others'}]}
             isShowReaction
             successLoginCallback={this.test}
             failCallback={this.test2}

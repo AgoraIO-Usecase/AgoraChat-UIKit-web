@@ -254,7 +254,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
                 )}
       </div>
       <div className={classes.time}>{renderTime(message.time)}</div>
-      <Menu
+      {customMessageList &&<Menu
         keepMounted
         open={state.mouseY !== null}
         onClose={handleClose}
@@ -265,15 +265,15 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
             : undefined
         }
       >
-        {customMessageList &&
-          customMessageList.map((val, key) => {
+  
+         { customMessageList.map((val, key) => {
             return (
               <MenuItem key={key} onClick={_customMessageClick(val, message)}>
                 {val.name}
               </MenuItem>
             );
           })}
-      </Menu>
+      </Menu>}
     </li>
   );
 }

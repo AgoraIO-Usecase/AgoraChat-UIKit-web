@@ -64,6 +64,7 @@
         "Started a Thread":"创建了一个子区",
         "Join the thread":"加入该子区",
         "You have been removed from the thread":"你已经被移除子区",
-        "Someone else created a thread for this message":"其他人已经创建了该消息的子区"
+        "Someone else created a thread for this message":"其他人已经创建了该消息的子区",
+        "ThreadName can not empty":"子区名称不能为空"
     }
 }
