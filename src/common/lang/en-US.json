@@ -59,6 +59,7 @@
         "Started a Thread":"Started a Thread",
         "Join the thread":"Join the thread",
         "You have been removed from the thread":"You have been removed from the thread",
-        "Someone else created a thread for this message":"Someone else created a thread for this message"
+        "Someone else created a thread for this message":"Someone else created a thread for this message",
+        "ThreadName can not empty":"ThreadName can not empty"
     }
 }
