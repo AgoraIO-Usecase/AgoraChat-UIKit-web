@@ -11,6 +11,8 @@ import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
 import threadIcon from "../../../common/images/thread.png"
 import MsgThreadInfo from "./msgThreadInfo"
+
+import MessageStatus from "./messageStatus";
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
     padding: "10px 0",
@@ -177,6 +179,23 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
   const createThread = ()=>{
     onCreateThread(message)
   }
+
+  const sentStatus = () => {
+		return (
+		  <div>
+			{message.bySelf && !isThreadPanel && (
+			  <MessageStatus
+				status={message.status}
+				style={{
+				  marginRight: "-30px",
+				  marginTop: message.chatType === "singleChat" ? "0" : "22px",
+				}}
+			  />
+			)}
+		  </div>
+		);
+	  };
+
 	const showThreadEntry = showThread && !message.chatThreadOverview && !isThreadPanel && message.chatType === 'groupChat';
 	const showThreaddInfo = showThread && (!isThreadPanel) && message.chatType ==="groupChat" && message.chatThreadOverview&& (JSON.stringify(message.chatThreadOverview)!=='{}')
   const classes = useStyles({
@@ -243,7 +262,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
                   
                   </div>
                   ) : (
-                    <></>
+                    sentStatus()
                   )}
                   
                 </div>

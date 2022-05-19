@@ -12,6 +12,8 @@ import RenderReactions from "../reaction/renderReaction";
 import threadIcon from "../../../common/images/thread.png"
 import MsgThreadInfo from "./msgThreadInfo"
 
+import MessageStatus from "./messageStatus";
+
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
 		padding: "10px 0",
@@ -186,6 +188,23 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	const createThread = () => {
 		onCreateThread(message)
 	}
+
+	const sentStatus = () => {
+		return (
+		  <div>
+			{message.bySelf && !isThreadPanel && (
+			  <MessageStatus
+				status={message.status}
+				style={{
+				  marginRight: "-30px",
+				  marginTop: message.chatType === "singleChat" ? "0" : "22px",
+				}}
+			  />
+			)}
+		  </div>
+		);
+	  };
+
 	const showThreadEntry = showThread && !message.chatThreadOverview && !isThreadPanel && message.chatType === 'groupChat';
 	const showThreaddInfo = showThread && (!isThreadPanel) && message.chatType === "groupChat" && message.chatThreadOverview && (JSON.stringify(message.chatThreadOverview) !== '{}')
 	const classes = useStyles({ bySelf: message.bySelf ,showThreadEntry,rnReactions: reactionMsg.length > 0,});
@@ -238,7 +257,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 								<div className={classes.thread}></div></div>}
 						</div>
 					) : (
-						<></>
+						sentStatus()
 					)}
 				</div>
 				{showThreaddInfo ? <MsgThreadInfo message={message} /> : null}
