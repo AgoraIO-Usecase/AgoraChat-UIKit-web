@@ -1,10 +1,11 @@
-import React, { memo } from 'react'
+import React, { memo, useContext } from 'react'
 import { makeStyles } from "@material-ui/styles";
 import i18next from "i18next";
 import { useSelector, useDispatch } from "react-redux";
 import ThreadActions from "../../../redux/thread"
 import AppDB from "../../../utils/AppDB"
 import { message as Alert } from '../../../EaseChat/common/alert'
+import { EaseChatContext } from "../index"
 
 const useStyles = makeStyles((theme) => ({
     pulldownListItem: {
@@ -32,6 +33,8 @@ function ThreadNotify({ message }) {
     const classes = useStyles();
     const dispatch = useDispatch();
     const threadList = useSelector((state) => state.thread?.threadList) || [];
+    let easeChatProps = useContext(EaseChatContext);
+    const { onOpenThreadPanel } = easeChatProps
     const joinThread = () => {
         //Whether you are in the thread. If not, call the interface added by SDK
         let hasJoined = threadList.find((item) => {
@@ -65,6 +68,7 @@ function ThreadNotify({ message }) {
                     dispatch(ThreadActions.setThreadOriginalMsg(msg));
                 })
             }
+            onOpenThreadPanel(res.data)
         })
        //open threadPanel
         dispatch(ThreadActions.updateThreadStates(true));
