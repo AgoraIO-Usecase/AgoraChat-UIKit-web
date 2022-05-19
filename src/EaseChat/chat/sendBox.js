@@ -76,7 +76,7 @@ const useStyles = makeStyles((theme) => ({
 
 function SendBox(props) {
   let easeChatProps = useContext(EaseChatContext);
-  const { easeInputMenu, menuList, handleMenuItem } = easeChatProps;
+  const { easeInputMenu, menuList, handleMenuItem, onOpenThreadPanel } = easeChatProps;
   const dispatch = useDispatch();
   const classes = useStyles();
   const globalProps = useSelector((state) => state.global.globalProps);
@@ -139,6 +139,7 @@ function SendBox(props) {
         }
         WebIM.conn.createChatThread(options).then(res=>{
           const threadId = res.data?.chatThreadId;
+          onOpenThreadPanel({id: threadId})
           resolve(threadId)
         })
       }else if(props.isChatThread){
