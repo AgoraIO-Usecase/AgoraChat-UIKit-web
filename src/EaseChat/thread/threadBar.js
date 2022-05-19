@@ -11,7 +11,7 @@ import ThreadActions from "../../redux/thread";
 import { EaseChatContext } from "../chat/index";
 import "../../i18n";
 import i18next from "i18next";
-
+import muteImg from '../../common/images/gray@2x.png'
 
 
 const useStyles = makeStyles((theme) => {
@@ -49,6 +49,11 @@ const useStyles = makeStyles((theme) => {
             height: '38px',
             width: '38px',
 
+        },
+        muteImgStyle: {
+            width: '12px',
+            marginLeft: '2px',
+            height: '12px',
         }
     };
 });
@@ -78,12 +83,19 @@ const ThreadBar = () => {
             threadOwner
         });
     }
+    const globalProps = useSelector((state) => state.global?.globalProps)
+    const { presenceExt } = globalProps
     return (
         <div className={classes.root}>
             <Box position="static" className={classes.leftBar}>
                 <IconButton className="iconfont icon">
                     <img alt="" className={classes.threadIcon} src={threadIcon} />
-                </IconButton>{threadName}</Box>
+                </IconButton>
+                {threadName}
+                {
+                    presenceExt && presenceExt[threadId]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
+                }
+            </Box>
             <Box position="static" className={classes.rightBar}>
                 {!isCreatingThread && hasThreadEditPanel && <IconButton
                     className="iconfont icon-hanbaobao icon editPanel"

@@ -222,7 +222,8 @@ EaseAppProvider.propTypes = {
   customMessageClick:PropTypes.func,
 
   //thread-click edit panel,get thread info
-  onEditThreadPanel:PropTypes.func
+  onEditThreadPanel:PropTypes.func,
+  onOpenThreadPanel:PropTypes.func,
 };
 EaseAppProvider.defaultProps = {
   isShowUnread: true,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import ReactDOM from "react-dom";
 import { useSelector, useDispatch } from "../../../EaseApp/index";
 import { Box, Popover } from "@material-ui/core";
@@ -13,8 +13,11 @@ import { emoji } from "../../../common/emoji";
 import _ from "lodash";
 import AppDB from "../../../utils/AppDB";
 import { message as Alert } from '../../../EaseChat/common/alert'
+import { EaseChatContext } from "../../chat/index"
 
 const ThreadListPanel = ({ anchorEl, onClose }) => {
+    let easeChatProps = useContext(EaseChatContext);
+    const { onOpenThreadPanel } = easeChatProps
     const dispatch = useDispatch();
     const threadList = useSelector((state) => state.thread?.threadList) || [];
     const curGroupRole = useSelector((state) => state.thread?.curGroupRole) || '';
@@ -120,6 +123,7 @@ const ThreadListPanel = ({ anchorEl, onClose }) => {
                 }
             })
         }
+        onOpenThreadPanel(option)
     }
     const changeCurrentThreadInfo = (option) => {
         dispatch(ThreadActions.setCurrentThreadInfo(option));
