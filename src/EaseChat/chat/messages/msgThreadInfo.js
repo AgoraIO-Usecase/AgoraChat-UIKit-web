@@ -236,7 +236,7 @@ const MsgThreadInfo = (props) => {
                     dispatch(ThreadActions.setThreadOriginalMsg(msg));
                 })
             }
-            onOpenThreadPanel(res.data)
+            onOpenThreadPanel && onOpenThreadPanel(res.data)
         })
        //open threadPanel
         dispatch(ThreadActions.updateThreadStates(true));

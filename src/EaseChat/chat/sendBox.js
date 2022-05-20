@@ -139,7 +139,7 @@ function SendBox(props) {
         }
         WebIM.conn.createChatThread(options).then(res=>{
           const threadId = res.data?.chatThreadId;
-          onOpenThreadPanel({id: threadId})
+          onOpenThreadPanel && onOpenThreadPanel({id: threadId})
           resolve(threadId)
         })
       }else if(props.isChatThread){
