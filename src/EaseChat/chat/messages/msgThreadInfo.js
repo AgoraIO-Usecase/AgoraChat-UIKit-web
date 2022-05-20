@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { Box } from "@material-ui/core";
 import threadIcon from '../../../common/images/thread.png'
@@ -12,6 +12,7 @@ import i18next from "i18next";
 import { emoji } from "../../../common/emoji";
 import AppDB from "../../../utils/AppDB"
 import { message as Alert } from '../../../EaseChat/common/alert'
+import { EaseChatContext } from "../index"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -146,6 +147,8 @@ const useStyles = makeStyles((theme) => ({
 
 const MsgThreadInfo = (props) => {
     const { chatThreadOverview } = props.message;
+    let easeChatProps = useContext(EaseChatContext);
+	const { onOpenThreadPanel } = easeChatProps;
     const dispatch = useDispatch();
     const classes = useStyles();
     const renderMessage = (message) => {
@@ -233,6 +236,7 @@ const MsgThreadInfo = (props) => {
                     dispatch(ThreadActions.setThreadOriginalMsg(msg));
                 })
             }
+            onOpenThreadPanel(res.data)
         })
        //open threadPanel
         dispatch(ThreadActions.updateThreadStates(true));

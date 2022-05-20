@@ -698,9 +698,9 @@ export const updateMessageMid = (state, { id, mid,to }) => {
 		return state
     }
 	const byId = state.getIn(["byId", id]);
-	
+
 	if (!_.isEmpty(byId)) {
-	    const { chatType, chatId } = byId;
+		const { chatType, chatId } = byId;
 		let messages = state
 			.getIn([chatType, chatId])
 			.asMutable({ deep: true });
@@ -711,10 +711,10 @@ export const updateMessageMid = (state, { id, mid,to }) => {
 		// let msg = found.setIn(['toJid'], mid)
 		messages.splice(messages.indexOf(found), 1, found);
 		state = state.setIn([chatType, chatId], messages);
+		state = state.setIn(["byMid", mid], { id });
 		state = state.setIn(["byId", mid], { chatType, chatId })
 	}
 	AppDB.updateMessageMid(mid, id);
-	state = state.setIn(["byMid", mid], { id });
 	return state;
 }
 

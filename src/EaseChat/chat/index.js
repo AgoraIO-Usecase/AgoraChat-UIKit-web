@@ -148,6 +148,7 @@ EaseChatProvider.propTypes = {
   isShowReaction: PropTypes.bool,
   customMessageList:PropTypes.array,
   customMessageClick:PropTypes.func,
+  onOpenThreadPanel:PropTypes.func,
 };
 
 EaseChatProvider.defaultProps = {

@@ -10,6 +10,8 @@ import RenderReactions from "../reaction/renderReaction";
 import threadIcon from "../../../common/images/thread.png"
 import MsgThreadInfo from "./msgThreadInfo"
 
+import MessageStatus from "./messageStatus";
+
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
 		padding: "10px 0",
@@ -137,14 +139,30 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 			mouseY: event.clientY - 4,
 		});
 	};
-  const _customMessageClick = (val, option) => (e) => {
+  	const _customMessageClick = (val, option) => (e) => {
     customMessageClick && customMessageClick(e, val, option);
     handleClose();
-  };
+  	};
 
-  const createThread = ()=>{
+  	const createThread = ()=>{
 	onCreateThread(message)
- }
+ 	}
+
+	 const sentStatus = () => {
+		return (
+		  <div>
+			{message.bySelf && !isThreadPanel && (
+			  <MessageStatus
+				status={message.status}
+				style={{
+				  marginRight: "-30px",
+				  marginTop: message.chatType === "singleChat" ? "0" : "22px",
+				}}
+			  />
+			)}
+		  </div>
+		);
+	  };
 	
 	return (
 		<li
@@ -177,7 +195,7 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 							  <div className={classes.thread}></div></div>}
                				</div>
 						) : (
-							<></>
+							sentStatus()
 						)}
 					</div>
 					{showThreaddInfo ? <MsgThreadInfo message={message} />: null}
