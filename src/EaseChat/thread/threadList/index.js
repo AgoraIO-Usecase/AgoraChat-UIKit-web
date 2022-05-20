@@ -123,7 +123,7 @@ const ThreadListPanel = ({ anchorEl, onClose }) => {
                 }
             })
         }
-        onOpenThreadPanel(option)
+        onOpenThreadPanel && onOpenThreadPanel(option)
     }
     const changeCurrentThreadInfo = (option) => {
         dispatch(ThreadActions.setCurrentThreadInfo(option));
