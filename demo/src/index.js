@@ -64,10 +64,10 @@ export default class Demo extends Component {
             onChatAvatarClick={this.test4}
             onEditThreadPanel={this.test5}
             // appkey= "easemob-demo#chatdemoui"
-            appkey= "5101220107132865#test"
-            username="wy2"
-            password="1"
-            // agoraToken="007eJxTYPCe51Vb5Rl3kCX/veizhwyel9f7fNp0e2mBNGd157ut3zUVGNIMU5LNzS2SUlKSzUzMElMs0ozMDCzNzZITjVIMDE2To7ItkxRkGBhONNtwMzKwMjACIYivwmBiaJxoYWxgoJtoZpmqa2iYmqybZG5oqWtpbGJsmpaWbGpmbgIAfPMmSQ=="
+            appkey= "81446724#514456"
+            username="wy1"
+            // password="1"
+            agoraToken="007eJxTYAiNDlN3KFkdE3Jc/GPcjr3njT9ze9cxnbiYYqveeaky+owCQ1KihampgYmZkaGxgUlakoWlibmlgbmBRQqQa25pkvbzYVdSBiMDA6/xvypGBlYGRiAE8VUYLI1MTVMNDQ10UywMTXQNDVOTdZPSUsx1U1KMUlNSUk3Nk8wtAeEaJkQ="
             header={<div style={{ height: "100px" }}>TestHeader</div>}/>
         </div>
       </div>

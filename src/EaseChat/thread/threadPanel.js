@@ -357,7 +357,7 @@ const ThreadPanel = () => {
                         {Math.floor(message.body.length) + "''"}
                     </span>
                     <AudioPlayer play={isPlaying} />
-                    <audio src={message.body.url} ref={threadAudioRef} />
+                    <audio src={message.audioSrcUrl||message.url} ref={threadAudioRef} />
                 </div>
             )
         } else if (message.body.type === "video") {
