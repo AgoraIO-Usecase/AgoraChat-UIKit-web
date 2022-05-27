@@ -750,7 +750,7 @@ export const updateReactionData = (state, { message, reaction }) => {
 					if(operator.reactionType === 'delete'){
 						item.userList.forEach((user, index) => {
 							if(user === operator.operator){
-								userList.splice(index, 1)
+								item.userList.splice(index, 1)
 							}
 						})
 					}
