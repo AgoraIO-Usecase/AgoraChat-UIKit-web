@@ -322,6 +322,24 @@ const ThreadPanel = () => {
             setIsPlaying(false);
         }, time + 500);
     };
+    const [audioUrl, setUrl] = useState('');
+    useEffect(()=>{
+        if(threadOriginalMsg.body && threadOriginalMsg?.body?.type === "audio"){
+            let options = {
+                url: threadOriginalMsg.bySelf? threadOriginalMsg.url: (threadOriginalMsg.audioSrcUrl || threadOriginalMsg.url),
+                headers: {
+                  Accept: 'audio/mp3'
+                },
+                onFileDownloadComplete: function (response) {
+                  let objectUrl = WebIM.utils.parseDownloadResponse.call(WebIM.conn, response)
+                  setUrl(objectUrl);
+                },
+                onFileDownloadError: function () {
+                }
+              };
+              WebIM.utils.download.call(WebIM.conn, options)
+        }
+      },[threadOriginalMsg])
     const renderMsgDom = (message) => {
         if (message.body.type === "txt") {
             return (
@@ -357,7 +375,7 @@ const ThreadPanel = () => {
                         {Math.floor(message.body.length) + "''"}
                     </span>
                     <AudioPlayer play={isPlaying} />
-                    <audio src={message.body.url} ref={threadAudioRef} />
+                    <audio src={audioUrl} ref={threadAudioRef} />
                 </div>
             )
         } else if (message.body.type === "video") {
