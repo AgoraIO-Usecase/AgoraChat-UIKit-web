@@ -10,6 +10,7 @@ import AudioOrVideoMessage from "../chat/messages/audioOrVideoMessage";
 import TextMessage from "../chat/messages/textMessage";
 import i18next from "i18next";
 import MessageActions from "../../redux/message"
+import ThirdEmoji from "../chat/messages/thirdEmoji";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -70,15 +71,27 @@ function ThreadMessageList({ messageList, showByselfAvatar }) {
                   />
                 );
               } else if (msg.body.type === "img") {
-                return (
-                  <ImgMessage
-                    message={msg}
-                    key={msg.id + index}
-                    onRecallMessage={handleRecallThreadMsg}
-                    showByselfAvatar={showByselfAvatar}
-                    isThreadPanel='true'
-                  />
-                );
+                if (msg.ext.emoji_type) {
+                  return (
+                    <ThirdEmoji
+                      message={msg}
+                      key={msg.id + index}
+                      onRecallMessage={handleRecallThreadMsg}
+                      showByselfAvatar={showByselfAvatar}
+                      isThreadPanel='true'
+                    />
+                  )
+                } else {
+                  return (
+                    <ImgMessage
+                      message={msg}
+                      key={msg.id + index}
+                      onRecallMessage={handleRecallThreadMsg}
+                      showByselfAvatar={showByselfAvatar}
+                      isThreadPanel='true'
+                    />
+                  );
+                }
               } else if (msg.body.type === "audio" || msg.body.type === "video") {
                 return <AudioOrVideoMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar} isThreadPanel='true'/>;
               } else if (msg.body.type === "recall") {

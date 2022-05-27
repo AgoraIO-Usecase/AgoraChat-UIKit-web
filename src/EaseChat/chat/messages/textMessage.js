@@ -14,6 +14,8 @@ import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
 import { EaseChatContext } from "../index";
 import threadIcon from "../../../common/images/thread.png"
+import offlineImg from '../../../common/images/Offline.png'
+import onlineIcon from '../../../common/images/Online.png'
 
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
@@ -41,6 +43,7 @@ const useStyles = makeStyles((theme) => ({
 		minWidth: "40%",
 		maxWidth: "75%",
 		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
+		position: 'relative',
 	},
 	time: {
 		position: "absolute",
@@ -125,7 +128,15 @@ const useStyles = makeStyles((theme) => ({
 		background: `url(${threadIcon}) center center no-repeat`,
 		backgroundSize: 'contain',
 		cursor: 'pointer',
-	}
+	},
+	onLineImg: {
+    width: '15px',
+    height: '15px',
+		position: 'absolute',
+    zIndex: 1,
+		top: (props) => (props.chatType === "singleChat" ? "0px" : "20px"),
+    left: (props) => (props.chatType === "singleChat" ? "6px" : "7px"),
+  }
 }))
 const initialState = {
 	mouseX: null,
@@ -231,6 +242,12 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 		customMessageClick && customMessageClick(e, val, option);
 		handleClose();
 	};
+	let onLineImg = ''
+  if (message.body.onlineState === 1) {
+    onLineImg = onlineIcon
+  } else if (message.body.onlineState === 0) {
+    onLineImg = offlineImg
+  }
 	return (
 		<li
 			className={classes.pulldownListItem}
@@ -252,6 +269,11 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 				)}
 			</div>
 			<div className={classes.textBodyBox}>
+				{
+          !message.bySelf && (
+            onLineImg && <img className={classes.onLineImg} alt="" src={onLineImg} />
+          )
+        }
 				<span className={classes.userName}>{message.from}</span>
 				<div
 					className={classes.textBody}

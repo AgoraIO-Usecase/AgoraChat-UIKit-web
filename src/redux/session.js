@@ -33,6 +33,30 @@ const { Types, Creators } = createActions({
             dispatch(Creators.pushSession(session))
         }
     },
+    onGetChatroomUserList: () => {
+        return (dispatch, getState) => {
+            var option = {
+                pagenum: 1,                                 // 页数
+                pagesize: 20,                               // 每页个数
+                success: function(list){
+                    const tempArr = []
+                    if (list?.data.length) {
+                        list.data.forEach(item => {
+                            tempArr.push({
+                                sessionType: 'chatRoom',
+                                sessionId: item.id,
+                            })
+                        })
+                    }
+                    dispatch(Creators.setSessionList(tempArr))
+                },
+                error: function(){
+                    console.log('List chat room error')
+                }
+            };
+            WebIM.conn.getChatRooms(option);
+        }
+    },
 })
 export default Creators
 export const INITIAL_STATE = Immutable({

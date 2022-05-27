@@ -6,6 +6,8 @@ import i18next from "i18next";
 import { IconButton, Icon, Menu, MenuItem } from "@material-ui/core";
 import { renderTime } from "../../../utils";
 import { EaseChatContext } from "../index";
+import offlineImg from '../../../common/images/Offline.png'
+import onlineIcon from '../../../common/images/Online.png'
 
 import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
@@ -48,6 +50,7 @@ const useStyles = makeStyles((theme) => ({
 		padding: '12px',
 		borderRadius: (props) =>
 			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+		position: 'relative',
 	},
 	fileCard: {
 		width: "252px",
@@ -150,7 +153,15 @@ const useStyles = makeStyles((theme) => ({
 		background: `url(${threadIcon}) center center no-repeat`,
 		backgroundSize: 'contain',
 		cursor: 'pointer',
-	}
+	},
+	onLineImg: {
+    width: '15px',
+    height: '15px',
+		position: 'absolute',
+    zIndex: 1,
+		top: '28px',
+    left: '7px',
+  }
 }));
 const initialState = {
 	mouseX: null,
@@ -209,7 +220,12 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	const showThreaddInfo = showThread && (!isThreadPanel) && message.chatType === "groupChat" && message.chatThreadOverview && (JSON.stringify(message.chatThreadOverview) !== '{}')
 	const classes = useStyles({ bySelf: message.bySelf ,showThreadEntry,rnReactions: reactionMsg.length > 0,});
 
-
+	let onLineImg = ''
+  if (message.body.onlineState === 1) {
+    onLineImg = onlineIcon
+  } else if (message.body.onlineState === 0) {
+    onLineImg = offlineImg
+  }
 	return (
 		<li
 			className={classes.pulldownListItem}
@@ -229,6 +245,11 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 				<img className={classes.avatarStyle} src={avatar}></img>
 			)}
 			<div className={classes.textBodyBox}>
+				{
+          !message.bySelf && (
+            onLineImg && <img className={classes.onLineImg} alt="" src={onLineImg} />
+          )
+        }
 				<span className={classes.userName}>{message.from}</span>
 				<div className={classes.fileCard} onContextMenu={handleClick}>
 					<div className={classes.fileIcon}>

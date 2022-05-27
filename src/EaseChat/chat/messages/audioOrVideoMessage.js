@@ -13,6 +13,8 @@ import threadIcon from "../../../common/images/thread.png"
 import MsgThreadInfo from "./msgThreadInfo"
 
 import MessageStatus from "./messageStatus";
+import offlineImg from '../../../common/images/Offline.png'
+import onlineIcon from '../../../common/images/Online.png'
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
     padding: "10px 0",
@@ -43,6 +45,7 @@ const useStyles = makeStyles((theme) => ({
     padding:  (props) => props.showThreaddInfo? '12px':'0',
     borderRadius: (props) =>
 			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+    position: 'relative',
   },
 
   audioBox: {
@@ -130,7 +133,15 @@ const useStyles = makeStyles((theme) => ({
 		background: `url(${threadIcon}) center center no-repeat`,
 		backgroundSize: 'contain',
 		cursor: 'pointer',
-	}
+	},
+  onLineImg: {
+    width: '15px',
+    height: '15px',
+    position: 'absolute',
+    zIndex: 1,
+    top: '20px',
+    left: '0px',
+  }
 }));
 const initialState = {
   mouseX: null,
@@ -206,6 +217,12 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
     rnReactions: reactionMsg.length > 0,
   });
   
+  let onLineImg = ''
+  if (message.body.onlineState === 1) {
+    onLineImg = onlineIcon
+  } else if (message.body.onlineState === 0) {
+    onLineImg = offlineImg
+  }
   return (
     <li
       className={classes.pulldownListItem}
@@ -220,6 +237,11 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
       )}
       {showByselfAvatar && message.bySelf && <Avatar src={avatar}></Avatar>}
       <div className={classes.textBodyBox}>
+        {
+          !message.bySelf && (
+            onLineImg && <img className={classes.onLineImg} alt="" src={onLineImg} />
+          )
+        }
           <div className={classes.messageBox}>
             <span className={classes.userName}>{message.from}</span>
             {audioType ? (
