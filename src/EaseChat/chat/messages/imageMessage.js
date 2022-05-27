@@ -11,7 +11,8 @@ import threadIcon from "../../../common/images/thread.png"
 import MsgThreadInfo from "./msgThreadInfo"
 
 import MessageStatus from "./messageStatus";
-
+import offlineImg from '../../../common/images/Offline.png'
+import onlineIcon from '../../../common/images/Online.png'
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
 		padding: "10px 0",
@@ -43,6 +44,7 @@ const useStyles = makeStyles((theme) => ({
 		padding: (props) => (props.showThreaddInfo ? "12px": '0'),
 		borderRadius: (props) =>
 				props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+		position: 'relative',
 	},
 	imgBox: {
 		"& img": {
@@ -103,7 +105,15 @@ const useStyles = makeStyles((theme) => ({
 		background: `url(${threadIcon}) center center no-repeat`,
 		backgroundSize: 'contain',
 		cursor: 'pointer',
-	}
+	},
+	onLineImg: {
+    width: '15px',
+    height: '15px',
+		position: 'absolute',
+    zIndex: 1,
+		top: '16px',
+    left: '5px',
+  }
 }));
 const initialState = {
   mouseX: null,
@@ -163,7 +173,12 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 		  </div>
 		);
 	  };
-	
+		let onLineImg = ''
+		if (message.body.onlineState === 1) {
+			onLineImg = onlineIcon
+		} else if (message.body.onlineState === 0) {
+			onLineImg = offlineImg
+		}
 	return (
 		<li
 			className={classes.pulldownListItem}
@@ -182,6 +197,11 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 				<Avatar src={avatar}></Avatar>
 			)}
 			<div className={classes.textBodyBox}>
+				{
+          !message.bySelf && (
+            onLineImg && <img className={classes.onLineImg} alt="" src={onLineImg} />
+          )
+        }
 				<span className={classes.userName}>{message.from}</span>
 				<div className={classes.imgBox} onContextMenu={handleClick}>
 					<img src={message.url} alt="img message"></img>

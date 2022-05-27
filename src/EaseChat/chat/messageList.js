@@ -11,6 +11,7 @@ import ImgMessage from "./messages/imageMessage";
 import AudioOrVideoMessage from "./messages/audioOrVideoMessage";
 import TextMessage from "./messages/textMessage";
 import ThreadActions from "../../redux/thread"
+import ThirdEmoji from "./messages/thirdEmoji";
 import i18next from "i18next";
 import ThreadNotify from "./messages/threadNotify";
 
@@ -125,16 +126,27 @@ function MessageList({ messageList, showByselfAvatar }) {
                     />
                   );
                 } else if (msg.body.type === "img") {
-                  return (
-                    <ImgMessage
-                      message={msg}
-                      key={msg.id + index}
-                      onRecallMessage={handleRecallMsg}
-                      onCreateThread={createThread}
-                      showByselfAvatar={showByselfAvatar}
-                      showThread={showThread}
-                    />
-                  );
+                  if (msg.ext.emoji_type) {
+                    return (
+                      <ThirdEmoji
+                        message={msg}
+                        key={msg.id + index}
+                        onRecallMessage={handleRecallMsg}
+                        showByselfAvatar={showByselfAvatar}
+                      />
+                    )
+                  } else {
+                    return (
+                      <ImgMessage
+                        message={msg}
+                        key={msg.id + index}
+                        onRecallMessage={handleRecallMsg}
+                        showByselfAvatar={showByselfAvatar}
+                        onCreateThread={createThread}
+                        showThread={showThread}
+                      />
+                    );
+                  }
                 } else if (msg.body.type === "audio" || msg.body.type === "video") {
                   return <AudioOrVideoMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}  onCreateThread={createThread} showThread={showThread}/>;
                 } else if (msg.body.type === "recall") {

@@ -1,4 +1,4 @@
-import React, { useCallback, createContext } from "react";
+import React, { useCallback, createContext, useEffect } from "react";
 import PropTypes from "prop-types";
 import { makeStyles, styled } from "@material-ui/styles";
 import Box from "@material-ui/core/Box";
@@ -224,6 +224,8 @@ EaseAppProvider.propTypes = {
   //thread-click edit panel,get thread info
   onEditThreadPanel:PropTypes.func,
   onOpenThreadPanel:PropTypes.func,
+  thridPartyStickets: PropTypes.node,
+  thridPartyGifs: PropTypes.node,
 };
 EaseAppProvider.defaultProps = {
   isShowUnread: true,

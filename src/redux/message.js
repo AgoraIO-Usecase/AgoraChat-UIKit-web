@@ -141,9 +141,11 @@ const { Types, Creators } = createActions({
 
 	sendImgMessage: (to, chatType, file, imageEl, isChatThread=false) => {
 		return (dispatch, getState) => {
-			if (file.data.size > (1024 * 1024 * 10)) {
-				message.error(i18next.t('The file exceeds the upper limit'))
-				return
+			if (!file?.ext?.emoji_url) {
+				if (file.data.size > (1024 * 1024 * 10)) {
+					message.error(i18next.t('The file exceeds the upper limit'))
+					return
+				}
 			}
 			const formatMsg = formatLocalMessage(to, chatType, file, 'img', isChatThread)
 			let option = {
@@ -152,11 +154,19 @@ const { Types, Creators } = createActions({
 				to,
 				file: file,
 				isChatThread,
+				ext: {
+					file_length: !file?.ext?.emoji_url ? file.data.size : null,
+					file_type: !file?.ext?.emoji_url ? file.data.type : null,
+					emoji_url: file?.ext?.emoji_url ? file.ext.emoji_url : null,
+					emoji_type: file?.ext?.emoji_url ? file.ext.emoji_type : null
+				},
 				onFileUploadError: function () {
 					console.log("onFileUploadError");
 					formatMsg.status = "fail";
 					dispatch(Creators.updateMessageStatus(formatMsg, "fail", msg.id));
-					imageEl.current.value = "";
+					if (!file?.ext?.emoji_url) {
+						imageEl.current.value = "";
+					}
 				},
 				onFileUploadProgress: function (progress) {
 					console.log(progress);
@@ -168,7 +178,9 @@ const { Types, Creators } = createActions({
 					formatMsg.body.url = url;
 					const type = isChatThread? 'threadMessage' : chatType;
 					dispatch(Creators.updateMessages(type, to, formatMsg ));
-					imageEl.current.value = "";
+					if (!file?.ext?.emoji_url) {
+						imageEl.current.value = "";
+					}
 				},
 			};
 			let msg = WebIM.message.create(option);
@@ -378,11 +390,15 @@ const { Types, Creators } = createActions({
     },
 
 	addAudioMessage: (message, bodyType) => {
+		let Accept = 'audio/mp3'
+		if (bodyType === 'video') {
+				Accept = 'audio/mp4'
+		}
 		return (dispatch, getState) => {
 			let options = {
 				url: message.url,
 				headers: {
-					Accept: "audio/mp3",
+					Accept: Accept,
 				},
 				onFileDownloadComplete: function (response) {
 					let objectUrl = WebIM.utils.parseDownloadResponse.call(

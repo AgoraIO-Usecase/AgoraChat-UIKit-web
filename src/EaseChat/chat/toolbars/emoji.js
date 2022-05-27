@@ -17,7 +17,7 @@ const useStyles = makeStyles(() => {
 const lineNum = 10;
 const emojiWidth = 25;
 const emojiPadding = 5;
-function Emoji({ anchorEl, onClose, onSelected }) {
+function Emoji({ anchorEl, onClose, onSelected, thirdEmoji }) {
 
     const emojisNum = Object.values(emoji.map).length
     const rows = Math.ceil(emojisNum / lineNum)
@@ -55,26 +55,34 @@ function Emoji({ anchorEl, onClose, onSelected }) {
         const emoji = e.target.alt || e.target.children[0].alt
         onSelected(emoji)
     }
-    return (
-        <Popover
-            keepMounted
-            open={Boolean(anchorEl)}
-            onClose={onClose}
-            anchorEl={anchorEl}
-            style={{ maxHeight: '500px' }}
-            anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-            }}
-            transformOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-            }}
-        >
+    if (thirdEmoji) {
+        return (
             <div className={classes.emojiBox} onClick={handleEmojiClick}>
                 {renderEmoji()}
             </div>
-        </Popover>
-    );
+        )
+    } else {
+        return (
+            <Popover
+                keepMounted
+                open={Boolean(anchorEl)}
+                onClose={onClose}
+                anchorEl={anchorEl}
+                style={{ maxHeight: '500px' }}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+                transformOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+            >
+                <div className={classes.emojiBox} onClick={handleEmojiClick}>
+                    {renderEmoji()}
+                </div>
+            </Popover>
+        );
+    }
 }
 export default memo(Emoji)

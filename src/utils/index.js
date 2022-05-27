@@ -165,7 +165,9 @@ export function formatLocalMessage(to, chatType, message = {}, messageType, isCh
     const formatMsg = Object.assign({}, msgTpl.base, message)
     const body = Object.assign({}, msgTpl[messageType], message)
     if (messageType === 'file' || messageType === 'img' || messageType === 'video') {
-        body.size = message?.data.size
+        if (!message?.ext?.emoji_url) {
+            body.size = message?.data.size
+        }
     }
     if(messageType === 'threadNotify'){
         formatMsg.id = WebIM.conn.getUniqueId();

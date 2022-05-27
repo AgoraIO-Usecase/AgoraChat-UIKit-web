@@ -81,7 +81,7 @@ function Recorder({ open, onClose, isChatThread,threadName }) {
 
     recording.get((rec,val) => {
       setRecorderObj(rec);
-      console.log('recrecrecrecrec', rec,val.getTracks())
+      console.log('recrecrecrecrec', rec)
       MediaStream = val
       if (rec) {
         let _interval = setInterval(() => {
