@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect,useContext,useRef } from "react";
 import { useSelector, useDispatch } from "../../../EaseApp/index";
 import { Menu, MenuItem, IconButton, Icon, InputBase, Tooltip } from "@material-ui/core";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -11,7 +11,9 @@ import i18next from "i18next";
 
 import MessageActions from "../../../redux/message";
 import SessionActions from "../../../redux/session";
-import GlobalPropsActions from "../../../redux/globalProps"
+import ThreadActions from "../../../redux/thread";
+import GlobalPropsActions from "../../../redux/globalProps";
+import ThreadListPanel from "../../thread/threadList/index.js";
 import { EaseChatContext } from "../index";
 
 import _ from 'lodash'
@@ -23,6 +25,7 @@ import CallKit from 'zd-callkit'
 import WebIM from '../../../utils/WebIM'
 
 import InviteModal from './inviteModal'
+import threadIcon from '../../../common/images/thread.png'
 
 import offlineImg from '../../../common/images/Offline.png'
 import onlineIcon from '../../../common/images/Online.png'
@@ -30,6 +33,7 @@ import busyIcon from '../../../common/images/Busy.png'
 import donotdisturbIcon from '../../../common/images/Do_not_Disturb.png'
 import customIcon from '../../../common/images/custom.png'
 import leaveIcon from '../../../common/images/leave.png'
+import muteImg from '../../../common/images/gray@2x.png'
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -69,6 +73,15 @@ const useStyles = makeStyles((theme) => {
       height: '18px',
       borderRadius: '50%',
     },
+    muteImgStyle: {
+      width: '12px',
+      marginLeft: '2px',
+      height: '12px',
+    },
+    threadIcon: {
+      width: '21px',
+      height: '20px',
+    }
   };
 });
 const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
@@ -78,6 +91,7 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   const dispatch = useDispatch();
   const groupById = useSelector((state) => state.group?.group.byId) || {};
   const globalProps = useSelector((state) => state.global.globalProps);
+  const showThread = useSelector((state) => state.thread.showThread);
 
   const [sessionEl, setSessionEl] = useState(null);
 
@@ -124,6 +138,15 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   const handleSessionInfoClick = (e) => {
     setSessionEl(e.currentTarget);
   };
+  const [anchorEl, setAnchorEl] = useState(null);
+  const onClose = ()=>{
+    setAnchorEl(null);
+    dispatch(ThreadActions.setThreadListPanelDisplay(false));
+  }
+  const openThreadList = (e)=>{
+    setAnchorEl(e.currentTarget)
+  }
+  const threadListAnchorEl = useRef(null);
 
   const getUserOnlineStatus = {
     'Offline': offlineImg,
@@ -148,11 +171,6 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
     setUsersInfoData(newInfoData)
     setUserAvatarIndex(_.find(newInfoData, { username: to })?.userAvatar || 1)
   }, [to])
-
-  // useEffect(() => {
-  //   // let appId = '15cb0d28b87b425ea613fc46f7c9f974';
-  //   CallKit.init(appId, agoraUid, WebIM.conn)
-  // }, [])
 
   const callAudio = async () => {
     console.log('to', to, chatType)
@@ -264,21 +282,29 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
     let data = await WebIM.conn.listGroupMembers({ pageNum: 1, pageSize: 500, groupId: gid })
     return data.data
   }
+  
+  const threadListPanelDisplay = useSelector((state) => state.thread?.threadListPanelDisplay) || false;
+  useEffect(()=>{
+    if(threadListPanelDisplay){
+      setAnchorEl(threadListAnchorEl.current)
+    }else{
+      onClose()
+    }
+  },[threadListPanelDisplay])
 
   return (
-    <>
-      <div className={classes.root}>
-        <Box position="static" className={classes.leftBar}>
-          <Avatar className={classes.avatar} onClick={(e) => onChatAvatarClick && onChatAvatarClick(e, { chatType, to })}
-            src={chatType === "singleChat" ? userAvatars[userAvatarIndex] : groupAvatarIcon}
-            style={{ borderRadius: chatType === "singleChat" ? "50%" : 'inherit' }}
-          ></Avatar>
+    <div className={classes.root}>
+      <Box position="static" className={classes.leftBar}>
+        <Avatar className={classes.avatar} onClick={(e) => onChatAvatarClick && onChatAvatarClick(e,{chatType, to})} 
+        src={chatType === "singleChat" ? userAvatars[userAvatarIndex] : groupAvatarIcon}
+          style={{ borderRadius: chatType === "singleChat" ? "50%" : 'inherit'}}
+        ></Avatar>
           {
             chatType === "singleChat" ?
-              <div className={classes.imgBox}>
-                <img alt="" src={getUserOnlineStatus[presenceExt[to]] || customIcon} className={classes.imgStyle} />
-              </div>
-              : null
+            <div className={classes.imgBox}>
+              <img alt="" src={(presenceExt && getUserOnlineStatus[presenceExt[to]?.ext]) ? getUserOnlineStatus[presenceExt[to]?.ext] : customIcon} className={classes.imgStyle} />
+            </div>
+            : null
           }
           {name || to}
         </Box>

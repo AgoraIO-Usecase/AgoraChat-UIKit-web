@@ -16,12 +16,14 @@ import GlobalPropsActions from "../redux/globalProps";
 import createlistener from "../utils/WebIMListen";
 import MessageActions from "../redux/message";
 import SessionActions from "../redux/session";
+import ThreadActions from "../redux/thread"
 import _ from "lodash";
 import "../i18n";
 import "../common/iconfont.css";
 
 import SessionList from "../EaseChat/session/sessionList";
 import EaseChat from "../EaseChat/chat/index";
+
 const uikit_store = React.createContext();
 export const useDispatch = createDispatchHook(uikit_store);
 export const useSelector = createSelectorHook(uikit_store);
@@ -65,12 +67,24 @@ const EaseApp = (props) => {
             to: sessionId,
             chatType: sessionType,
             name: name,
-            presenceExt: {[data.uid] : data.ext}
+            presenceExt: {[sessionId]: {
+              ext: data.ext
+            }}
+          })
+        );
+      }).catch(e=>{
+        console.log(e);
+        dispatch(
+          GlobalPropsActions.setGlobalProps({
+            to: sessionId,
+            chatType: sessionType,
           })
         );
       });
       dispatch(SessionActions.setCurrentSession(sessionId));
       dispatch(MessageActions.clearUnreadAsync(sessionType, sessionId));
+      dispatch(ThreadActions.updateThreadStates(false));
+      dispatch(ThreadActions.getCurrentGroupRole({sessionType, sessionId}));
     },
     [props.width]
   );
@@ -105,7 +119,7 @@ const EaseApp = (props) => {
           </div>
         </Grid>
         <Grid 
-        style={{width:'100%'}}
+        style={{width:'100%',  minWidth: '788px'}}
         >
           <EaseChat {...props} />
         </Grid>
@@ -149,10 +163,12 @@ EaseAppProvider.addConversationItem = (session) => {
       GlobalPropsActions.setGlobalProps({
         to: conversationId,
         chatType: conversationType,
-        presenceExt: {[conversationId] : ext }
+        presenceExt: {[conversationId]: ext }
       })
     );
     dispatch(MessageActions.clearUnreadAsync(conversationType, conversationId));
+    dispatch(ThreadActions.updateThreadStates(false));
+    dispatch(ThreadActions.getCurrentGroupRole({sessionType:conversationType, sessionId:conversationId}));
   }
 };
 EaseAppProvider.changePresenceStatus = (ext) => {
@@ -172,6 +188,19 @@ EaseAppProvider.getSdk = (props) => {
   }
   return WebIM
 };
+EaseAppProvider.thread = {
+  setShowThread: function(status){
+    store.dispatch(ThreadActions.setShowThread(status))
+  },
+  setHasThreadEditPanel:function(status){
+    store.dispatch(ThreadActions.setHasThreadEditPanel(status))
+  },
+  closeThreadPanel:function(){
+    store.dispatch(ThreadActions.updateThreadStates(false))
+  }
+}
+
+
 EaseAppProvider.propTypes = {
 	username: PropTypes.string,
 	agoraToken: PropTypes.string,
@@ -191,6 +220,10 @@ EaseAppProvider.propTypes = {
   isShowReaction: PropTypes.bool,
   customMessageList: PropTypes.array,
   customMessageClick: PropTypes.func,
+  
+   //thread-click edit panel,get thread info
+  onEditThreadPanel:PropTypes.func,
+  onOpenThreadPanel:PropTypes.func,
 
   agoraUid: PropTypes.string,
   getRTCToken: PropTypes.func,

@@ -6,7 +6,7 @@ import _ from "lodash";
 import WebIM from "../utils/WebIM";
 import AppDB from "../utils/AppDB";
 import i18next from "i18next";
-import { message } from "../EaseChat/common/alert";
+import { message } from '../EaseChat/common/alert'
 
 
 function isAdded(reactionOp) {
@@ -28,147 +28,166 @@ function isAdded(reactionOp) {
 
 /* ------------- Initial State ------------- */
 export const INITIAL_STATE = Immutable({
-	byId: {},
-	singleChat: {},
-	groupChat: {},
-	chatRoom: {},
-	stranger: {},
-	extra: {},
-	unread: {
-		singleChat: {},
-		groupChat: {},
-		chatRoom: {},
-		stranger: {},
-	},
-});
+    byId: {},
+    singleChat: {},
+    groupChat: {},
+    chatRoom: {},
+    stranger: {},
+    threadMessage:{},
+    extra: {},
+    unread: {
+        singleChat: {},
+        groupChat: {},
+        chatRoom: {},
+        stranger: {},
+    },
+    threadHistoryStart:-1,
+    threadHasHistory:true,
+})
 
 /* -------- Types and Action Creators -------- */
 const { Types, Creators } = createActions({
 	addMessage: ["message", "messageType"],
 	deleteMessage: ["msgId", "to", "chatType"],
-	updateMessageStatus: ["message", "status", "localId"],
+	updateMessageStatus: ["message", "status", "localId", "serverMsgId"],
 	clearUnread: ["chatType", "sessionId"],
 	updateMessages: ["chatType", "sessionId", "messages"],
-	updateMessageMid: ["id", "mid"],
 	updateReactionData: ["message", "reaction"],
+    updateMessageMid: ['id', 'mid', 'to'],
+    updateThreadDetails: ['chatType','options','messageList'],
+    updateThreadMessage: ['to','messageList','isScroll'],
+    setThreadHistoryStart:['start'],
+    setThreadHasHistory: ['status'],
 
 	// -async-
-	sendTxtMessage: (to, chatType, message = {}) => {
-		if (!to || !chatType) return;
+	sendTxtMessage: (to, chatType, message = {}, isChatThread=false) => {
+		if (!to || !chatType) return
 		return (dispatch, getState) => {
-			const formatMsg = formatLocalMessage(to, chatType, message, "txt");
-			const { body, id } = formatMsg;
-			const { msg } = body;
-			const msgObj = new WebIM.message("txt", id);
-			msgObj.set({
+			const formatMsg = formatLocalMessage(to, chatType, message, 'txt', isChatThread)
+			const { msg } = formatMsg.body;
+			let option = {
+				chatType,
+				type: 'txt',
 				to,
 				msg,
-				chatType,
-				ext: message.ext,
-				success: (localId, serverId) => {
-					formatMsg.id = serverId
-					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
-				},
-				fail: (e) => {
-					// console.error("Send private text error", e);
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
-				},
+				isChatThread,
+			};
+			let msgObj = WebIM.message.create(option);
+			formatMsg.id = msgObj.id;
+			WebIM.conn.send(msgObj).then((res) => {
+				console.log("send private text Success",res);
+				let { localMsgId, serverMsgId } = res;
+				dispatch(Creators.updateMessageStatus(formatMsg, "sent", localMsgId, serverMsgId));
+			}).catch((e) => {
+				console.log("Send private text error", e);
+				dispatch(Creators.updateMessageStatus(formatMsg, "fail",msgObj.id));
 			});
-			WebIM.conn.send(msgObj.body).catch(() => {
-				console.warn('Send private text error')
-			});
-			dispatch(Creators.addMessage(formatMsg));
-		};
+			dispatch(Creators.addMessage(formatMsg))
+		}
 	},
 
-	sendFileMessage: (to, chatType, file, fileEl) => {
+	sendFileMessage: (to, chatType, file, fileEl, isChatThread=false) => {
 		return (dispatch, getState) => {
 			if (file.data.size > (1024 * 1024 * 10)) {
 				message.error(i18next.t('The file exceeds the upper limit'))
 				return
 			}
-			const formatMsg = formatLocalMessage(to, chatType, file, "file");
-			const { id } = formatMsg;
-			const msgObj = new WebIM.message("file", id);
-			msgObj.set({
+			const formatMsg = formatLocalMessage(to, chatType, file, 'file', isChatThread)
+			let option = {
+				chatType,
+				type: "file",
+				to,
+				file: file,
+				filename: file.filename,
+				isChatThread,
 				ext: {
 					file_length: file.data.size,
 					file_type: file.data.type,
 				},
-				file: file,
-				to,
-				chatType,
-				onFileUploadError: function (error) {
+				onFileUploadError: function (e) {
+					console.log("onFileUploadError",e);
 					formatMsg.status = "fail";
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", msg.id));
 					fileEl.current.value = "";
+				},
+				onFileUploadProgress: function (progress) {
+					console.log(progress);
 				},
 				onFileUploadComplete: function (data) {
-					let url = data.uri + "/" + data.entities[0].uuid;
-					formatMsg.url = formatMsg.body.url = url;
-					formatMsg.status = "sent";
-					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
-					dispatch(Creators.updateMessages(chatType, to, formatMsg));
-					fileEl.current.value = "";
+					console.log("onFileUploadComplete");
+					let url = data.uri + '/' + data.entities[0].uuid
+                    formatMsg.url = formatMsg.body.url = url;
+					const type = isChatThread? 'threadMessage' : chatType;
+					dispatch(Creators.updateMessages(type, to, formatMsg ));
+                    fileEl.current.value ='';
 				},
-				success: (localId, serverId) => {
-					formatMsg.id = serverId
-					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
-				},
-				fail: function () {
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
-					fileEl.current.value = "";
-				},
+			};
+			let msg = WebIM.message.create(option);
+			formatMsg.id = msg.id;
+			WebIM.conn.send(msg).then((res) => {
+				let { localMsgId, serverMsgId } = res;
+				console.log("success");
+				formatMsg.status = "sent";
+				dispatch(Creators.updateMessageStatus(formatMsg, "sent", localMsgId, serverMsgId));
+				fileEl.current.value = "";
+			}).catch((e) => {
+				console.log("fail",e);
+				dispatch(Creators.updateMessageStatus(formatMsg, "fail",msg.id));
+				fileEl.current.value = "";
 			});
-			WebIM.conn.send(msgObj.body);
-			dispatch(Creators.addMessage(formatMsg, "file"));
-		};
+			dispatch(Creators.addMessage(formatMsg, 'file'))
+		}
 	},
 
-	sendImgMessage: (to, chatType, file, imageEl) => {
+	sendImgMessage: (to, chatType, file, imageEl, isChatThread=false) => {
 		return (dispatch, getState) => {
-			if (file.data.size > 1024 * 1024 * 10) {
-				message.error(i18next.t("The file exceeds the upper limit"));
-				return;
+			if (file.data.size > (1024 * 1024 * 10)) {
+				message.error(i18next.t('The file exceeds the upper limit'))
+				return
 			}
-			const formatMsg = formatLocalMessage(to, chatType, file, "img");
-			const { id } = formatMsg;
-			const msgObj = new WebIM.message("img", id);
-			msgObj.set({
-				ext: {
-					file_length: file.data.size,
-					file_type: file.data.type,
-				},
-				file: file,
-				to,
+			const formatMsg = formatLocalMessage(to, chatType, file, 'img', isChatThread)
+			let option = {
 				chatType,
-				onFileUploadError: function (error) {
+				type: "img",
+				to,
+				file: file,
+				isChatThread,
+				onFileUploadError: function () {
+					console.log("onFileUploadError");
 					formatMsg.status = "fail";
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", msg.id));
 					imageEl.current.value = "";
+				},
+				onFileUploadProgress: function (progress) {
+					console.log(progress);
 				},
 				onFileUploadComplete: function (data) {
+					console.log("onFileUploadComplete", data);
 					let url = data.uri + "/" + data.entities[0].uuid;
-					formatMsg.url = formatMsg.body.url = url;
-					formatMsg.status = "sent";
-					dispatch(Creators.updateMessages(chatType, to, formatMsg));
-					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
+					formatMsg.url = url;
+					formatMsg.body.url = url;
+					const type = isChatThread? 'threadMessage' : chatType;
+					dispatch(Creators.updateMessages(type, to, formatMsg ));
 					imageEl.current.value = "";
 				},
-				success: (localId, serverId) => {
-					formatMsg.id = serverId
-					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
-				},
-				fail: function () {
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
-					imageEl.current.value = "";
-				},
+			};
+			let msg = WebIM.message.create(option);
+			formatMsg.id = msg.id;
+			WebIM.conn.send(msg).then((res) => {
+				console.log("Success");
+				let { localMsgId, serverMsgId } = res;
+				formatMsg.status = "sent";
+				dispatch(Creators.updateMessageStatus(formatMsg, "sent", localMsgId, serverMsgId));
+			}).catch((e) => {
+				console.log("Fail");
+				dispatch(Creators.updateMessageStatus(formatMsg, "fail",  msg.id));
+				imageEl.current.value = "";
 			});
-			WebIM.conn.send(msgObj.body);
-			dispatch(Creators.addMessage(formatMsg, "img"));
-		};
+			dispatch(Creators.addMessage(formatMsg, 'img'))
+		}
 	},
-	sendVideoMessage: (to, chatType, file, videoEl) => {
+
+	sendVideoMessage: (to, chatType, file, videoEl, isChatThread=false) => {
 		return (dispatch, getState) => {
 			if (file.data.size > (1024 * 1024 * 10)) {
 				message.error(i18next.t('The video exceeds the upper limit'))
@@ -182,141 +201,181 @@ const { Types, Creators } = createActions({
 				'mkv': true
 			};
 			if (file.filetype.toLowerCase() in allowType) {
-				const formatMsg = formatLocalMessage(to, chatType, file, 'video')
-				const { id } = formatMsg
-				const msgObj = new WebIM.message('video', id)
-				msgObj.set({
+				const formatMsg = formatLocalMessage(to, chatType, file, "video", isChatThread);
+				let option = {
+					chatType,
+					type: "video",
+					to,
+					file: file,
+					filename: file.filename,
+					isChatThread,
 					ext: {
 						file_length: file.data.size,
 						file_type: file.data.type,
 					},
-					file: file,
-					length: file.length,
-					file_length: file.data.size,
-					to,
-					chatType,
-					onFileUploadError: function (error) {
-						formatMsg.status = 'fail'
-						dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
-						videoEl.current.value = ''
+					onFileUploadError: function () {
+						console.log("onFileUploadError");
+						formatMsg.status = "fail";
+						dispatch(Creators.updateMessageStatus(formatMsg, "fail", msg.id));
+						videoEl.current.value = "";
+					},
+					onFileUploadProgress: function (e) {
+						console.log(e);
 					},
 					onFileUploadComplete: function (data) {
-						let url = data.uri + '/' + data.entities[0].uuid
-						formatMsg.url = url
-						formatMsg.body.url = url
-						formatMsg.status = 'sent'
-						dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
-						dispatch(Creators.updateMessages(chatType, to, formatMsg))
-						videoEl.current.value = ''
+						console.log("onFileUploadComplete");
+						let url = data.uri + "/" + data.entities[0].uuid;
+						formatMsg.url = url;
+						formatMsg.body.url = url;
+						const type = isChatThread? 'threadMessage' : chatType;
+						dispatch(Creators.updateMessages(type, to, formatMsg ));
+						videoEl.current.value = "";
 					},
-					success: (localId, serverId) => {
-						formatMsg.id = serverId
-						dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
-					},
-					fail: function () {
-						dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
-						videoEl.current.value = ''
-					},
-				})
-				WebIM.conn.send(msgObj.body)
-				dispatch(Creators.addMessage(formatMsg, 'video'))
+				};
+				let msg = WebIM.message.create(option);
+				formatMsg.id = msg.id;
+				WebIM.conn.send(msg).then((res) => {
+					console.log("Success");
+					let { localMsgId, serverMsgId } = res;
+					formatMsg.status = "sent";
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localMsgId, serverMsgId));
+				}).catch((e) => {
+					console.log("Fail");
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", msg.id));
+					videoEl.current.value = "";
+				});
+				dispatch(Creators.addMessage(formatMsg, "video"));
 			}
 		}
 	},
-
-	sendRecorder: (to, chatType, file) => {
+    sendRecorder: (to, chatType, file, isChatThread = false ) => {
 		return (dispatch, getState) => {
 			if (file.data.size > 1024 * 1024 * 10) {
 				message.error(i18next.t("The file exceeds the upper limit"));
 				return;
 			}
-			const formatMsg = formatLocalMessage(to, chatType, file, "audio");
-			const { id } = formatMsg;
-			const msgObj = new WebIM.message("audio", id);
-			msgObj.set({
+			const formatMsg = formatLocalMessage(to, chatType, file, "audio", isChatThread);
+			let option = {
+				chatType,
+				type: "audio",
+				to,
+				file: file,
+				filename: file.filename,
+				length: file.length,
+				isChatThread,
 				ext: {
 					file_length: file.data.size,
 					file_type: file.data.type,
 					length: file.length,
 					duration: file.duration,
 				},
-				file: file,
-				length: file.length,
-				file_length: file.data.size,
-				to,
-				chatType,
 				onFileUploadError: function (error) {
-					console.log(error);
-					// dispatch(Creators.updateMessageStatus(pMessage, "fail"))
+					console.log("onFileUploadError",error);
 					formatMsg.status = "fail";
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", msg.id));
+				},
+				onFileUploadProgress: function (e) {
+					console.log(e);
 				},
 				onFileUploadComplete: function (data) {
+					console.log("onFileUploadComplete");
 					let url = data.uri + "/" + data.entities[0].uuid;
 					formatMsg.url = url;
-					formatMsg.status = "sent";
-					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
-					dispatch(Creators.updateMessages(chatType, to, formatMsg));
+					formatMsg.body.url = url;
+                    const type = isChatThread? 'threadMessage' : chatType;
+					dispatch(Creators.updateMessages(type, to, formatMsg ));
 				},
-				success: (localId, serverId) => {
-					formatMsg.id = serverId
-					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
-				},
-				fail: function () {
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
-				},
+			};
+			let msg = WebIM.message.create(option);
+			formatMsg.id = msg.id;
+			WebIM.conn.send(msg).then((res) => {
+				console.log("success");
+				let { localMsgId, serverMsgId } = res;
+				formatMsg.status = "sent";
+				dispatch(Creators.updateMessageStatus(formatMsg, "sent", localMsgId, serverMsgId));
+			}).catch((e) => {
+				console.log("fail");
+				dispatch(Creators.updateMessageStatus(formatMsg, "fail", msg.id));
 			});
-
-			WebIM.conn.send(msgObj.body);
 			dispatch(Creators.addMessage(formatMsg, "audio"));
 		};
 	},
+    recallMessage: (to, chatType, msg, isChatThread = false) => {
+        return (dispatch, getState) => {
+            const { id, toJid, mid } = msg
+            WebIM.conn.recallMessage({
+                to: to,
+                mid: toJid || mid || id, // message id
+                type: chatType,
+                isChatThread,
+                success: () => {
+                    dispatch(Creators.deleteMessage(id, to, chatType))
+                },
+                fail: (err) => {
+                    console.log(err)
+                }
+            })
+        }
+    },
 
-	recallMessage: (to, chatType, msg) => {
-		return (dispatch, getState) => {
-			const { id, toJid, mid } = msg;
-			WebIM.conn.recallMessage({
-				to: to,
-				mid: toJid || mid, // message id
-				type: chatType,
-				success: () => {
-					dispatch(Creators.deleteMessage(id, to, chatType));
-				},
-				fail: (err) => {
-					console.log(err);
-				},
-			});
-		};
-	},
-
-	clearUnreadAsync: (chatType, sessionId) => {
-		return (dispatch) => {
-			dispatch({ type: "CLEAR_UNREAD", chatType, sessionId });
-			AppDB.readMessage(chatType, sessionId);
-		};
-	},
-	fetchMessage: (to, chatType, offset, cb) => {
-		return (dispatch) => {
-			AppDB.fetchMessage(to, chatType, offset).then((res) => {
-				if (res.length) {
-					dispatch({
-						type: "FETCH_MESSAGE",
-						chatType: chatType,
-						to: to,
-						messages: res,
-					});
-				}
-				cb && cb(res.length);
-			});
-		};
-	},
-
-	clearMessage: (chatType, id) => {
-		return (dispatch) => {
-			dispatch({ type: "CLEAR_MESSAGE", chatType: chatType, id: id });
-			AppDB.clearMessage(chatType, id).then((res) => {});
-		};
-	},
+    clearUnreadAsync: (chatType, sessionId) => {
+        return (dispatch) => {
+            dispatch({ 'type': 'CLEAR_UNREAD', chatType, sessionId })
+            AppDB.readMessage(chatType, sessionId)
+        }
+    },
+    fetchMessage: (to, chatType, offset, cb) => {
+        return (dispatch) => {
+            AppDB.fetchMessage(to, chatType, offset).then(res => {
+                if (res.length) {
+                    dispatch({
+                        'type': 'FETCH_MESSAGE',
+                        'chatType': chatType,
+                        'to': to,
+                        'messages': res
+                    })
+                }
+                cb && cb(res.length)
+            })
+        }
+    },
+    fetchThreadMessage: (to, cb, isScroll) => {
+        const rootState = uikit_store.getState();
+        const username = WebIM.conn.context.userId;
+        if(!rootState.message.threadHasHistory && isScroll) return
+        return (dispatch) => {
+            let options = {
+                targetId: to,
+                cursor: isScroll ? rootState.message.threadHistoryStart : -1,
+                pageSize: 20,
+                chatType: 'groupChat',
+                searchDirection: 'down',
+            }
+            WebIM.conn.getHistoryMessages(options).then((res)=>{
+                let msgList = res.messages;
+                if(msgList.length < options.pageSize || msgList.length === 0){
+                    dispatch(Creators.setThreadHasHistory(false));
+                }
+                const newMsgList  = [];
+                if(msgList.length>0) {
+                    msgList.forEach((item)=>{
+                        let msg = formatServerMessage(item, item.type);
+                        msg.bySelf = msg.from === username;
+                        newMsgList.push(msg)
+                    })
+                    dispatch(Creators.setThreadHistoryStart(res.cursor));
+                    dispatch(Creators.updateThreadMessage(to,newMsgList,isScroll));
+                }
+                cb && cb(newMsgList.length);
+            })
+        }
+    },
+    clearMessage: (chatType, id) => {
+        return (dispatch) => {
+            dispatch({ 'type': 'CLEAR_MESSAGE', 'chatType': chatType, 'id': id })
+            AppDB.clearMessage(chatType, id).then(res => { })
+        }
+    },
 
 	addAudioMessage: (message, bodyType) => {
 		return (dispatch, getState) => {
@@ -402,11 +461,36 @@ export const addMessage = (state, { message, messageType = "txt" }) => {
 	const rootState = uikit_store.getState();
 	!message.status && (message = formatServerMessage(message, messageType));
 	const username = WebIM.conn.context.userId;
-	const { id, to, status } = message;
+	const { id, to, status, isChatThread, chatThread } = message;
 	let { chatType } = message;
 	const from = message.from || username;
 	const bySelf = from === username;
 	let chatId = bySelf || chatType !== "singleChat" ? to : from;
+	if(isChatThread || (chatThread && JSON.stringify(chatThread)!=='{}')){
+        if(state.threadHasHistory) return state
+        //The message is sent byself when isChatThread is true or the chatThread is not null when receiving a thread message
+        //save the thread message  indexDB & threadMessageList
+        const chatData = state.getIn(['threadMessage', chatId], Immutable([])).asMutable()
+        const _message = {
+            ...message,
+            bySelf,
+            isChatThread:true,//is thread message
+            time: +new Date(),
+            status: status
+        }
+        let isPushed = false
+        chatData.forEach(m => {
+            if (m.id === _message.id) {
+                isPushed = true
+            }
+        })
+
+        !isPushed && chatData.push(_message)
+        state = state.setIn(['threadMessage', chatId], chatData)
+        !isPushed && AppDB.addMessage(_message, !bySelf ? 1 : 0, isChatThread)
+		state = state.setIn(["byId", id], { chatType, chatId });
+        return state
+    }
 	const chatData = state.getIn([chatType, chatId], Immutable([])).asMutable();
 	const _message = {
 		...message,
@@ -426,7 +510,7 @@ export const addMessage = (state, { message, messageType = "txt" }) => {
 			isPushed = true;
 		}
 	});
-
+console.log(_message, '_message')
 	!isPushed && chatData.push(_message);
 	// add a message to db, if by myselt, isUnread equals 0
 	!isPushed && AppDB.addMessage(_message, !bySelf ? 1 : 0);
@@ -443,7 +527,6 @@ export const addMessage = (state, { message, messageType = "txt" }) => {
 		byId = _.omit(byId, _.map(deletedChats, "id"));
 		state = state.setIn(["byId"], byId);
 	}
-
 	state = state.setIn([chatType, chatId], chatData);
 
 	// unread
@@ -468,40 +551,75 @@ export const addMessage = (state, { message, messageType = "txt" }) => {
 	return state;
 };
 
-export const updateMessageStatus = (state, { message, status = "", localId }) => {
+export const updateThreadMessage = (state,{to,messageList,isScroll}) =>{
+    let data = state['threadMessage'][to] ? state['threadMessage'][to].asMutable() : []
+    data = data.concat(messageList)
+    if(isScroll === "scroll"){
+        state = state.setIn(['threadMessage', to], data)
+    }else{
+        state = state.setIn(['threadMessage'], {})
+        state = state.setIn(['threadMessage', to], messageList)
+    }
+    return state
+}
+
+export const updateMessageStatus = (state, { message, status = "", localId, serverMsgId }) => {
+	console.log(message, status, localId, serverMsgId, 'messages', state)
 	let id = localId;
-	if (!id) id = state.getIn(["byMid", message.mid, "id"]);
-	let mids = state.getIn(["byMid"]) || {};
-	let mid;
-	for (var i in mids) {
-		if (mids[i].id === id) {
-			mid = i;
-		}
-	}
 	const byId = state.getIn(["byId", id]);
 	if (!_.isEmpty(byId)) {
 		const { chatType, chatId } = byId;
-		let messages = state.getIn([chatType, chatId]).asMutable();
-		let found = _.find(messages, { id: id });
+		let messages = []
+		if(message.isChatThread){
+			messages = state.getIn(['threadMessage', chatId]).asMutable();
+		}else{
+			messages = state.getIn([chatType, chatId]).asMutable();
+		}
+		let found = _.find(messages, { id: id }) || _.find(messages, { id: serverMsgId });
+		console.log(found, 'found')
 		found.setIn(["status"], status);
-		found.setIn(["toJid"], mid);
 		let msg = {
 			...found,
 			status: status,
-			toJid: mid,
 		};
 		messages.splice(messages.indexOf(found), 1, msg);
-		AppDB.updateMessageStatus(id, status).then((res) => { });
-
-		return state.setIn([chatType, chatId], messages);
+		AppDB.updateMessageStatus(id, serverMsgId, status)
+		
+		if(message.isChatThread){
+			state = state.setIn(['threadMessage', chatId], messages)
+		}else{
+			state = state.setIn([chatType, chatId], messages)
+		}
+		return state
 	}
 	return state;
-};
+}
 
 export const deleteMessage = (state, { msgId, to, chatType }) => {
 	msgId = msgId.mid || msgId;
 	let byId = state.getIn(["byId", msgId]);
 	let sessionType, chatId;
+    //update the mid of  thread message 
+    const rootState = uikit_store.getState()
+    if(state.threadMessage[to]){
+        let threadMsg = {}
+        const threadMsgList = state.getIn(['threadMessage', to]).asMutable({ deep: true })
+        threadMsg = _.find(threadMsgList, { id: msgId })
+        const index = threadMsgList.indexOf(threadMsg);
+        //update threadMessageList and indexDB
+        if(threadMsg && threadMsg.id){
+            threadMsgList.splice(index, 1, {
+                ...threadMsg,
+                body: {
+                    ...threadMsg.body,
+                    type: "recall",
+                },
+            });
+            state = state.setIn(['threadMessage',to],threadMsgList);
+            AppDB.deleteMessage(msgId);
+            return state
+        }
+    }
 	if (!byId) {
 		return state;
 	} else {
@@ -556,20 +674,33 @@ export const updateMessages = (state, { chatType, sessionId, messages }) => {
 	let messagesArr = state
 		.getIn([chatType, sessionId])
 		.asMutable({ deep: true });
-	messagesArr.forEach((msg) => {
+	messagesArr.forEach((msg,index) => {
 		if (msg.id === messages.id) {
-			msg = messages;
+			messages.bySelf = true;
+			messagesArr.splice(index, 1, messages);
 			AppDB.updateMessageUrl(msg.id, messages.url);
 		}
 	});
 	return state.setIn([chatType, sessionId], messagesArr);
 };
 
-export const updateMessageMid = (state, { id, mid }) => {
+export const updateMessageMid = (state, { id, mid,to }) => {
+	if(state.threadMessage[to]){
+        let threadMsg = {}
+        const threadMsgList = state.getIn(['threadMessage', to]).asMutable({ deep: true })
+        threadMsg = _.find(threadMsgList, { id: id })
+        if(threadMsg && threadMsg.id){
+            threadMsg.toJid = mid;
+            threadMsg.id = mid;
+            state = state.setIn(['threadMessage',to],threadMsgList)
+        }
+		AppDB.updateMessageMid(mid, id);
+		return state
+    }
 	const byId = state.getIn(["byId", id]);
-	if(!byId) return state // callkit 发的消息 uikit拿不到 id
-	const { chatType, chatId } = byId;
+    if(!byId) return state // callkit 发的消息 uikit拿不到 id
 	if (!_.isEmpty(byId)) {
+		const { chatType, chatId } = byId;
 		let messages = state
 			.getIn([chatType, chatId])
 			.asMutable({ deep: true });
@@ -580,15 +711,15 @@ export const updateMessageMid = (state, { id, mid }) => {
 		// let msg = found.setIn(['toJid'], mid)
 		messages.splice(messages.indexOf(found), 1, found);
 		state = state.setIn([chatType, chatId], messages);
+		state = state.setIn(["byMid", mid], { id });
+		state = state.setIn(["byId", mid], { chatType, chatId })
 	}
-
 	AppDB.updateMessageMid(mid, id);
-	state = state.setIn(["byMid", mid], { id });
-	state = state.setIn(["byId", mid], { chatType, chatId })
 	return state;
-};
+}
 
 export const updateReactionData = (state, { message, reaction }) => {
+	console.log('updateReactionData>>>', message, reaction);
 	let { messageId, from, to, reactions, chatType } = message;
 	let newReactionsData = reactions
 
@@ -629,24 +760,24 @@ export const updateReactionData = (state, { message, reaction }) => {
 	}
 
 	function mergeArray (arr1, arr2){
-      var _arr = new Array()
-      for (var i = 0; i < arr1.length; i++) {
-        _arr.push(arr1[i])
-      }
-      for (var i = 0; i < arr2.length; i++) {
-        var flag = true
-        for (var j = 0; j < arr1.length; j++) {
-          if (arr2[i] === arr1[j]) {
-            flag = false
-            break
-          }
-        }
-        if (flag) {
-          _arr.push(arr2[i])
-        }
-      }
-      return _arr
-    }
+      var _arr = new Array()
+      for (var i = 0; i < arr1.length; i++) {
+        _arr.push(arr1[i])
+      }
+      for (var i = 0; i < arr2.length; i++) {
+        var flag = true
+        for (var j = 0; j < arr1.length; j++) {
+          if (arr2[i] === arr1[j]) {
+            flag = false
+            break
+          }
+        }
+        if (flag) {
+          _arr.push(arr2[i])
+        }
+      }
+      return _arr
+    }
 
 	if (byId) {
 		const { chatType } = byId;
@@ -694,20 +825,47 @@ export const updateReactionData = (state, { message, reaction }) => {
 	}
 	return state;
 };
+export const updateThreadDetails = (state, {chatType,options,messageList}) => {
+    const {operation,parentId} = options;
+    if(operation === 'create'){
+        const formatMsg = formatLocalMessage(parentId, chatType,{}, 'threadNotify');
+        const message = {
+            ...formatMsg,
+            from:options.operator,
+            name:options.name,
+            time:options.createTimestamp,
+            threadId:options.id
+        }
+        messageList.push(message);
+        AppDB.addMessage(message)
+    }
+    return state.setIn([chatType, parentId], messageList)
+}
 
+export const setThreadHistoryStart = (state, {start}) => {
+    return state.setIn(['threadHistoryStart'], start);
+}
+export const setThreadHasHistory = (state, {status}) => {
+    return state.setIn(['threadHasHistory'], status)
+}
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const messageReducer = createReducer(INITIAL_STATE, {
-	[Types.ADD_MESSAGE]: addMessage,
-	[Types.DELETE_MESSAGE]: deleteMessage,
-	[Types.CLEAR_UNREAD]: clearUnread,
-	[Types.FETCH_MESSAGE]: fetchMessage,
-	[Types.CLEAR_MESSAGE]: clearMessage,
-	[Types.UPDATE_MESSAGES]: updateMessages,
-	[Types.UPDATE_MESSAGE_MID]: updateMessageMid,
-	[Types.UPDATE_MESSAGE_STATUS]: updateMessageStatus,
+    [Types.ADD_MESSAGE]: addMessage,
+    [Types.DELETE_MESSAGE]: deleteMessage,
+    [Types.CLEAR_UNREAD]: clearUnread,
+    [Types.FETCH_MESSAGE]: fetchMessage,
+    [Types.CLEAR_MESSAGE]: clearMessage,
+    [Types.UPDATE_MESSAGES]: updateMessages,
+    [Types.UPDATE_MESSAGE_MID]: updateMessageMid,
+    [Types.UPDATE_MESSAGE_STATUS]: updateMessageStatus,
+    [Types.UPDATE_THREAD_DETAILS]: updateThreadDetails,
+    [Types.UPDATE_THREAD_MESSAGE]: updateThreadMessage,
+    [Types.SET_THREAD_HISTORY_START]: setThreadHistoryStart,
+    [Types.SET_THREAD_HAS_HISTORY]: setThreadHasHistory,
 	[Types.UPDATE_REACTION_DATA]: updateReactionData,
-});
+
+})
 
 export default Creators;
 

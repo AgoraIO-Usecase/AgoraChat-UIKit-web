@@ -40,13 +40,30 @@ export const updateGlobalProps = (state, { options }) => {
   state = state.setIn(["globalProps", "to"], options.to);
   state = state.setIn(["globalProps", "chatType"], options.chatType);
   state = state.setIn(["globalProps", "name"], options.name);
-  state = state.setIn(["globalProps", "presenceExt"], {...presenceObj, ...options.presenceExt});
+  if (Object.keys(presenceObj).length) {
+    for (let item in presenceObj) {
+      for (let val in options.presenceExt) {
+        if (item === val) {
+          presenceObj[item] = {
+            ...presenceObj[item],
+            ...options.presenceExt[val]
+          }
+        }
+        if (!presenceObj[val]) {
+          presenceObj[val] = options.presenceExt[val]
+        }
+      }
+    }
+  } else {
+    presenceObj = options.presenceExt
+  }
+  state = state.setIn(["globalProps", "presenceExt"], presenceObj);
   return state;
 };
 
 /* ------------- Hookup Reducers To Types ------------- */
 export const globalPropsReducer = createReducer(INITIAL_STATE, {
-  [Types.UPDATE_GLOBAL_PROPS]: addGlobalProps,
+  [Types.ADD_GLOBAL_PROPS]: addGlobalProps,
   [Types.UPDATE_GLOBAL_PROPS]: updateGlobalProps,
   [Types.LOGOUT]: logout,
 });

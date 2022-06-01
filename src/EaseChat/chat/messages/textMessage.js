@@ -7,11 +7,14 @@ import { emoji } from "../../../common/emoji";
 import { renderTime } from "../../../utils";
 
 import MessageStatus from "./messageStatus";
+import MsgThreadInfo from "./msgThreadInfo"
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
 import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
 import { EaseChatContext } from "../index";
+import threadIcon from "../../../common/images/thread.png"
+
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
 		display: "flex",
@@ -35,45 +38,9 @@ const useStyles = makeStyles((theme) => ({
 	textBodyBox: {
 		display: "flex",
 		flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
-		maxWidth: "65%",
+		minWidth: "40%",
+		maxWidth: "75%",
 		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
-	},
-	textBody: {
-		// display: "flex",
-		margin: (props) => (props.bySelf ? "0 10px 10px 0" : "0 0 10px 10px"),
-		lineHeight: "20px",
-		fontSize: "14px",
-		background: (props) =>
-			props.bySelf
-				? "linear-gradient(124deg, #c913df 20%,#154DFE 90%)"
-				: "#F2F2F2",
-		color: (props) => (props.bySelf ? "#fff" : "#000"),
-		border: "1px solid #fff",
-		borderRadius: (props) =>
-			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-		padding: "15px",
-		maxWidth: "65%",
-		wordBreak: "break-all",
-		textAlign: "initial",
-		position: "relative",
-	},
-	textReaction: {
-		position: "absolute",
-		right: (props) => (props.bySelf ? "" : "-30px"),
-		bottom: "-10px",
-		left: (props) => (props.bySelf ? "-25px" : ""),
-		marginRight: "5px",
-	},
-	reactionBox: {
-		position: "absolute",
-		top: (props) => (props.bySelf ? "-15px" : "-10px"),
-		right: (props) => (props.bySelf ? "0px" : ""),
-		left: (props) => (props.bySelf ? "" : "0px"),
-		background: "#F2F2F2",
-		borderRadius: "17.5px",
-		padding: (props) => (props.rnReactions ? "4px 8px" : "4px"),
-		border: "solid 2px #FFFFFF",
-		boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
 	},
 	time: {
 		position: "absolute",
@@ -95,28 +62,94 @@ const useStyles = makeStyles((theme) => ({
 		width: "40px",
 		borderRadius: "50%",
 	},
-}));
+	textBody: {
+		margin: (props) => (props.bySelf ? "0 10px 10px 0" : props.rnReactions? "15px 0 10px 10px": "0 0 10px 10px"),
+		lineHeight: "22px",
+		fontSize: "14px",
+		background: (props) =>
+			props.bySelf
+				? "linear-gradient(124deg, #c913df 20%,#154DFE 90%)"
+				: "#F2F2F2",
+		color: (props) => (props.bySelf ? "#fff" : "#000"),
+		border: "1px solid #fff",
+		borderRadius: (props) =>
+			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+		padding: "12px",
+		width: "100%",
+		maxWidth: "100%",
+		// maxWidth: "80%",
+		// minWidth: "40%",
+		wordBreak: "break-all",
+		textAlign: "initial",
+		position: "relative",
+		boxSizing: "border-box",
+	},
+	textReaction: {
+		position: "absolute",
+		right: (props) => (props.bySelf ? "" : "0"),
+		bottom: "-10px",
+		transform: (props) => (props.bySelf ? "translateX(-100%)" : "translateX(100%)"),
+		marginLeft: (props) => (props.bySelf ? "-15px" : ""),
+		height: '24px',
+	},
+	textReactionCon: {
+		width: '100%',
+		height: '100%',
+		float: (props) => (props.bySelf ? 'right' : 'left'),
+	},
+	reactionBox: {
+		position: "absolute",
+		top: (props) => (props.bySelf ? "-15px" : "-18px"),
+		right: (props) => (props.bySelf ? "0px" : ""),
+		left: (props) => (props.bySelf ? "" : "0px"),
+		background: "#F2F2F2",
+		borderRadius: "17.5px",
+		padding: (props) => (props.rnReactions ? "4px 8px" : "4px"),
+		border: "solid 2px #FFFFFF",
+		boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
+	},
+	threadCon: {
+		float: (props) => (props.bySelf ? 'left' : 'right'),
+		height: '24px',
+		width: '24px',
+		borderRadius: '50%',
+		'&:hover': {
+			background: '#E6E6E6',
+		}
+	},
+	thread: {
+		marginTop: '5px',
+		marginLeft: '4px',
+		width: '16px',
+		height: '15px',
+		background: `url(${threadIcon}) center center no-repeat`,
+		backgroundSize: 'contain',
+		cursor: 'pointer',
+	}
+}))
 const initialState = {
 	mouseX: null,
 	mouseY: null,
 };
 
-function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
+function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread, isThreadPanel, showThread }) {
 	let easeChatProps = useContext(EaseChatContext);
 	const { onAvatarChange, isShowReaction, customMessageClick, customMessageList } = easeChatProps;
 	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
 	const reactionMsg = message?.reactions || [];
+	const showThreadEntry = showThread && !message.chatThreadOverview && !isThreadPanel && message.chatType === 'groupChat';
+	const showThreaddInfo = showThread && (!isThreadPanel) && message.chatType === "groupChat" && message.chatThreadOverview && (JSON.stringify(message.chatThreadOverview) !== '{}')
 	const classes = useStyles({
 		bySelf: message.bySelf,
 		chatType: message.chatType,
-		rnReactions: reactionMsg.length > 1,
+		rnReactions: reactionMsg.length > 0,
 	});
 	const [menuState, setMenuState] = useState(initialState);
-  	const [copyMsgVal,setCopyMsgVal] = useState('')
-	
-	  useEffect(() => {
-    	setCopyMsgVal(message.msg);
-  	}, [copyMsgVal]);
+	const [copyMsgVal, setCopyMsgVal] = useState('')
+
+	useEffect(() => {
+		setCopyMsgVal(message.msg);
+	}, [copyMsgVal]);
 
 	const handleClick = (event) => {
 		event.preventDefault();
@@ -150,11 +183,12 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 				const v = emoji.map[match[1]];
 				rnTxt.push(
 					<img
-						key={v}
+						key={v + Math.floor(Math.random() * 99 + 1)}
 						alt={v}
 						src={require(`../../../common/faces/${v}`).default}
 						width={20}
 						height={20}
+						style={{verticalAlign:'middle'}}
 					/>
 				);
 			} else {
@@ -170,10 +204,11 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 	const sentStatus = () => {
 		return (
 			<div>
-				{message.bySelf && (
+				{message.bySelf && !isThreadPanel && (
 					<MessageStatus
 						status={message.status}
 						style={{
+							marginRight: '-30px',
 							marginTop:
 								message.chatType === "singleChat"
 									? "0"
@@ -185,115 +220,120 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar }) {
 		);
 	};
 
+	const createThread = () => {
+		onCreateThread(message)
+	}
 	const changeCopyVal = () => {
-    	setCopyMsgVal(message.msg);
-    	handleClose();
-  	};
+		setCopyMsgVal(message.msg);
+		handleClose();
+	};
 	const _customMessageClick = (val, option) => (e) => {
-    	customMessageClick && customMessageClick(e, val, option);
-    	handleClose();
-  	};
-
+		customMessageClick && customMessageClick(e, val, option);
+		handleClose();
+	};
 	return (
-    <li
-      className={classes.pulldownListItem}
-      onMouseOver={() => setHoverDeviceModule(true)}
-      onMouseLeave={() => setHoverDeviceModule(false)}
-    >
-      <div>
-        {!message.bySelf && (
-          <img
-            className={classes.avatarStyle}
-            src={avatar}
-            onClick={(e) => onAvatarChange && onAvatarChange(e,message)}
-          ></img>
-        )}
-        {showByselfAvatar && message.bySelf && (
-          <img className={classes.avatarStyle} src={avatar}></img>
-        )}
-      </div>
-      <div className={classes.textBodyBox}>
-        <span className={classes.userName}>{message.from}</span>
-        <div
-          className={classes.textBody}
-          onContextMenu={handleClick}
-          id={message.id}
-        >
-          {renderTxt(message.body.msg)}
+		<li
+			className={classes.pulldownListItem}
+			onMouseOver={() => setHoverDeviceModule(true)}
+			onMouseLeave={() => setHoverDeviceModule(false)}
+		>
+			<div>
+				{!message.bySelf && (
+					<img
+						className={classes.avatarStyle}
+						src={avatar}
+						onClick={(e) =>
+							onAvatarChange && onAvatarChange(e, message)
+						}
+					></img>
+				)}
+				{showByselfAvatar && message.bySelf && (
+					<img className={classes.avatarStyle} src={avatar}></img>
+				)}
+			</div>
+			<div className={classes.textBodyBox}>
+				<span className={classes.userName}>{message.from}</span>
+				<div
+					className={classes.textBody}
+					onContextMenu={handleClick}
+					id={message.id}
+				>
+					{renderTxt(message.body.msg)}{message.isThread}
+					{showThreaddInfo ? <MsgThreadInfo message={message} /> : null}
 
-          {reactionMsg.length > 0 && (
-            <div className={classes.reactionBox}>
-              <RenderReactions message={message} />
-            </div>
-          )}
-          <div className={classes.textReaction}>
-            {hoverDeviceModule ? (
-              <div>{isShowReaction && <Reaction message={message} />}</div>
-            ) : (
-              sentStatus()
-            )}
-          </div>
-        </div>
-      </div>
-      <div className={classes.time}>{renderTime(message.time)}</div>
-      {message.status === "read" ? (
-        <div className={classes.read}>{i18next.t("Read")}</div>
-      ) : null}
+					{reactionMsg.length > 0 && (
+						<div className={classes.reactionBox} >
+							<RenderReactions message={message} />
+						</div>
+					)}
 
-      <Menu
-        keepMounted
-        open={menuState.mouseY !== null}
-        onClose={handleClose}
-        anchorReference="anchorPosition"
-        anchorPosition={
-          menuState.mouseY !== null && menuState.mouseX !== null
-            ? { top: menuState.mouseY, left: menuState.mouseX }
-            : undefined
-        }
-      >
-        {message.bySelf && (
-          <MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
-        )}
-        {
-          <MenuItem onClick={changeCopyVal}>
-            <CopyToClipboard text={copyMsgVal}>
-              <span>{i18next.t("Copy")}</span>
-            </CopyToClipboard>
-          </MenuItem>
-        }
-        {customMessageList &&
-          customMessageList.map((val, key) => {
-          	const bySelf = message.bySelf;
-          	let show = false
-          	if(val.position === 'others'){}
-          	switch(val.position){
-          		case 'others':
-          			show = bySelf ? false : true
-          			break;
-          		case 'self':
-          			show = bySelf ? true : false
-          			break;
-          		default:
-          			show = true
-          			break;
-          	}
-            return show ? (
-              <MenuItem key={key} onClick={_customMessageClick(val, message)}>
-                {val.name}
-              </MenuItem>
-            ): null;
-          })}
-      </Menu>
+					<div className={classes.textReaction}>
+						{hoverDeviceModule ? (
+							<div className={classes.textReactionCon}>
+								{!isThreadPanel && isShowReaction && (
+									<Reaction message={message} />
+								)}
+								{showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
+									<div className={classes.thread}></div>
+								</div>}
+							</div>
+						) : (
+							sentStatus()
+						)}
+					</div>
+				</div>
+			</div>
+			<div className={classes.time}>{renderTime(message.time)}</div>
+			{message.status === "read" ? (
+				<div className={classes.read}>{i18next.t("Read")}</div>
+			) : null}
 
-      {/* {reactionMsg.length > 0 && (
-        <ReactionInfo
-          anchorEl={reactionInfoVisible}
-          onClose={() => setReactionInfoVisible(null)}
-          message={message}
-        />
-      )} */}
-    </li>
-  );
+			<Menu
+				keepMounted
+				open={menuState.mouseY !== null}
+				onClose={handleClose}
+				anchorReference="anchorPosition"
+				anchorPosition={
+					menuState.mouseY !== null && menuState.mouseX !== null
+						? { top: menuState.mouseY, left: menuState.mouseX }
+						: undefined
+				}
+			>
+				{message.bySelf && (
+					<MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
+				)}
+				{
+					<MenuItem onClick={changeCopyVal}>
+						<CopyToClipboard text={copyMsgVal}>
+							<span>{i18next.t("Copy")}</span>
+						</CopyToClipboard>
+					</MenuItem>
+				}
+				{customMessageList &&
+					customMessageList.map((val, key) => {
+						const bySelf = message.bySelf;
+						let show = false
+						if (val.position === 'others') { }
+						switch (val.position) {
+							case 'others':
+								show = bySelf ? false : true
+								break;
+							case 'self':
+								show = bySelf ? true : false
+								break;
+							default:
+								show = true
+								break;
+						}
+						return show ? (
+							<MenuItem key={key} onClick={_customMessageClick(val, message)}>
+								{val.name}
+							</MenuItem>
+						) : null;
+					})}
+			</Menu>
+		</li >
+	);
 }
 
 export default memo(TextMessage);

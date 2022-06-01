@@ -3,7 +3,8 @@ import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/styles";
 import MessageList from "./messageList";
 import MessageBar from "./messageBar/index";
-import { Provider, useSelector } from "react-redux";
+import { useSelector } from "../../EaseApp/index";
+import { Provider } from "react-redux";
 import SendBox from "./sendBox";
 import WebIM, { initIMSDK } from "../../utils/WebIM";
 import store from "../../redux/index";
@@ -15,8 +16,12 @@ import noMessage from "../../common/images/nomessage.png";
 import contactAvatar from "../../common/images/avatar1.png";
 import groupAvatar from "../../common/images/groupAvatar.png";
 import i18next from "i18next";
+
 import CallKit from 'zd-callkit'
 import MessageActions from "../../redux/message";
+
+import ThreadPanel from "../thread/threadPanel";
+
 export const EaseChatContext = createContext();
 import { message } from '../common/alert'
 const useStyles = makeStyles((theme) => ({
@@ -89,6 +94,9 @@ const Chat = (props) => {
   const closeInviteModal = () => {
     setShowInvite(false)
   }
+
+  const to = useSelector((state) => state.global.globalProps.to);
+
 
   const handleCallStateChange = async (info) => {
     console.log('info ----', info)
@@ -198,12 +206,28 @@ const Chat = (props) => {
     </div >
   );
 };
-
+const Thread = (props) =>{
+  return (
+    <EaseChatContext.Provider value={props}>
+      <ThreadPanel/>
+    </EaseChatContext.Provider>
+    
+  )
+}
 const EaseChatProvider = (props) => {
+  const threadPanelStates = useSelector((state) => state.thread?.threadPanelStates);
   return (
     <Provider store={store}>
       <React.StrictMode>
-        <Chat {...props} />
+        <div style={{display: 'flex',height: '100%'}}>
+          <div style={{flex: '1 1 auto',height: '100%'}}>
+             <Chat {...props} />
+          </div>
+          <div style={{flex: '0 0 392px',overflow:'hidden',display: threadPanelStates?'flex':'none',height: '100%'}}>
+            <hr style={{width:0,height:'100%',border:'none',borderRight:'8px solid #edeff2'}}/>
+            <Thread {...props}/>
+          </div>
+        </div>
       </React.StrictMode>
     </Provider>
   );
@@ -236,6 +260,7 @@ EaseChatProvider.propTypes = {
   isShowReaction: PropTypes.bool,
   customMessageList: PropTypes.array,
   customMessageClick: PropTypes.func,
+  onOpenThreadPanel:PropTypes.func,
 
   agoraUid: PropTypes.string,
   isShowRTC: PropTypes.bool,
@@ -245,9 +270,10 @@ EaseChatProvider.propTypes = {
 };
 
 EaseChatProvider.defaultProps = {
-  showByselfAvatar: false,
+  showByselfAvatar:false,
+  easeInputMenu:'all',
+  isChatThread: false,
   isShowRTC: true,
-  easeInputMenu: 'all',
   menuList: [
     { name: i18next.t('send-image'), value: "img", key: "1" },
     { name: i18next.t('send-file'), value: "file", key: "2" },

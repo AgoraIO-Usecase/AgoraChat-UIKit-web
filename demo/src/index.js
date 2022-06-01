@@ -1,11 +1,10 @@
-import React, { Component } from "react";
+import React, { Component,useState } from "react";
 import { render } from "react-dom";
 import { EaseChat, EaseApp } from "../../src/index";
 import axios from 'axios'
 // import WebIM from "./WebIM";
 import val from "./comm";
 // import initListen from "./WebIMListen";
-
 export default class Demo extends Component {
   state = {
     token: val,
@@ -53,10 +52,13 @@ export default class Demo extends Component {
   addSessionItem = () => {
     let session = {
       conversationType: "singleChat",
-      conversationId: "test0001",
+      conversationId: "zd132",
     };
     EaseApp.addConversationItem(session);
-    EaseApp.changePresenceStatus({ [session.conversationId]: 'Online' })
+    EaseApp.changePresenceStatus({[session.conversationId] : 'Online'})
+    EaseApp.thread.setShowThread(true)
+    // EaseApp.thread.closeThreadPanel()
+    // EaseApp.thread.setHasThreadEditPanel(true)
   };
   test = (res) =>{
     console.log('test登录成功',res);
@@ -88,6 +90,9 @@ export default class Demo extends Component {
     return member
   }
 
+  test5 = (val1,val2) => {
+    console.log('val',val1,val2)
+  }
   render() {
     console.log("this.state.token>>", this.state.token);
     return (
@@ -96,7 +101,7 @@ export default class Demo extends Component {
         <h3>EaseApp</h3>
         <div>
           <EaseApp
-            customMessageList={ [{name: 'report', value: 'report', position: 'others'}]}
+            // customMessageList={ [{name: 'report', value: 'report', position: 'others'}]}
             isShowReaction
             successLoginCallback={this.test}
             failCallback={this.test2}

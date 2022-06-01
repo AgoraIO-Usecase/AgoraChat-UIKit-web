@@ -5,6 +5,8 @@ import AppDB from "../utils/AppDB";
 import MessageActions from "../redux/message";
 import SessionActions from "../redux/session";
 import GlobalPropsActions from "../redux/globalProps";
+import ThreadActions from "../redux/thread"
+import uikit_store from "../redux/index";
 export default function createlistener(props) {
 	WebIM.conn.addEventHandler("EaseChat", {
 		onConnected: (msg) => {
@@ -19,7 +21,7 @@ export default function createlistener(props) {
 			store.dispatch(SessionActions.getJoinedGroupList());
 			store.dispatch(GlobalPropsActions.saveGlobalProps(options));
 			props.successLoginCallback &&
-				props.successLoginCallback({ isLogin: true });
+			props.successLoginCallback({ isLogin: true });
 		},
 
 		onTextMessage: (message) => {
@@ -77,11 +79,11 @@ export default function createlistener(props) {
 			// When log in, have received the Recall message before get Message from db. so retract after 2 seconds
 			if (!uikit_store.getState().message.byId[message.mid]) {
 				setTimeout(() => {
-					store.dispatch(MessageActions.deleteMessage(message));
+					store.dispatch(MessageActions.deleteMessage(message.mid,message.to,message.chatType));
 				}, 2000);
 				return;
 			}
-			store.dispatch(MessageActions.deleteMessage(message));
+			store.dispatch(MessageActions.deleteMessage(message.mid,message.to,message.chatType));
 		},
 		// The other has read the message
 		onReadMessage: (message) => {
@@ -90,8 +92,9 @@ export default function createlistener(props) {
 		},
 
 		onReceivedMessage: function (message) {
-			const { id, mid } = message;
-			store.dispatch(MessageActions.updateMessageMid(id, mid));
+      		console.log("updateMessageMid",message)
+			const { id, mid, to } = message;
+			store.dispatch(MessageActions.updateMessageMid(id, mid, to));
 		},
 		onDeliveredMessage: function (message) {
 			store.dispatch(
@@ -113,18 +116,25 @@ export default function createlistener(props) {
 			store.dispatch(GlobalPropsActions.logout());
 		},
 		onGroupChange: (event) => {
-			if (event.type === "direct_joined") {
-				store.dispatch(SessionActions.getJoinedGroupList());
-			} else if (event.type === "joinPublicGroupSuccess") {
-				const joinedGroup = store.getState().session.joinedGroups;
-				const result = joinedGroup.find((item) => {
-					item.groupid === event.gid;
-				});
-				if (!result) {
-					store.dispatch(SessionActions.getJoinedGroupList());
-				}
+			console.log("onGroupChange",event);
+			if(event.type === 'direct_joined'){
+			  store.dispatch(SessionActions.getJoinedGroupList())
+			}else if(event.type === 'joinPublicGroupSuccess'){
+			  const joinedGroup = store.getState().session.joinedGroups;
+			  const result = joinedGroup.find((item) => {
+				item.groupid === event.gid
+			  })
+			  if(!result){
+				store.dispatch(SessionActions.getJoinedGroupList())
+			  }
 			}
-		},
+			if(event.type === 'addAdmin' || event.type === 'removeAdmin' || event.type === 'changeOwner'){
+			  const { chatType, to } = uikit_store.getState().global.globalProps;
+			  if( chatType === 'groupChat' && to === event.gid){
+				dispatch(ThreadActions.getCurrentGroupRole({chatType, to}));
+			  }
+			}
+		  },
 		onContactDeleted: (msg) => {
 			store.dispatch(MessageActions.clearMessage("singleChat", msg.from));
 			store.dispatch(SessionActions.deleteSession(msg.from));
@@ -133,6 +143,18 @@ export default function createlistener(props) {
 		onReactionChange: (message) => {
 			console.log("onReactionChange", message);
 			store.dispatch(MessageActions.updateReaction(message));
+		},
+		//thread notify
+		onChatThreadChange:(msg) =>{
+			console.log("====thread change:",msg)
+			store.dispatch(ThreadActions.updateThreadInfo(msg));
+		},
+		onMultiDeviceEvent: (msg) => {
+		console.log("====thread mutiDeviceEvent：",msg)
+		store.dispatch(ThreadActions.updateMultiDeviceEvent(msg));
+		},
+		onReactionMessage: (message) => {
+			console.log("onReactionMessage", message);
 		},
 	});
 }
