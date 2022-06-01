@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useContext,useRef } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useSelector, useDispatch } from "../../../EaseApp/index";
 import { Menu, MenuItem, IconButton, Icon, InputBase, Tooltip } from "@material-ui/core";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -139,11 +139,11 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
     setSessionEl(e.currentTarget);
   };
   const [anchorEl, setAnchorEl] = useState(null);
-  const onClose = ()=>{
+  const onClose = () => {
     setAnchorEl(null);
     dispatch(ThreadActions.setThreadListPanelDisplay(false));
   }
-  const openThreadList = (e)=>{
+  const openThreadList = (e) => {
     setAnchorEl(e.currentTarget)
   }
   const threadListAnchorEl = useRef(null);
@@ -282,29 +282,30 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
     let data = await WebIM.conn.listGroupMembers({ pageNum: 1, pageSize: 500, groupId: gid })
     return data.data
   }
-  
+
   const threadListPanelDisplay = useSelector((state) => state.thread?.threadListPanelDisplay) || false;
-  useEffect(()=>{
-    if(threadListPanelDisplay){
+  useEffect(() => {
+    if (threadListPanelDisplay) {
       setAnchorEl(threadListAnchorEl.current)
-    }else{
+    } else {
       onClose()
     }
-  },[threadListPanelDisplay])
+  }, [threadListPanelDisplay])
 
   return (
-    <div className={classes.root}>
-      <Box position="static" className={classes.leftBar}>
-        <Avatar className={classes.avatar} onClick={(e) => onChatAvatarClick && onChatAvatarClick(e,{chatType, to})} 
-        src={chatType === "singleChat" ? userAvatars[userAvatarIndex] : groupAvatarIcon}
-          style={{ borderRadius: chatType === "singleChat" ? "50%" : 'inherit'}}
-        ></Avatar>
+    <>
+      <div className={classes.root}>
+        <Box position="static" className={classes.leftBar}>
+          <Avatar className={classes.avatar} onClick={(e) => onChatAvatarClick && onChatAvatarClick(e, { chatType, to })}
+            src={chatType === "singleChat" ? userAvatars[userAvatarIndex] : groupAvatarIcon}
+            style={{ borderRadius: chatType === "singleChat" ? "50%" : 'inherit' }}
+          ></Avatar>
           {
             chatType === "singleChat" ?
-            <div className={classes.imgBox}>
-              <img alt="" src={(presenceExt && getUserOnlineStatus[presenceExt[to]?.ext]) ? getUserOnlineStatus[presenceExt[to]?.ext] : customIcon} className={classes.imgStyle} />
-            </div>
-            : null
+              <div className={classes.imgBox}>
+                <img alt="" src={(presenceExt && getUserOnlineStatus[presenceExt[to]?.ext]) ? getUserOnlineStatus[presenceExt[to]?.ext] : customIcon} className={classes.imgStyle} />
+              </div>
+              : null
           }
           {name || to}
         </Box>

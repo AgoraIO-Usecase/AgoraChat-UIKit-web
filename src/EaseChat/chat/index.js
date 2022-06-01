@@ -58,21 +58,21 @@ const Chat = (props) => {
 
   const login = () => {
     const noLogin = WebIM.conn.logOut;
-    if(props.agoraToken){
+    if (props.agoraToken) {
       noLogin &&
-      WebIM.conn.open({
-        user: props.username,
-        agoraToken: props.agoraToken,
-        pwd: props.password,
-        appKey: WebIM.config.appkey,
-      });
-    }else if(props.password){
+        WebIM.conn.open({
+          user: props.username,
+          agoraToken: props.agoraToken,
+          pwd: props.password,
+          appKey: WebIM.config.appkey,
+        });
+    } else if (props.password) {
       noLogin &&
-      WebIM.conn.open({
-        user: props.username,
-        pwd: props.password,
-        appKey: WebIM.config.appkey,
-      });
+        WebIM.conn.open({
+          user: props.username,
+          pwd: props.password,
+          appKey: WebIM.config.appkey,
+        });
     }
   };
   const classes = useStyles();
@@ -95,9 +95,6 @@ const Chat = (props) => {
     setShowInvite(false)
   }
 
-  const to = useSelector((state) => state.global.globalProps.to);
-
-
   const handleCallStateChange = async (info) => {
     console.log('info ----', info)
     switch (info.type) {
@@ -105,14 +102,14 @@ const Chat = (props) => {
       case 'refuse':
         setConfr({})
         let chatType = 'singleChat'
-        let to = ''
+        let targetId = ''
         if (info.callInfo.groupId) {
-          to = info.callInfo.groupId
+          targetId = info.callInfo.groupId
           chatType = 'groupChat';
         } else if (info.callInfo.callerIMName == WebIM.conn.context.userId) {
-          to = info.callInfo.calleeIMName
+          targetId = info.callInfo.calleeIMName
         } else {
-          to = info.callInfo.callerIMName
+          targetId = info.callInfo.callerIMName
         }
         var id = WebIM.conn.getUniqueId();
         let cusMessage = {
@@ -123,7 +120,7 @@ const Chat = (props) => {
             info: info.callInfo
           },
           from: WebIM.conn.context.userId,
-          to: to,
+          to: targetId,
           chatType: chatType
         }
         store.dispatch(MessageActions.addMessage(cusMessage))
@@ -206,12 +203,12 @@ const Chat = (props) => {
     </div >
   );
 };
-const Thread = (props) =>{
+const Thread = (props) => {
   return (
     <EaseChatContext.Provider value={props}>
-      <ThreadPanel/>
+      <ThreadPanel />
     </EaseChatContext.Provider>
-    
+
   )
 }
 const EaseChatProvider = (props) => {
@@ -219,13 +216,13 @@ const EaseChatProvider = (props) => {
   return (
     <Provider store={store}>
       <React.StrictMode>
-        <div style={{display: 'flex',height: '100%'}}>
-          <div style={{flex: '1 1 auto',height: '100%'}}>
-             <Chat {...props} />
+        <div style={{ display: 'flex', height: '100%' }}>
+          <div style={{ flex: '1 1 auto', height: '100%' }}>
+            <Chat {...props} />
           </div>
-          <div style={{flex: '0 0 392px',overflow:'hidden',display: threadPanelStates?'flex':'none',height: '100%'}}>
-            <hr style={{width:0,height:'100%',border:'none',borderRight:'8px solid #edeff2'}}/>
-            <Thread {...props}/>
+          <div style={{ flex: '0 0 392px', overflow: 'hidden', display: threadPanelStates ? 'flex' : 'none', height: '100%' }}>
+            <hr style={{ width: 0, height: '100%', border: 'none', borderRight: '8px solid #edeff2' }} />
+            <Thread {...props} />
           </div>
         </div>
       </React.StrictMode>
@@ -242,25 +239,25 @@ EaseChatProvider.getSdk = (props) => {
 export default EaseChatProvider;
 
 EaseChatProvider.propTypes = {
-	appkey: PropTypes.string,
-	username: PropTypes.string,
-	agoraToken: PropTypes.string,
-  	password: PropTypes.string,
-	chatType: PropTypes.string,
-	to: PropTypes.string,
+  appkey: PropTypes.string,
+  username: PropTypes.string,
+  agoraToken: PropTypes.string,
+  password: PropTypes.string,
+  chatType: PropTypes.string,
+  to: PropTypes.string,
 
-	showByselfAvatar: PropTypes.bool,
-	easeInputMenu: PropTypes.string,
-	menuList: PropTypes.array,
-	handleMenuItem: PropTypes.func,
+  showByselfAvatar: PropTypes.bool,
+  easeInputMenu: PropTypes.string,
+  menuList: PropTypes.array,
+  handleMenuItem: PropTypes.func,
 
-  successLoginCallback:PropTypes.func,
-  failCallback:PropTypes.func,
-  onChatAvatarClick:PropTypes.func,
+  successLoginCallback: PropTypes.func,
+  failCallback: PropTypes.func,
+  onChatAvatarClick: PropTypes.func,
   isShowReaction: PropTypes.bool,
   customMessageList: PropTypes.array,
   customMessageClick: PropTypes.func,
-  onOpenThreadPanel:PropTypes.func,
+  onOpenThreadPanel: PropTypes.func,
 
   agoraUid: PropTypes.string,
   isShowRTC: PropTypes.bool,
@@ -270,13 +267,13 @@ EaseChatProvider.propTypes = {
 };
 
 EaseChatProvider.defaultProps = {
-  showByselfAvatar:false,
-  easeInputMenu:'all',
+  showByselfAvatar: false,
+  easeInputMenu: 'all',
   isChatThread: false,
   isShowRTC: true,
   menuList: [
     { name: i18next.t('send-image'), value: "img", key: "1" },
     { name: i18next.t('send-file'), value: "file", key: "2" },
-    { name: i18next.t('send-video'), value: "video", key: "3"}
+    { name: i18next.t('send-video'), value: "video", key: "3" }
   ],
 };
