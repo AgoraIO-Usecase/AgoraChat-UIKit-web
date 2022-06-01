@@ -54,28 +54,31 @@ const { Types, Creators } = createActions({
 
 	// -async-
 	sendTxtMessage: (to, chatType, message = {}) => {
-		if (!to || !chatType) return
+		if (!to || !chatType) return;
 		return (dispatch, getState) => {
-			const formatMsg = formatLocalMessage(to, chatType, message, 'txt')
-			const { msg } = formatMsg.body;
-			let option = {
-				chatType,
-				type: 'txt',
+			const formatMsg = formatLocalMessage(to, chatType, message, "txt");
+			const { body, id } = formatMsg;
+			const { msg } = body;
+			const msgObj = new WebIM.message("txt", id);
+			msgObj.set({
 				to,
 				msg,
-			};
-			let msgObj = WebIM.message.create(option);
-			WebIM.conn.send(msgObj).then((res) => {
-				console.log("send private text Success",res);
-				let { localMsgId, serverMsgId } = res;
-				formatMsg.id = serverMsgId
-				dispatch(Creators.updateMessageStatus(formatMsg, "sent", localMsgId));
-			}).catch((e) => {
-				console.log("Send private text error", e);
-				dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+				chatType,
+				ext: message.ext,
+				success: (localId, serverId) => {
+					formatMsg.id = serverId
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
+				},
+				fail: (e) => {
+					// console.error("Send private text error", e);
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
+				},
 			});
-			dispatch(Creators.addMessage(formatMsg))
-		}
+			WebIM.conn.send(msgObj.body).catch(() => {
+				console.warn('Send private text error')
+			});
+			dispatch(Creators.addMessage(formatMsg));
+		};
 	},
 
 	sendFileMessage: (to, chatType, file, fileEl) => {
@@ -84,91 +87,86 @@ const { Types, Creators } = createActions({
 				message.error(i18next.t('The file exceeds the upper limit'))
 				return
 			}
-			const formatMsg = formatLocalMessage(to, chatType, file, 'file')
-			let option = {
-				chatType,
-				type: "file",
-				to,
-				file: file,
-				filename: file.filename,
+			const formatMsg = formatLocalMessage(to, chatType, file, "file");
+			const { id } = formatMsg;
+			const msgObj = new WebIM.message("file", id);
+			msgObj.set({
 				ext: {
 					file_length: file.data.size,
 					file_type: file.data.type,
 				},
-				onFileUploadError: function () {
-					console.log("onFileUploadError");
+				file: file,
+				to,
+				chatType,
+				onFileUploadError: function (error) {
 					formatMsg.status = "fail";
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 					fileEl.current.value = "";
 				},
-				onFileUploadProgress: function (progress) {
-					console.log(progress);
+				onFileUploadComplete: function (data) {
+					let url = data.uri + "/" + data.entities[0].uuid;
+					formatMsg.url = formatMsg.body.url = url;
+					formatMsg.status = "sent";
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
+					dispatch(Creators.updateMessages(chatType, to, formatMsg));
+					fileEl.current.value = "";
 				},
-				onFileUploadComplete: function () {
-					console.log("onFileUploadComplete");
+				success: (localId, serverId) => {
+					formatMsg.id = serverId
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
 				},
-			};
-			let msg = WebIM.message.create(option);
-			WebIM.conn.send(msg).then((data) => {
-				console.log("success");
-				let url = data.uri + "/" + data.entities[0].uuid;
-				formatMsg.url = url;
-				formatMsg.body.url = url;
-				formatMsg.status = "sent";
-				dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
-				dispatch(Creators.updateMessages(chatType, to, formatMsg));
-				fileEl.current.value = "";
-			}).catch((e) => {
-				console.log("fail");
-				dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
-				fileEl.current.value = "";
+				fail: function () {
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
+					fileEl.current.value = "";
+				},
 			});
-			dispatch(Creators.addMessage(formatMsg, 'file'))
-		}
+			WebIM.conn.send(msgObj.body);
+			dispatch(Creators.addMessage(formatMsg, "file"));
+		};
 	},
 
 	sendImgMessage: (to, chatType, file, imageEl) => {
 		return (dispatch, getState) => {
-			if (file.data.size > (1024 * 1024 * 10)) {
-				message.error(i18next.t('The file exceeds the upper limit'))
-				return
+			if (file.data.size > 1024 * 1024 * 10) {
+				message.error(i18next.t("The file exceeds the upper limit"));
+				return;
 			}
-			const formatMsg = formatLocalMessage(to, chatType, file, 'img')
-			let option = {
-				chatType,
-				type: "img",
-				to,
+			const formatMsg = formatLocalMessage(to, chatType, file, "img");
+			const { id } = formatMsg;
+			const msgObj = new WebIM.message("img", id);
+			msgObj.set({
+				ext: {
+					file_length: file.data.size,
+					file_type: file.data.type,
+				},
 				file: file,
-				onFileUploadError: function () {
-					console.log("onFileUploadError");
+				to,
+				chatType,
+				onFileUploadError: function (error) {
 					formatMsg.status = "fail";
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 					imageEl.current.value = "";
 				},
-				onFileUploadProgress: function (progress) {
-					console.log(progress);
-				},
 				onFileUploadComplete: function (data) {
-					console.log("onFileUploadComplete", data);
 					let url = data.uri + "/" + data.entities[0].uuid;
-					formatMsg.url = url;
-					formatMsg.body.url = url;
+					formatMsg.url = formatMsg.body.url = url;
 					formatMsg.status = "sent";
 					dispatch(Creators.updateMessages(chatType, to, formatMsg));
 					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
 					imageEl.current.value = "";
 				},
-			};
-			let msg = WebIM.message.create(option);
-			WebIM.conn.send(msg).then(() => {
-				console.log("Success");
-			}).catch((e) => {
-				console.log("Fail");
-				dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
-				imageEl.current.value = "";
+				success: (localId, serverId) => {
+					formatMsg.id = serverId
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
+				},
+				fail: function () {
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
+					imageEl.current.value = "";
+				},
 			});
-			dispatch(Creators.addMessage(formatMsg, 'img'))
-		}
+			WebIM.conn.send(msgObj.body);
+			dispatch(Creators.addMessage(formatMsg, "img"));
+		};
 	},
 	sendVideoMessage: (to, chatType, file, videoEl) => {
 		return (dispatch, getState) => {
@@ -184,46 +182,44 @@ const { Types, Creators } = createActions({
 				'mkv': true
 			};
 			if (file.filetype.toLowerCase() in allowType) {
-				const formatMsg = formatLocalMessage(to, chatType, file, "video");
-				let option = {
-					chatType,
-					type: "video",
-					to,
-					file: file,
-					filename: file.filename,
+				const formatMsg = formatLocalMessage(to, chatType, file, 'video')
+				const { id } = formatMsg
+				const msgObj = new WebIM.message('video', id)
+				msgObj.set({
 					ext: {
 						file_length: file.data.size,
 						file_type: file.data.type,
 					},
-					onFileUploadError: function () {
-						console.log("onFileUploadError");
-						formatMsg.status = "fail";
-						dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
-						videoEl.current.value = "";
-					},
-					onFileUploadProgress: function (e) {
-						console.log(e);
+					file: file,
+					length: file.length,
+					file_length: file.data.size,
+					to,
+					chatType,
+					onFileUploadError: function (error) {
+						formatMsg.status = 'fail'
+						dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
+						videoEl.current.value = ''
 					},
 					onFileUploadComplete: function (data) {
-						console.log("onFileUploadComplete");
-						let url = data.uri + "/" + data.entities[0].uuid;
-						formatMsg.url = url;
-						formatMsg.body.url = url;
-						formatMsg.status = "sent";
-						dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
-						dispatch(Creators.updateMessages(chatType, to, formatMsg));
-						videoEl.current.value = "";
+						let url = data.uri + '/' + data.entities[0].uuid
+						formatMsg.url = url
+						formatMsg.body.url = url
+						formatMsg.status = 'sent'
+						dispatch(Creators.updateMessageStatus(formatMsg, 'sent'))
+						dispatch(Creators.updateMessages(chatType, to, formatMsg))
+						videoEl.current.value = ''
 					},
-				};
-				let msg = WebIM.message.create(option);
-				WebIM.conn.send(msg).then(() => {
-					console.log("Success");
-				}).catch((e) => {
-					console.log("Fail");
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
-					videoEl.current.value = "";
-				});
-				dispatch(Creators.addMessage(formatMsg, "video"));
+					success: (localId, serverId) => {
+						formatMsg.id = serverId
+						dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
+					},
+					fail: function () {
+						dispatch(Creators.updateMessageStatus(formatMsg, 'fail'))
+						videoEl.current.value = ''
+					},
+				})
+				WebIM.conn.send(msgObj.body)
+				dispatch(Creators.addMessage(formatMsg, 'video'))
 			}
 		}
 	},
@@ -235,45 +231,43 @@ const { Types, Creators } = createActions({
 				return;
 			}
 			const formatMsg = formatLocalMessage(to, chatType, file, "audio");
-			let option = {
-				chatType,
-				type: "audio",
-				to,
-				file: file,
-				filename: file.filename,
+			const { id } = formatMsg;
+			const msgObj = new WebIM.message("audio", id);
+			msgObj.set({
 				ext: {
 					file_length: file.data.size,
 					file_type: file.data.type,
 					length: file.length,
 					duration: file.duration,
 				},
-				onFileUploadError: function () {
-					console.log("onFileUploadError");
+				file: file,
+				length: file.length,
+				file_length: file.data.size,
+				to,
+				chatType,
+				onFileUploadError: function (error) {
 					console.log(error);
 					// dispatch(Creators.updateMessageStatus(pMessage, "fail"))
 					formatMsg.status = "fail";
-					dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
-				},
-				onFileUploadProgress: function (e) {
-					console.log(e);
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
 				},
 				onFileUploadComplete: function (data) {
-					console.log("onFileUploadComplete");
 					let url = data.uri + "/" + data.entities[0].uuid;
 					formatMsg.url = url;
-					formatMsg.body.url = url;
 					formatMsg.status = "sent";
 					dispatch(Creators.updateMessageStatus(formatMsg, "sent"));
 					dispatch(Creators.updateMessages(chatType, to, formatMsg));
 				},
-			};
-			let msg = WebIM.message.create(option);
-			WebIM.conn.send(msg).then(() => {
-				console.log("success");
-			}).catch((e) => {
-				console.log("fail");
-				dispatch(Creators.updateMessageStatus(formatMsg, "fail"));
+				success: (localId, serverId) => {
+					formatMsg.id = serverId
+					dispatch(Creators.updateMessageStatus(formatMsg, "sent", localId));
+				},
+				fail: function () {
+					dispatch(Creators.updateMessageStatus(formatMsg, "fail", formatMsg.id));
+				},
 			});
+
+			WebIM.conn.send(msgObj.body);
 			dispatch(Creators.addMessage(formatMsg, "audio"));
 		};
 	},
@@ -405,17 +399,6 @@ const { Types, Creators } = createActions({
 
 /* ------------- Reducers ------------- */
 export const addMessage = (state, { message, messageType = "txt" }) => {
-	// message = {
-	// 	id: '1234556',
-	// 	status: 'sent',
-	// 	body: {
-	// 		msg: 'hello',
-	// 		type: 'notice'
-	// 	},
-	// 	from: 'zd3',
-	// 	to: 'test0001',
-	// 	chatType: 'singleChat'
-	// }
 	const rootState = uikit_store.getState();
 	!message.status && (message = formatServerMessage(message, messageType));
 	const username = WebIM.conn.context.userId;
@@ -431,7 +414,6 @@ export const addMessage = (state, { message, messageType = "txt" }) => {
 		time: +new Date(),
 		status: status,
 	};
-	console.log('_message', _message)
 	if (_message.chatType === "chatRoom" && bySelf) {
 		const oid = state.getIn(["byMid", _message.id, "id"]);
 		if (oid) {
@@ -585,7 +567,7 @@ export const updateMessages = (state, { chatType, sessionId, messages }) => {
 
 export const updateMessageMid = (state, { id, mid }) => {
 	const byId = state.getIn(["byId", id]);
-	if(!byId) return state;
+	if(!byId) return state // callkit 发的消息 uikit拿不到 id
 	const { chatType, chatId } = byId;
 	if (!_.isEmpty(byId)) {
 		let messages = state
@@ -637,7 +619,7 @@ export const updateReactionData = (state, { message, reaction }) => {
 					if(operator.reactionType === 'delete'){
 						item.userList.forEach((user, index) => {
 							if(user === operator.operator){
-								userList.splice(index, 1)
+								item.userList.splice(index, 1)
 							}
 						})
 					}

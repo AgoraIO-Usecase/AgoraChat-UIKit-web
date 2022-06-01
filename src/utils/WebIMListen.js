@@ -22,28 +22,49 @@ export default function createlistener(props) {
 				props.successLoginCallback({ isLogin: true });
 		},
 
-    onTextMessage: (message) => {
-      console.log("onTextMessage", message);
-      const { chatType, from, to} = message;
-      const sessionId = chatType === "singleChat" ? from : to;
-      store.dispatch(MessageActions.addMessage(message, "txt"));
-      store.dispatch(SessionActions.topSession(sessionId, chatType))
-    },
-    onFileMessage: (message) => {
-      console.log("onFileMessage", message);
-      store.dispatch(MessageActions.addMessage(message, "file"));
-    },
-    onVideoMessage: (message) => {
-      console.log("onVideoMessage", message);
-      store.dispatch(MessageActions.addMessage(message, "video"));
-    },
-    onImageMessage: (message) => {
-      console.log("onImageMessage", message);
-      const { chatType, from, to } = message;
-      const sessionId = chatType === "singleChat" ? from : to;
-      store.dispatch(MessageActions.addMessage(message, "img"));
-      store.dispatch(SessionActions.topSession(sessionId, chatType))
-    },
+		onTextMessage: (message) => {
+			console.log("onTextMessage", message);
+			const { chatType, from, to, ext } = message;
+			const sessionId = chatType === "singleChat" ? from : to;
+			if (ext.action === 'invite' && chatType === 'groupChat') {
+				var id = WebIM.conn.getUniqueId();
+				let message = {
+					id: id,
+					status: 'sent',
+					body: {
+						type: 'custom',
+						info: {
+							type: ext.type,
+							action: 'invite',
+							duration: `${new Date().toString().slice(16, 21)} ${new Date().toString().slice(4, 10)}`
+						}
+					},
+					from: from,
+					to: to,
+					chatType: chatType
+				}
+				store.dispatch(MessageActions.addMessage(message))
+			} else {
+				store.dispatch(MessageActions.addMessage(message, "txt"));
+			}
+
+			store.dispatch(SessionActions.topSession(sessionId, chatType))
+		},
+		onFileMessage: (message) => {
+			console.log("onFileMessage", message);
+			store.dispatch(MessageActions.addMessage(message, "file"));
+		},
+		onVideoMessage: (message) => {
+			console.log("onVideoMessage", message);
+			store.dispatch(MessageActions.addMessage(message, "video"));
+		},
+		onImageMessage: (message) => {
+			console.log("onImageMessage", message);
+			const { chatType, from, to } = message;
+			const sessionId = chatType === "singleChat" ? from : to;
+			store.dispatch(MessageActions.addMessage(message, "img"));
+			store.dispatch(SessionActions.topSession(sessionId, chatType))
+		},
 
 		onAudioMessage: (message) => {
 			console.log("onAudioMessage", message);
@@ -78,7 +99,7 @@ export default function createlistener(props) {
 			);
 		},
 
-		onPresence: (msg) => {},
+		onPresence: (msg) => { },
 		onError: (err) => {
 			console.log("error");
 			console.error(err);

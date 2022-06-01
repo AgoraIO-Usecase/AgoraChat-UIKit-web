@@ -10,6 +10,7 @@ import rearch_icon from '../../../common/images/search@2x.png'
 import deldete_icon from '../../../common/images/delete@2x.png'
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import WebIM from '../../../utils/WebIM'
+import { message } from '../../common/alert'
 const useStyles = makeStyles((theme) => {
     return ({
         root: {
@@ -62,24 +63,36 @@ const useStyles = makeStyles((theme) => {
 
 
 const InviteModal = (props) => {
-    const {open, onClose, onCall, members} = props
+    const { open, onClose, onCall, members, joinedMembers } = props
     const classes = useStyles();
     const username = WebIM.conn.context.userId
-    let contacts = members.length>0? members.map((item) => {
-        return {id: item.member || item.owner}
-    }):[]
+    let contacts = members.length > 0 ? members.map((item) => {
+        return { id: item.member || item.owner }
+    }) : []
     contacts = contacts.filter((item) => {
-        if(username == item.id ){
+        if (username == item.id) {
             return false
-        }else{
+        } else {
             return true
+        }
+    })
+    console.log('joinedMembers', joinedMembers)
+    joinedMembers && joinedMembers.forEach((item) => {
+        let user = contacts.find((el) => {
+            if (el.id === item.imUserId) {
+                return true
+            }
+        })
+        if (user) {
+            user.checked = true
+            user.disabled = true
         }
     })
     const groupById = useSelector((state) => state.group?.group.byId) || {};
     const [searchValue, setSearchValue] = useState('')
     const [groupMembers, setGroupMembers] = useState([]);
     const [contactsObjs, setContactsObjs] = useState(contacts);
-
+    console.log('contactsObjs', contactsObjs)
     useEffect(() => {
         setContactsObjs(contacts)
     }, [members])
@@ -93,9 +106,9 @@ const InviteModal = (props) => {
         console.log(searchValue)
         if (searchValue === '') {
             contacts.forEach((user) => {
-                if(groupMembers.includes(user.id)){
+                if (groupMembers.includes(user.id)) {
                     user.checked = true
-                }else{
+                } else {
                     user.checked = false
                 }
             })
@@ -104,7 +117,7 @@ const InviteModal = (props) => {
         }
 
         let searched = contactsObjs.filter((item) => {
-            if(item.id.includes(searchValue)){
+            if (item.id.includes(searchValue)) {
                 return item
             }
         })
@@ -112,7 +125,19 @@ const InviteModal = (props) => {
     }
 
     const handleSelect = (val) => (e) => {
+        console.log('e.target.checked', e.target)
         if (e.target.checked) {
+            let joinedNum = joinedMembers ? joinedMembers.length : 0
+
+            if (joinedNum > 0 && groupMembers.length + joinedNum >= 3) {
+                message.error('There can only be 16 people in the channel')
+                return
+            }
+            if (joinedNum === 0 && groupMembers.length + 1 >= 3) {
+                message.error('There can only be 16 people in the channel')
+                return
+            }
+
             let newSelected = [...groupMembers]
             newSelected.push(val)
             console.log('groupMembers', [...newSelected])
@@ -164,61 +189,62 @@ const InviteModal = (props) => {
     }
 
     const renderMember = () => {
-        return  <Box className={classes.root}>
-                    <Box className={classes.listBox}>
-                        <Box className={classes.container}>
-                        <Box style={{ width: '50%', background: '#F5F7FA', padding: '10px' }}>
-                            <Box className={classes.searchBox}>
-                                <InputBase type="search"
-                                    placeholder={i18next.t('Your Contacts')}
-                                    style={{ width: '100%', padding: '5px' }}
-                                    onChange={searchChangeValue}
-                                />
-                                <img src={rearch_icon} alt=""
-                                    style={{ width: '32px', cursor: 'pointer' }}
-                                    onClick={handleSearchValue}
-                                />
-                            </Box>
-                            <List>
-                                {contactsObjs.length > 0 && contactsObjs.map((item, key) => {
-                                    return (
-                                        <ListItem key={key} onClick={handleSelect(item.id)} className={classes.contactsItem}>
-                                            <Box style={{ display: 'flex', alignItems: 'center' }}>
-                                                <Box className={classes.gMemberAvatar}></Box>
-                                                <Typography style={{ marginLeft: '10px' }}>{item.id}</Typography>
-                                            </Box>
-                                            
-                                            <FormControlLabel
-                                                control={<Checkbox checked={!!item.checked}/>}
-                                              />
-                                        </ListItem>
-                                    )
-                                })}
-                            </List>
+        return <Box className={classes.root}>
+            <Box className={classes.listBox}>
+                <Box className={classes.container}>
+                    <Box style={{ width: '50%', background: '#F5F7FA', padding: '10px' }}>
+                        <Box className={classes.searchBox}>
+                            <InputBase type="search"
+                                placeholder={i18next.t('Your Contacts')}
+                                style={{ width: '100%', padding: '5px' }}
+                                onChange={searchChangeValue}
+                            />
+                            <img src={rearch_icon} alt=""
+                                style={{ width: '32px', cursor: 'pointer' }}
+                                onClick={handleSearchValue}
+                            />
                         </Box>
-                        <Box className={classes.memberBox}>
-                            <Typography >{`${i18next.t('Group Members')}(${groupMembers.length})`}</Typography>
-                            <List>
-                                {groupMembers.length > 0 && groupMembers.map((item, key) => {
-                                    return (
-                                        <ListItem key={key} className={classes.contactsItem}>
-                                            <Box style={{ display: 'flex', alignItems: 'center' }}>
-                                                <Box className={classes.gMemberAvatar} ></Box>
-                                                <Typography style={{ marginLeft: '10px' }}>{item}</Typography>
-                                            </Box>
-                                            <img src={deldete_icon} alt="" style={{ width: '20px', cursor: 'pointer' }} onClick={deleteGroupMember(item)} />
-                                        </ListItem>
-                                    )
-                                })}
-                            </List>
-                        </Box>
-                        </Box>
-                    </Box>
+                        <List>
+                            {contactsObjs.length > 0 && contactsObjs.map((item, key) => {
+                                return (
+                                    <ListItem key={key} onClick={handleSelect(item.id)} className={classes.contactsItem}>
+                                        <Box style={{ display: 'flex', alignItems: 'center' }}>
+                                            <Box className={classes.gMemberAvatar}></Box>
+                                            <Typography style={{ marginLeft: '10px' }}>{item.id}</Typography>
+                                        </Box>
 
-                    <Box className={classes.btnBox}>
-                        <Button variant="contained" color="primary" onClick={startCall} disabled={groupMembers.length == 0}>call</Button>
+                                        <FormControlLabel
+                                            disabled={item.disabled}
+                                            control={<Checkbox checked={!!item.checked} />}
+                                        />
+                                    </ListItem>
+                                )
+                            })}
+                        </List>
+                    </Box>
+                    <Box className={classes.memberBox}>
+                        <Typography >{`${i18next.t('Group Members')}(${groupMembers.length})`}</Typography>
+                        <List>
+                            {groupMembers.length > 0 && groupMembers.map((item, key) => {
+                                return (
+                                    <ListItem key={key} className={classes.contactsItem}>
+                                        <Box style={{ display: 'flex', alignItems: 'center' }}>
+                                            <Box className={classes.gMemberAvatar} ></Box>
+                                            <Typography style={{ marginLeft: '10px' }}>{item}</Typography>
+                                        </Box>
+                                        <img src={deldete_icon} alt="" style={{ width: '20px', cursor: 'pointer' }} onClick={deleteGroupMember(item)} />
+                                    </ListItem>
+                                )
+                            })}
+                        </List>
                     </Box>
                 </Box>
+            </Box>
+
+            <Box className={classes.btnBox}>
+                <Button variant="contained" color="primary" onClick={startCall} disabled={groupMembers.length == 0}>call</Button>
+            </Box>
+        </Box>
     }
     return (
         <Dialog
