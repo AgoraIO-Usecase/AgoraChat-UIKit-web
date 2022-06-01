@@ -29,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     maxWidth: "65%",
     alignItems: "unset",
+    wordBreak: "break-all"
   },
   textBody: {
     padding: "0 15px",
