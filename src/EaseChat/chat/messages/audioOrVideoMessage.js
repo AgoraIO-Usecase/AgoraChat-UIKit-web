@@ -145,8 +145,23 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
     customMessageClick,
     customMessageList,
   } = easeChatProps;
-  // const url = message.body.url;
-  const url = message.bySelf? message.url: (message.audioSrcUrl || message.url);
+  // const url = message.bySelf? message.url: message.audioSrcUrl;
+  const [url, setUrl] = useState('');
+  useEffect(()=>{
+    let options = {
+      url: message.bySelf? message.url: (message.audioSrcUrl || message.url),
+      headers: {
+        Accept: 'audio/mp3'
+      },
+      onFileDownloadComplete: function (response) {
+        let objectUrl = WebIM.utils.parseDownloadResponse.call(WebIM.conn, response)
+        setUrl(objectUrl);
+      },
+      onFileDownloadError: function () {
+      }
+    };
+    WebIM.utils.download.call(WebIM.conn, options)
+  },[message])
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [state, setState] = useState(initialState);
