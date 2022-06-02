@@ -47,7 +47,7 @@ const EaseApp = (props) => {
   const handleClickItem = useCallback(
     (session) => {
       props.onConversationClick && props.onConversationClick(session);
-      const { sessionType, sessionId, name } = session;
+      const { sessionType, sessionId, sessionName } = session;
       if (!session.lastMessage) {
         dispatch(MessageActions.fetchMessage(sessionId, sessionType));
       }
@@ -66,7 +66,7 @@ const EaseApp = (props) => {
           GlobalPropsActions.setGlobalProps({
             to: sessionId,
             chatType: sessionType,
-            name: name,
+            name: sessionName,
             presenceExt: {[sessionId]: {
               ext: data.ext
             }}
@@ -78,6 +78,7 @@ const EaseApp = (props) => {
           GlobalPropsActions.setGlobalProps({
             to: sessionId,
             chatType: sessionType,
+            name: sessionName,
           })
         );
       });
@@ -141,8 +142,7 @@ export default EaseAppProvider;
 
 EaseAppProvider.addConversationItem = (session) => {
   if (session && Object.keys(session).length > 0) {
-    const { conversationType, conversationId, ext } = session;
-    console.log(session, 'session')
+    const { conversationType, conversationId, conversationName,  ext } = session;
     const { dispatch } = store;
     const storeSessionList = store.getState().session;
     const { sessionList } = storeSessionList;
@@ -154,6 +154,7 @@ EaseAppProvider.addConversationItem = (session) => {
         SessionActions._pushSession({
           sessionType: session.conversationType,
           sessionId: session.conversationId,
+          sessionName: session.conversationName
         })
       );
     }
@@ -163,6 +164,7 @@ EaseAppProvider.addConversationItem = (session) => {
       GlobalPropsActions.setGlobalProps({
         to: conversationId,
         chatType: conversationType,
+        name: conversationName,
         presenceExt: {[conversationId]: ext }
       })
     );
