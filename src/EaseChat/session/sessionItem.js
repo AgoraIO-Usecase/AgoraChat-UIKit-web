@@ -191,14 +191,14 @@ function SessionItem(props) {
           <ListItemAvatar>
             <Avatar
               style={{ borderRadius: `${session.sessionType}` === "singleChat" ? "50%" : 'inherit'}}
-              alt={`${session.sessionName || session.sessionId}`}
+              alt={`${(session.sessionName || session.name) || session.sessionId}`}
               src={avatarSrc}
             />
           </ListItemAvatar>
           <Box className={classes.itemRightBox}>
             <Typography className={classes.itemName}>
               <span>
-                {session.sessionName || session.sessionId}
+                {(session.sessionName || session.name) || session.sessionId}
                   {
                     presenceExt && presenceExt[session.sessionId]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
                   }
