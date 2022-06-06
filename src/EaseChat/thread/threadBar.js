@@ -75,12 +75,13 @@ const ThreadBar = () => {
     const isCreatingThread = useSelector((state) => state.thread?.isCreatingThread) || false;
     const to = useSelector((state) => state.global.globalProps?.to);
     const hasThreadEditPanel = useSelector((state) => state.thread?.hasThreadEditPanel) || false;
+    //打开thread编辑窗口
     const openEditPanel = (e) => {
         onEditThreadPanel(e, {
-            groupId: to,
-            threadId,
-            threadName,
-            threadOwner
+            groupId: to,//群组id
+            threadId,//thread id
+            threadName,//thread name
+            threadOwner,//thread owner
         });
     }
     const globalProps = useSelector((state) => state.global?.globalProps)
