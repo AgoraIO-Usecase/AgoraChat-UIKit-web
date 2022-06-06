@@ -189,12 +189,26 @@ EaseAppProvider.getSdk = (props) => {
   return WebIM
 };
 EaseAppProvider.thread = {
+  //是否支持thread功能 默认：否
+  /**
+   * 
+   * @param {boolean} status: thread服务可用状态
+   */
   setShowThread: function(status){
     store.dispatch(ThreadActions.setShowThread(status))
   },
+  //是否有thread编辑面板，默认：否
+  /**
+   * 
+   * @param {boolean} status 
+   */
   setHasThreadEditPanel:function(status){
     store.dispatch(ThreadActions.setHasThreadEditPanel(status))
   },
+  //关闭thread面板
+  /**
+   * @param {boolean} status 
+   */
   closeThreadPanel:function(){
     store.dispatch(ThreadActions.updateThreadStates(false))
   }
