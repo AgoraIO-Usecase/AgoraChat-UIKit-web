@@ -161,7 +161,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
       }
     };
     WebIM.utils.download.call(WebIM.conn, options)
-  },[message])
+  },[message.audioSrcUrl,message.url])
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [state, setState] = useState(initialState);
