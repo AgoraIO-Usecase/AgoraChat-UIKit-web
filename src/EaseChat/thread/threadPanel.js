@@ -123,7 +123,7 @@ const useStyles = makeStyles((theme) => {
         },
         threadName: {
             marginTop: '4px',
-            lineHeight: '44px',
+            lineHeight: '30px',
             fontWeight: '700',
             fontSize: '18px',
             textAlign: 'left',

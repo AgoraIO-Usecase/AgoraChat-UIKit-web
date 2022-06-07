@@ -6,6 +6,7 @@ import {
 } from "@material-ui/core";
 import threadIcon from '../../common/images/thread.png'
 import close from '../../common/images/threadClose.png'
+import edit from '../../common/images/edit.png'
 import { useSelector, useDispatch } from "../../EaseApp/index";
 import ThreadActions from "../../redux/thread";
 import { EaseChatContext } from "../chat/index";
@@ -26,15 +27,29 @@ const useStyles = makeStyles((theme) => {
             justifyContent: "space-between",
             alignItems: "center",
         },
+        threadIconContainer: {
+            position: 'absolute',
+            top: '4px',
+            left: '16px',
+            display: 'inline-block',
+            width: '32px',
+            height: '32px',
+            textAlign: 'center',
+        },
         threadIcon: {
+            marginTop: '5px',
+            display: 'inline-block',
             width: '24px',
-            height: '21px',
+            height: '22px',
+            objectFit: 'contain',
         },
         close: {
             width: '14px',
             height: '14px',
         },
         leftBar: {
+            position: 'realtive',
+            paddingLeft: '36px',
             fontWeight: '600',
             textAlign: 'left',
             width: '315px',
@@ -46,9 +61,43 @@ const useStyles = makeStyles((theme) => {
             display: 'flex',
         },
         editPanel: {
-            height: '38px',
-            width: '38px',
-
+            marginTop: '4px',
+            height: '32px',
+            width: '32px',
+            textAlign: 'center',
+            lineHeight: '32px',
+            cursor: 'pointer',
+            borderRadius: '100%',
+            background: '#fff',
+            '&:hover':{
+                background: '#F2F2F2',
+            },
+            '&:active':{
+                background: '#E6E6E6',
+            }
+        },
+        editIcon: {
+            display: 'inline-block',
+            width: '4px',
+            height: '16px',
+            objectFit: 'contain',
+        },
+        closeCon: {
+            marginTop: '4px',
+            marginLeft: '4px',
+            height: '32px',
+            width: '32px',
+            textAlign: 'center',
+            lineHeight: '32px',
+            cursor: 'pointer',
+            borderRadius: '100%',
+            background: '#fff',
+            '&:hover':{
+                background: '#F2F2F2',
+            },
+            '&:active':{
+                background: '#E6E6E6',
+            }
         },
         muteImgStyle: {
             width: '12px',
@@ -89,22 +138,22 @@ const ThreadBar = () => {
     return (
         <div className={classes.root}>
             <Box position="static" className={classes.leftBar}>
-                <IconButton className="iconfont icon">
+                <div className={classes.threadIconContainer}>
                     <img alt="" className={classes.threadIcon} src={threadIcon} />
-                </IconButton>
+                </div>
                 {threadName}
                 {
                     presenceExt && presenceExt[threadId]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
                 }
             </Box>
             <Box position="static" className={classes.rightBar}>
-                {!isCreatingThread && hasThreadEditPanel && <IconButton
-                    className="iconfont icon-hanbaobao icon editPanel"
+                {!isCreatingThread && hasThreadEditPanel && <div
+                    className={classes.editPanel}
                     onClick={(e) => openEditPanel(e)}
-                ></IconButton>}
-                <IconButton className="iconfont icon" onClick={closeThreadPanel}>
+                ><img alt="" className={classes.editIcon} src={edit} /></div>}
+                <div className={classes.closeCon} onClick={closeThreadPanel}>
                     <img alt="" className={classes.close} src={close} />
-                </IconButton>
+                </div>
             </Box>
         </div>
     );
