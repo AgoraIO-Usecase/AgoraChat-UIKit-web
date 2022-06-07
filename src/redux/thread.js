@@ -125,13 +125,15 @@ const { Types, Creators } = createActions({
                         dispatch(Creators.setThreadOriginalMsg({}));
                         message.warn(i18next.t('Someone else created a thread for this message'));
                     }else{
-                        //update the owner
-                        dispatch(Creators.setCurrentThreadInfo(Object.assign({}, info,{owner: chatThreadOverview.operator})));
+                        //create 事件下发时间大部分晚于update，收到create不处理，防止覆盖 messageCount 字段
+                        if(!info.timestamp){
+                            //update the owner
+                            dispatch(Creators.setCurrentThreadInfo(Object.assign({}, info,{owner: chatThreadOverview.operator})));
+                        }
                     }
                 }
-                //create 事件下发时间大部分晚于update，收到create不处理，防止覆盖 messageCount 字段
-                if(operation === 'update' || operation === 'create' && !info.timestamp){
-                    dispatch(Creators.setCurrentThreadInfo(Object.assign({}, info,chatThreadOverview)));
+                if(operation === 'update'){
+                    dispatch(Creators.setCurrentThreadInfo(Object.assign({}, info,chatThreadOverview,{owner: chatThreadOverview.operator})));
                 }
                 dispatch(Creators.setIsCreatingThread(false));
             }

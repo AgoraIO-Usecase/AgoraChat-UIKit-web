@@ -192,7 +192,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	const sentStatus = () => {
 		return (
 		  <div>
-			{message.bySelf && !isThreadPanel && (
+			{message.bySelf && (isThreadPanel && message.status!=='sent') && (
 			  <MessageStatus
 				status={message.status}
 				style={{
