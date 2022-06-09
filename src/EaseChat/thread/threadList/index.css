@@ -1,0 +1,136 @@
+.threadListPanel {
+    width: 540px;
+    overflow: hidden;
+    background: #F0F1F2;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0px 24px 36px rgba(0, 0, 0, 0.12), 8px 0px 24px rgba(0, 0, 0, 0.08);
+}
+.tlp-list {
+    position: relative;
+    padding: 0 8px;
+    margin: 0;
+    width: 100%;
+    min-height: 361px;
+    max-height: 666px;
+    overflow-x: hidden;
+    overflow-Y:scroll;
+    list-style: none;
+    box-sizing: border-box;
+}
+.tlp-header-thread{
+    display: flex;
+    padding: 0 4px 0 24px;
+    height: 60px;
+    line-height: 60px;
+    background: #fff;
+    justify-content: space-between;
+}
+.tlp-header-title{
+    font-size: 18px;
+    line-height: 60px;
+    font-weight: 600;
+}
+.tlp-header-icon{
+    margin-right: 20px;
+    cursor: pointer;
+}
+.tlp-header-icon-search{
+    display: inline-block;
+    margin-top: 20px;
+    height: 19px;
+    width: 19px;
+}
+.tlp-item {
+    height: 60px;
+    margin: 16px 0px;
+    width: 524px;
+    background: #F4F5F7;
+    border-radius: 16px;
+    list-style: none;
+    cursor: pointer;
+}
+.tpl-item-con{
+    padding: 8px 16px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+.tpl-item-name{
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 22px;
+    color: #0D0D0D;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+}
+.tpl-item-bottom{
+    display: flex;
+    margin-top: 2px;
+}
+.tlp-item:hover{
+    background: #F9FAFC;
+}
+
+.tlp-avatar {
+    margin-top: 2px;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+}
+.tpl-item-owner{
+    margin-left: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.tpl-item-msg{
+    display: inline-block;
+    margin-left: 4px;
+    color: #666;
+    font-size: 14px;
+    line-height: 20px;
+    max-width: 262px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.tpl-item-time{
+    margin-left: 4px;
+    color: #999;
+    font-size: 12px;
+    line-height: 20px;;
+}
+.tlp-default-tips {
+    position: absolute;
+    top: 40%;
+    width: 100%;
+    text-align: center;
+    color: #999;
+    font-size: 18px;
+    font-weight: 600;
+}
+.tlp-tips1 {
+    color: #999;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 28px;
+}
+.tlp-tips1-img{
+    display: inline-block;
+    margin-right: 5px;
+    vertical-align: -4px;
+    width: 21px;
+    height: 20px;
+    background: url("../../../common/images/threadgray.png") center center no-repeat;
+}
+.tlp-tips2 {
+    color: #999;
+    font-size: 14px;
+    line-height: 20px;
+}

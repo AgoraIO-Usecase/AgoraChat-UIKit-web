@@ -1,4 +1,6 @@
-import websdk from 'easemob-websdk';
+// import websdk from 'easemob-websdk';
+// import websdk from 'websdk';
+import websdk from './Easemob-chat';
 import config from './WebIMConfig';
 let WebIM = window.WebIM || {};
 WebIM.config = config;

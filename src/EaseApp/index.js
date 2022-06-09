@@ -16,6 +16,7 @@ import GlobalPropsActions from "../redux/globalProps";
 import createlistener from "../utils/WebIMListen";
 import MessageActions from "../redux/message";
 import SessionActions from "../redux/session";
+import ThreadActions from "../redux/thread"
 import _ from "lodash";
 import "../i18n";
 import "../common/iconfont.css";
@@ -46,18 +47,45 @@ const EaseApp = (props) => {
   const handleClickItem = useCallback(
     (session) => {
       props.onConversationClick && props.onConversationClick(session);
-      const { sessionType, sessionId } = session;
+      const { sessionType, sessionId, name } = session;
       if (!session.lastMessage) {
         dispatch(MessageActions.fetchMessage(sessionId, sessionType));
       }
-      dispatch(
-        GlobalPropsActions.setGlobalProps({
-          to: sessionId,
-          chatType: sessionType,
+      WebIM.conn.getPresenceStatus({usernames: [sessionId]}).then(res => {
+        let extFlag = false
+        const data = res.result[0]
+        Object.values(data.status).forEach(val => {
+          if (Number(val) === 1) {
+            extFlag = true
+          }
         })
-      );
+        if (!extFlag) {
+          data.ext = 'Offline'
+        }
+        dispatch(
+          GlobalPropsActions.setGlobalProps({
+            to: sessionId,
+            chatType: sessionType,
+            name: name,
+            presenceExt: {[sessionId]: {
+              ext: data.ext
+            }}
+          })
+        );
+      }).catch(e=>{
+        console.log(e);
+        dispatch(
+          GlobalPropsActions.setGlobalProps({
+            to: sessionId,
+            chatType: sessionType,
+            name: name,
+          })
+        );
+      });
       dispatch(SessionActions.setCurrentSession(sessionId));
       dispatch(MessageActions.clearUnreadAsync(sessionType, sessionId));
+      dispatch(ThreadActions.updateThreadStates(false));
+      dispatch(ThreadActions.getCurrentGroupRole({sessionType, sessionId}));
     },
     [props.width]
   );
@@ -92,7 +120,7 @@ const EaseApp = (props) => {
           </div>
         </Grid>
         <Grid 
-        style={{width:'100%'}}
+        style={{width:'100%',  minWidth: '788px'}}
         >
           <EaseLivestream {...props} />
         </Grid>
@@ -114,7 +142,7 @@ export default EaseAppProvider;
 
 EaseAppProvider.addConversationItem = (session) => {
   if (session && Object.keys(session).length > 0) {
-    const { conversationType, conversationId } = session;
+    const { conversationType, conversationId, conversationName,  ext } = session;
     const { dispatch } = store;
     const storeSessionList = store.getState().session;
     const { sessionList } = storeSessionList;
@@ -126,6 +154,7 @@ EaseAppProvider.addConversationItem = (session) => {
         SessionActions._pushSession({
           sessionType: session.conversationType,
           sessionId: session.conversationId,
+          sessionName: session.conversationName
         })
       );
     }
@@ -135,10 +164,24 @@ EaseAppProvider.addConversationItem = (session) => {
       GlobalPropsActions.setGlobalProps({
         to: conversationId,
         chatType: conversationType,
+        name: conversationName,
+        presenceExt: {[conversationId]: ext }
       })
     );
     dispatch(MessageActions.clearUnreadAsync(conversationType, conversationId));
+    dispatch(ThreadActions.updateThreadStates(false));
+    dispatch(ThreadActions.getCurrentGroupRole({sessionType:conversationType, sessionId:conversationId}));
   }
+};
+EaseAppProvider.changePresenceStatus = (ext) => {
+  console.log(ext, 'changePresenceStatus')
+  const { dispatch, getState } = store;
+  dispatch(
+    GlobalPropsActions.setGlobalProps({
+      ...getState().global.globalProps,
+      presenceExt: ext
+    })
+  )
 };
 EaseAppProvider.getSdk = (props) => {
   if (!WebIM.conn) {
@@ -147,10 +190,38 @@ EaseAppProvider.getSdk = (props) => {
   }
   return WebIM
 };
+EaseAppProvider.thread = {
+  //是否支持thread功能 默认：否
+  /**
+   * 
+   * @param {boolean} status: thread服务可用状态
+   */
+  setShowThread: function(status){
+    store.dispatch(ThreadActions.setShowThread(status))
+  },
+  //是否有thread编辑面板，默认：否
+  /**
+   * 
+   * @param {boolean} status 
+   */
+  setHasThreadEditPanel:function(status){
+    store.dispatch(ThreadActions.setHasThreadEditPanel(status))
+  },
+  //关闭thread面板
+  /**
+   * @param {boolean} status 
+   */
+  closeThreadPanel:function(){
+    store.dispatch(ThreadActions.updateThreadStates(false))
+  }
+}
+
+
 EaseAppProvider.propTypes = {
-  username: PropTypes.string,
-  agoraToken: PropTypes.string,
-  appkey: PropTypes.string,
+	username: PropTypes.string,
+	agoraToken: PropTypes.string,
+  password: PropTypes.string,
+	appkey: PropTypes.string,
 
   header: PropTypes.node,
   addConversationItem: PropTypes.func,
@@ -162,9 +233,13 @@ EaseAppProvider.propTypes = {
   menuList: PropTypes.array,
   handleMenuItem: PropTypes.func,
   onChatAvatarClick:PropTypes.func,
-
+  isShowReaction: PropTypes.bool,
   customMessageList:PropTypes.array,
-  customMessageClick:PropTypes.func
+  customMessageClick:PropTypes.func,
+
+  //thread-click edit panel,get thread info
+  onEditThreadPanel:PropTypes.func,
+  onOpenThreadPanel:PropTypes.func,
 };
 EaseAppProvider.defaultProps = {
   isShowUnread: true,

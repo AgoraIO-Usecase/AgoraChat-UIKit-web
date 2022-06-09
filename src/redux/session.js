@@ -7,13 +7,13 @@ import WebIM from '../utils/WebIM';
 const { Types, Creators } = createActions({
     setSessionList: ['sessionList'],
     setCurrentSession: ['userId'],
-    topSession: ['sessionId', 'sessionType'],
+    topSession: ['sessionId', 'sessionType', 'message'],
     deleteSession: ['sessionId'],
     pushSession:['session'],
     setJoinedGroups: ["joinedGroups"],
-    getSessionList: () => {
+    getSessionList: (userId) => {
         return (dispatch, getState) => {
-            AppDB.getSessionList().then((res) => {
+            AppDB.getSessionList(null, userId).then((res) => {
                 console.log('获取会话列表', res)
                 dispatch(Creators.setSessionList(res))
             })
@@ -32,7 +32,7 @@ const { Types, Creators } = createActions({
         return (dispatch) =>{
             dispatch(Creators.pushSession(session))
         }
-    }
+    },
 })
 export default Creators
 export const INITIAL_STATE = Immutable({
@@ -56,7 +56,10 @@ export const setJoinedGroups = (state, {joinedGroups}) => {
     return state.merge({ joinedGroups })
 }
 
-export const topSession = (state, { sessionId, sessionType }) => {
+export const topSession = (state, { sessionId, sessionType, message }) => {
+    if(message?.chatThread && (JSON.stringify(message.chatThread)!=='{}')){
+        return state;
+    }
     const sessionList = state.getIn(['sessionList'], Immutable([])).asMutable()
     let topSession = { sessionId, sessionType }
     sessionList.forEach((element, index) => {
@@ -74,7 +77,9 @@ export const deleteSession = (state, { sessionId }) => {
     sessionList = sessionList.filter((item) => {
         return item.sessionId !== sessionId
     })
-    return state.setIn(['sessionList'], sessionList)
+    state = state.setIn(['sessionList'], sessionList);
+    state = state.setIn(['currentSession', ''])
+    return state
 }
 
 export const pushSession = (state, {session}) =>{
@@ -90,5 +95,5 @@ export const sessionReducer = createReducer(INITIAL_STATE, {
     [Types.TOP_SESSION]: topSession,
     [Types.DELETE_SESSION]: deleteSession,
     [Types.PUSH_SESSION]:pushSession,
-    [Types.SET_JOINED_GROUPS]: setJoinedGroups
+    [Types.SET_JOINED_GROUPS]: setJoinedGroups,
 })

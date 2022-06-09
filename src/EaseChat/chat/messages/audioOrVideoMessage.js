@@ -4,8 +4,15 @@ import { Avatar, Icon } from "@material-ui/core";
 import { renderTime } from "../../../utils/index";
 import avatar from "../../../common/icons/avatar1.png";
 import AudioPlayer from "./audioPlayer/audioPlayer";
-import { Menu ,MenuItem } from '@mui/material';
+import { Menu, MenuItem } from "@mui/material";
 import { EaseChatContext } from "../index";
+
+import Reaction from "../reaction";
+import RenderReactions from "../reaction/renderReaction";
+import threadIcon from "../../../common/images/thread.png"
+import MsgThreadInfo from "./msgThreadInfo"
+
+import MessageStatus from "./messageStatus";
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
     padding: "10px 0",
@@ -26,17 +33,23 @@ const useStyles = makeStyles((theme) => ({
     textAlign: (props) => (props.bySelf ? "right" : "left"),
   },
   textBodyBox: {
+    position: 'relative',
     display: "flex",
-    flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
-    maxWidth: "65%",
+    marginLeft: (props) => props.showThreaddInfo? '12px':'0',
+    flexDirection:'column',
+    background: (props) => props.showThreaddInfo? '#f2f2f2':'#fff',
+    maxWidth: "80%",
     alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
+    padding:  (props) => props.showThreaddInfo? '12px':'0',
+    borderRadius: (props) =>
+			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
   },
 
   audioBox: {
-    margin: (props) => (props.bySelf ? "0 10px 26px 0" : "0 0 26px 10px"),
-    maxWidth: "50%",
-    minWidth: "50px",
+    margin: (props) => (props.bySelf ? "0 10px 6px 0" : props.rnReactions? "15px 0 10px 10px": "0 0 6px 10px"),
     width: (props) => `calc(208px * ${props.duration / 15})`,
+    minWidth: '70px',
+    maxWidth: '100%',
     height: "34px",
     background: (props) =>
       props.bySelf
@@ -46,7 +59,8 @@ const useStyles = makeStyles((theme) => ({
       props.bySelf ? "16px 16px 4px" : "16px 16px 16px 4px",
     color: (props) => (props.bySelf ? "#fff" : "rgb(0, 0, 0)"),
     textAlign: (props) => (props.bySelf ? "left" : "right"),
-    flexDirection: (props) => (props.bySelf ? "row" : "row-reverse"),
+    // flexDirection: (props) => (props.bySelf ? "row" : "row-reverse"),
+    flexDirection:"row",
     alignItems: "center",
     minHeight: "40px",
     lineHeight: "34px",
@@ -54,6 +68,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     cursor: "pointer",
     fontSize: "14px",
+    position: "relative",
   },
   time: {
     position: "absolute",
@@ -75,22 +90,83 @@ const useStyles = makeStyles((theme) => ({
     display: "block",
     height: "34px",
   },
+  textReaction: {
+    position: "absolute",
+    right: (props) => (props.bySelf ? "" : "0"),
+		left: (props) => (props.bySelf ? "0" : ""),
+		bottom: '0',
+		transform: (props) => (props.bySelf ? "translateX(-100%)":"translateX(100%)"),
+  },
+  reactionBox: {
+    position: "absolute",
+    top:  (props) =>(props.bySelf? "-26px": "22px"),
+    right: (props) => (props.bySelf ? "0" : ""),
+    left: (props) => (props.bySelf ? "" : "0"),
+    background: "#F2F2F2",
+    borderRadius: "17.5px",
+    padding: "3px",
+    border: "solid 2px #FFFFFF",
+    boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
+  },
+  textReactionCon: {
+		width: '100%',
+		height: '100%',
+		float: (props) => (props.bySelf? 'right':'left'),
+	},
+  threadCon: {
+		float: (props) => (props.bySelf? 'left':'right'),
+		height: '24px',
+		width: '24px',
+		borderRadius: '50%',
+		'&:hover':{
+		background: '#E6E6E6',
+		}
+	},
+	thread: {
+		marginTop: '5px',
+		marginLeft: '4px',
+		width: '16px',
+		height: '15px',
+		background: `url(${threadIcon}) center center no-repeat`,
+		backgroundSize: 'contain',
+		cursor: 'pointer',
+	}
 }));
 const initialState = {
   mouseX: null,
   mouseY: null,
 };
-function AudioOrVideoMessage({ message, showByselfAvatar }) {
+function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThreadPanel,showThread }) {
+  let audioType = message.body.type === "audio";
   let easeChatProps = useContext(EaseChatContext);
-  const { onAvatarChange, customMessageClick, customMessageList} = easeChatProps;
-  const classes = useStyles({
-    bySelf: message.bySelf,
-    duration: Math.round(message.body.length),
-  });
-  const url = message.body.url;
+  const {
+    onAvatarChange,
+    isShowReaction,
+    customMessageClick,
+    customMessageList,
+  } = easeChatProps;
+  // const url = message.bySelf? message.url: message.audioSrcUrl;
+  const [url, setUrl] = useState('');
+  useEffect(()=>{
+    let options = {
+      url: message.bySelf? message.url: (message.audioSrcUrl || message.url),
+      headers: {
+        Accept: 'audio/mp3'
+      },
+      onFileDownloadComplete: function (response) {
+        let objectUrl = WebIM.utils.parseDownloadResponse.call(WebIM.conn, response)
+        setUrl(objectUrl);
+      },
+      onFileDownloadError: function () {
+      }
+    };
+    WebIM.utils.download.call(WebIM.conn, options)
+  },[message.audioSrcUrl,message.url])
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [state, setState] = useState(initialState);
+  const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
+  const reactionMsg = message?.reactions || [];
   const handleClose = () => {
     setState(initialState);
   };
@@ -111,57 +187,127 @@ function AudioOrVideoMessage({ message, showByselfAvatar }) {
     }, time + 500);
   };
 
-  const _customMessageClick = (val,option) =>(e) =>{
-    customMessageClick && customMessageClick(e,val,option)
-    handleClose()
+  const _customMessageClick = (val, option) => (e) => {
+    customMessageClick && customMessageClick(e, val, option);
+    handleClose();
+  };
+  const createThread = ()=>{
+    onCreateThread(message)
   }
+
+  const sentStatus = () => {
+		return (
+		  <div>
+			{message.bySelf && (isThreadPanel && message.status!=='sent') && (
+			  <MessageStatus
+				status={message.status}
+				style={{
+				  marginRight: "-30px",
+				  marginTop: message.chatType === "singleChat" ? "0" : "22px",
+				}}
+			  />
+			)}
+		  </div>
+		);
+	  };
+
+	const showThreadEntry = showThread && !message.chatThreadOverview && !isThreadPanel && message.chatType === 'groupChat';
+	const showThreaddInfo = showThread && (!isThreadPanel) && message.chatType ==="groupChat" && message.chatThreadOverview&& (JSON.stringify(message.chatThreadOverview)!=='{}')
+  const classes = useStyles({
+    bySelf: message.bySelf,
+    duration: Math.round(message.body.length),
+    msgType: audioType,
+    showThreaddInfo,
+    rnReactions: reactionMsg.length > 0,
+  });
+  
   return (
-    <li className={classes.pulldownListItem}>
+    <li
+      className={classes.pulldownListItem}
+      onMouseOver={() => setHoverDeviceModule(true)}
+      onMouseLeave={() => setHoverDeviceModule(false)}
+    >
       {!message.bySelf && (
         <Avatar
           src={avatar}
-          onClick={() => onAvatarChange && onAvatarChange(message)}
+          onClick={(e) => onAvatarChange && onAvatarChange(e, message)}
         ></Avatar>
       )}
       {showByselfAvatar && message.bySelf && <Avatar src={avatar}></Avatar>}
       <div className={classes.textBodyBox}>
-        <span className={classes.userName}>{message.from}</span>
-        {message.type === "audio" ? (
-          <div className={classes.audioBox} onClick={play} onContextMenu={handleClick}>
-            <AudioPlayer play={isPlaying} reverse={message.bySelf} />
-            <span className={classes.duration}>
-              {Math.floor(message.body.length) + "''"}
-            </span>
-            <audio src={url} ref={audioRef} />
+          <div className={classes.messageBox}>
+            <span className={classes.userName}>{message.from}</span>
+            {audioType ? (
+              <div
+                className={classes.audioBox}
+                onClick={play}
+                onContextMenu={handleClick}
+              >
+                <AudioPlayer play={isPlaying} reverse={message.bySelf} />
+                <span className={classes.duration}>
+                  {Math.floor(message.body.length) + "''"}
+                </span>
+                <audio src={url} ref={audioRef} />
+              </div>
+            ) : (
+              <div style={{ position: "relative",width:'100%', maxWidth: '320px'}}>
+                <video
+                  style={{
+                    width: "100%",
+                    borderRadius: "20px",
+                  }}
+                  controls
+                  src={message.url}
+                  onContextMenu={handleClick}
+                />
+              </div>
+            )}
           </div>
-        ) : (
-          <div>
-            <video
-              style={{width:'320px',borderRadius:'20px'}}
-              controls
-              src={message.url}
-              onContextMenu={handleClick}
-            />
-          </div>
-        )}
+          
+          {showThreaddInfo ? <MsgThreadInfo message={message} />: null}
+          <div className={classes.textReaction}>
+                  {hoverDeviceModule ? (
+                    <div className={classes.textReactionCon}>
+                    {isShowReaction && (
+                      <Reaction message={message}/>
+                    )}
+                    { showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
+                    <div className={classes.thread}></div>
+                  </div>}
+                  
+                  </div>
+                  ) : (
+                    sentStatus()
+                  )}
+                  
+                </div>
+                {reactionMsg.length > 0 && (
+                  <div className={classes.reactionBox}>
+                    <RenderReactions message={message} />
+                  </div>
+                )}
       </div>
-
       <div className={classes.time}>{renderTime(message.time)}</div>
-        <Menu
-          keepMounted
-          open={state.mouseY !== null}
-          onClose={handleClose}
-          anchorReference="anchorPosition"
-          anchorPosition={
-            state.mouseY !== null && state.mouseX !== null
-              ? { top: state.mouseY, left: state.mouseX }
-              : undefined
-          }
-        >
-          {customMessageList && customMessageList.map((val,key)=>{
-            return <MenuItem key={key} onClick={_customMessageClick(val,message)}>{val.name}</MenuItem>
+      {customMessageList &&<Menu
+        keepMounted
+        open={state.mouseY !== null}
+        onClose={handleClose}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          state.mouseY !== null && state.mouseX !== null
+            ? { top: state.mouseY, left: state.mouseX }
+            : undefined
+        }
+      >
+  
+         { customMessageList.map((val, key) => {
+            return (
+              <MenuItem key={key} onClick={_customMessageClick(val, message)}>
+                {val.name}
+              </MenuItem>
+            );
           })}
-        </Menu>
+      </Menu>}
     </li>
   );
 }
