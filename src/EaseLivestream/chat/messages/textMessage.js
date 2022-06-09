@@ -75,8 +75,6 @@ const useStyles = makeStyles((theme) => ({
 function TextMessage({ message }) {
   let easeLivestreamProps = useContext(EaseLivestreamContext);
   const { roomUserInfo } = easeLivestreamProps;
-  console.log('roomUserInfo>>>', roomUserInfo);
-  console.log('roomUserInfo[message.from]>>>', roomUserInfo[message.from])
   const classes = useStyles({
     bySelf: message.bySelf,
     chatType: message.chatType,
