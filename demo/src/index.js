@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component,useState } from "react";
 import { render } from "react-dom";
 
 import { EaseChat, EaseApp,EaseLivestream } from "../../src/index";
@@ -43,9 +43,8 @@ export default class Demo extends Component {
   test4 = (val) =>{
     console.log('val',val);
   }
-
-  test5 = (res) =>{
-    console.log('val>>',res);
+  test5 = (val1,val2) => {
+    console.log('val',val1,val2)
   }
   render() {
     console.log("this.state.token>>", this.state.token);

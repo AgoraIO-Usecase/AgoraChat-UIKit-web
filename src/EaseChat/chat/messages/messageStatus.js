@@ -6,27 +6,32 @@ import fail from '../../../common/icons/failed@3x.png'
 import read from '../../../common/icons/read@3x.png'
 import received from '../../../common/icons/received@3x.png'
 const useStyles = makeStyles((theme) => ({
-    'MuiCircularProgressSvg': {
-        width: '15px',
-        height: '15px',
-        color: '#e0e0e0',
-        margin: '0 4px'
-    },
-    failIcon: {
-        color: 'red'
-    },
-    imgStyle:{
-        height:'20px',
-        marginRight:'5px'
-    }
-}))
-function SedndingStatus({ status, style = {} }) {
-    const classes = useStyles();
+	MuiCircularProgressSvg: {
+		width: "15px",
+		height: "15px",
+		color: "#e0e0e0",
+		margin: "0 4px",
+	},
+	failIcon: {
+		color: "red",
+	},
+	imgStyle: {
+		height: "20px",
+		marginRight: "5px",
+	},
+	hoverStyle: {
+		marginRight: "25px",
+	},
+}));
+function SedndingStatus({ status, style = {},hoverReaction }) {
+    const classes = useStyles({
+		hoverReaction: hoverReaction,
+	});
     let statusIcon = ''
     console.log('status>>',status);
     switch (status) {
         case 'sent':
-            statusIcon = <img src={send} alt="" className={classes.imgStyle}></img>
+            statusIcon = <img src={!hoverReaction ? send : null} alt="" className={classes.imgStyle}></img>
             break;
         case 'sending':
             statusIcon = <svg className={classes.MuiCircularProgressSvg} viewBox="22 22 44 44" style={style}><circle className="MuiCircularProgress-circle MuiCircularProgress-circleIndeterminate" cx="44" cy="44" r="20.2" fill="none" strokeWidth="3.6"></circle></svg>
