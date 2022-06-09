@@ -165,7 +165,7 @@ const ThreadListPanel = ({ anchorEl, onClose }) => {
             }}
         >
             <Box className='threadListPanel'>
-                <div className='tlp-header'>
+                <div className='tlp-header-thread'>
                     <span className='tlp-header-title'>{i18next.t('Threads List')}</span>
                     <div className="tlp-header-icon" onClick={onClose}>
                         <img className="tlp-header-icon-close" alt="closeIcon" src={close} />

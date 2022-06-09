@@ -778,10 +778,19 @@ export const updateReactionData = (state, { message, reaction }) => {
       }
       return _arr
     }
-
-	if (byId) {
-		const { chatType } = byId;
-		let messages = state.getIn([chatType, addReactionUser]).asMutable();
+	const isThreadMessage = state.threadMessage[to]? true: false;
+	if (byId || isThreadMessage) {
+		let messages = {};
+		let chatType = '';
+		if(isThreadMessage){
+			chatType = message.chatType;
+			messages = state.getIn(['threadMessage', to]).asMutable({ deep: true })
+		}else{
+			chatType = byId.chatType;
+			messages = state.getIn([chatType, addReactionUser]).asMutable();
+		}
+		// const { chatType } = byId;
+		// let messages = state.getIn([chatType, addReactionUser]).asMutable();
 		let found = _.find(messages, { id: messageId })
 		let { reactions } = found;
 		let newReactions = [];
@@ -816,8 +825,13 @@ export const updateReactionData = (state, { message, reaction }) => {
 		};
 		messages.splice(messages.indexOf(found), 1, msg);
 		AppDB.updateMessageReaction(messageId, msg.reactions).then((res) => { });
-
-		return state.setIn([chatType, addReactionUser], messages);
+		if(isThreadMessage){
+			state = state.setIn(['threadMessage',to],messages);
+		}else{
+			state = state.setIn([chatType, addReactionUser], messages);
+		}
+		return state
+		// return state.setIn([chatType, addReactionUser], messages);
 	}else{
 		calculateUserList(reaction)
 		// state 里没有这条消息，更新数据库里消息的 reation

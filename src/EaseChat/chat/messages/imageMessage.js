@@ -151,7 +151,7 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 	 const sentStatus = () => {
 		return (
 		  <div>
-			{message.bySelf && !isThreadPanel && (
+			{message.bySelf && (isThreadPanel && message.status!=='sent') && (
 			  <MessageStatus
 				status={message.status}
 				style={{
@@ -188,7 +188,7 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 					<div className={classes.textReaction}>
 						{hoverDeviceModule ? (
 							<div className={classes.textReactionCon}>
-								{!isThreadPanel && isShowReaction && (
+								{isShowReaction && (
 									<Reaction message={message}/>
 								)}
 							{showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
