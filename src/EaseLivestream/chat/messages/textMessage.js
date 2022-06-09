@@ -2,13 +2,19 @@ import React, { memo, useState, useContext, useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
 import i18next from "i18next";
 import { Menu, MenuItem } from "@material-ui/core";
-import avatar from "../../../common/icons/avatar1.png";
+import avatar from "../../../common/images/defaultAvatar.png";
 import { emoji } from "../../../common/emoji";
 import { renderTime } from "../../../utils";
 
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
 import { EaseLivestreamContext } from "../index";
+
+import streamerIcon from '../../../common/images/streamer.png'
+import moderatorIcon from '../../../common/images/moderator.png'
+import muteIcon from '../../../common/images/mute.png'
+
+
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
     display: "flex",
@@ -54,6 +60,17 @@ const useStyles = makeStyles((theme) => ({
     width: "40px",
     borderRadius: "50%",
   },
+  userInfoBox:{
+    display: "flex",
+    alignItems: "center"
+  },
+  iconStyle:{
+    width:"38px"
+  },
+  muteIconStyle:{
+    width: "12px",
+    marginLeft: "4px",
+  }
 }));
 function TextMessage({ message }) {
   let easeLivestreamProps = useContext(EaseLivestreamContext);
@@ -109,7 +126,12 @@ function TextMessage({ message }) {
         <img className={classes.avatarStyle} src={roomUserInfo && roomUserInfo[message.from]?.avatarurl || avatar}></img>
       </div>
       <div className={classes.textBodyBox}>
-        <span className={classes.userName}>{roomUserInfo && roomUserInfo[message.from]?.nickname || message.from}</span>
+        <div className={classes.userInfoBox}>
+            <span className={classes.userName}>{roomUserInfo && roomUserInfo[message.from]?.nickname || message.from}</span>
+            {roomUserInfo[message.from]?.isStreamer && <img src={streamerIcon} alt="" className={classes.iconStyle}/>}
+            {roomUserInfo[message.from]?.isAdmin && <img src={moderatorIcon} alt="" className={classes.iconStyle}/>}
+            {roomUserInfo[message.from]?.isMuted && <img src={muteIcon} alt="" className={classes.muteIconStyle}/>}
+        </div>
         <div className={classes.textBody}>{renderTxt(message.body.msg)}</div>
       </div>
     </li>
