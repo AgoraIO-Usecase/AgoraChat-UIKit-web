@@ -15,28 +15,55 @@ import noticeIcon from "../../common/images/notice@2x.png";
 import avatarIcon1 from '../../common/images/avatar1.png'
 import avatarIcon2 from '../../common/images/avatar2.png'
 import avatarIcon3 from '../../common/images/avatar3.png'
+import searchgray from '../../common/images/searchgray.png'
 
 import i18next from "i18next";
-
+import HighlightOffIcon from '@material-ui/icons/HighlightOff'
 
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
     height: "100%",
     margin: '0 !important',
-    padding: '0 5px !important',
+    padding: '0 8px !important',
     overflowY: 'auto',
-    boxSizing:'border-box'
+    boxSizing:'border-box',
+    '& .MuiListItem-root.Mui-selected': {
+      background: '#fff',
+    },
+    '& .MuiListItem-root.Mui-selected:hover': {
+      background: '#fff',
+    },
+    '& .MuiListItem-button:hover': {
+      background: 'rgb(242, 243, 245)',
+    }
   },
   paper:{
-    margin:'5px',
+    margin:'8px 8px 15px 8px',
     paddingRight:'20px',
-    borderRadius:'20px',
-    display:'flex'
+    borderRadius:'25px',
+    display:'flex',
+    boxShadow: 'none',
+    position: 'relative',
+    '& .MuiIconButton-root': {
+      padding: '8px',
+    }
   },
   inputBase:{
-    width:'100%'
+    width:'100%',
+    paddingRight: '14px',
+    height: '40px',
   },
+  closeBtn: {
+    position: 'absolute !important',
+    right: '0px',
+    top: '0px',
+  },
+  searchImgStyle: {
+    width: '22px',
+    height: '22px',
+    margin: '10px 8px 0px 8px'
+  }
 }));
 
 export default function SessionList(props) {
@@ -52,8 +79,10 @@ export default function SessionList(props) {
   // dealwith notice unread num
   const notices = useSelector((state) => state.notice?.notices) || [];
   const [searchAry,setSearchAry] = useState([])
-  let noticeUnreadNum = 0;
+  const newGroupName = useSelector((state) => state.global.globalProps.name);
+  const [inputValue, setInputValue] = useState('')
 
+  let noticeUnreadNum = 0;
   /******** -session- ********/
   notices.forEach((item) => {
     if (!item.disabled) {
@@ -66,7 +95,7 @@ export default function SessionList(props) {
       /******* --sessionId replaces the group name-- *******/
       joinedGroups.length>0 && joinedGroups.forEach((item) => {
         if(item.groupid === session.sessionId){
-          session.name = item.groupname
+          session.name = newGroupName[session.sessionId] ? newGroupName[session.sessionId] : item.groupname
         }
       })
 
@@ -129,6 +158,7 @@ export default function SessionList(props) {
   };
 
   const searchSession = (e) =>{
+    setInputValue(e.target.value)
     let ary = []
     if (e.target.value) {
       renderSessionList.map((val,key)=>{
@@ -153,25 +183,44 @@ export default function SessionList(props) {
  let renderSession = searchAry && searchAry.length>0?searchAry:renderSessionList
 
 
-const deleteSessionClick = (v) =>{
-  let newAry = _.filter(searchAry,(o)=>{
-    return v.sessionId !== o.sessionId
-  })
-  setSearchAry(newAry)
-}
+  const deleteSessionClick = (v) =>{
+    let newAry = _.filter(searchAry,(o)=>{
+      return v.sessionId !== o.sessionId
+    })
+    setSearchAry(newAry)
+  }
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault()
+  }
+  const handleClickClearagoraId = () => {
+    setInputValue('')
+    setSearchAry([])
+  }
   return (
     <>
     <Paper component="form" className={classes.paper}
       sx={{ p: '2px 4px', display: 'flex', alignItems: 'center'}}>
-      <IconButton aria-label="search">
+      {/* <IconButton aria-label="search">
         <SearchIcon />
-      </IconButton>
+      </IconButton> */}
+      <img alt="search" className={classes.searchImgStyle} src={searchgray} />
       <InputBase
         className={classes.inputBase}
         sx={{ ml: 1, flex: 2 }}
         placeholder="Search"
+        value={inputValue}
         onChange={searchSession}
       />
+      {
+        inputValue &&
+        <IconButton
+            aria-label="toggle password visibility"
+            onClick={handleClickClearagoraId}
+            onMouseDown={handleMouseDownPassword}
+            className={classes.closeBtn}>
+            <HighlightOffIcon />
+        </IconButton>
+      }
     </Paper>
       <List dense className={classes.root}>
         {renderSession.map((session, index) => {

@@ -23,6 +23,7 @@ import "../common/iconfont.css";
 
 import SessionList from "../EaseChat/session/sessionList";
 import EaseChat from "../EaseChat/chat/index";
+import { addLocalMessage } from '../utils/WebIMListen'
 
 const uikit_store = React.createContext();
 export const useDispatch = createDispatchHook(uikit_store);
@@ -35,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
   },
   grid: {
-    backgroundColor: "rgba(206, 211, 217, 0.3)",
+    backgroundColor: "rgb(237, 239, 242)",
     width:'360px'
   },
 }));
@@ -53,14 +54,19 @@ const EaseApp = (props) => {
       }
       WebIM.conn.getPresenceStatus({usernames: [sessionId]}).then(res => {
         let extFlag = false
-        const data = res.result[0]
-        Object.values(data.status).forEach(val => {
-          if (Number(val) === 1) {
+        let device = ''
+        const data = res.result[0].status
+        for (const item in data) {
+          if (Number(data[item]) === 1) {
             extFlag = true
+            device = item.includes('webim') ? 'Web' : 'Mobile'
           }
-        })
+        }
         if (!extFlag) {
           data.ext = 'Offline'
+        }
+        if (!device) {
+          device = Object.keys(data).length ? (Object.keys(data)[0].includes('webim') ? 'Web' : 'Mobile') : ''
         }
         dispatch(
           GlobalPropsActions.setGlobalProps({
@@ -68,7 +74,8 @@ const EaseApp = (props) => {
             chatType: sessionType,
             name: name,
             presenceExt: {[sessionId]: {
-              ext: data.ext
+              ext: data.ext,
+              device
             }}
           })
         );
@@ -142,7 +149,7 @@ export default EaseAppProvider;
 
 EaseAppProvider.addConversationItem = (session) => {
   if (session && Object.keys(session).length > 0) {
-    const { conversationType, conversationId, conversationName,  ext } = session;
+    const { conversationType, conversationId, conversationName, ext, firstCrate, groupText, createGroup } = session;
     const { dispatch } = store;
     const storeSessionList = store.getState().session;
     const { sessionList } = storeSessionList;
@@ -157,6 +164,15 @@ EaseAppProvider.addConversationItem = (session) => {
           sessionName: session.conversationName
         })
       );
+      addLocalMessage({
+        to: conversationId,
+        from: WebIM.conn.context.userId,
+        chatType: conversationType,
+        groupName: conversationName,
+        createGroup: createGroup || true,
+        groupText: groupText || `You have created a group`,
+        firstCrate: firstCrate
+      })
     }
     dispatch(SessionActions.setCurrentSession(conversationId));
     dispatch(SessionActions.topSession(conversationId, conversationType));
@@ -174,7 +190,6 @@ EaseAppProvider.addConversationItem = (session) => {
   }
 };
 EaseAppProvider.changePresenceStatus = (ext) => {
-  console.log(ext, 'changePresenceStatus')
   const { dispatch, getState } = store;
   dispatch(
     GlobalPropsActions.setGlobalProps({
@@ -216,7 +231,12 @@ EaseAppProvider.thread = {
   }
 }
 
-
+EaseAppProvider.deleteSessionAndMessage = (session) => {
+  const { dispatch } = store;
+  dispatch(MessageActions.clearMessage(session.sessionType, session.sessionId));
+  dispatch(SessionActions.deleteSession(session.sessionId));
+  dispatch(GlobalPropsActions.setGlobalProps({to: null}))
+}
 EaseAppProvider.propTypes = {
 	username: PropTypes.string,
 	agoraToken: PropTypes.string,

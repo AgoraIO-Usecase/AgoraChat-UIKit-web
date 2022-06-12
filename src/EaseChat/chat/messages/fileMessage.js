@@ -3,8 +3,8 @@ import { makeStyles } from "@material-ui/styles";
 import avatar from "../../../common/icons/avatar1.png";
 // import clsx from 'clsx';
 import i18next from "i18next";
-import { IconButton, Icon, Menu, MenuItem } from "@material-ui/core";
-import { renderTime } from "../../../utils";
+import { IconButton, Icon, Menu, MenuItem, Tooltip } from "@material-ui/core";
+import { renderTime, sessionItemTime } from "../../../utils";
 import { EaseChatContext } from "../index";
 
 import Reaction from "../reaction";
@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
 		position: "relative",
 		display: "flex",
 		flexDirection: (props) => (props.bySelf ? "row-reverse" : "row"),
-		alignItems: "center",
+		alignItems: "flex-end",
 	},
 	userName: {
 		padding: "0 10px 4px",
@@ -99,26 +99,27 @@ const useStyles = makeStyles((theme) => ({
 		fontSize: "11px",
 		height: "16px",
 		color: "rgba(1, 1, 1, .2)",
-		lineHeight: "16px",
+		lineHeight: "20px",
 		textAlign: "center",
 		top: "-18px",
 		width: "100%",
 	},
 	avatarStyle: {
-		height: "40px",
-		width: "40px",
+		height: "28px",
+		width: "28px",
 		borderRadius: "50%",
 	},
 	textReaction: {
 		position: "absolute",
 		right: (props) => (props.bySelf ? "" : "0"),
 		left: (props) => (props.bySelf ? "0" : ""),
-		bottom: "0",
+		bottom: "6px",
 		transform: (props) => (props.bySelf ? "translateX(-100%)" : "translateX(100%)"),
 		height: '24px',
+		left: '0px',
 	},
 	textReactionCon: {
-		width: '100%',
+		width: (props) => (props.showThreadEntry ? "48px" : "24px"),
 		height: '100%',
 		float: (props) => (props.bySelf ? 'right' : 'left'),
 	},
@@ -150,6 +151,11 @@ const useStyles = makeStyles((theme) => ({
 		background: `url(${threadIcon}) center center no-repeat`,
 		backgroundSize: 'contain',
 		cursor: 'pointer',
+	},
+	tooltipthread: {
+		background: '#fff',
+		color: 'rgba(0, 0, 0, 0.87)',
+		boxShadow: '6px 6px 12px rgba(0, 0, 0, 0.12), -2px 0px 8px rgba(0, 0, 0, 0.08)',
 	}
 }));
 const initialState = {
@@ -192,7 +198,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	const sentStatus = () => {
 		return (
 		  <div>
-			{message.bySelf && (isThreadPanel && message.status!=='sent') && (
+			{message.bySelf && !isThreadPanel && (
 			  <MessageStatus
 				status={message.status}
 				style={{
@@ -253,8 +259,14 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 							{isShowReaction && (
 								<Reaction message={message} />
 							)}
-							{showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
-								<div className={classes.thread}></div></div>}
+							{
+								showThreadEntry &&
+								<div className={classes.threadCon} onClick={createThread}>
+									<Tooltip title='Create Thread' placement="top" classes={{ tooltip: classes.tooltipthread }}>
+										<div className={classes.thread}></div>
+									</Tooltip>
+								</div>
+							}
 						</div>
 					) : (
 						sentStatus()
@@ -268,7 +280,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 				)}
 			</div>
 
-			<div className={classes.time}>{renderTime(message.time)}</div>
+			<div className={classes.time}>{sessionItemTime(message.time)}</div>
 			<Menu
 				keepMounted
 				open={state.mouseY !== null}

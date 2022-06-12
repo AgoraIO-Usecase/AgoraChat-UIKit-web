@@ -1,9 +1,9 @@
 import React, { memo, useState, useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
-import { Avatar, Menu, MenuItem } from "@material-ui/core";
+import { Avatar, Menu, MenuItem, Tooltip } from "@material-ui/core";
 import avatar from "../../../common/icons/avatar1.png";
 import i18next from "i18next";
-import { renderTime } from "../../../utils";
+import { renderTime, sessionItemTime } from "../../../utils";
 import { EaseChatContext } from "../index";
 import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
 		position: "relative",
 		display: "flex",
 		flexDirection: (props) => (props.bySelf ? "row-reverse" : "row"),
-		alignItems: "center",
+		alignItems: "flex-end",
 	},
 	userName: {
 		padding: "0 10px 4px",
@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
 		fontSize: "11px",
 		height: "16px",
 		color: "rgba(1, 1, 1, .2)",
-		lineHeight: "16px",
+		lineHeight: "20px",
 		textAlign: "center",
 		top: "-18px",
 		width: "100%",
@@ -65,13 +65,14 @@ const useStyles = makeStyles((theme) => ({
 	textReaction: {
 		position: "absolute",
 		right: (props) => (!props.bySelf&&props.showThreaddInfo? "-12px": !props.showThreaddInfo&&!props.bySelf ? "0":""),
-		bottom: "-10px",
+		bottom: "6px",
 		transform: (props) => (props.bySelf ? "translateX(-100%)":"translateX(100%)"),
-		marginLeft: (props) => (props.bySelf ? "-15px" : ""),
+		marginLeft: (props) => (props.bySelf ? "-10px" : ""),
 		height: '24px',
+		left: '8px',
 	},
 	textReactionCon: {
-		width: '100%',
+		width: (props) => (props.showThreadEntry ? "48px" : "24px"),
 		height: '100%',
 		float: (props) => (props.bySelf? 'right':'left'),
 	},
@@ -103,6 +104,11 @@ const useStyles = makeStyles((theme) => ({
 		background: `url(${threadIcon}) center center no-repeat`,
 		backgroundSize: 'contain',
 		cursor: 'pointer',
+	},
+	tooltipthread: {
+		background: '#fff',
+		color: 'rgba(0, 0, 0, 0.87)',
+		boxShadow: '6px 6px 12px rgba(0, 0, 0, 0.12), -2px 0px 8px rgba(0, 0, 0, 0.08)',
 	}
 }));
 const initialState = {
@@ -120,7 +126,7 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 
 	const showThreadEntry = showThread && !message.chatThreadOverview && !isThreadPanel && message.chatType === 'groupChat';
 	const showThreaddInfo = showThread && (!isThreadPanel) && message.chatType ==="groupChat" && message.chatThreadOverview&& (JSON.stringify(message.chatThreadOverview)!=='{}')
-	const classes = useStyles({ bySelf: message.bySelf,showThreaddInfo:showThreaddInfo});
+	const classes = useStyles({ bySelf: message.bySelf,showThreaddInfo:showThreaddInfo, showThreadEntry: showThreadEntry});
 	const [state, setState] = useState(initialState);
 	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
 	const reactionMsg = message?.reactions || [];
@@ -151,7 +157,7 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 	 const sentStatus = () => {
 		return (
 		  <div>
-			{message.bySelf && (isThreadPanel && message.status!=='sent') && (
+			{message.bySelf && !isThreadPanel && (
 			  <MessageStatus
 				status={message.status}
 				style={{
@@ -191,9 +197,15 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 								{isShowReaction && (
 									<Reaction message={message}/>
 								)}
-							{showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
-							  <div className={classes.thread}></div></div>}
-               				</div>
+								{
+									showThreadEntry &&
+									<div className={classes.threadCon} onClick={createThread}>
+										<Tooltip title='Create Thread' placement="top" classes={{ tooltip: classes.tooltipthread }}>
+											<div className={classes.thread}></div>
+										</Tooltip>
+									</div>
+								}
+              </div>
 						) : (
 							sentStatus()
 						)}
@@ -207,7 +219,7 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 				</div>
 			</div>
 
-      <div className={classes.time}>{renderTime(message.time)}</div>
+      <div className={classes.time}>{sessionItemTime(message.time)}</div>
       <Menu
         keepMounted
         open={state.mouseY !== null}

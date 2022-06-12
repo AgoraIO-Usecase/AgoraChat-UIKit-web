@@ -7,6 +7,36 @@ import SessionActions from "../redux/session";
 import GlobalPropsActions from "../redux/globalProps";
 import ThreadActions from "../redux/thread"
 import uikit_store from "../redux/index";
+import EaseApp from '../EaseApp/index'
+
+let conversationName = ''
+export function addLocalMessage (obj) {
+	console.log(obj, 'addLocalMessage')
+	const { to, from, chatType, groupName, createGroup, groupText, firstCrate } = obj
+	const message = {
+		chatType: chatType,
+		ext: {},
+		from: chatType === 'singleChat' ? to : from,
+		id: WebIM.conn.getUniqueId(),
+		msg: groupText,
+		onlineState: 3,
+		time: new Date().getTime(),
+		to: chatType === 'singleChat' ? from : to,
+		type: "groupNote",
+	}
+	if (firstCrate) {
+		store.dispatch(MessageActions.addMessage(message, "txt"))
+	}
+	if (!createGroup) {
+		store.dispatch(
+			SessionActions._pushSession({
+				sessionType: chatType,
+				sessionId: chatType === 'singleChat' ? from : to,
+				sessionName: groupName || ''
+			})
+		)
+	}
+}
 export default function createlistener(props) {
   WebIM.conn.addEventHandler('EaseChat',{
     onConnected: (msg) => {
@@ -66,7 +96,8 @@ export default function createlistener(props) {
 		// The other has read the message
 		onReadMessage: (message) => {
 			console.log("onReadMessage", message);
-			store.dispatch(MessageActions.updateMessageStatus(message, "read"));
+			const { mid, id } = message
+			store.dispatch(MessageActions.updateMessageStatus(message, "read", id, mid));
 		},
 
 		onReceivedMessage: function (message) {
@@ -75,11 +106,12 @@ export default function createlistener(props) {
 			store.dispatch(MessageActions.updateMessageMid(id, mid, to));
 		},
 		onDeliveredMessage: function (message) {
+			console.log("onDeliveredMessage",message)
+			const { mid, id } = message
 			store.dispatch(
-				MessageActions.updateMessageStatus(message, "received")
+				MessageActions.updateMessageStatus(message, "received", id, mid)
 			);
 		},
-
 		onPresence: (msg) => {},
 		onError: (err) => {
 			console.log("error");
@@ -95,8 +127,17 @@ export default function createlistener(props) {
 		},
 		onGroupChange: (event) => {
 			console.log("onGroupChange",event);
+			const { to, from, groupName, gid } = event
 			if(event.type === 'direct_joined'){
 			  store.dispatch(SessionActions.getJoinedGroupList())
+				addLocalMessage({
+					to: gid,
+					from: WebIM.conn.context.userId,
+					chatType:'groupChat',
+					groupName,
+					groupText: `You joined the group`,
+					firstCrate: true
+				})
 			}else if(event.type === 'joinPublicGroupSuccess'){
 			  const joinedGroup = store.getState().session.joinedGroups;
 			  const result = joinedGroup.find((item) => {
@@ -105,6 +146,17 @@ export default function createlistener(props) {
 			  if(!result){
 				store.dispatch(SessionActions.getJoinedGroupList())
 			  }
+			} else if (event.type === 'invite') {
+				conversationName = groupName
+			} else if (event.type === 'invite_accept') {
+				addLocalMessage({
+					to: gid,
+					from: WebIM.conn.context.userId,
+					chatType: 'groupChat',
+					groupName: conversationName,
+					groupText: `You joined the group`,
+					firstCrate: true
+				})
 			}
 			if(event.type === 'addAdmin' || event.type === 'removeAdmin' || event.type === 'changeOwner'){
 			  const { chatType, to } = uikit_store.getState().global.globalProps;
@@ -134,5 +186,26 @@ export default function createlistener(props) {
 		onReactionMessage: (message) => {
 			console.log("onReactionMessage", message);
 		},
+		onContactAgreed: (msg) => {
+			console.log("onContactAgreed", msg);
+			const { to, from } = msg
+			EaseApp.addConversationItem({
+				conversationType: 'singleChat',
+				conversationId: from,
+				ext: {
+					from: {
+						ext: 'Online'
+					}
+				},
+				firstCrate: true,
+				groupText: 'Your friend request has been approved',
+				createGroup: false
+			})
+		},
+		onContactAdded: (msg) => {
+			console.log("onContactAdded", msg);
+			const { to, from } = msg
+			addLocalMessage({to, from, chatType: 'singleChat', groupText: 'You agreed the friend request', firstCrate: true})
+		}
 	});
 }

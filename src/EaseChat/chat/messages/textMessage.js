@@ -1,10 +1,10 @@
 import React, { memo, useState, useEffect, useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
 import i18next from "i18next";
-import { Menu, MenuItem } from "@material-ui/core";
+import { Menu, MenuItem, Tooltip } from "@material-ui/core";
 import avatar from "../../../common/icons/avatar1.png";
 import { emoji } from "../../../common/emoji";
-import { renderTime } from "../../../utils";
+import { renderTime, sessionItemTime } from "../../../utils";
 
 import MessageStatus from "./messageStatus";
 import MsgThreadInfo from "./msgThreadInfo"
@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 		marginBottom: "26px",
 		position: "relative",
 		flexDirection: (props) => (props.bySelf ? "row-reverse" : "row"),
-		alignItems: "center",
+		alignItems: "flex-end",
 	},
 	userName: {
 		padding: "0 10px 4px",
@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
 		fontSize: "11px",
 		height: "16px",
 		color: "rgba(1, 1, 1, .2)",
-		lineHeight: "16px",
+		lineHeight: "20px",
 		textAlign: "center",
 		top: "-18px",
 		width: "100%",
@@ -57,12 +57,12 @@ const useStyles = makeStyles((theme) => ({
 		margin: "3px",
 	},
 	avatarStyle: {
-		height: "40px",
-		width: "40px",
+		height: "28px",
+		width: "28px",
 		borderRadius: "50%",
 	},
 	textBody: {
-		margin: (props) => (props.bySelf ? "0 10px 10px 0" : props.rnReactions? "15px 0 10px 10px": "0 0 10px 10px"),
+		margin: (props) => (props.bySelf ? "0 0px 10px 0" : props.rnReactions? "15px 0 10px 10px": "0 0 10px 10px"),
 		lineHeight: "22px",
 		fontSize: "16px",
 		background: (props) =>
@@ -81,14 +81,17 @@ const useStyles = makeStyles((theme) => ({
 		textAlign: "initial",
 		position: "relative",
 		boxSizing: "border-box",
+		wordBreak: 'break-word',
+		fontFamily: 'Roboto',
 	},
 	textReaction: {
 		position: "absolute",
-		right: (props) => (props.bySelf ? "" : "0"),
-		bottom: "-10px",
+		right: (props) => (props.bySelf ? "" : "-6px"),
+		bottom: "2px",
 		transform: (props) => (props.bySelf ? "translateX(-100%)" : "translateX(100%)"),
-		marginLeft: (props) => (props.bySelf ? "-15px" : ""),
+		marginLeft: (props) => (props.bySelf ? "-10px" : ""),
 		height: '24px',
+		left: '8px',
 	},
 	textReactionCon: {
 		height: '100%',
@@ -97,14 +100,14 @@ const useStyles = makeStyles((theme) => ({
 	},
 	reactionBox: {
 		position: "absolute",
-		top: (props) => (props.bySelf ? "-15px" : "-18px"),
+		top: (props) => (props.bySelf ? "-22px" : "-18px"),
 		right: (props) => (props.bySelf ? "0px" : ""),
 		left: (props) => (props.bySelf ? "" : "0px"),
 		background: "#F2F2F2",
 		borderRadius: "17.5px",
 		padding: (props) => (props.rnReactions ? "4px 8px" : "4px"),
 		border: "solid 2px #FFFFFF",
-		boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
+		// boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
 	},
 	threadCon: {
 		float: (props) => (props.bySelf ? 'left' : 'right'),
@@ -123,6 +126,11 @@ const useStyles = makeStyles((theme) => ({
 		background: `url(${threadIcon}) center center no-repeat`,
 		backgroundSize: 'contain',
 		cursor: 'pointer',
+	},
+	tooltipthread: {
+		background: '#fff',
+		color: 'rgba(0, 0, 0, 0.87)',
+		boxShadow: '6px 6px 12px rgba(0, 0, 0, 0.12), -2px 0px 8px rgba(0, 0, 0, 0.08)',
 	}
 }))
 const initialState = {
@@ -184,7 +192,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 					<img
 						key={v + Math.floor(Math.random() * 99 + 1)}
 						alt={v}
-						src={require(`../../../common/faces/${v}`).default}
+						src={require(`../../../common/reactions/${v}`).default}
 						width={20}
 						height={20}
 						style={{verticalAlign:'middle'}}
@@ -203,7 +211,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	const sentStatus = () => {
 		return (
 			<div>
-				{message.bySelf && (isThreadPanel && message.status!=='sent') && (
+				{message.bySelf && !isThreadPanel && (
 					<MessageStatus
 						status={message.status}
 						style={{
@@ -272,9 +280,14 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 								{isShowReaction && (
 									<Reaction message={message} />
 								)}
-								{showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
-									<div className={classes.thread}></div>
-								</div>}
+								{
+								showThreadEntry &&
+									<div className={classes.threadCon} onClick={createThread}>
+										<Tooltip title='Create Thread' placement="top" classes={{ tooltip: classes.tooltipthread }}>
+											<div className={classes.thread}></div>
+										</Tooltip>
+									</div>	
+								}
 							</div>
 						) : (
 							sentStatus()
@@ -282,7 +295,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 					</div>
 				</div>
 			</div>
-			<div className={classes.time}>{renderTime(message.time)}</div>
+			<div className={classes.time}>{sessionItemTime(message.time)}</div>
 			{message.status === "read" ? (
 				<div className={classes.read}>{i18next.t("Read")}</div>
 			) : null}

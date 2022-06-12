@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useRef, useState, useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
-import { Avatar, Icon } from "@material-ui/core";
-import { renderTime } from "../../../utils/index";
+import { Avatar, Icon, Tooltip } from "@material-ui/core";
+import { renderTime, sessionItemTime } from "../../../utils/index";
 import avatar from "../../../common/icons/avatar1.png";
 import AudioPlayer from "./audioPlayer/audioPlayer";
 import { Menu, MenuItem } from "@mui/material";
@@ -21,6 +21,7 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     display: "flex",
     flexDirection: (props) => (props.bySelf ? "row-reverse" : "row"),
+    alignItems: 'flex-end'
   },
   userName: {
     padding: "0 10px 4px",
@@ -46,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
   },
 
   audioBox: {
-    margin: (props) => (props.bySelf ? "0 10px 6px 0" : props.rnReactions? "15px 0 10px 10px": "0 0 6px 10px"),
+    margin: (props) => (props.bySelf ? "0 0px 6px 0" : props.rnReactions? "15px 0 10px 10px": "0 0 6px 10px"),
     width: (props) => `calc(208px * ${props.duration / 15})`,
     minWidth: '70px',
     maxWidth: '100%',
@@ -75,7 +76,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "11px",
     height: "16px",
     color: "rgba(1, 1, 1, .2)",
-    lineHeight: "16px",
+    lineHeight: "20px",
     textAlign: "center",
     top: "-18px",
     width: "100%",
@@ -94,8 +95,9 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     right: (props) => (props.bySelf ? "" : "0"),
 		left: (props) => (props.bySelf ? "0" : ""),
-		bottom: '0',
+		bottom: '6px',
 		transform: (props) => (props.bySelf ? "translateX(-100%)":"translateX(100%)"),
+    left: '0px',
   },
   reactionBox: {
     position: "absolute",
@@ -109,7 +111,7 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
   },
   textReactionCon: {
-		width: '100%',
+		width: (props) => (props.showThreadEntry ? "48px" : "24px"),
 		height: '100%',
 		float: (props) => (props.bySelf? 'right':'left'),
 	},
@@ -130,6 +132,11 @@ const useStyles = makeStyles((theme) => ({
 		background: `url(${threadIcon}) center center no-repeat`,
 		backgroundSize: 'contain',
 		cursor: 'pointer',
+	},
+	tooltipthread: {
+		background: '#fff',
+		color: 'rgba(0, 0, 0, 0.87)',
+		boxShadow: '6px 6px 12px rgba(0, 0, 0, 0.12), -2px 0px 8px rgba(0, 0, 0, 0.08)',
 	}
 }));
 const initialState = {
@@ -198,7 +205,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
   const sentStatus = () => {
 		return (
 		  <div>
-			{message.bySelf && (isThreadPanel && message.status!=='sent') && (
+			{message.bySelf && !isThreadPanel && (
 			  <MessageStatus
 				status={message.status}
 				style={{
@@ -219,6 +226,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
     msgType: audioType,
     showThreaddInfo,
     rnReactions: reactionMsg.length > 0,
+    showThreadEntry: showThreadEntry
   });
   
   return (
@@ -271,10 +279,14 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
                     {isShowReaction && (
                       <Reaction message={message}/>
                     )}
-                    { showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
-                    <div className={classes.thread}></div>
-                  </div>}
-                  
+                    {
+                      showThreadEntry &&
+                      <div className={classes.threadCon} onClick={createThread}>
+                        <Tooltip title='Create Thread' placement="top" classes={{ tooltip: classes.tooltipthread }}>
+                        <div className={classes.thread}></div>
+                        </Tooltip>
+                      </div>
+                    }
                   </div>
                   ) : (
                     sentStatus()
@@ -287,7 +299,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
                   </div>
                 )}
       </div>
-      <div className={classes.time}>{renderTime(message.time)}</div>
+      <div className={classes.time}>{sessionItemTime(message.time)}</div>
       {customMessageList &&<Menu
         keepMounted
         open={state.mouseY !== null}

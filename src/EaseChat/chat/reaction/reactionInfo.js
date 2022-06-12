@@ -16,6 +16,7 @@ import deleteReactionIcon from "../../../common/icons/reaction_delete@2x.png";
 import avatarIcon1 from "../../../common/images/avatar1.png";
 import avatarIcon2 from "../../../common/images/avatar2.png";
 import avatarIcon3 from "../../../common/images/avatar3.png";
+import threadClose from "../../../common/images/threadClose.png"
 
 const useStyles = makeStyles((theme) => ({
 	infoBox: {
@@ -34,8 +35,8 @@ const useStyles = makeStyles((theme) => ({
 	infoReaction: {
 		height: `calc(100% - 60px)`,
 	},
-	textStyle: {
-		fontFamily: "SF Compact Text",
+	textStyleTitle: {
+		fontFamily: "Roboto",
 		fontWeight: "600",
 		fontStyle: "normal",
 		fontSize: "18px",
@@ -93,7 +94,14 @@ const useStyles = makeStyles((theme) => ({
 		alignItems: "center",
 	},
 	textStyle: {
-		marginLeft: '8px'
+		marginLeft: '8px !important',
+	},
+	myselfPopover: {
+		'& .MuiPopover-paper': {
+				borderRadius: '12px',
+				backdropFilter: 'blur(12px)',
+				background: 'rgba(255,255,255,.8)',
+		}
 	}
 }));
 
@@ -194,12 +202,13 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 				vertical: "top",
 				horizontal: "left",
 			}}
+			className={classes.myselfPopover}
 		>
 			<Box className={classes.infoBox}>
 				<Box className={classes.infoTitle}>
-					<span className={classes.textStyle}>Reactions</span>
+					<span className={classes.textStyleTitle}>Reactions</span>
 					<span className={classes.closeStyle} onClick={onClose}>
-						X
+						<img slt="" src={threadClose} />
 					</span>
 				</Box>
 				<Box className={classes.infoReaction}>

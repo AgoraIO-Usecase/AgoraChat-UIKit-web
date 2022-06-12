@@ -30,6 +30,8 @@ import donotdisturbIcon from '../../../common/images/Do_not_Disturb.png'
 import customIcon from '../../../common/images/custom.png'
 import leaveIcon from '../../../common/images/leave.png'
 import muteImg from '../../../common/images/gray@2x.png'
+import deleteChat from '../../../common/icons/reaction_delete@2x.png'
+import moreIcon from '../../../common/icons/menu@2x.png'
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -37,12 +39,14 @@ const useStyles = makeStyles((theme) => {
       display: "flex",
       zIndex: "999",
       width: "100%",
-      height: "6.67vh",
+      height: "60px",
       maxHeight: "60px",
       minHeight: "40px",
       justifyContent: "space-between",
       alignItems: "center",
-      padding: "0 10px",
+      // padding: "0 10px",
+      backdropFilter: 'blur(32px)',
+      background: 'rgba(255,255,255,.8)',
     },
     leftBar: {
       display: "flex",
@@ -50,7 +54,7 @@ const useStyles = makeStyles((theme) => {
       position: 'relative'
     },
     avatar: {
-      margin: "0 20px 0 16px",
+      margin: "0 12px 0 16px",
     },
     imgBox: {
       position: 'absolute',
@@ -58,15 +62,15 @@ const useStyles = makeStyles((theme) => {
       left: '45px',
       zIndex: 1,
       borderRadius: '50%',
-      width: '20px',
-      height: '20px',
-      lineHeight: '26px',
+      width: '17px',
+      height: '17px',
+      lineHeight: '21px',
       textAlign: 'center',
       background: '#fff',
     },
     imgStyle: {
-      width: '18px',
-      height: '18px',
+      width: '15px',
+      height: '15px',
       borderRadius: '50%',
     },
     muteImgStyle: {
@@ -77,6 +81,29 @@ const useStyles = makeStyles((theme) => {
     threadIcon: {
       width: '21px',
       height: '20px',
+    },
+    deleteChatImg: {
+      width: '30px',
+      height: '30px',
+      verticalAlign: 'middle',
+    },
+    imgActive: {
+      borderRadius: '50%',
+      width: '32px',
+      cursor: 'pointer',
+      marginRight: '10px',
+      verticalAlign: 'middle',
+    },
+    userStatusOnline: {
+      fontFamily: 'Roboto',
+      fontStyle: 'normal',
+      fontWeight:' 500',
+      fontSize: '12px',
+      lineHeight: '14px',
+      color: '#999999',
+    },
+    nameStatusMuteBox: {
+      textAlign: 'left'
     }
   };
 });
@@ -116,15 +143,16 @@ const MessageBar = () => {
             <Icon className="iconfont icon-qingkongxiaoxi"></Icon>
           </Box>
           <Typography variant="inherit" noWrap>
-            {i18next.t("Clear Message")}
+            {i18next.t("Clear Messages")}
           </Typography>
         </MenuItem>
         <MenuItem onClick={handleClickDeleteSession}>
           <Box className={classes.menuItemIconBox}>
-            <Icon className="iconfont icon-shanchuhuihua"></Icon>
+            {/* <Icon className="iconfont icon-shanchuhuihua"></Icon> */}
+            <img className={classes.deleteChatImg} src={deleteChat} alt="" />
           </Box>
           <Typography variant="inherit" noWrap>
-            {i18next.t("Delete Session")}
+            {i18next.t("Delete Chat")}
           </Typography>
         </MenuItem>
       </Menu>
@@ -187,19 +215,25 @@ const MessageBar = () => {
             </div>
             : null
           }
-        {name || to}
-        {
-          presenceExt && presenceExt[to]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
-        }
+        <div className={classes.nameStatusMuteBox}>
+          {name[to] || to}
+          {
+            presenceExt && presenceExt[to]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
+          }
+          {
+            presenceExt && presenceExt[to]?.device && <div className={classes.userStatusOnline}>{presenceExt[to]?.device} {presenceExt[to]?.ext === '' ? 'Online' : presenceExt[to]?.ext}</div>
+          }
+        </div>
       </Box>
       <Box position="static">
         <IconButton className="iconfont icon" style={{display: chatType === "groupChat" && showThread ? "inline-flex" : "none"}} onClick={openThreadList} ref={threadListAnchorEl}>
           <img alt="" className={classes.threadIcon} src={threadIcon} />
         </IconButton>
-        <IconButton
+        {/* <IconButton
           onClick={handleSessionInfoClick}
           className="iconfont icon-hanbaobao icon"
-        ></IconButton>
+        ></IconButton> */}
+        <img src={moreIcon} className={classes.imgActive} style={{background: sessionEl ? '#ccc' : '' }} onClick={handleSessionInfoClick} alt="" />
       </Box>
       {renderSessionInfoMenu()}
       <ThreadListPanel anchorEl={anchorEl} onClose={onClose}/>

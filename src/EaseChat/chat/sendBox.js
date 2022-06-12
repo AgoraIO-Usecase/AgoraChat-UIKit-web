@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     background: "#fff",
     borderRadius: "2px",
     position: "absolute",
-    bottom: 0,
+    bottom: '-25px',
     padding: "10px 0",
   },
   emitter: {
@@ -53,8 +53,10 @@ const useStyles = makeStyles((theme) => ({
     color: "#010101",
     resize: "none",
     backgroundColor: "#efefef",
-    borderRadius: "10px",
+    borderRadius: "18px",
     padding: "5px",
+    fontFamily: 'Roboto',
+    width: '98%',
   },
   senderBar: {
     height: "12px",
@@ -65,13 +67,24 @@ const useStyles = makeStyles((theme) => ({
     display: "none",
   },
   iconStyle: {
-    width: "26px",
-    height: "26px",
+    width: "30px",
+    height: "30px",
   },
   menuItemIconBox: {
     marginRight: "5px",
     display: "flex",
   },
+  textareaBox: {
+    backgroundColor: "#efefef",
+    width: '100%',
+    borderRadius: "18px",
+    minHeight: '36px',
+    padding: '10px 0 0 8px',
+  },
+  iconbtnStyle: {
+    padding: '2px',
+    margin: '6px 0',
+  }
 }));
 
 function SendBox(props) {
@@ -251,7 +264,7 @@ function SendBox(props) {
         onClose={() => setSessionEl(null)}
         anchorOrigin={{
           vertical: "top",
-          horizontal: "left",
+          horizontal: "center",
         }}
         transformOrigin={{
           vertical: "bottom",
@@ -302,6 +315,7 @@ function SendBox(props) {
       <>
         {window.location.protocol === "https:" && (
           <IconButton
+            className={classes.iconbtnStyle}
             onClick={() => {
               setShowRecorder(true);
             }}
@@ -323,21 +337,25 @@ function SendBox(props) {
 
   const renderTextarea = () => {
     return (
-      <TextareaAutosize
-        className={classes.input}
-        minRows={2}
-        maxRows={3}
-        value={inputValue}
-        onChange={handleInputChange}
-        ref={inputRef}
-      ></TextareaAutosize>
+      <div className={classes.textareaBox}>
+        <TextareaAutosize
+          placeholder="Say Something"
+          className={classes.input}
+          minRows={1}
+          maxRows={3}
+          value={inputValue}
+          onChange={handleInputChange}
+          ref={inputRef}
+        ></TextareaAutosize>
+      </div>
+      
     );
   };
 
   const renderEmoji = () => {
     return (
       <>
-        <IconButton ref={emojiRef} onClick={handleClickEmoji}>
+        <IconButton ref={emojiRef} className={classes.iconbtnStyle} onClick={handleClickEmoji}>
           <img alt="" className={classes.iconStyle} src={icon_emoji} />
         </IconButton>
         <Emoji
@@ -352,7 +370,7 @@ function SendBox(props) {
   const renderMoreFeatures = () => {
     return (
       <>
-        <IconButton onClick={handleClickMenu}>
+        <IconButton className={classes.iconbtnStyle} onClick={handleClickMenu}>
           <img alt="" className={classes.iconStyle} src={attachment} />
         </IconButton>
         {renderMenu()}

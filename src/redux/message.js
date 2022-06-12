@@ -583,7 +583,17 @@ export const updateMessageStatus = (state, { message, status = "", localId, serv
 			status: status,
 		};
 		messages.splice(messages.indexOf(found), 1, msg);
-		AppDB.updateMessageStatus(id, serverMsgId, status)
+		AppDB.updateMessageStatus(id, serverMsgId, status).then(res => {
+			if (res === 0) {
+				AppDB.updateMessageStatus(serverMsgId, id, status).then(val => {
+					if (val === 0) {
+						AppDB.updateMessageStatus(id, serverMsgId, status).then(value => {
+							console.log(value)
+						})
+					}
+				})
+			}
+		})
 		
 		if(message.isChatThread){
 			state = state.setIn(['threadMessage', chatId], messages)
