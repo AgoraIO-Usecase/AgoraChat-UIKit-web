@@ -161,7 +161,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
       }
     };
     WebIM.utils.download.call(WebIM.conn, options)
-  },[message])
+  },[message.audioSrcUrl,message.url])
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [state, setState] = useState(initialState);
@@ -198,7 +198,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
   const sentStatus = () => {
 		return (
 		  <div>
-			{message.bySelf && !isThreadPanel && (
+			{message.bySelf && (isThreadPanel && message.status!=='sent') && (
 			  <MessageStatus
 				status={message.status}
 				style={{
@@ -268,7 +268,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
           <div className={classes.textReaction}>
                   {hoverDeviceModule ? (
                     <div className={classes.textReactionCon}>
-                    {!isThreadPanel && isShowReaction && (
+                    {isShowReaction && (
                       <Reaction message={message}/>
                     )}
                     { showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">

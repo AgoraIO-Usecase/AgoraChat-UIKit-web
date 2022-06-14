@@ -38,7 +38,6 @@ const useStyles = makeStyles((theme) => ({
 	textBodyBox: {
 		display: "flex",
 		flexDirection: (props) => (props.bySelf ? "inherit" : "column"),
-		minWidth: "40%",
 		maxWidth: "75%",
 		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
 	},
@@ -65,16 +64,15 @@ const useStyles = makeStyles((theme) => ({
 	textBody: {
 		margin: (props) => (props.bySelf ? "0 10px 10px 0" : props.rnReactions? "15px 0 10px 10px": "0 0 10px 10px"),
 		lineHeight: "22px",
-		fontSize: "14px",
+		fontSize: "16px",
 		background: (props) =>
 			props.bySelf
 				? "linear-gradient(124deg, #c913df 20%,#154DFE 90%)"
 				: "#F2F2F2",
 		color: (props) => (props.bySelf ? "#fff" : "#000"),
-		border: "1px solid #fff",
 		borderRadius: (props) =>
 			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-		padding: "12px",
+		padding: "8px 12px",
 		width: "100%",
 		maxWidth: "100%",
 		// maxWidth: "80%",
@@ -93,8 +91,8 @@ const useStyles = makeStyles((theme) => ({
 		height: '24px',
 	},
 	textReactionCon: {
-		width: '100%',
 		height: '100%',
+		width: (props) => (props.showThreadEntry ? "48px" : "24px"),
 		float: (props) => (props.bySelf ? 'right' : 'left'),
 	},
 	reactionBox: {
@@ -143,6 +141,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 		bySelf: message.bySelf,
 		chatType: message.chatType,
 		rnReactions: reactionMsg.length > 0,
+		showThreadEntry: showThreadEntry
 	});
 	const [menuState, setMenuState] = useState(initialState);
 	const [copyMsgVal, setCopyMsgVal] = useState('')
@@ -204,7 +203,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	const sentStatus = () => {
 		return (
 			<div>
-				{message.bySelf && !isThreadPanel && (
+				{message.bySelf && (isThreadPanel && message.status!=='sent') && (
 					<MessageStatus
 						status={message.status}
 						style={{
@@ -270,7 +269,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 					<div className={classes.textReaction}>
 						{hoverDeviceModule ? (
 							<div className={classes.textReactionCon}>
-								{!isThreadPanel && isShowReaction && (
+								{isShowReaction && (
 									<Reaction message={message} />
 								)}
 								{showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">

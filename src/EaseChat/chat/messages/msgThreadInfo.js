@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { Box } from "@material-ui/core";
 import threadIcon from '../../../common/images/thread.png'
+import openIcon from '../../../common/images/open.png'
 import { useSelector, useDispatch } from "../../../EaseApp/index";
 import ThreadActions from "../../../redux/thread"
 import MessageActions from "../../../redux/message"
@@ -73,11 +74,10 @@ const useStyles = makeStyles((theme) => ({
         textAlign: 'left'
     },
     messageCount: {
-        flex: '0 0 36px',
+        flex: '0 0 42px',
         textAlign: 'right',
         fontWeight: '500',
         color: '#154DFE',
-        cursor: 'pointer',
     },
     threadBottom: {
         marginTop: '9px',
@@ -93,15 +93,18 @@ const useStyles = makeStyles((theme) => ({
         width: '100%',
     },
     messageInfo: {
+        marginTop: '3px',
         display: 'inline-block',
-        height: '20px',
-        lineHeight: '20px',
+        paddingLeft: '20px',
+        height: '16px',
+        lineHeight: '16px',
         color: '#4d4d4d',
         fontSize: '12px',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
         width: '100%',
+        boxSizing: 'border-box'
     },
     threadAva: {
         flex: '0 0 16px',
@@ -123,6 +126,7 @@ const useStyles = makeStyles((theme) => ({
         whiteSpace: 'nowrap',
         color: '#000',
         width: 'calc(100% - 70px)',
+        fontWeight: '500',
     },
     time: {
         color: '#999',
@@ -142,6 +146,14 @@ const useStyles = makeStyles((theme) => ({
         marginTop: '8px',
         color: '#4d4d4d',
         textAlign: 'left',
+    },
+    count: {
+        marginRight: '4px',
+    },
+    openImg: {
+        width: '8px',
+        height: '12px',
+        objectFit: 'contain',
     },
 }));
 
@@ -243,12 +255,15 @@ const MsgThreadInfo = (props) => {
     }
     return (
         <Box className={classes.root}>
-            <div className={classes.container}>
+            <div className={classes.container} onClick={changeMessage}>
                 <span className={classes.triangle}></span>
                 <div className={classes.threadTop}>
                     <div className={classes.threadIcon}></div>
                     <div className={classes.threadName}>{chatThreadOverview.name}</div>
-                    <span className={classes.messageCount} onClick={changeMessage}>{chatThreadOverview.messageCount}&nbsp;&gt;</span>
+                    <div className={classes.messageCount}>
+                        <span className={classes.count}>{chatThreadOverview.messageCount > 99 ? '99+' : chatThreadOverview.messageCount}</span>
+                        <img alt="" className={classes.openImg} src={openIcon} />
+                    </div>
                 </div>
                 {chatThreadOverview.lastMessage && JSON.stringify(chatThreadOverview.lastMessage) !== '{}' && <div className={classes.threadBottom}>
                     <div className={classes.threadInfo}>

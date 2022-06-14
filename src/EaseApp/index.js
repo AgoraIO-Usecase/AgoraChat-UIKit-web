@@ -78,6 +78,7 @@ const EaseApp = (props) => {
           GlobalPropsActions.setGlobalProps({
             to: sessionId,
             chatType: sessionType,
+            name: name,
           })
         );
       });
@@ -141,8 +142,7 @@ export default EaseAppProvider;
 
 EaseAppProvider.addConversationItem = (session) => {
   if (session && Object.keys(session).length > 0) {
-    const { conversationType, conversationId, ext } = session;
-    console.log(session, 'session')
+    const { conversationType, conversationId, conversationName,  ext } = session;
     const { dispatch } = store;
     const storeSessionList = store.getState().session;
     const { sessionList } = storeSessionList;
@@ -154,6 +154,7 @@ EaseAppProvider.addConversationItem = (session) => {
         SessionActions._pushSession({
           sessionType: session.conversationType,
           sessionId: session.conversationId,
+          sessionName: session.conversationName
         })
       );
     }
@@ -163,6 +164,7 @@ EaseAppProvider.addConversationItem = (session) => {
       GlobalPropsActions.setGlobalProps({
         to: conversationId,
         chatType: conversationType,
+        name: conversationName,
         presenceExt: {[conversationId]: ext }
       })
     );
@@ -189,12 +191,26 @@ EaseAppProvider.getSdk = (props) => {
   return WebIM
 };
 EaseAppProvider.thread = {
+  //是否支持thread功能 默认：否
+  /**
+   * 
+   * @param {boolean} status: thread服务可用状态
+   */
   setShowThread: function(status){
     store.dispatch(ThreadActions.setShowThread(status))
   },
+  //是否有thread编辑面板，默认：否
+  /**
+   * 
+   * @param {boolean} status 
+   */
   setHasThreadEditPanel:function(status){
     store.dispatch(ThreadActions.setHasThreadEditPanel(status))
   },
+  //关闭thread面板
+  /**
+   * @param {boolean} status 
+   */
   closeThreadPanel:function(){
     store.dispatch(ThreadActions.updateThreadStates(false))
   }

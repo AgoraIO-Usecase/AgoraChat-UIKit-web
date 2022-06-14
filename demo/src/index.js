@@ -107,12 +107,12 @@ export default class Demo extends Component {
             failCallback={this.test2}
             onAvatarChange={this.test3}
             onChatAvatarClick={this.test4}
-            
+            onEditThreadPanel={this.test5}
             appkey= "easemob-demo#easeim"
             username="zd3"
             password="1"
-            // agoraToken="007eJxTYDiw2fuKzNWjLzknllxuMkl+z+OTa5dxRZPB6fP1VGlGX1sFhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9NkPSnjJAUZBgbT1MfvGBlYGRiBEMRXYTBPsTAyMzc10LVMSjTVNTRMTda1NDdP1U0xT7Y0M0oztjC1NAMA7zUk8Q=="
-            header={<div style={{ height: "100px" }}>TestHeader</div>} />
+            // agoraToken="007eJxTYAiTXhXwV2WKwARx+Xxlv3x9dZfw6xXTdT42T5v7PqsuNUeBIc0wJdnc3CIpJSXZzMQsMcUizcjMwNLcLDnRKMXA0DSZ48XUJAUZBoZZ35YHMDKwMjACIYivwpBkYGaSmGJmoGtmZJKka2iYmqxrkWpopGuaZGRikWRgapGWZAkAkzwlRw=="
+            header={<div style={{ height: "100px" }}>TestHeader</div>}/>
         </div>
       </div>
     );
