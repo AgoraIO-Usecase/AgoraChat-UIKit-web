@@ -127,15 +127,17 @@ const Chat = (props) => {
 
         if (info.type == 'hangup') {
           if (info.reson == 'timeout') {
-            message.error('Call timeout.')
+            message.error('No response.')
           } else if (info.reson == 'refuse') {
-            message.error('The other has refused.')
+            message.error('Request declined.')
           } else if (info.reson == 'cancel') {
             message.error('The call has been canceled.')
-          } else if (info.reson == 'processed on other devices') {
-            message.error('Processed on other devices.')
+          } else if (info.reson == 'accepted on other devices') {
+            message.error('Other devices connected.')
+          } else if (info.reson == 'refused on other devices') {
+            message.error('Other devices declined.')
           } else if (info.reson == 'busy') {
-            message.error('target is busy.')
+            message.error('The line is busy.')
           } else {
             message.error(info.reson || 'normal hangup')
           }
