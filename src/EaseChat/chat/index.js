@@ -179,7 +179,13 @@ const Chat = (props) => {
           showByselfAvatar={props.showByselfAvatar}
         />
         <SendBox />
-        {!showRTCCall ? <CallKit onAddPerson={showInvite} onStateChange={handleCallStateChange} onInvite={handleInvite} contactAvatar={contactAvatar} groupAvatar={groupAvatar}></CallKit> : null}
+        {!showRTCCall ? <CallKit 
+            onAddPerson={showInvite} 
+            onStateChange={handleCallStateChange} 
+            onInvite={handleInvite} 
+            contactAvatar={contactAvatar} 
+            groupAvatar={groupAvatar}
+            ringingSource={props.ringingSource}></CallKit> : null}
       </EaseChatContext.Provider>
     </div>
   ) : (
@@ -194,7 +200,7 @@ const Chat = (props) => {
     >
       <img src={noMessage} alt="" style={{ height: "200px", width: "200px" }} />
       {<>
-        <CallKit onAddPerson={showInvite} onStateChange={handleCallStateChange} onInvite={handleInvite} contactAvatar={contactAvatar} groupAvatar={groupAvatar}></CallKit>
+        <CallKit onAddPerson={showInvite} onStateChange={handleCallStateChange} onInvite={handleInvite} contactAvatar={contactAvatar} groupAvatar={groupAvatar} ringingSource={props.ringingSource}></CallKit>
         <EaseChatContext.Provider value={props}>
           <div style={{ display: 'none' }}>
             <MessageBar showinvite={showInviteModal} onInviteClose={closeInviteModal} confrData={confrData} />
