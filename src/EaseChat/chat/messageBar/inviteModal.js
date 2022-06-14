@@ -195,7 +195,7 @@ const InviteModal = (props) => {
                     <Box style={{ width: '50%', background: '#F5F7FA', padding: '10px' }}>
                         <Box className={classes.searchBox}>
                             <InputBase type="search"
-                                placeholder={i18next.t('Your Contacts')}
+                                placeholder={i18next.t('Group Members')}
                                 style={{ width: '100%', padding: '5px' }}
                                 onChange={searchChangeValue}
                             />
@@ -223,7 +223,7 @@ const InviteModal = (props) => {
                         </List>
                     </Box>
                     <Box className={classes.memberBox}>
-                        <Typography >{`${i18next.t('Group Members')}(${groupMembers.length})`}</Typography>
+                        <Typography >{`${i18next.t('Selected')}(${groupMembers.length})`}</Typography>
                         <List>
                             {groupMembers.length > 0 && groupMembers.map((item, key) => {
                                 return (
@@ -242,15 +242,15 @@ const InviteModal = (props) => {
             </Box>
 
             <Box className={classes.btnBox}>
-                <Button variant="contained" color="primary" onClick={startCall} disabled={groupMembers.length == 0}>call</Button>
+                <Button style={{ textTransform: "none"}} variant="contained" color="primary" onClick={startCall} disabled={groupMembers.length == 0}>Call</Button>
             </Box>
         </Box>
     }
     return (
         <Dialog
-            open={open}
+            open={!!open}
             onClose={onCloseModal}
-            title={i18next.t('Gromp Members')}
+            title={i18next.t('Call for Gromp Members')}
             content={renderMember()}
             maxWidth={880}
         ></Dialog>
