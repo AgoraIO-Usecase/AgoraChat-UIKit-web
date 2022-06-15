@@ -13,7 +13,7 @@ import { EaseLivestreamContext } from "../index";
 import streamerIcon from '../../../common/images/streamer.png'
 import moderatorIcon from '../../../common/images/moderator.png'
 import muteIcon from '../../../common/images/mute.png'
-
+import joinIcon from '../../../common/images/join.png'
 
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     maxWidth: "65%",
     alignItems: "unset",
-    wordBreak: "break-all"
+    wordBreak: "break-word"
   },
   textBody: {
     padding: "0 15px",
@@ -70,6 +70,21 @@ const useStyles = makeStyles((theme) => ({
   muteIconStyle:{
     width: "12px",
     marginLeft: "4px",
+  },
+  joinTextStyle:{
+    fontFamily: "Roboto",
+    fontSize: "12px",
+    fontWeight: "600",
+    lineLeight: "16px",
+    letterSpacing: "0.15px",
+    textAlign: "left",
+    color: "#FFFFFF",
+    margin:"0 4px",
+    display: "flex",
+    alignItems: "center"
+  },
+  joinIconStyle:{
+    marginLeft: "4px"
   }
 }));
 function TextMessage({ message }) {
@@ -123,18 +138,23 @@ function TextMessage({ message }) {
   return (
     <li className={classes.pulldownListItem}>
       <div>
-        <img className={classes.avatarStyle} src={roomUserInfo && roomUserInfo[message.from]?.avatarurl || avatar}></img>
+        <img className={classes.avatarStyle} src={roomUserInfo && roomUserInfo[message.from]?.avatar || avatar}></img>
       </div>
-      <div className={classes.textBodyBox}>
-        <div className={classes.userInfoBox}>
+      {message?.notify ? <div className={classes.userInfoBox}>
+        <span className={classes.userName}>{roomUserInfo[message.from]?.nickname || message.from}</span>
+        <span className={classes.joinTextStyle}>{i18next.t('Joined')} <img src={joinIcon} alt="" className={classes.joinIconStyle}/></span>
+      </div>:<>
+        <div className={classes.textBodyBox}>
+          <div className={classes.userInfoBox}>
             <span className={classes.userName}>{roomUserInfo && roomUserInfo[message.from]?.nickname || message.from}</span>
-            {roomUserInfo[message.from]?.isStreamer && <img src={streamerIcon} alt="" className={classes.iconStyle}/>}
-            {roomUserInfo[message.from]?.isAdmin && <img src={moderatorIcon} alt="" className={classes.iconStyle}/>}
-            {roomUserInfo[message.from]?.isMuted && <img src={muteIcon} alt="" className={classes.muteIconStyle}/>}
-        </div>
-        <div className={classes.textBody}>{renderTxt(message.body.msg)}</div>
-      </div>
+            {roomUserInfo[message.from]?.isStreamer && <img src={streamerIcon} alt="" className={classes.iconStyle} />}
+            {roomUserInfo[message.from]?.isAdmin && <img src={moderatorIcon} alt="" className={classes.iconStyle} />}
+            {roomUserInfo[message.from]?.isMuted && <img src={muteIcon} alt="" className={classes.muteIconStyle} />}
+          </div>
+          <div className={classes.textBody}>{renderTxt(message.body.msg)}</div>
+        </div></>}
     </li>
+    
   );
 }
 

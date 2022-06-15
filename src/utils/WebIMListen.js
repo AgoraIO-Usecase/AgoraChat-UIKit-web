@@ -112,7 +112,14 @@ export default function createlistener(props) {
 				dispatch(ThreadActions.getCurrentGroupRole({chatType, to}));
 			  }
 			}
-		  },
+		},
+	  	onChatroomChange: (event) => {
+			const {type,from,gid,chatroom } = event;
+		  	if (type === "memberJoinChatRoomSuccess") {
+				// store.dispatch(MessageActions.addRoomNotify(from, gid, chatroom));
+				store.dispatch(MessageActions.addRoomNotify(event));
+			}
+		},
 		onContactDeleted: (msg) => {
 			store.dispatch(MessageActions.clearMessage("singleChat", msg.from));
 			store.dispatch(SessionActions.deleteSession(msg.from));

@@ -31,7 +31,9 @@ const useStyles = makeStyles((theme) => {
       justifyContent: "space-between",
       alignItems: "center",
       backgroundColor: "#393939",
-      color: "#ffffff"
+      color: "#ffffff",
+
+      borderRadius: "0 12px 0 0",
     },
     leftBar: {
       display: "flex",
@@ -39,6 +41,8 @@ const useStyles = makeStyles((theme) => {
     },
     avatar: {
       margin: "0 20px 0 16px",
+      width:"28px",
+      height:"28px"
     },
   };
 });
@@ -77,13 +81,13 @@ const MessageBar = () => {
         ></Avatar>
         {to}
       </Box>
-      <Box position="static">
+      {/* <Box position="static">
         <IconButton
           onClick={handleClick}
           className="iconfont icon-guanbi icon"
           style={{color:'#fff',fontSize:'16px',marginRight:'10px'}}
         ></IconButton>
-      </Box>
+      </Box> */}
     </div>
   );
 };

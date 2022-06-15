@@ -19,7 +19,8 @@ export const EaseLivestreamContext = createContext();
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
-    height: "calc(100% - 20px)",
+    // height: "calc(100% - 20px)",
+    height: "100%",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",

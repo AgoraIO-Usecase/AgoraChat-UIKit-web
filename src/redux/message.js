@@ -58,6 +58,7 @@ const { Types, Creators } = createActions({
     updateThreadMessage: ['to','messageList','isScroll'],
     setThreadHistoryStart:['start'],
     setThreadHasHistory: ['status'],
+	updateChatroomDetails: ["formatMsg"],
 
 	// -async-
 	sendTxtMessage: (to, chatType, message = {}, isChatThread=false) => {
@@ -406,7 +407,6 @@ const { Types, Creators } = createActions({
 			WebIM.utils.download.call(WebIM.conn, options);
 		};
 	},
-
 	addReactions: (msg, reaction) => {
 		return (dispatch, getState) => {
 			WebIM.conn.addReaction({ messageId: msg.id, reaction}).then((res) => {
@@ -460,6 +460,16 @@ const { Types, Creators } = createActions({
 			}else{
 				dispatch(Creators.updateReactionData(message))
 			}
+		}
+	},
+	addRoomNotify: (message) => {
+		const { from, gid, chatroom } = message
+		return (dispatch, getState) => {
+			const formatMsg = formatLocalMessage(gid, chatroom, message, 'roomNotify')
+			formatMsg.from = from;
+			formatMsg.type = 'txt',
+			console.log('formatMsg>>>', formatMsg);
+			dispatch(Creators.updateChatroomDetails(formatMsg))
 		}
 	}
 });
@@ -870,6 +880,29 @@ export const setThreadHistoryStart = (state, {start}) => {
 export const setThreadHasHistory = (state, {status}) => {
     return state.setIn(['threadHasHistory'], status)
 }
+
+export const updateChatroomDetails = (state, {formatMsg}) => {
+	let { chatType, to, id } = formatMsg;
+	let messageList = state[chatType][to].asMutable({ deep: true });
+	const message = {
+		...formatMsg,
+		type: "txt",
+		// notify: "roomNotify",
+		body:{
+			chatType,
+			type: "txt",
+			to,
+			id,
+			notify: "roomNotify",
+		}
+	}
+	AppDB.addMessage(message)
+	messageList.push(message);
+	state = state.setIn([chatType, to], messageList);
+	console.log('state>>>',state);
+	return state
+}
+
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const messageReducer = createReducer(INITIAL_STATE, {
@@ -886,6 +919,7 @@ export const messageReducer = createReducer(INITIAL_STATE, {
     [Types.SET_THREAD_HISTORY_START]: setThreadHistoryStart,
     [Types.SET_THREAD_HAS_HISTORY]: setThreadHasHistory,
 	[Types.UPDATE_REACTION_DATA]: updateReactionData,
+	[Types.UPDATE_CHATROOM_DETAILS]: updateChatroomDetails,
 
 })
 

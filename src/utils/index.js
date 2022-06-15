@@ -167,7 +167,7 @@ export function formatLocalMessage(to, chatType, message = {}, messageType, isCh
     if (messageType === 'file' || messageType === 'img' || messageType === 'video') {
         body.size = message?.data.size
     }
-    if(messageType === 'threadNotify'){
+    if (messageType === 'threadNotify' || messageType === 'roomNotify'){
         formatMsg.id = WebIM.conn.getUniqueId();
     }
     return {
@@ -175,7 +175,7 @@ export function formatLocalMessage(to, chatType, message = {}, messageType, isCh
         // id: WebIM.conn.getUniqueId(),
         to,
         from: WebIM.conn.context.userId,
-        chatType,
+        chatType:"chatRoom",
         session: to,
         isChatThread,
         body: {

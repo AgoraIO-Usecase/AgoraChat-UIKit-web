@@ -72,7 +72,7 @@ function MessageList({ messageList, showByselfAvatar }) {
   return (
     <div className={classes.root}>
       <div ref={scrollEl} className="pulldown-wrapper" onScroll={handleScroll}>
-        <div className="pulldown-tips">
+        {/* <div className="pulldown-tips">
           <div style={{ display: isLoaded ? "block" : "none" }}>
             <span style={{ fontSize: "12px" }}>
               {i18next.t("no more messages")}
@@ -81,7 +81,7 @@ function MessageList({ messageList, showByselfAvatar }) {
           <div style={{ display: isPullingDown ? "block" : "none" }}>
             <span>Loading...</span>
           </div>
-        </div>
+        </div> */}
         <ul className="pulldown-list">
           {messageList.length
             ? messageList.map((msg, index) => {
