@@ -28,7 +28,7 @@ export default function createlistener(props) {
 			console.log("onTextMessage", message);
 			const { chatType, from, to, ext } = message;
 			const sessionId = chatType === "singleChat" ? from : to;
-			if (ext.action === 'invite' && chatType === 'groupChat') {
+			if (ext.action === 'invite') {
 				var id = WebIM.conn.getUniqueId();
 				let message = {
 					id: id,
