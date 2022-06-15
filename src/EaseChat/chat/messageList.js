@@ -15,6 +15,7 @@ import CustomMessage from './messages/customMessage'
 import ThreadActions from "../../redux/thread"
 import i18next from "i18next";
 import ThreadNotify from "./messages/threadNotify";
+import Notify from './messages/notify';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -104,6 +105,7 @@ function MessageList({ messageList, showByselfAvatar }) {
         <ul className="pulldown-list">
           {messageList.length
             ? messageList.map((msg, index) => {
+              console.log('message>>>',msg);
                 if (msg.body.type === "txt") {
                   return (
                     <TextMessage
@@ -155,8 +157,11 @@ function MessageList({ messageList, showByselfAvatar }) {
                   return (
                     <ThreadNotify message={msg} key={msg.id + index}/>
                   );
-                }
-                else {
+                } else if (msg.body.type === "notify") {
+                  return (
+                    <Notify message={msg} key={msg.id + index}></Notify>
+                  )
+                } else {
                   return null;
                 }
               })

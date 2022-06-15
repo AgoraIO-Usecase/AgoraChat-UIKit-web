@@ -127,6 +127,8 @@ export default function createlistener(props) {
 			  if(!result){
 				store.dispatch(SessionActions.getJoinedGroupList())
 			  }
+			} else if (event.type === "memberJoinPublicGroupSuccess"){
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
 			}
 			if(event.type === 'addAdmin' || event.type === 'removeAdmin' || event.type === 'changeOwner'){
 			  const { chatType, to } = uikit_store.getState().global.globalProps;

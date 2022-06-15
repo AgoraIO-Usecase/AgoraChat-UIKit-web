@@ -1,5 +1,5 @@
 {
-  "name": "chat-uikit",
+   "name": "chat-uikit",
   "version": "2.0.3-test",
   "description": "chat-uikit React component",
   "main": "lib/index.js",
