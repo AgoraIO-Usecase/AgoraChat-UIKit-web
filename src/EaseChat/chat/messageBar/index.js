@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useContext,useRef } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useSelector, useDispatch } from "../../../EaseApp/index";
 import { Menu, MenuItem, IconButton, Icon, InputBase, Tooltip } from "@material-ui/core";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -21,6 +21,10 @@ import avatarIcon1 from '../../../common/images/avatar1.png'
 import avatarIcon2 from '../../../common/images/avatar2.png'
 import avatarIcon3 from '../../../common/images/avatar3.png'
 import groupAvatarIcon from '../../../common/images/groupAvatar.png'
+import CallKit from 'zd-callkit'
+import WebIM from '../../../utils/WebIM'
+
+import InviteModal from './inviteModal'
 import threadIcon from '../../../common/images/thread.png'
 
 import offlineImg from '../../../common/images/Offline.png'
@@ -83,9 +87,9 @@ const useStyles = makeStyles((theme) => {
     }
   };
 });
-const MessageBar = () => {
+const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   let easeChatProps = useContext(EaseChatContext);
-  const { onChatAvatarClick } = easeChatProps
+  const { onChatAvatarClick, isShowRTC, getRTCToken, agoraUid, getIdMap, appId } = easeChatProps
   const classes = useStyles();
   const dispatch = useDispatch();
   const groupById = useSelector((state) => state.group?.group.byId) || {};
@@ -103,7 +107,7 @@ const MessageBar = () => {
     const handleClickDeleteSession = () => {
       dispatch(MessageActions.clearMessage(chatType, to));
       dispatch(SessionActions.deleteSession(to));
-      dispatch(GlobalPropsActions.setGlobalProps({to:null}))
+      dispatch(GlobalPropsActions.setGlobalProps({ to: null }))
     };
 
     return (
@@ -134,11 +138,11 @@ const MessageBar = () => {
     setSessionEl(e.currentTarget);
   };
   const [anchorEl, setAnchorEl] = useState(null);
-  const onClose = ()=>{
+  const onClose = () => {
     setAnchorEl(null);
     dispatch(ThreadActions.setThreadListPanelDisplay(false));
   }
-  const openThreadList = (e)=>{
+  const openThreadList = (e) => {
     setAnchorEl(e.currentTarget)
   }
   const threadListAnchorEl = useRef(null);
@@ -158,51 +162,176 @@ const MessageBar = () => {
   }
   const [userAvatarIndex, setUserAvatarIndex] = useState([])
   const [usersInfoData, setUsersInfoData] = useState([])
+  const [inviteOpen, setInviteOpen] = useState(false)
+  const [groupMembers, setGroupMembers] = useState([])
+  const [callType, setCallType] = useState('')
   useEffect(() => {
-    let newwInfoData =usersInfoData && usersInfoData.length > 0 ? usersInfoData : localStorage.getItem("usersInfo_1.0")
-    setUsersInfoData(newwInfoData)
-    setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 1)
+    let newInfoData = usersInfoData && usersInfoData.length > 0 ? usersInfoData : localStorage.getItem("usersInfo_1.0")
+    setUsersInfoData(newInfoData)
+    setUserAvatarIndex(_.find(newInfoData, { username: to })?.userAvatar || 1)
   }, [to])
+
+  const callAudio = async () => {
+    console.log('to', to, chatType)
+    setCallType('audio')
+    const channel = Math.uuid(8)
+    if (chatType === 'groupChat') {
+      let members = await getGroupMembers(to) || []
+      setGroupMembers(members)
+      setInviteOpen(true)
+    } else {
+      const { agoraUid, accessToken } = await getRTCToken({
+        channel: channel,
+        username: WebIM.conn.context.userId
+      })
+      let options = {
+        callType: 0,
+        chatType: 'singleChat',
+        to: to,
+        agoraUid,
+        message: 'invite you to audio call',
+        accessToken,
+        channel
+      }
+      CallKit.startCall(options)
+    }
+    let idMap = await getIdMap({ userId: WebIM.conn.context.userId, channel })
+    CallKit.setUserIdMap(idMap)
+  }
+  console.log('easeChatProps @@@@', easeChatProps)
+  const callVideo = async () => {
+    const channel = Math.uuid(8)
+    const { agoraUid, accessToken } = await getRTCToken({
+      channel: channel,
+      // agoraId: WebIM.conn.agoraUid,
+      username: WebIM.conn.context.userId
+    })
+    console.log('token', agoraUid, accessToken)
+    setCallType('video')
+    if (chatType === 'groupChat') {
+      let members = await getGroupMembers(to) || []
+      setGroupMembers(members)
+      setInviteOpen(true)
+    } else {
+      let options = {
+        callType: 1,
+        chatType: 'singleChat',
+        to: to,
+        agoraUid,
+        message: 'invite you to video call',
+        accessToken,
+        channel
+      }
+      CallKit.startCall(options)
+    }
+    let idMap = await getIdMap({ userId: WebIM.conn.context.userId, channel })
+    CallKit.setUserIdMap(idMap)
+  }
+
+  const startCall = async (members) => {
+    setInviteOpen(false)
+    const channel = confrData.channel || Math.uuid(8)
+    const type = confrData.type || callType == 'audio' ? 3 : 2
+    const { agoraUid, accessToken } = await getRTCToken({
+      channel: channel,
+      username: WebIM.conn.context.userId
+    })
+
+    let options = {
+      callType: type,
+      chatType: 'groupChat',
+      to: members,
+      agoraUid: agoraUid,
+      message: `invite you to ${callType} call`,
+      groupId: to,
+      groupName: confrData.groupName || name,
+      accessToken,
+      channel
+    }
+    // 多人通话过程中发邀请的文档
+    CallKit.startCall(options)
+
+    let idMap = await getIdMap({ userId: WebIM.conn.context.userId, channel })
+    CallKit.setUserIdMap(idMap)
+  }
+
+  const handleInviteClose = () => {
+    setInviteOpen(false)
+    onInviteClose && onInviteClose()
+  }
+
+  useEffect(async () => {
+    console.log('监听 invite 变化', chatType, showinvite, confrData)
+
+    if (chatType === 'groupChat' || !chatType) {
+      let gid = to
+      if (!to) {
+        gid = confrData.groupId
+      }
+      console.log('gid', gid)
+      if (!gid) return
+      let members = await getGroupMembers(gid) || []
+      setGroupMembers(members)
+      setInviteOpen(showinvite)
+    }
+
+  }, [showinvite])
+
+  const getGroupMembers = async (gid) => {
+    let data = await WebIM.conn.listGroupMembers({ pageNum: 1, pageSize: 500, groupId: gid })
+    return data.data
+  }
+
   const threadListPanelDisplay = useSelector((state) => state.thread?.threadListPanelDisplay) || false;
-  useEffect(()=>{
-    if(threadListPanelDisplay){
+  useEffect(() => {
+    if (threadListPanelDisplay) {
       setAnchorEl(threadListAnchorEl.current)
-    }else{
+    } else {
       onClose()
     }
-  },[threadListPanelDisplay])
+  }, [threadListPanelDisplay])
 
   return (
-    <div className={classes.root}>
-      <Box position="static" className={classes.leftBar}>
-        <Avatar className={classes.avatar} onClick={(e) => onChatAvatarClick && onChatAvatarClick(e,{chatType, to})} 
-        src={chatType === "singleChat" ? userAvatars[userAvatarIndex] : groupAvatarIcon}
-          style={{ borderRadius: chatType === "singleChat" ? "50%" : 'inherit'}}
-        ></Avatar>
+    <>
+      <div className={classes.root}>
+        <Box position="static" className={classes.leftBar}>
+          <Avatar className={classes.avatar} onClick={(e) => onChatAvatarClick && onChatAvatarClick(e, { chatType, to })}
+            src={chatType === "singleChat" ? userAvatars[userAvatarIndex] : groupAvatarIcon}
+            style={{ borderRadius: chatType === "singleChat" ? "50%" : 'inherit' }}
+          ></Avatar>
           {
             chatType === "singleChat" ?
-            <div className={classes.imgBox}>
-              <img alt="" src={(presenceExt && getUserOnlineStatus[presenceExt[to]?.ext]) ? getUserOnlineStatus[presenceExt[to]?.ext] : customIcon} className={classes.imgStyle} />
-            </div>
-            : null
+              <div className={classes.imgBox}>
+                <img alt="" src={(presenceExt && getUserOnlineStatus[presenceExt[to]?.ext]) ? getUserOnlineStatus[presenceExt[to]?.ext] : customIcon} className={classes.imgStyle} />
+              </div>
+              : null
           }
-        {name || to}
-        {
-          presenceExt && presenceExt[to]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
-        }
-      </Box>
-      <Box position="static">
-        <IconButton className="iconfont icon" style={{display: chatType === "groupChat" && showThread ? "inline-flex" : "none"}} onClick={openThreadList} ref={threadListAnchorEl}>
-          <img alt="" className={classes.threadIcon} src={threadIcon} />
-        </IconButton>
-        <IconButton
-          onClick={handleSessionInfoClick}
-          className="iconfont icon-hanbaobao icon"
-        ></IconButton>
-      </Box>
-      {renderSessionInfoMenu()}
-      <ThreadListPanel anchorEl={anchorEl} onClose={onClose}/>
-    </div>
+          {name || to}
+        </Box>
+
+        <Box position="static">
+          {
+            window.location.protocol === 'https:' && isShowRTC && <>
+              <IconButton
+                onClick={callAudio}
+                className="iconfont icon-yuyin icon"
+              ></IconButton>
+              <IconButton
+                onClick={callVideo}
+                className="iconfont icon-shipin icon"
+              ></IconButton>
+            </>
+          }
+
+          <IconButton
+            onClick={handleSessionInfoClick}
+            className="iconfont icon-hanbaobao icon"
+          ></IconButton>
+        </Box>
+        {renderSessionInfoMenu()}
+      </div>
+      <InviteModal open={inviteOpen} onClose={handleInviteClose} onCall={startCall} members={groupMembers} joinedMembers={confrData.joinedMembers} />
+    </>
   );
 };
 

@@ -8,43 +8,65 @@ import GlobalPropsActions from "../redux/globalProps";
 import ThreadActions from "../redux/thread"
 import uikit_store from "../redux/index";
 export default function createlistener(props) {
-  WebIM.conn.addEventHandler('EaseChat',{
-    onConnected: (msg) => {
-        // init DB
-        AppDB.init(WebIM.conn.context.userId);
-      // get session list
-      store.dispatch(SessionActions.getSessionList(WebIM.conn.context.userId));
-      const options = {
-        appKey:WebIM.conn.context.appKey,
-        username:WebIM.conn.context.userId
-      }
-      store.dispatch(SessionActions.getJoinedGroupList())
-      store.dispatch(GlobalPropsActions.saveGlobalProps(options));
-      props.successLoginCallback && props.successLoginCallback({isLogin:true})
-    },
+	WebIM.conn.addEventHandler("EaseChat", {
+		onConnected: (msg) => {
+			// init DB
+			AppDB.init(WebIM.conn.context.userId);
+			// get session list
+			store.dispatch(SessionActions.getSessionList());
+			const options = {
+				appKey: WebIM.conn.context.appKey,
+				username: WebIM.conn.context.userId,
+			};
+			store.dispatch(SessionActions.getJoinedGroupList());
+			store.dispatch(GlobalPropsActions.saveGlobalProps(options));
+			props.successLoginCallback &&
+			props.successLoginCallback({ isLogin: true });
+		},
 
-    onTextMessage: (message) => {
-      console.log("onTextMessage", message);
-      const { chatType, from, to} = message;
-      const sessionId = chatType === "singleChat" ? from : to;
-      store.dispatch(MessageActions.addMessage(message, "txt"));
-      store.dispatch(SessionActions.topSession(sessionId, chatType, message))
-    },
-    onFileMessage: (message) => {
-      console.log("onFileMessage", message);
-      store.dispatch(MessageActions.addMessage(message, "file"));
-    },
-    onVideoMessage: (message) => {
-      console.log("onVideoMessage", message);
-      store.dispatch(MessageActions.addMessage(message, "video"));
-    },
-    onImageMessage: (message) => {
-      console.log("onImageMessage", message);
-      const { chatType, from, to } = message;
-      const sessionId = chatType === "singleChat" ? from : to;
-      store.dispatch(MessageActions.addMessage(message, "img"));
-      store.dispatch(SessionActions.topSession(sessionId, chatType, message))
-    },
+		onTextMessage: (message) => {
+			console.log("onTextMessage", message);
+			const { chatType, from, to, ext } = message;
+			const sessionId = chatType === "singleChat" ? from : to;
+			if (ext.action === 'invite') {
+				var id = WebIM.conn.getUniqueId();
+				let message = {
+					id: id,
+					status: 'sent',
+					body: {
+						type: 'custom',
+						info: {
+							type: ext.type,
+							action: 'invite',
+							duration: `${new Date().toString().slice(16, 21)} ${new Date().toString().slice(4, 10)}`
+						}
+					},
+					from: from,
+					to: to,
+					chatType: chatType
+				}
+				store.dispatch(MessageActions.addMessage(message))
+			} else {
+				store.dispatch(MessageActions.addMessage(message, "txt"));
+			}
+
+			store.dispatch(SessionActions.topSession(sessionId, chatType))
+		},
+		onFileMessage: (message) => {
+			console.log("onFileMessage", message);
+			store.dispatch(MessageActions.addMessage(message, "file"));
+		},
+		onVideoMessage: (message) => {
+			console.log("onVideoMessage", message);
+			store.dispatch(MessageActions.addMessage(message, "video"));
+		},
+		onImageMessage: (message) => {
+			console.log("onImageMessage", message);
+			const { chatType, from, to } = message;
+			const sessionId = chatType === "singleChat" ? from : to;
+			store.dispatch(MessageActions.addMessage(message, "img"));
+			store.dispatch(SessionActions.topSession(sessionId, chatType))
+		},
 
 		onAudioMessage: (message) => {
 			console.log("onAudioMessage", message);
@@ -80,7 +102,7 @@ export default function createlistener(props) {
 			);
 		},
 
-		onPresence: (msg) => {},
+		onPresence: (msg) => { },
 		onError: (err) => {
 			console.log("error");
 			console.error(err);

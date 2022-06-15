@@ -51,7 +51,7 @@ const EaseApp = (props) => {
       if (!session.lastMessage) {
         dispatch(MessageActions.fetchMessage(sessionId, sessionType));
       }
-      WebIM.conn.getPresenceStatus({usernames: [sessionId]}).then(res => {
+      WebIM.conn.getPresenceStatus({ usernames: [sessionId] }).then(res => {
         let extFlag = false
         const data = res.result[0]
         Object.values(data.status).forEach(val => {
@@ -234,12 +234,18 @@ EaseAppProvider.propTypes = {
   handleMenuItem: PropTypes.func,
   onChatAvatarClick:PropTypes.func,
   isShowReaction: PropTypes.bool,
-  customMessageList:PropTypes.array,
-  customMessageClick:PropTypes.func,
-
-  //thread-click edit panel,get thread info
+  customMessageList: PropTypes.array,
+  customMessageClick: PropTypes.func,
+  
+   //thread-click edit panel,get thread info
   onEditThreadPanel:PropTypes.func,
   onOpenThreadPanel:PropTypes.func,
+
+  agoraUid: PropTypes.string,
+  getRTCToken: PropTypes.func,
+  isShowRTC: PropTypes.bool,
+  getIdMap: PropTypes.func,
+  appId: PropTypes.string,
 };
 EaseAppProvider.defaultProps = {
   isShowUnread: true,

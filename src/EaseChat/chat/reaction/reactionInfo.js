@@ -134,6 +134,10 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 		2: avatarIcon2,
 		3: avatarIcon3,
 	};
+
+	useEffect(() => {
+		setValue(0)
+	}, [anchorEl])
 	
 	const handleChange = (event, newValue) => {
 		setValue(newValue);

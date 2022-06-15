@@ -10,6 +10,8 @@ import FileMessage from "./messages/fileMessage";
 import ImgMessage from "./messages/imageMessage";
 import AudioOrVideoMessage from "./messages/audioOrVideoMessage";
 import TextMessage from "./messages/textMessage";
+import NoticeMessage from './messages/noticeMessage'
+import CustomMessage from './messages/customMessage'
 import ThreadActions from "../../redux/thread"
 import i18next from "i18next";
 import ThreadNotify from "./messages/threadNotify";
@@ -136,16 +138,25 @@ function MessageList({ messageList, showByselfAvatar }) {
                     />
                   );
                 } else if (msg.body.type === "audio" || msg.body.type === "video") {
-                  return <AudioOrVideoMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}  onCreateThread={createThread} showThread={showThread}/>;
+                  return <AudioOrVideoMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}/>;
                 } else if (msg.body.type === "recall") {
                   return (
                     <RetractedMessage message={msg} key={msg.id + index}/>
                   );
-                }else if (msg.body.type === "threadNotify") {
+                } else if(msg.body.type === "notice"){
+                    return (
+                      <NoticeMessage message={msg} key={msg.id + index}/>
+                    )
+                } else if(msg.body.type === 'custom'){
+                  return (
+                      <CustomMessage message={msg} key={msg.id + index}/>
+                    )
+                } else if (msg.body.type === "threadNotify") {
                   return (
                     <ThreadNotify message={msg} key={msg.id + index}/>
                   );
-                } else {
+                }
+                else {
                   return null;
                 }
               })

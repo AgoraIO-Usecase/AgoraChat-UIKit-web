@@ -698,7 +698,7 @@ export const updateMessageMid = (state, { id, mid,to }) => {
 		return state
     }
 	const byId = state.getIn(["byId", id]);
-
+    if(!byId) return state // callkit 发的消息 uikit拿不到 id
 	if (!_.isEmpty(byId)) {
 		const { chatType, chatId } = byId;
 		let messages = state
