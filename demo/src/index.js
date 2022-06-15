@@ -1,6 +1,7 @@
 import React, { Component,useState } from "react";
 import { render } from "react-dom";
 import { EaseChat, EaseApp } from "../../src/index";
+import axios from 'axios'
 // import WebIM from "./WebIM";
 import val from "./comm";
 // import initListen from "./WebIMListen";
@@ -8,6 +9,32 @@ export default class Demo extends Component {
   state = {
     token: val,
   };
+
+  getRtctoken(params) {
+    const { channel, agoraId, username } = params;
+    const url = `https://a41.easemob.com/token/rtc/channel/${channel}/agorauid/${agoraId}?userAccount=${username}`
+    return axios
+      .get(url)
+      .then(function (response) {
+        console.log('getRtctoken', response)
+        return response.data;
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
+  getConfDetail = (username, channelName) => {
+    const url = `https://a41.easemob.com/agora/channel/mapper?channelName=${channelName}&userAccount=${username}`
+
+    return axios.get(url)
+      .then(function (response) {
+        let members = response.data.result
+        return members
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
 
   postData = (url, data) => {
     return fetch(url, {
@@ -22,7 +49,7 @@ export default class Demo extends Component {
       referrer: "no-referrer",
     }).then((response) => response.json());
   };
-    addSessionItem = () => {
+  addSessionItem = () => {
     let session = {
       conversationType: "singleChat",
       conversationId: "zd132",
@@ -45,6 +72,24 @@ export default class Demo extends Component {
   test4 = (val) =>{
     console.log('val',val);
   }
+  handleGetToken = async (data) => {
+    let token = ''
+    console.log('data', data)
+
+    // zd3 token
+    token = await this.getRtctoken({ channel: data.channel, agoraId: '527268238', username: data.username })
+    return {
+      agoraUid: '527268238',
+      accessToken: token.accessToken
+    }
+  }
+
+  handleGetIdMap = async (data) => {
+    let member = {}
+    member = await this.getConfDetail(data.userId, data.channel)
+    return member
+  }
+
   test5 = (val1,val2) => {
     console.log('val',val1,val2)
   }
@@ -63,11 +108,10 @@ export default class Demo extends Component {
             onAvatarChange={this.test3}
             onChatAvatarClick={this.test4}
             onEditThreadPanel={this.test5}
-            // appkey= "easemob-demo#chatdemoui"
-            appkey= "41117440#383391"
-            username="test005"
-            // password="1"
-            agoraToken="007eJxTYJg1KW7b/o7cHV6yK35NkOkKftHyTuvTWiGH45le6TufX3NUYEgzTEk2N7dISklJNjMxS0yxSDMyM7A0N0tONEoxMDRN1tdakaQgw8DgMuslEyMDKwMjEIL4KgyWyYamqSYmBropFkZmuoaGqcm6iUYWQK6xZZqlgUFSsklKMgAAeyfs"
+            appkey= "easemob-demo#easeim"
+            username="zd3"
+            password="1"
+            // agoraToken="007eJxTYAiTXhXwV2WKwARx+Xxlv3x9dZfw6xXTdT42T5v7PqsuNUeBIc0wJdnc3CIpJSXZzMQsMcUizcjMwNLcLDnRKMXA0DSZ48XUJAUZBoZZ35YHMDKwMjACIYivwpBkYGaSmGJmoGtmZJKka2iYmqxrkWpopGuaZGRikWRgapGWZAkAkzwlRw=="
             header={<div style={{ height: "100px" }}>TestHeader</div>}/>
         </div>
       </div>

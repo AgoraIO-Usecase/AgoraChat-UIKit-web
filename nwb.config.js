@@ -8,7 +8,7 @@ module.exports = {
   webpack: {
     aliases: {
       react: path.resolve('./node_modules/react'),
-    },
+    }
   },
   devServer: {
     https: true
