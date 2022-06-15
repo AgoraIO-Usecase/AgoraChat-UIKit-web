@@ -20,6 +20,11 @@ import _ from 'lodash'
 import avatarIcon1 from '../../../common/images/avatar1.png'
 import avatarIcon2 from '../../../common/images/avatar2.png'
 import avatarIcon3 from '../../../common/images/avatar3.png'
+import avatarIcon4 from '../../../common/images/avatar4.png'
+import avatarIcon5 from '../../../common/images/avatar5.png'
+import avatarIcon6 from '../../../common/images/avatar6.png'
+import avatarIcon7 from '../../../common/images/avatar7.png'
+import avatarIcon11 from '../../../common/images/avatar11.png'
 import groupAvatarIcon from '../../../common/images/groupAvatar.png'
 import threadIcon from '../../../common/images/thread.png'
 
@@ -79,7 +84,7 @@ const useStyles = makeStyles((theme) => {
       height: '12px',
     },
     threadIcon: {
-      width: '21px',
+      width: '20px',
       height: '20px',
     },
     deleteChatImg: {
@@ -91,8 +96,11 @@ const useStyles = makeStyles((theme) => {
       borderRadius: '50%',
       width: '32px',
       cursor: 'pointer',
-      marginRight: '10px',
+      marginRight: '12px',
       verticalAlign: 'middle',
+      '&:hover': {
+        background: 'rgba(0, 0, 0, 0.04)',
+      }
     },
     userStatusOnline: {
       fontFamily: 'Roboto',
@@ -104,6 +112,9 @@ const useStyles = makeStyles((theme) => {
     },
     nameStatusMuteBox: {
       textAlign: 'left'
+    },
+    threadBtnBox: {
+      padding: '6px',
     }
   };
 });
@@ -183,14 +194,22 @@ const MessageBar = () => {
   let userAvatars = {
     1: avatarIcon1,
     2: avatarIcon2,
-    3: avatarIcon3
+    3: avatarIcon3,
+    4: avatarIcon4,
+    5: avatarIcon5,
+    6: avatarIcon6,
+    7: avatarIcon7,
+    8: avatarIcon11,
   }
   const [userAvatarIndex, setUserAvatarIndex] = useState([])
   const [usersInfoData, setUsersInfoData] = useState([])
   useEffect(() => {
     let newwInfoData =usersInfoData && usersInfoData.length > 0 ? usersInfoData : localStorage.getItem("usersInfo_1.0")
+    if (newwInfoData && !usersInfoData.length) {
+      newwInfoData = JSON.parse(newwInfoData)
+    }
     setUsersInfoData(newwInfoData)
-    setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 1)
+    setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 8)
   }, [to])
   const threadListPanelDisplay = useSelector((state) => state.thread?.threadListPanelDisplay) || false;
   useEffect(()=>{
@@ -221,12 +240,12 @@ const MessageBar = () => {
             presenceExt && presenceExt[to]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
           }
           {
-            presenceExt && presenceExt[to]?.device && <div className={classes.userStatusOnline}>{presenceExt[to]?.device} {presenceExt[to]?.ext === '' ? 'Online' : presenceExt[to]?.ext}</div>
+            chatType === "singleChat" && presenceExt && presenceExt[to]?.device && <div className={classes.userStatusOnline}>{presenceExt[to]?.device} {presenceExt[to]?.ext === '' ? 'Online' : presenceExt[to]?.ext}</div>
           }
         </div>
       </Box>
       <Box position="static">
-        <IconButton className="iconfont icon" style={{display: chatType === "groupChat" && showThread ? "inline-flex" : "none"}} onClick={openThreadList} ref={threadListAnchorEl}>
+        <IconButton className={`${classes.threadBtnBox} iconfont icon`} style={{display: chatType === "groupChat" && showThread ? "inline-flex" : "none"}} onClick={openThreadList} ref={threadListAnchorEl}>
           <img alt="" className={classes.threadIcon} src={threadIcon} />
         </IconButton>
         {/* <IconButton

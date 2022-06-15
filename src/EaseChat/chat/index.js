@@ -112,7 +112,7 @@ const EaseChatProvider = (props) => {
              <Chat {...props} />
           </div>
           <div style={{flex: '0 0 392px',overflow:'hidden',display: threadPanelStates?'flex':'none',height: '100%'}}>
-            <hr style={{width:0,height:'100%',border:'none',borderRight:'8px solid #edeff2'}}/>
+            <hr style={{width:0,height:'100%',border:'none',borderRight:'8px solid #edeff2', marginTop: '0px'}}/>
             <Thread {...props}/>
           </div>
         </div>

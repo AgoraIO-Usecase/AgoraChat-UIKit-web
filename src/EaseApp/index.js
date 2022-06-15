@@ -56,6 +56,7 @@ const EaseApp = (props) => {
         let extFlag = false
         let device = ''
         const data = res.result[0].status
+        const dataExt = res.result[0]
         for (const item in data) {
           if (Number(data[item]) === 1) {
             extFlag = true
@@ -63,7 +64,7 @@ const EaseApp = (props) => {
           }
         }
         if (!extFlag) {
-          data.ext = 'Offline'
+          dataExt.ext = 'Offline'
         }
         if (!device) {
           device = Object.keys(data).length ? (Object.keys(data)[0].includes('webim') ? 'Web' : 'Mobile') : ''
@@ -74,7 +75,7 @@ const EaseApp = (props) => {
             chatType: sessionType,
             name: name,
             presenceExt: {[sessionId]: {
-              ext: data.ext,
+              ext: dataExt.ext,
               device
             }}
           })

@@ -15,6 +15,11 @@ import noticeIcon from "../../common/images/notice@2x.png";
 import avatarIcon1 from '../../common/images/avatar1.png'
 import avatarIcon2 from '../../common/images/avatar2.png'
 import avatarIcon3 from '../../common/images/avatar3.png'
+import avatarIcon4 from '../../common/images/avatar4.png'
+import avatarIcon5 from '../../common/images/avatar5.png'
+import avatarIcon6 from '../../common/images/avatar6.png'
+import avatarIcon7 from '../../common/images/avatar7.png'
+import avatarIcon11 from '../../common/images/avatar11.png'
 import searchgray from '../../common/images/searchgray.png'
 
 import i18next from "i18next";
@@ -95,7 +100,7 @@ export default function SessionList(props) {
       /******* --sessionId replaces the group name-- *******/
       joinedGroups.length>0 && joinedGroups.forEach((item) => {
         if(item.groupid === session.sessionId){
-          session.name = newGroupName[session.sessionId] ? newGroupName[session.sessionId] : item.groupname
+          session.name = (newGroupName && newGroupName[session.sessionId]) ? newGroupName[session.sessionId] : item.groupname
         }
       })
 
@@ -178,7 +183,11 @@ export default function SessionList(props) {
   let userAvatars = {
     1: avatarIcon1,
     2: avatarIcon2,
-    3: avatarIcon3
+    3: avatarIcon3,
+    4: avatarIcon4,
+    5: avatarIcon5,
+    6: avatarIcon6,
+    7: avatarIcon7,
   }
  let renderSession = searchAry && searchAry.length>0?searchAry:renderSessionList
 
@@ -227,8 +236,11 @@ export default function SessionList(props) {
           let usersInfoData = localStorage.getItem("usersInfo_1.0")
           let avatarSrc = "";
           if (session.sessionType === "singleChat") {
+            if (usersInfoData) {
+              usersInfoData = JSON.parse(usersInfoData)
+            }
             let findIndex =  _.find(usersInfoData, { username: session.sessionId }) || ''
-            avatarSrc = userAvatars[findIndex.userAvatar] || avatarIcon1
+            avatarSrc = userAvatars[findIndex.userAvatar] || avatarIcon11
           }else if (session.sessionType === "groupChat") {
             avatarSrc = groupIcon;
           } else if (session.sessionType === "chatRoom") {

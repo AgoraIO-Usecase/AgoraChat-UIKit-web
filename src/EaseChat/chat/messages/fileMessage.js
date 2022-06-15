@@ -13,6 +13,8 @@ import threadIcon from "../../../common/images/thread.png"
 import MsgThreadInfo from "./msgThreadInfo"
 
 import MessageStatus from "./messageStatus";
+import ico_file from "../../../common/images/ico_file.svg";
+import { userAvatar } from '../../../utils'
 
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
@@ -40,34 +42,43 @@ const useStyles = makeStyles((theme) => ({
 		flexDirection: 'column',
 		maxWidth: "80%",
 		minWidth: "40%",
-		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
+		alignItems: (props) => (props.bySelf ? "flex-start" : "unset"),
 		position: "relative",
 		background: '#f2f2f2',
 		padding:  (props) => props.showThreadEntry? '0':'12px',
 		marginLeft:'12px',
-		padding: '12px',
+		padding: '0',
 		borderRadius: (props) =>
 			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
 	},
 	fileCard: {
-		width: "252px",
-		height: "72px",
+		width: (props) => props.bySelf ? "252px" : '',
+		height: (props) => props.bySelf ? "72px" : '',
 		marginTop: (props) => (!props.bySelf && props.rnReactions ? "15px" : "0"),
-		backgroundColor: "#fff",
+		// backgroundColor: "#fff",
 		display: "flex",
 		alignItems: "center",
-		marginBottom: "6px",
+		justifyContent: (props) => props.bySelf ? '' : 'space-between',
+		flexDirection: (props) => props.bySelf ? '' : 'row-reverse',
+		// marginBottom: "6px",
+		padding: props => props.bySelf ? '' : '8px',
 	},
 	fileIcon: {
-		width: "59px",
-		height: "59px",
-		background: "rgba(35, 195, 129, 0.06)",
-		borderRadius: "4px",
+		width: "50px",
+		height: "50px",
+		background: "#fff",
+		borderRadius: "12px",
 		border: "1px solid rgba(35, 195, 129, 0.06)",
 		textAlign: "center",
-		lineHeight: "59px",
+		lineHeight: "47px",
 		margin: "0 7px 0 7px",
+		marginRight: (props) => props.bySelf ? '7px' : '0px',
 		flexShrink: 0,
+		'& img': {
+			transform: 'rotateX(180deg)',
+			width: '40px',
+			verticalAlign: 'middle',
+		}
 	},
 	fileInfo: {
 		"& p": {
@@ -225,21 +236,20 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 			{!message.bySelf && (
 				<img
 					className={classes.avatarStyle}
-					src={avatar}
+					src={userAvatar(message.from)}
 					onClick={(e) =>
 						onAvatarChange && onAvatarChange(e, message)
 					}
 				></img>
 			)}
 			{showByselfAvatar && message.bySelf && (
-				<img className={classes.avatarStyle} src={avatar}></img>
+				<img className={classes.avatarStyle} src={userAvatar(message.from)}></img>
 			)}
 			<div className={classes.textBodyBox}>
 				<span className={classes.userName}>{message.from}</span>
 				<div className={classes.fileCard} onContextMenu={handleClick}>
 					<div className={classes.fileIcon}>
-						{/* <Icon className={clsx(classes.icon, 'iconfont icon-fujian')}></Icon> */}
-						{i18next.t("file")}
+						<img src={ico_file} alt="file" />
 					</div>
 					<div className={classes.fileInfo}>
 						<p>{message.filename}</p>
@@ -247,11 +257,11 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 							{Math.floor(message.body.size / 1024) + "kb"}
 						</span>
 					</div>
-					<div className={classes.download}>
+					{/* <div className={classes.download}>
 						<a href={message.body.url} download={message.filename}>
 							<IconButton className="iconfont icon-xiazai"></IconButton>
 						</a>
-					</div>
+					</div> */}
 				</div>
 				<div className={classes.textReaction}>
 					{hoverDeviceModule ? (
@@ -293,7 +303,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 				}
 			>
 				{message.bySelf && (
-					<MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
+					<MenuItem onClick={recallMessage}>{i18next.t("Withdraw")}</MenuItem>
 				)}
 				{customMessageList &&
 					customMessageList.map((val, key) => {

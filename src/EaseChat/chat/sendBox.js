@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "18px",
     padding: "5px",
     fontFamily: 'Roboto',
-    width: '98%',
+    width: '96%',
   },
   senderBar: {
     height: "12px",

@@ -166,6 +166,8 @@ const { Types, Creators } = createActions({
 					let url = data.uri + "/" + data.entities[0].uuid;
 					formatMsg.url = url;
 					formatMsg.body.url = url;
+					formatMsg.thumb = data.thumb
+					formatMsg.body.thumb = data.thumb
 					const type = isChatThread? 'threadMessage' : chatType;
 					dispatch(Creators.updateMessages(type, to, formatMsg ));
 					imageEl.current.value = "";

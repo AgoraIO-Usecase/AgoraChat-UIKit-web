@@ -14,6 +14,7 @@ import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
 import { EaseChatContext } from "../index";
 import threadIcon from "../../../common/images/thread.png"
+import { userAvatar } from '../../../utils'
 
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
@@ -67,7 +68,7 @@ const useStyles = makeStyles((theme) => ({
 		fontSize: "16px",
 		background: (props) =>
 			props.bySelf
-				? "linear-gradient(124deg, #c913df 20%,#154DFE 90%)"
+				? "linear-gradient(135deg, #B128DD 0%, #234AFC 100%)"
 				: "#F2F2F2",
 		color: (props) => (props.bySelf ? "#fff" : "#000"),
 		borderRadius: (props) =>
@@ -100,7 +101,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 	reactionBox: {
 		position: "absolute",
-		top: (props) => (props.bySelf ? "-22px" : "-18px"),
+		top: (props) => (props.bySelf ? "-28px" : "-18px"),
 		right: (props) => (props.bySelf ? "0px" : ""),
 		left: (props) => (props.bySelf ? "" : "0px"),
 		background: "#F2F2F2",
@@ -248,14 +249,14 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 				{!message.bySelf && (
 					<img
 						className={classes.avatarStyle}
-						src={avatar}
+						src={userAvatar(message.from)}
 						onClick={(e) =>
 							onAvatarChange && onAvatarChange(e, message)
 						}
 					></img>
 				)}
 				{showByselfAvatar && message.bySelf && (
-					<img className={classes.avatarStyle} src={avatar}></img>
+					<img className={classes.avatarStyle} src={userAvatar(message.from)}></img>
 				)}
 			</div>
 			<div className={classes.textBodyBox}>
@@ -312,7 +313,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 				}
 			>
 				{message.bySelf && (
-					<MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
+					<MenuItem onClick={recallMessage}>{i18next.t("Withdraw")}</MenuItem>
 				)}
 				{
 					<MenuItem onClick={changeCopyVal}>

@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/styles";
 import store from "../../../redux/index";
 import MessageActions from "../../../redux/message";
 import WebIM from "../../../utils/WebIM";
-import Popover from "@material-ui/core/Popover";
+import Dialog from "@material-ui/core/Dialog";
 import AppBar from "@material-ui/core/AppBar";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
 		justifyContent: "space-between",
 		padding: "0px 15px",
 		height: "58px",
-		borderBottom: "2px solid #C4C4C4",
+		borderBottom: "1px solid #C4C4C4",
 	},
 	infoReaction: {
 		height: `calc(100% - 60px)`,
@@ -52,6 +52,19 @@ const useStyles = makeStyles((theme) => ({
 	},
 	root: {
 		background: "#FFFFFF",
+		'& .MuiTabs-scroller .MuiTabs-indicator': {
+			background: '#114EFF',
+			height: '3px',
+			display: 'inline-block',
+			borderRadius: '5px',
+		},
+		'& .MuiTabScrollButton-root': {
+			width: '25px',
+			'& .MuiSvgIcon-root': {
+				width: '25px',
+				height: '25px',
+			}
+		}
 	},
 	iconStyle: {
 		width: "24px",
@@ -59,11 +72,14 @@ const useStyles = makeStyles((theme) => ({
 		cursor: "pointer",
 	},
 	reactionItem: {
-		width: "80px !important",
+		width: "70px !important",
 		minWidth: "0 !important",
 	},
 	tabPanelItem: {
 		position: "relative",
+		'& .MuiBox-root': {
+			padding: '12px'
+		}
 	},
 	reactionNumLabel: {
 		display: "flex",
@@ -97,10 +113,10 @@ const useStyles = makeStyles((theme) => ({
 		marginLeft: '8px !important',
 	},
 	myselfPopover: {
-		'& .MuiPopover-paper': {
+		'& .MuiDialog-paper': {
 				borderRadius: '12px',
-				backdropFilter: 'blur(12px)',
-				background: 'rgba(255,255,255,.8)',
+				// backdropFilter: 'blur(12px)',
+				// background: 'rgba(255,255,255,.8)',
 		}
 	}
 }));
@@ -189,19 +205,9 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 	};
 
 	return (
-		<Popover
-			keepMounted
-			open={Boolean(anchorEl)}
+		<Dialog
+			open={anchorEl}
 			onClose={onClose}
-			anchorEl={anchorEl}
-			anchorOrigin={{
-				vertical: "bottom",
-				horizontal: "left",
-			}}
-			transformOrigin={{
-				vertical: "top",
-				horizontal: "left",
-			}}
 			className={classes.myselfPopover}
 		>
 			<Box className={classes.infoBox}>
@@ -262,7 +268,7 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 					})}
 				</Box>
 			</Box>
-		</Popover>
+		</Dialog>
 	);
 };
 

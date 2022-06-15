@@ -38,7 +38,7 @@ function ThreadMessageList({ messageList, showByselfAvatar }) {
   );
   return (
     <div className={classes.root}>
-      <div className="pulldown-wrapper">
+      <div className="pulldown-wrapper" style={{padding: '0'}}>
         <div className="pulldown-tips">
           <div>
             <span style={{ fontSize: "12px" }}>

@@ -13,6 +13,8 @@ import threadIcon from "../../../common/images/thread.png"
 import MsgThreadInfo from "./msgThreadInfo"
 
 import MessageStatus from "./messageStatus";
+import { userAvatar } from '../../../utils'
+
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
     padding: "10px 0",
@@ -54,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
     height: "34px",
     background: (props) =>
       props.bySelf
-        ? "linear-gradient(124deg, rgb(201, 19, 223) 20%, rgb(21, 77, 254) 90%)"
+        ? "linear-gradient(135deg, #B128DD 0%, #234AFC 100%)" // linear-gradient(124deg, rgb(201, 19, 223) 20%, rgb(21, 77, 254) 90%)
         : "rgb(242, 242, 242)",
     borderRadius: (props) =>
       props.bySelf ? "16px 16px 4px" : "16px 16px 16px 4px",
@@ -237,11 +239,11 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
     >
       {!message.bySelf && (
         <Avatar
-          src={avatar}
+          src={userAvatar(message.from)}
           onClick={(e) => onAvatarChange && onAvatarChange(e, message)}
         ></Avatar>
       )}
-      {showByselfAvatar && message.bySelf && <Avatar src={avatar}></Avatar>}
+      {showByselfAvatar && message.bySelf && <Avatar src={userAvatar(message.from)}></Avatar>}
       <div className={classes.textBodyBox}>
           <div className={classes.messageBox}>
             <span className={classes.userName}>{message.from}</span>
