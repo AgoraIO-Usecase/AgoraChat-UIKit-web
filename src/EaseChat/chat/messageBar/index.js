@@ -35,6 +35,9 @@ import customIcon from '../../../common/images/custom.png'
 import leaveIcon from '../../../common/images/leave.png'
 import muteImg from '../../../common/images/gray@2x.png'
 
+import deleteIcon from '../../../common/icons/delete@2x.png'
+import clearIcon from '../../../common/icons/clear@2x.png'
+
 const useStyles = makeStyles((theme) => {
   return {
     root: {
@@ -116,19 +119,15 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
         onClose={() => setSessionEl(null)}
       >
         <MenuItem onClick={handleClickClearMessage}>
-          <Box className={classes.menuItemIconBox}>
-            <Icon className="iconfont icon-qingkongxiaoxi"></Icon>
-          </Box>
+            <img src={clearIcon} alt="" style={{width:'30px'}}/>
           <Typography variant="inherit" noWrap>
             {i18next.t("Clear Message")}
           </Typography>
         </MenuItem>
         <MenuItem onClick={handleClickDeleteSession}>
-          <Box className={classes.menuItemIconBox}>
-            <Icon className="iconfont icon-shanchuhuihua"></Icon>
-          </Box>
+            <img src={clearIcon} alt=""  style={{width:'30px'}}/>
           <Typography variant="inherit" noWrap>
-            {i18next.t("Delete Session")}
+            {i18next.t("Delete Chat")}
           </Typography>
         </MenuItem>
       </Menu>
