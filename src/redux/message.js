@@ -58,6 +58,7 @@ const { Types, Creators } = createActions({
     updateThreadMessage: ['to','messageList','isScroll'],
     setThreadHistoryStart:['start'],
     setThreadHasHistory: ['status'],
+	updateNotifyDetails: ["formatMsg"],
 
 	// -async-
 	sendTxtMessage: (to, chatType, message = {}, isChatThread=false) => {
@@ -176,6 +177,8 @@ const { Types, Creators } = createActions({
 					let url = data.uri + "/" + data.entities[0].uuid;
 					formatMsg.url = url;
 					formatMsg.body.url = url;
+					formatMsg.thumb = data.thumb
+					formatMsg.body.thumb = data.thumb
 					const type = isChatThread? 'threadMessage' : chatType;
 					dispatch(Creators.updateMessages(type, to, formatMsg ));
 					if (!file?.ext?.emoji_url) {
@@ -469,6 +472,16 @@ const { Types, Creators } = createActions({
 				dispatch(Creators.updateReactionData(message))
 			}
 		}
+	},
+
+	addNotify: (message, notifyType) => {
+		const { from, gid } = message
+		return (dispatch, getState) => {
+			const formatMsg = formatLocalMessage(gid, notifyType, message, 'notify')
+			formatMsg.from = from;
+			formatMsg.type = 'notify',
+			dispatch(Creators.updateNotifyDetails(formatMsg))
+		}
 	}
 });
 
@@ -599,7 +612,17 @@ export const updateMessageStatus = (state, { message, status = "", localId, serv
 			status: status,
 		};
 		messages.splice(messages.indexOf(found), 1, msg);
-		AppDB.updateMessageStatus(id, serverMsgId, status)
+		AppDB.updateMessageStatus(id, serverMsgId, status).then(res => {
+			if (res === 0) {
+				AppDB.updateMessageStatus(serverMsgId, id, status).then(val => {
+					if (val === 0) {
+						AppDB.updateMessageStatus(id, serverMsgId, status).then(value => {
+							console.log(value)
+						})
+					}
+				})
+			}
+		})
 		
 		if(message.isChatThread){
 			state = state.setIn(['threadMessage', chatId], messages)
@@ -714,7 +737,7 @@ export const updateMessageMid = (state, { id, mid,to }) => {
 		return state
     }
 	const byId = state.getIn(["byId", id]);
-
+    if(!byId) return state // callkit 发的消息 uikit拿不到 id
 	if (!_.isEmpty(byId)) {
 		const { chatType, chatId } = byId;
 		let messages = state
@@ -766,7 +789,7 @@ export const updateReactionData = (state, { message, reaction }) => {
 					if(operator.reactionType === 'delete'){
 						item.userList.forEach((user, index) => {
 							if(user === operator.operator){
-								userList.splice(index, 1)
+								item.userList.splice(index, 1)
 							}
 						})
 					}
@@ -794,10 +817,19 @@ export const updateReactionData = (state, { message, reaction }) => {
       }
       return _arr
     }
-
-	if (byId) {
-		const { chatType } = byId;
-		let messages = state.getIn([chatType, addReactionUser]).asMutable();
+	const isThreadMessage = state.threadMessage[to]? true: false;
+	if (byId || isThreadMessage) {
+		let messages = {};
+		let chatType = '';
+		if(isThreadMessage){
+			chatType = message.chatType;
+			messages = state.getIn(['threadMessage', to]).asMutable({ deep: true })
+		}else{
+			chatType = byId.chatType;
+			messages = state.getIn([chatType, addReactionUser]).asMutable();
+		}
+		// const { chatType } = byId;
+		// let messages = state.getIn([chatType, addReactionUser]).asMutable();
 		let found = _.find(messages, { id: messageId })
 		let { reactions } = found;
 		let newReactions = [];
@@ -832,8 +864,13 @@ export const updateReactionData = (state, { message, reaction }) => {
 		};
 		messages.splice(messages.indexOf(found), 1, msg);
 		AppDB.updateMessageReaction(messageId, msg.reactions).then((res) => { });
-
-		return state.setIn([chatType, addReactionUser], messages);
+		if(isThreadMessage){
+			state = state.setIn(['threadMessage',to],messages);
+		}else{
+			state = state.setIn([chatType, addReactionUser], messages);
+		}
+		return state
+		// return state.setIn([chatType, addReactionUser], messages);
 	}else{
 		calculateUserList(reaction)
 		// state 里没有这条消息，更新数据库里消息的 reation
@@ -864,6 +901,21 @@ export const setThreadHistoryStart = (state, {start}) => {
 export const setThreadHasHistory = (state, {status}) => {
     return state.setIn(['threadHasHistory'], status)
 }
+
+export const updateNotifyDetails = (state, { formatMsg }) => {
+	let { chatType, to, id ,type} = formatMsg;
+	let messageList = state[chatType][to].asMutable({ deep: true });
+	const message = {
+		...formatMsg,
+		body: {
+			type
+		}
+	}
+	AppDB.addMessage(message)
+	messageList.push(message);
+	state = state.setIn([chatType, to], messageList);
+	return state
+}
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const messageReducer = createReducer(INITIAL_STATE, {
@@ -880,6 +932,8 @@ export const messageReducer = createReducer(INITIAL_STATE, {
     [Types.SET_THREAD_HISTORY_START]: setThreadHistoryStart,
     [Types.SET_THREAD_HAS_HISTORY]: setThreadHasHistory,
 	[Types.UPDATE_REACTION_DATA]: updateReactionData,
+	[Types.UPDATE_NOTIFY_DETAILS]: updateNotifyDetails,
+
 
 })
 

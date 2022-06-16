@@ -1,9 +1,9 @@
-import React, { memo, useState, useContext } from "react";
+import React, { memo, useState, useContext, useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
-import { Avatar, Menu, MenuItem } from "@material-ui/core";
+import { Avatar, Menu, MenuItem, Tooltip, Dialog } from "@material-ui/core";
 import avatar from "../../../common/icons/avatar1.png";
 import i18next from "i18next";
-import { renderTime } from "../../../utils";
+import { renderTime, sessionItemTime } from "../../../utils";
 import { EaseChatContext } from "../index";
 import Reaction from "../reaction";
 import RenderReactions from "../reaction/renderReaction";
@@ -13,6 +13,9 @@ import MsgThreadInfo from "./msgThreadInfo"
 import MessageStatus from "./messageStatus";
 import offlineImg from '../../../common/images/Offline.png'
 import onlineIcon from '../../../common/images/Online.png'
+import { userAvatar } from '../../../utils'
+import loadingGif from '../../../common/images/giphy.gif'
+
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
 		padding: "10px 0",
@@ -21,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
 		position: "relative",
 		display: "flex",
 		flexDirection: (props) => (props.bySelf ? "row-reverse" : "row"),
-		alignItems: "center",
+		alignItems: "flex-end",
 	},
 	userName: {
 		padding: "0 10px 4px",
@@ -59,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
 		fontSize: "11px",
 		height: "16px",
 		color: "rgba(1, 1, 1, .2)",
-		lineHeight: "16px",
+		lineHeight: "20px",
 		textAlign: "center",
 		top: "-18px",
 		width: "100%",
@@ -67,13 +70,14 @@ const useStyles = makeStyles((theme) => ({
 	textReaction: {
 		position: "absolute",
 		right: (props) => (!props.bySelf&&props.showThreaddInfo? "-12px": !props.showThreaddInfo&&!props.bySelf ? "0":""),
-		bottom: "-10px",
+		bottom: "6px",
 		transform: (props) => (props.bySelf ? "translateX(-100%)":"translateX(100%)"),
-		marginLeft: (props) => (props.bySelf ? "-15px" : ""),
+		marginLeft: (props) => (props.bySelf ? "-10px" : ""),
 		height: '24px',
+		left: '8px',
 	},
 	textReactionCon: {
-		width: '100%',
+		width: (props) => (props.showThreadEntry ? "48px" : "24px"),
 		height: '100%',
 		float: (props) => (props.bySelf? 'right':'left'),
 	},
@@ -113,7 +117,12 @@ const useStyles = makeStyles((theme) => ({
     zIndex: 1,
 		top: '16px',
     left: '5px',
-  }
+  },
+	tooltipthread: {
+		background: '#fff',
+		color: 'rgba(0, 0, 0, 0.87)',
+		boxShadow: '6px 6px 12px rgba(0, 0, 0, 0.12), -2px 0px 8px rgba(0, 0, 0, 0.08)',
+	}
 }));
 const initialState = {
   mouseX: null,
@@ -130,10 +139,13 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 
 	const showThreadEntry = showThread && !message.chatThreadOverview && !isThreadPanel && message.chatType === 'groupChat';
 	const showThreaddInfo = showThread && (!isThreadPanel) && message.chatType ==="groupChat" && message.chatThreadOverview&& (JSON.stringify(message.chatThreadOverview)!=='{}')
-	const classes = useStyles({ bySelf: message.bySelf,showThreaddInfo:showThreaddInfo});
+	const classes = useStyles({ bySelf: message.bySelf,showThreaddInfo:showThreaddInfo, showThreadEntry: showThreadEntry});
 	const [state, setState] = useState(initialState);
 	const [hoverDeviceModule, setHoverDeviceModule] = useState(false);
 	const reactionMsg = message?.reactions || [];
+	const [openDialog, setOpenDialog] = useState(false)
+	const [bigImgUrl, setBigImgUrl] = useState(false)
+	const [loadingFlag, setLoadingFlag] = useState(true)
 	
 	const handleClose = () => {
 		setState(initialState);
@@ -158,114 +170,171 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 	onCreateThread(message)
  	}
 
-	 const sentStatus = () => {
-		return (
-		  <div>
-			{message.bySelf && !isThreadPanel && (
-			  <MessageStatus
-				status={message.status}
-				style={{
-				  marginRight: "-30px",
-				  marginTop: message.chatType === "singleChat" ? "0" : "22px",
-				}}
-			  />
-			)}
-		  </div>
-		);
-	  };
-		let onLineImg = ''
-		if (message.body.onlineState === 1) {
-			onLineImg = onlineIcon
-		} else if (message.body.onlineState === 0) {
-			onLineImg = offlineImg
-		}
+	const sentStatus = () => {
 	return (
-		<li
-			className={classes.pulldownListItem}
-			onMouseOver={() => setHoverDeviceModule(true)}
-			onMouseLeave={() => setHoverDeviceModule(false)}
-		>
-			{!message.bySelf && (
-				<Avatar
-					src={avatar}
-					onClick={(e) =>
-						onAvatarChange && onAvatarChange(e, message)
+		<div>
+		{message.bySelf && !isThreadPanel && (
+			<MessageStatus
+			status={message.status}
+			style={{
+				marginRight: "-30px",
+				marginTop: message.chatType === "singleChat" ? "0" : "22px",
+			}}
+			/>
+		)}
+		</div>
+	);
+	};
+	const openBigImg = (url) => {
+		setOpenDialog(true)
+		// setBigImgUrl(url)
+		canvasDataURL(url, {quality: 0.2})
+		setLoadingFlag(true)
+	}
+	function canvasDataURL(path, obj, callback){
+		var img = new Image();
+		img.src = path;
+		img.setAttribute("crossOrigin",'Anonymous')
+		img.onload = function(){
+				var that = this;
+				var w = that.width,
+						h = that.height,
+						scale = w / h;
+				w = obj.width || w;
+				h = obj.height || (w / scale);
+				var quality = 0.7;
+				var canvas = document.createElement('canvas');
+				var ctx = canvas.getContext('2d');
+				var anw = document.createAttribute("width");
+				anw.nodeValue = w;
+				var anh = document.createAttribute("height");
+				anh.nodeValue = h;
+				canvas.setAttributeNode(anw);
+				canvas.setAttributeNode(anh);
+				ctx.drawImage(that, 0, 0, w, h);
+				if(obj.quality && obj.quality <= 1 && obj.quality > 0){
+						quality = obj.quality;
+				}
+				var base64 = canvas.toDataURL('image/jpeg', quality);
+				setBigImgUrl(base64)
+				setLoadingFlag(false)
+				// callback(base64);
+		}
+	}
+	let onLineImg = ''
+	if (message.body.onlineState === 1) {
+		onLineImg = onlineIcon
+	} else if (message.body.onlineState === 0) {
+		onLineImg = offlineImg
+	}
+	return (
+		<>
+			<li
+				className={classes.pulldownListItem}
+				onMouseOver={() => setHoverDeviceModule(true)}
+				onMouseLeave={() => setHoverDeviceModule(false)}
+			>
+				{!message.bySelf && (
+					<Avatar
+						src={userAvatar(message.from)}
+						onClick={(e) =>
+							onAvatarChange && onAvatarChange(e, message)
+						}
+					></Avatar>
+				)}
+				{showByselfAvatar && message.bySelf && (
+					<Avatar src={userAvatar(message.from)}></Avatar>
+				)}
+				<div className={classes.textBodyBox}>
+					{
+						!message.bySelf && (
+							onLineImg && <img className={classes.onLineImg} alt="" src={onLineImg} />
+						)
 					}
-				></Avatar>
-			)}
-			{showByselfAvatar && message.bySelf && (
-				<Avatar src={avatar}></Avatar>
-			)}
-			<div className={classes.textBodyBox}>
-				{
-          !message.bySelf && (
-            onLineImg && <img className={classes.onLineImg} alt="" src={onLineImg} />
-          )
-        }
-				<span className={classes.userName}>{message.from}</span>
-				<div className={classes.imgBox} onContextMenu={handleClick}>
-					<img src={message.url} alt="img message"></img>
-					<div className={classes.textReaction}>
-						{hoverDeviceModule ? (
-							<div className={classes.textReactionCon}>
-								{!isThreadPanel && isShowReaction && (
-									<Reaction message={message}/>
-								)}
-							{showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
-							  <div className={classes.thread}></div></div>}
-               				</div>
-						) : (
-							sentStatus()
+					<span className={classes.userName}>{message.from}</span>
+					<div className={classes.imgBox} onContextMenu={handleClick}>
+						<img src={message.thumb || message.url + '?thumbnail=true'}  alt="img message" onClick={() => openBigImg(message.url)}></img>
+						<div className={classes.textReaction}>
+							{hoverDeviceModule ? (
+								<div className={classes.textReactionCon}>
+									{isShowReaction && (
+										<Reaction message={message}/>
+									)}
+									{
+										showThreadEntry &&
+										<div className={classes.threadCon} onClick={createThread}>
+											<Tooltip title='Create Thread' placement="top" classes={{ tooltip: classes.tooltipthread }}>
+												<div className={classes.thread}></div>
+											</Tooltip>
+										</div>
+									}
+								</div>
+							) : (
+								sentStatus()
+							)}
+						</div>
+						{showThreaddInfo ? <MsgThreadInfo message={message} />: null}
+						{reactionMsg.length > 0 && (
+							<div className={classes.reactionBox}>
+								<RenderReactions message={message} />
+							</div>
 						)}
 					</div>
-					{showThreaddInfo ? <MsgThreadInfo message={message} />: null}
-					{reactionMsg.length > 0 && (
-						<div className={classes.reactionBox}>
-							<RenderReactions message={message} />
-						</div>
-					)}
 				</div>
-			</div>
 
-      <div className={classes.time}>{renderTime(message.time)}</div>
-      <Menu
-        keepMounted
-        open={state.mouseY !== null}
-        onClose={handleClose}
-        anchorReference="anchorPosition"
-        anchorPosition={
-          state.mouseY !== null && state.mouseX !== null
-            ? { top: state.mouseY, left: state.mouseX }
-            : undefined
-        }
-      >
-        {message.bySelf && (
-          <MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
-        )}
-        {customMessageList &&
-          customMessageList.map((val, key) => {
-            const bySelf = message.bySelf;
-            let show = false
-            if(val.position === 'others'){}
-            switch(val.position){
-              case 'others':
-                show = bySelf ? false : true
-                break;
-              case 'self':
-                show = bySelf ? true : false
-                break;
-              default:
-                show = true
-                break;
-            }
-            return show ?(
-              <MenuItem key={key} onClick={_customMessageClick(val, message)}>
-                {val.name}
-              </MenuItem>
-            ): null;
-          })}
-      </Menu>
-    </li>
+				<div className={classes.time}>{sessionItemTime(message.time)}</div>
+				<Menu
+					keepMounted
+					open={state.mouseY !== null}
+					onClose={handleClose}
+					anchorReference="anchorPosition"
+					anchorPosition={
+						state.mouseY !== null && state.mouseX !== null
+							? { top: state.mouseY, left: state.mouseX }
+							: undefined
+					}
+				>
+					{message.bySelf && (
+						<MenuItem onClick={recallMessage}>{i18next.t("Withdraw")}</MenuItem>
+					)}
+					{customMessageList &&
+						customMessageList.map((val, key) => {
+							const bySelf = message.bySelf;
+							let show = false
+							if(val.position === 'others'){}
+							switch(val.position){
+								case 'others':
+									show = bySelf ? false : true
+									break;
+								case 'self':
+									show = bySelf ? true : false
+									break;
+								default:
+									show = true
+									break;
+							}
+							return show ?(
+								<MenuItem key={key} onClick={_customMessageClick(val, message)}>
+									{val.name}
+								</MenuItem>
+							): null;
+						})}
+				</Menu>
+			</li>
+			<Dialog
+				open={openDialog}
+				onClose={() => setOpenDialog(false)}
+			>
+				<div>
+					{
+						loadingFlag ?
+						<img style={{width: '40px'}} src={loadingGif} alt="loading" />
+						:
+						<img style={{width: '100%', verticalAlign: 'middle'}} src={bigImgUrl} alt="big image" />
+					}
+				</div>
+			</Dialog>
+		</>
   );
 }
 

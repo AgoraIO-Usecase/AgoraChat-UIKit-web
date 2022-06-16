@@ -17,7 +17,7 @@
     list-style: none;
     box-sizing: border-box;
 }
-.tlp-header{
+.tlp-header-thread{
     display: flex;
     padding: 0 4px 0 24px;
     height: 60px;

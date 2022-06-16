@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useRef, useState, useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
-import { Avatar, Icon } from "@material-ui/core";
-import { renderTime } from "../../../utils/index";
+import { Avatar, Icon, Tooltip } from "@material-ui/core";
+import { renderTime, sessionItemTime } from "../../../utils/index";
 import avatar from "../../../common/icons/avatar1.png";
 import AudioPlayer from "./audioPlayer/audioPlayer";
 import { Menu, MenuItem } from "@mui/material";
@@ -15,6 +15,8 @@ import MsgThreadInfo from "./msgThreadInfo"
 import MessageStatus from "./messageStatus";
 import offlineImg from '../../../common/images/Offline.png'
 import onlineIcon from '../../../common/images/Online.png'
+import { userAvatar } from '../../../utils'
+
 const useStyles = makeStyles((theme) => ({
   pulldownListItem: {
     padding: "10px 0",
@@ -23,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     display: "flex",
     flexDirection: (props) => (props.bySelf ? "row-reverse" : "row"),
+    alignItems: 'flex-end'
   },
   userName: {
     padding: "0 10px 4px",
@@ -49,14 +52,14 @@ const useStyles = makeStyles((theme) => ({
   },
 
   audioBox: {
-    margin: (props) => (props.bySelf ? "0 10px 6px 0" : props.rnReactions? "15px 0 10px 10px": "0 0 6px 10px"),
+    margin: (props) => (props.bySelf ? "0 0px 6px 0" : props.rnReactions? "15px 0 10px 10px": "0 0 6px 10px"),
     width: (props) => `calc(208px * ${props.duration / 15})`,
     minWidth: '70px',
     maxWidth: '100%',
     height: "34px",
     background: (props) =>
       props.bySelf
-        ? "linear-gradient(124deg, rgb(201, 19, 223) 20%, rgb(21, 77, 254) 90%)"
+        ? "linear-gradient(135deg, #B128DD 0%, #234AFC 100%)" // linear-gradient(124deg, rgb(201, 19, 223) 20%, rgb(21, 77, 254) 90%)
         : "rgb(242, 242, 242)",
     borderRadius: (props) =>
       props.bySelf ? "16px 16px 4px" : "16px 16px 16px 4px",
@@ -78,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "11px",
     height: "16px",
     color: "rgba(1, 1, 1, .2)",
-    lineHeight: "16px",
+    lineHeight: "20px",
     textAlign: "center",
     top: "-18px",
     width: "100%",
@@ -97,8 +100,9 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     right: (props) => (props.bySelf ? "" : "0"),
 		left: (props) => (props.bySelf ? "0" : ""),
-		bottom: '0',
+		bottom: '6px',
 		transform: (props) => (props.bySelf ? "translateX(-100%)":"translateX(100%)"),
+    left: '0px',
   },
   reactionBox: {
     position: "absolute",
@@ -112,7 +116,7 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: "0 10px 10px 0 rgb(0 0 0 / 30%)",
   },
   textReactionCon: {
-		width: '100%',
+		width: (props) => (props.showThreadEntry ? "48px" : "24px"),
 		height: '100%',
 		float: (props) => (props.bySelf? 'right':'left'),
 	},
@@ -141,7 +145,12 @@ const useStyles = makeStyles((theme) => ({
     zIndex: 1,
     top: '20px',
     left: '0px',
-  }
+  },
+	tooltipthread: {
+		background: '#fff',
+		color: 'rgba(0, 0, 0, 0.87)',
+		boxShadow: '6px 6px 12px rgba(0, 0, 0, 0.12), -2px 0px 8px rgba(0, 0, 0, 0.08)',
+	}
 }));
 const initialState = {
   mouseX: null,
@@ -156,8 +165,23 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
     customMessageClick,
     customMessageList,
   } = easeChatProps;
-  // const url = message.body.url;
-  const url = message.bySelf? message.url: (message.audioSrcUrl || message.url);
+  // const url = message.bySelf? message.url: message.audioSrcUrl;
+  const [url, setUrl] = useState('');
+  useEffect(()=>{
+    let options = {
+      url: message.bySelf? message.url: (message.audioSrcUrl || message.url),
+      headers: {
+        Accept: 'audio/mp3'
+      },
+      onFileDownloadComplete: function (response) {
+        let objectUrl = WebIM.utils.parseDownloadResponse.call(WebIM.conn, response)
+        setUrl(objectUrl);
+      },
+      onFileDownloadError: function () {
+      }
+    };
+    WebIM.utils.download.call(WebIM.conn, options)
+  },[message.audioSrcUrl,message.url])
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [state, setState] = useState(initialState);
@@ -215,6 +239,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
     msgType: audioType,
     showThreaddInfo,
     rnReactions: reactionMsg.length > 0,
+    showThreadEntry: showThreadEntry
   });
   
   let onLineImg = ''
@@ -231,11 +256,11 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
     >
       {!message.bySelf && (
         <Avatar
-          src={avatar}
+          src={userAvatar(message.from)}
           onClick={(e) => onAvatarChange && onAvatarChange(e, message)}
         ></Avatar>
       )}
-      {showByselfAvatar && message.bySelf && <Avatar src={avatar}></Avatar>}
+      {showByselfAvatar && message.bySelf && <Avatar src={userAvatar(message.from)}></Avatar>}
       <div className={classes.textBodyBox}>
         {
           !message.bySelf && (
@@ -275,13 +300,17 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
           <div className={classes.textReaction}>
                   {hoverDeviceModule ? (
                     <div className={classes.textReactionCon}>
-                    {!isThreadPanel && isShowReaction && (
+                    {isShowReaction && (
                       <Reaction message={message}/>
                     )}
-                    { showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
-                    <div className={classes.thread}></div>
-                  </div>}
-                  
+                    {
+                      showThreadEntry &&
+                      <div className={classes.threadCon} onClick={createThread}>
+                        <Tooltip title='Create Thread' placement="top" classes={{ tooltip: classes.tooltipthread }}>
+                        <div className={classes.thread}></div>
+                        </Tooltip>
+                      </div>
+                    }
                   </div>
                   ) : (
                     sentStatus()
@@ -294,7 +323,7 @@ function AudioOrVideoMessage({ message, showByselfAvatar, onCreateThread, isThre
                   </div>
                 )}
       </div>
-      <div className={classes.time}>{renderTime(message.time)}</div>
+      <div className={classes.time}>{sessionItemTime(message.time)}</div>
       {customMessageList &&<Menu
         keepMounted
         open={state.mouseY !== null}

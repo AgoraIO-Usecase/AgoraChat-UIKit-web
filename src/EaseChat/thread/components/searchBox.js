@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { makeStyles } from "@material-ui/styles";
 import searchgray from '../../../common/images/searchgray.png'
 import searchCancel from '../../../common/images/cancel.png'
-import "../../../i18n";
+// import "../../../i18n";
 import i18next from "i18next";
 
 const useStyles = makeStyles((theme) => {

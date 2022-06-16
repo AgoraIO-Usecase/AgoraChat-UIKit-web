@@ -7,7 +7,7 @@ import { getTimeDiff } from "../../../utils/index";
 import close from '../../../common/images/threadClose.png'
 import "./index.css"
 import avatar from "../../../common/icons/avatar1.png";
-import "../../../i18n";
+// import "../../../i18n";
 import i18next from "i18next";
 import { emoji } from "../../../common/emoji";
 import _ from "lodash";
@@ -75,7 +75,7 @@ const ThreadListPanel = ({ anchorEl, onClose }) => {
                     <img
                         key={v + Math.floor(Math.random() * 99 + 1)}
                         alt={v}
-                        src={require(`../../../common/faces/${v}`).default}
+                        src={require(`../../../common/reactions/${v}`).default}
                         width={20}
                         height={20}
                     />
@@ -165,7 +165,7 @@ const ThreadListPanel = ({ anchorEl, onClose }) => {
             }}
         >
             <Box className='threadListPanel'>
-                <div className='tlp-header'>
+                <div className='tlp-header-thread'>
                     <span className='tlp-header-title'>{i18next.t('Threads List')}</span>
                     <div className="tlp-header-icon" onClick={onClose}>
                         <img className="tlp-header-icon-close" alt="closeIcon" src={close} />

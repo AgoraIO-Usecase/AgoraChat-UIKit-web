@@ -8,7 +8,7 @@ var config = {
     autoReconnectNumMax: 10,
     useOwnUploadFun: false,
     isAutoLogin: false,
-    delivery: false,
+    delivery: true,
     loglevel: 'ERROR',
     enableLocalStorage: true,
     deviceId: 'webim'+ Math.floor(Math.random()*99 + 1),

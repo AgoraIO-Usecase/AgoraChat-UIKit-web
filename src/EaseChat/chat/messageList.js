@@ -10,10 +10,13 @@ import FileMessage from "./messages/fileMessage";
 import ImgMessage from "./messages/imageMessage";
 import AudioOrVideoMessage from "./messages/audioOrVideoMessage";
 import TextMessage from "./messages/textMessage";
+import NoticeMessage from './messages/noticeMessage'
+import CustomMessage from './messages/customMessage'
 import ThreadActions from "../../redux/thread"
 import ThirdEmoji from "./messages/thirdEmoji";
 import i18next from "i18next";
 import ThreadNotify from "./messages/threadNotify";
+import Notify from './messages/notify';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -39,16 +42,38 @@ function MessageList({ messageList, showByselfAvatar }) {
   const [isPullingDown, setIsPullingDown] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   let _not_scroll_bottom = false;
+  const [boxScrollHeight, setBoxScrollHeight] = useState(0)
 
   useEffect(() => {
-    if (!_not_scroll_bottom) {
-      setTimeout(() => {
-        const dom = scrollEl.current;
-        if (!ReactDOM.findDOMNode(dom)) return;
-        dom.scrollTop = dom.scrollHeight;
-      }, 0);
-    }
+    // if (!_not_scroll_bottom) {
+    //   setTimeout(() => {
+    //     const dom = scrollEl.current;
+    //     if (!ReactDOM.findDOMNode(dom)) return;
+    //     dom.scrollTop = dom.scrollHeight;
+    //   }, 0);
+    // }
+    const tempArr = []
+    messageList.forEach(item => {
+      if (item.body.type === 'img' || item.body.type === 'video') {
+        tempArr.push(item.body)
+      }
+    })
+    let time = tempArr.length ?  tempArr.length * 1000 : 510
+    const TimerId = setInterval(() => {
+      setBoxScrollHeight(document.getElementById('pulldownList').scrollHeight)
+    }, 500)
+    const TimeId = setTimeout(() => {
+      clearTimeout(TimeId)
+      clearInterval(TimerId)
+    }, time)
   }, [messageList.length]);
+
+  useEffect(() => {
+    document.getElementById('pulldownList').scrollIntoView({
+      behavior: 'smooth',
+      block: 'end'
+    })
+  }, [boxScrollHeight])
 
   const handleRecallMsg = useCallback(
     (message) => {
@@ -89,7 +114,7 @@ function MessageList({ messageList, showByselfAvatar }) {
   }
   return (
     <div className={classes.root}>
-      <div ref={scrollEl} className="pulldown-wrapper" onScroll={handleScroll}>
+      <div className="pulldown-wrapper" onScroll={handleScroll}>
         <div className="pulldown-tips">
           <div style={{ display: isLoaded ? "block" : "none" }}>
             <span style={{ fontSize: "12px" }}>
@@ -100,7 +125,7 @@ function MessageList({ messageList, showByselfAvatar }) {
             <span>Loading...</span>
           </div>
         </div>
-        <ul className="pulldown-list">
+        <ul ref={scrollEl} className="pulldown-list" id="pulldownList">
           {messageList.length
             ? messageList.map((msg, index) => {
                 if (msg.body.type === "txt") {
@@ -148,15 +173,27 @@ function MessageList({ messageList, showByselfAvatar }) {
                     );
                   }
                 } else if (msg.body.type === "audio" || msg.body.type === "video") {
-                  return <AudioOrVideoMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}  onCreateThread={createThread} showThread={showThread}/>;
+                  return <AudioOrVideoMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}/>;
                 } else if (msg.body.type === "recall") {
                   return (
                     <RetractedMessage message={msg} key={msg.id + index}/>
                   );
-                }else if (msg.body.type === "threadNotify") {
+                } else if(msg.body.type === "notice"){
+                    return (
+                      <NoticeMessage message={msg} key={msg.id + index}/>
+                    )
+                } else if(msg.body.type === 'custom'){
+                  return (
+                      <CustomMessage message={msg} key={msg.id + index}/>
+                    )
+                } else if (msg.body.type === "threadNotify") {
                   return (
                     <ThreadNotify message={msg} key={msg.id + index}/>
                   );
+                } else if (msg.body.type === "notify") {
+                  return (
+                    <Notify message={msg} key={msg.id + index}></Notify>
+                  )
                 } else {
                   return null;
                 }

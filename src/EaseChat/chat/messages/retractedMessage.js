@@ -1,14 +1,14 @@
 import React, { memo } from 'react'
 import { makeStyles } from "@material-ui/styles";
 import i18next from "i18next";
-import { renderTime } from '../../../utils';
+import { renderTime, sessionItemTime } from '../../../utils';
 const useStyles = makeStyles((theme) => ({
     pulldownListItem: {
         padding: '10px 0',
         listStyle: 'none',
         marginBottom: '26px',
         position: 'relative',
-        alignItems:'center'
+        alignItems:'flex-end'
     },
     text: {
         textAlign: 'center',
@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
         fontSize: '11px',
         height: '16px',
         color: 'rgba(1, 1, 1, .2)',
-        lineHeight: '16px',
+        lineHeight: '20px',
         textAlign: 'center',
         top: '-18px',
         width: '100%'
@@ -36,7 +36,7 @@ function RetractedMessage({ message }) {
                 {message.bySelf ? i18next.t('You retracted a message') : message.from + i18next.t('retracted a message')}
             </div>
             <div className={classes.time}>
-                {renderTime(message.time)}
+                {sessionItemTime(message.time)}
             </div>
         </li>
     )

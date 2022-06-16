@@ -6,10 +6,11 @@ import {
 } from "@material-ui/core";
 import threadIcon from '../../common/images/thread.png'
 import close from '../../common/images/threadClose.png'
+import edit from '../../common/images/edit.png'
 import { useSelector, useDispatch } from "../../EaseApp/index";
 import ThreadActions from "../../redux/thread";
 import { EaseChatContext } from "../chat/index";
-import "../../i18n";
+// import "../../i18n";
 import i18next from "i18next";
 import muteImg from '../../common/images/gray@2x.png'
 
@@ -26,34 +27,90 @@ const useStyles = makeStyles((theme) => {
             justifyContent: "space-between",
             alignItems: "center",
         },
+        threadIconContainer: {
+            // position: 'absolute',
+            top: '4px',
+            left: '16px',
+            display: 'inline-block',
+            width: '32px',
+            height: '32px',
+            // textAlign: 'center',
+        },
         threadIcon: {
-            width: '24px',
-            height: '21px',
+            marginTop: '5px',
+            display: 'inline-block',
+            width: '21px',
+            height: '20px',
+            objectFit: 'contain',
         },
         close: {
             width: '14px',
             height: '14px',
         },
         leftBar: {
+            // position: 'relative',
+            // paddingLeft: '36px',
             fontWeight: '600',
             textAlign: 'left',
             width: '315px',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
+            display: 'flex',
+            alignItems: 'center',
         },
         rightBar: {
             display: 'flex',
         },
         editPanel: {
-            height: '38px',
-            width: '38px',
-
+            marginTop: '4px',
+            height: '32px',
+            width: '32px',
+            textAlign: 'center',
+            lineHeight: '32px',
+            cursor: 'pointer',
+            borderRadius: '100%',
+            background: '#fff',
+            '&:hover':{
+                background: '#F2F2F2',
+            },
+            '&:active':{
+                background: '#E6E6E6',
+            }
+        },
+        editIcon: {
+            display: 'inline-block',
+            width: '4px',
+            height: '16px',
+            objectFit: 'contain',
+        },
+        closeCon: {
+            marginTop: '4px',
+            marginLeft: '4px',
+            height: '32px',
+            width: '32px',
+            textAlign: 'center',
+            lineHeight: '32px',
+            cursor: 'pointer',
+            borderRadius: '100%',
+            background: '#fff',
+            '&:hover':{
+                background: '#F2F2F2',
+            },
+            '&:active':{
+                background: '#E6E6E6',
+            }
         },
         muteImgStyle: {
             width: '12px',
             marginLeft: '2px',
             height: '12px',
+        },
+        threadNameStyle: {
+            width: '250px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            display: 'inline-block',
+            fontSize: '16px',
+            fontWeight: '600',
         }
     };
 });
@@ -75,12 +132,13 @@ const ThreadBar = () => {
     const isCreatingThread = useSelector((state) => state.thread?.isCreatingThread) || false;
     const to = useSelector((state) => state.global.globalProps?.to);
     const hasThreadEditPanel = useSelector((state) => state.thread?.hasThreadEditPanel) || false;
+    //打开thread编辑窗口
     const openEditPanel = (e) => {
         onEditThreadPanel(e, {
-            groupId: to,
-            threadId,
-            threadName,
-            threadOwner
+            groupId: to,//群组id
+            threadId,//thread id
+            threadName,//thread name
+            threadOwner,//thread owner
         });
     }
     const globalProps = useSelector((state) => state.global?.globalProps)
@@ -88,22 +146,22 @@ const ThreadBar = () => {
     return (
         <div className={classes.root}>
             <Box position="static" className={classes.leftBar}>
-                <IconButton className="iconfont icon">
+                <div className={classes.threadIconContainer}>
                     <img alt="" className={classes.threadIcon} src={threadIcon} />
-                </IconButton>
-                {threadName}
+                </div>
+                <span className={classes.threadNameStyle}>{threadName}</span>
                 {
                     presenceExt && presenceExt[threadId]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
                 }
             </Box>
             <Box position="static" className={classes.rightBar}>
-                {!isCreatingThread && hasThreadEditPanel && <IconButton
-                    className="iconfont icon-hanbaobao icon editPanel"
+                {!isCreatingThread && hasThreadEditPanel && <div
+                    className={classes.editPanel}
                     onClick={(e) => openEditPanel(e)}
-                ></IconButton>}
-                <IconButton className="iconfont icon" onClick={closeThreadPanel}>
+                ><img alt="" className={classes.editIcon} src={edit} /></div>}
+                <div className={classes.closeCon} onClick={closeThreadPanel}>
                     <img alt="" className={classes.close} src={close} />
-                </IconButton>
+                </div>
             </Box>
         </div>
     );

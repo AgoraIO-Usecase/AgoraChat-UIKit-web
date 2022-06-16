@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext, useEffect } from "react";
+import React, { useState, useRef, useContext, useEffect, createRef } from "react";
 import { makeStyles } from "@material-ui/styles";
 import ReactDOM from "react-dom";
 import ThreadBar from "./threadBar"
@@ -12,10 +12,12 @@ import { Box, IconButton } from "@material-ui/core";
 import { EaseChatContext } from "../chat/index";
 import _ from "lodash";
 import avatar from "../../common/icons/avatar1.png";
-import "../../i18n";
+// import "../../i18n";
 import i18next from "i18next";
 import { emoji } from "../../common/emoji";
 import AudioPlayer from "../chat/messages/audioPlayer/audioPlayer";
+import { userAvatar } from '../../utils'
+import '../chat/index.css'
 
 const useStyles = makeStyles((theme) => {
     return {
@@ -26,11 +28,11 @@ const useStyles = makeStyles((theme) => {
             position: "relative",
             bottom: "0",
             top: "0",
-            overflow: "hidden",
+            // overflow: "hidden",
             flexDirection: 'column',
             padding: '0 20px 0 12px',
             height: 'calc(100% - 20px)',
-            overflow: 'hidden',
+            boxSizing: 'border-box',
         },
         chat: {
             height: 'calc(100% - 130px)',
@@ -123,7 +125,7 @@ const useStyles = makeStyles((theme) => {
         },
         threadName: {
             marginTop: '4px',
-            lineHeight: '44px',
+            lineHeight: '30px',
             fontWeight: '700',
             fontSize: '18px',
             textAlign: 'left',
@@ -223,6 +225,7 @@ const ThreadPanel = () => {
     const isCreatingThread = useSelector((state) => state.thread?.isCreatingThread);
     const currentMessage = useSelector((state) => state.thread?.currentThreadInfo);
     const threadOriginalMsg = useSelector((state) => state.thread?.threadOriginalMsg);
+    const inputRef = createRef()
     const renderMessage = (body) => {
         switch (body?.type) {
             case 'txt':
@@ -259,7 +262,7 @@ const ThreadPanel = () => {
                     <img
                         key={v + Math.floor(Math.random() * 99 + 1)}
                         alt={v}
-                        src={require(`../../common/faces/${v}`).default}
+                        src={require(`../../common/reactions/${v}`).default}
                         width={20}
                         height={20}
                     />
@@ -273,14 +276,19 @@ const ThreadPanel = () => {
 
         return rnTxt;
     };
+    useEffect(() => {
+        if (isCreatingThread) {
+            inputRef.current && inputRef.current.focus()
+        }
+    }, [isCreatingThread])
     const createThread = () => {
         return (<Box>
             <div className={classes.createThreadCon}>
-                <input className={classes.threadNameInput} style={{ color: threadName.length === 0 ? '#ccc' : '#000' }} placeholder={i18next.t('Thread Name')} maxLength={64} value={threadName} onChange={(e) => changeThreadName(e)}></input>
+                <input ref={inputRef} className={classes.threadNameInput} style={{ color: threadName.length === 0 ? '#ccc' : '#000' }} placeholder={i18next.t('Thread Name')} maxLength={64} value={threadName} onChange={(e) => changeThreadName(e)}></input>
                 <span className={classes.threadNameClear} style={{ opacity: threadName.length === 0 ? '15%' : '100%' }} onClick={clearThreadName}></span>
             </div>
             <div className={classes.startTips} style={{ color: threadName.length === 0 ? '#ccc' : '#4d4d4d' }}>
-                {i18next.t('Start a Thread')}
+                {i18next.t('Send a message to start a thread in this Group Chat.')}
             </div>
         </Box>)
     }
@@ -296,7 +304,7 @@ const ThreadPanel = () => {
             <Box>
                 <div className={classes.threadOwnerInfo}>
                     <div className={classes.threadOwnerAvatarCon}>
-                        <img className={classes.threadOwnerAvatar} src={avatar} ></img>
+                        <img className={classes.threadOwnerAvatar} src={userAvatar(threadOriginalMsg.from)} ></img>
                     </div>
                     <div className={classes.threadOwnerMsg}>
                         <div className={classes.info}>
@@ -322,6 +330,24 @@ const ThreadPanel = () => {
             setIsPlaying(false);
         }, time + 500);
     };
+    const [audioUrl, setUrl] = useState('');
+    useEffect(()=>{
+        if(threadOriginalMsg.body && threadOriginalMsg?.body?.type === "audio"){
+            let options = {
+                url: threadOriginalMsg.bySelf? threadOriginalMsg.url: (threadOriginalMsg.audioSrcUrl || threadOriginalMsg.url),
+                headers: {
+                  Accept: 'audio/mp3'
+                },
+                onFileDownloadComplete: function (response) {
+                  let objectUrl = WebIM.utils.parseDownloadResponse.call(WebIM.conn, response)
+                  setUrl(objectUrl);
+                },
+                onFileDownloadError: function () {
+                }
+              };
+              WebIM.utils.download.call(WebIM.conn, options)
+        }
+      },[threadOriginalMsg])
     const renderMsgDom = (message) => {
         if (message.body.type === "txt") {
             return (
@@ -357,7 +383,7 @@ const ThreadPanel = () => {
                         {Math.floor(message.body.length) + "''"}
                     </span>
                     <AudioPlayer play={isPlaying} />
-                    <audio src={message.audioSrcUrl||message.url} ref={threadAudioRef} />
+                    <audio src={audioUrl} ref={threadAudioRef} />
                 </div>
             )
         } else if (message.body.type === "video") {

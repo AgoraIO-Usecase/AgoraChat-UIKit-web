@@ -10,7 +10,7 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Box from "@material-ui/core/Box";
 import {IconButton} from "@material-ui/core"
 import Typography from "@material-ui/core/Typography";
-import { renderTime } from "../../utils/index";
+import { renderTime, sessionItemTime } from "../../utils/index";
 import {EaseAppContext} from '../../EaseApp/index'
 import { useSelector, useDispatch } from "../../EaseApp/index";
 
@@ -21,6 +21,7 @@ import GlobalPropsActions from "../../redux/globalProps"
 import i18next from "i18next";
 
 import muteImg from '../../common/images/gray@2x.png'
+import deleteIcon from '../../common/icons/delete@2x.png'
 
 const useStyles = makeStyles((theme) => ({
       paper:{
@@ -40,7 +41,9 @@ const useStyles = makeStyles((theme) => ({
       },
       listItem: {
         padding: "0 14px",
-        borderRadius:'20px',
+        borderRadius:'16px',
+        height: '72px',
+        marginBottom: '8px',
         '& .Mui-selected':{
           backgroundColor: 'rgba(255, 255, 255, 1) !important'
         }
@@ -62,6 +65,7 @@ const useStyles = makeStyles((theme) => ({
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
+        color: '#0d0d0d',
       },
       itemMsgBox: {
         position: "relative",
@@ -80,7 +84,7 @@ const useStyles = makeStyles((theme) => ({
         display: "inline-block",
         height: "20px",
         overflow: "hidden",
-        color: "rgba(1, 1, 1, .6)",
+        color: "#666",
         width: "calc(100% - 18px)",
         fontSize: "14px",
         wordBreak: 'break-all'
@@ -91,16 +95,23 @@ const useStyles = makeStyles((theme) => ({
         display: "inline-block",
         height: "16px",
         borderRadius: "8px",
-        fontSize: "10px",
+        fontSize: "12px",
         minWidth: "16px",
         textAlign: "center",
         position: "absolute",
         right: "0",
+        padding: '0 3px',
+        letterSpacing: 0,
+        lineHeight: '16px',
       },
       muteImgStyle: {
         width: '12px',
         marginLeft: '2px',
         height: '12px',
+      },
+      avatarImg: {
+        width: '50px',
+        height: '50px',
       }
 }));
 
@@ -113,7 +124,7 @@ function SessionItem(props) {
     const dispatch = useDispatch();
     const [isShowMoreVertStyle,setIsShowMoreVertStyle] = useState(false)
     const [sessionEl, setSessionEl] = useState(null);
-    const menuList = [{name: i18next.t('Delete Session'),key:'0',value:'deleteSession'}]
+    const menuList = [{name: i18next.t('Delete Chat'),key:'0',value:'deleteSession'}]
     const globalProps = useSelector((state) => state.global?.globalProps)
     const { presenceExt } = globalProps
     const onClickMenuItem = (option,_session) => (e) =>{
@@ -166,7 +177,10 @@ function SessionItem(props) {
           >
             {menuList && menuList.map((option, index) => {
               return (
-                <MenuItem onClick={onClickMenuItem(option,_session)} key={index}>
+                <MenuItem onClick={onClickMenuItem(option,_session)} key={index} style={{width:'240px'}}>
+
+                    <img src={deleteIcon} style={{width:'30px',height:'30px',marginRight:'8px'}} alt=''></img>
+
                   <Typography variant="inherit" noWrap>
                     {i18next.t(option.name)}
                   </Typography>
@@ -191,20 +205,22 @@ function SessionItem(props) {
           <ListItemAvatar>
             <Avatar
               style={{ borderRadius: `${session.sessionType}` === "singleChat" ? "50%" : 'inherit'}}
-              alt={`${session.name || session.sessionId}`}
+              alt={`${(session.sessionName || session.name) || session.sessionId}`}
               src={avatarSrc}
+              className={classes.avatarImg}
             />
           </ListItemAvatar>
           <Box className={classes.itemRightBox}>
             <Typography className={classes.itemName}>
               <span>
-                  {session.name || session.sessionId}
+                {(session.sessionName || session.name) || session.sessionId}
                   {
                     presenceExt && presenceExt[session.sessionId]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
                   }
                 </span>
               <span className={classes.time}>
-                {renderTime(session?.lastMessage?.time)}
+                {/* {renderTime(session?.lastMessage?.time)} */}
+                {sessionItemTime(session?.lastMessage?.time)}
               </span>
             </Typography>
 
@@ -220,7 +236,7 @@ function SessionItem(props) {
                   display: session.unreadNum ? "inline-block" : "none",
                 }}
               >
-                {unreadType ?session.unreadNum:null}
+                {unreadType ?(Number(session.unreadNum) > 99 ? '99+' : session.unreadNum):null}
               </span>
               }
               {isShowMoreVertStyle && <IconButton className={classes.moreVertStyle} onClick={(e) => showMoreVert(e)}>
