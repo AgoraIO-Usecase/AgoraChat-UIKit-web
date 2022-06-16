@@ -21,6 +21,7 @@ import GlobalPropsActions from "../../redux/globalProps"
 import i18next from "i18next";
 
 import muteImg from '../../common/images/gray@2x.png'
+import deleteIcon from '../../common/icons/delete@2x.png'
 
 const useStyles = makeStyles((theme) => ({
       paper:{
@@ -123,7 +124,7 @@ function SessionItem(props) {
     const dispatch = useDispatch();
     const [isShowMoreVertStyle,setIsShowMoreVertStyle] = useState(false)
     const [sessionEl, setSessionEl] = useState(null);
-    const menuList = [{name: i18next.t('Delete Session'),key:'0',value:'deleteSession'}]
+    const menuList = [{name: i18next.t('Delete Chat'),key:'0',value:'deleteSession'}]
     const globalProps = useSelector((state) => state.global?.globalProps)
     const { presenceExt } = globalProps
     const onClickMenuItem = (option,_session) => (e) =>{
@@ -176,7 +177,10 @@ function SessionItem(props) {
           >
             {menuList && menuList.map((option, index) => {
               return (
-                <MenuItem onClick={onClickMenuItem(option,_session)} key={index}>
+                <MenuItem onClick={onClickMenuItem(option,_session)} key={index} style={{width:'240px'}}>
+
+                    <img src={deleteIcon} style={{width:'30px',height:'30px',marginRight:'8px'}} alt=''></img>
+
                   <Typography variant="inherit" noWrap>
                     {i18next.t(option.name)}
                   </Typography>

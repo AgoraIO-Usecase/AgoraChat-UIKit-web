@@ -14,6 +14,9 @@ import MsgThreadInfo from "./msgThreadInfo"
 
 import MessageStatus from "./messageStatus";
 import ico_file from "../../../common/images/ico_file.svg";
+import ico_img from "../../../common/images/img_file@2x.png";
+import ico_video from "../../../common/images/video_file@2x.png";
+
 import { userAvatar } from '../../../utils'
 
 const useStyles = makeStyles((theme) => ({
@@ -75,10 +78,12 @@ const useStyles = makeStyles((theme) => ({
 		marginRight: (props) => props.bySelf ? '7px' : '0px',
 		flexShrink: 0,
 		'& img': {
-			transform: 'rotateX(180deg)',
 			width: '40px',
 			verticalAlign: 'middle',
 		}
+	},
+	icoFileImg: {
+		transform: 'rotateX(180deg)',
 	},
 	fileInfo: {
 		"& p": {
@@ -249,7 +254,17 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 				<span className={classes.userName}>{message.from}</span>
 				<div className={classes.fileCard} onContextMenu={handleClick}>
 					<div className={classes.fileIcon}>
-						<img src={ico_file} alt="file" />
+						{
+							message.data && message.data.type ? (
+								message.data.type.includes('image') ? (
+									<img src={ico_img} alt="file" />
+								) : (
+									message.data.type.includes('video') ? <img src={ico_video} alt="file" /> : <img className={classes.icoFileImg} src={ico_file} alt="file" />
+								)
+							) : (
+								<img className={classes.icoFileImg} src={ico_file} alt="file" />
+							)
+						}
 					</div>
 					<div className={classes.fileInfo}>
 						<p>{message.filename}</p>

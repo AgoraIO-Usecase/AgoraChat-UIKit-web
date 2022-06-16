@@ -58,6 +58,7 @@ const { Types, Creators } = createActions({
     updateThreadMessage: ['to','messageList','isScroll'],
     setThreadHistoryStart:['start'],
     setThreadHasHistory: ['status'],
+	updateNotifyDetails: ["formatMsg"],
 
 	// -async-
 	sendTxtMessage: (to, chatType, message = {}, isChatThread=false) => {
@@ -455,6 +456,16 @@ const { Types, Creators } = createActions({
 				dispatch(Creators.updateReactionData(message))
 			}
 		}
+	},
+
+	addNotify: (message, notifyType) => {
+		const { from, gid } = message
+		return (dispatch, getState) => {
+			const formatMsg = formatLocalMessage(gid, notifyType, message, 'notify')
+			formatMsg.from = from;
+			formatMsg.type = 'notify',
+			dispatch(Creators.updateNotifyDetails(formatMsg))
+		}
 	}
 });
 
@@ -710,7 +721,7 @@ export const updateMessageMid = (state, { id, mid,to }) => {
 		return state
     }
 	const byId = state.getIn(["byId", id]);
-
+    if(!byId) return state // callkit 发的消息 uikit拿不到 id
 	if (!_.isEmpty(byId)) {
 		const { chatType, chatId } = byId;
 		let messages = state
@@ -874,6 +885,21 @@ export const setThreadHistoryStart = (state, {start}) => {
 export const setThreadHasHistory = (state, {status}) => {
     return state.setIn(['threadHasHistory'], status)
 }
+
+export const updateNotifyDetails = (state, { formatMsg }) => {
+	let { chatType, to, id ,type} = formatMsg;
+	let messageList = state[chatType][to].asMutable({ deep: true });
+	const message = {
+		...formatMsg,
+		body: {
+			type
+		}
+	}
+	AppDB.addMessage(message)
+	messageList.push(message);
+	state = state.setIn([chatType, to], messageList);
+	return state
+}
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const messageReducer = createReducer(INITIAL_STATE, {
@@ -890,6 +916,8 @@ export const messageReducer = createReducer(INITIAL_STATE, {
     [Types.SET_THREAD_HISTORY_START]: setThreadHistoryStart,
     [Types.SET_THREAD_HAS_HISTORY]: setThreadHasHistory,
 	[Types.UPDATE_REACTION_DATA]: updateReactionData,
+	[Types.UPDATE_NOTIFY_DETAILS]: updateNotifyDetails,
+
 
 })
 

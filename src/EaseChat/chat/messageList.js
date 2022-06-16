@@ -10,9 +10,13 @@ import FileMessage from "./messages/fileMessage";
 import ImgMessage from "./messages/imageMessage";
 import AudioOrVideoMessage from "./messages/audioOrVideoMessage";
 import TextMessage from "./messages/textMessage";
+import NoticeMessage from './messages/noticeMessage'
+import CustomMessage from './messages/customMessage'
 import ThreadActions from "../../redux/thread"
 import i18next from "i18next";
 import ThreadNotify from "./messages/threadNotify";
+import Notify from './messages/notify';
+
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
@@ -53,7 +57,7 @@ function MessageList({ messageList, showByselfAvatar }) {
         tempArr.push(item.body)
       }
     })
-    let time = tempArr.length * 1000
+    let time = tempArr.length ?  tempArr.length * 1000 : 510
     const TimerId = setInterval(() => {
       setBoxScrollHeight(document.getElementById('pulldownList').scrollHeight)
     }, 500)
@@ -157,15 +161,27 @@ function MessageList({ messageList, showByselfAvatar }) {
                     />
                   );
                 } else if (msg.body.type === "audio" || msg.body.type === "video") {
-                  return <AudioOrVideoMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}  onCreateThread={createThread} showThread={showThread}/>;
+                  return <AudioOrVideoMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}/>;
                 } else if (msg.body.type === "recall") {
                   return (
                     <RetractedMessage message={msg} key={msg.id + index}/>
                   );
-                }else if (msg.body.type === "threadNotify") {
+                } else if(msg.body.type === "notice"){
+                    return (
+                      <NoticeMessage message={msg} key={msg.id + index}/>
+                    )
+                } else if(msg.body.type === 'custom'){
+                  return (
+                      <CustomMessage message={msg} key={msg.id + index}/>
+                    )
+                } else if (msg.body.type === "threadNotify") {
                   return (
                     <ThreadNotify message={msg} key={msg.id + index}/>
                   );
+                } else if (msg.body.type === "notify") {
+                  return (
+                    <Notify message={msg} key={msg.id + index}></Notify>
+                  )
                 } else {
                   return null;
                 }

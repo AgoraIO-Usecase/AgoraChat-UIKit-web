@@ -177,7 +177,7 @@ export function formatLocalMessage(to, chatType, message = {}, messageType, isCh
     if (messageType === 'file' || messageType === 'img' || messageType === 'video') {
         body.size = message?.data.size
     }
-    if(messageType === 'threadNotify'){
+    if (messageType === 'threadNotify' || messageType === 'notify'){
         formatMsg.id = WebIM.conn.getUniqueId();
     }
     return {
