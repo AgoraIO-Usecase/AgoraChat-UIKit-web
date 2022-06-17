@@ -43,7 +43,7 @@ export default function createlistener(props) {
 			// init DB
 			AppDB.init(WebIM.conn.context.userId);
 			// get session list
-			store.dispatch(SessionActions.getSessionList());
+			store.dispatch(SessionActions.getSessionList(WebIM.conn.context.userId));
 			const options = {
 				appKey: WebIM.conn.context.appKey,
 				username: WebIM.conn.context.userId,
