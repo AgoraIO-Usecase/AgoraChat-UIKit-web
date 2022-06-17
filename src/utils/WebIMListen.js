@@ -151,17 +151,29 @@ export default function createlistener(props) {
 		onGroupChange: (event) => {
 			console.log("onGroupChange",event);
 			const { to, from, groupName, gid } = event
+			if (from === WebIM.conn.context.userId) {
+				event.whoName = 'you'
+			} else {
+				event.whoName = ''
+			}
 			if(event.type === 'direct_joined'){
 			  store.dispatch(SessionActions.getJoinedGroupList())
-				addLocalMessage({
-					to: gid,
-					from: WebIM.conn.context.userId,
-					chatType:'groupChat',
-					groupName,
-					groupText: `You joined the group`,
-					firstCrate: true,
-					msgType: 'notify',
+				const storeSessionList = store.getState().session;
+				const { sessionList } = storeSessionList;
+				const isNewSession = _.findIndex(sessionList, (v) => {
+					return v.sessionId === gid
 				})
+				if (isNewSession === -1) {
+					addLocalMessage({
+						to: gid,
+						from: WebIM.conn.context.userId,
+						chatType:'groupChat',
+						groupName,
+						groupText: `You joined the group`,
+						firstCrate: true,
+						msgType: 'notify',
+					})
+				}
 			}else if(event.type === 'joinPublicGroupSuccess'){
 			  const joinedGroup = store.getState().session.joinedGroups;
 			  const result = joinedGroup.find((item) => {
@@ -173,83 +185,91 @@ export default function createlistener(props) {
 			} else if (event.type === 'invite') {
 				conversationName = groupName
 			} else if (event.type === 'invite_accept') {
-				addLocalMessage({
-					to: gid,
-					from: WebIM.conn.context.userId,
-					chatType: 'groupChat',
-					groupName: conversationName,
-					groupText: `You joined the group`,
-					firstCrate: true,
-					msgType: 'notify',
+				const storeSessionList = store.getState().session;
+				const { sessionList } = storeSessionList;
+				const isNewSession = _.findIndex(sessionList, (v) => {
+					return v.sessionId === gid
 				})
+				if (isNewSession === -1) {
+					addLocalMessage({
+						to: gid,
+						from: WebIM.conn.context.userId,
+						chatType: 'groupChat',
+						groupName: conversationName,
+						groupText: `You joined the group`,
+						firstCrate: true,
+						msgType: 'notify',
+					})
+				}
 			} else if (event.type === "memberJoinPublicGroupSuccess"){
 				event.actionContent = 'joined the Group'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'deleteGroupChat') {
+			} else if (event.type === 'deleteGroupChat') {
 				//群组解散
 				event.actionContent = 'dissolution the Group'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'join') {
+			} else if (event.type === 'join') {
 				// 进群
 				event.actionContent = 'join the Group'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'leave') {
+			} else if (event.type === 'leave') {
 				// 退群
 				event.actionContent = 'leave the Group'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'removedFromGroup') {
+			} else if (event.type === 'removedFromGroup') {
 				//被移出群 或者被加入黑名单
 				event.actionContent = 'ware removed the Group'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'allow') {
+			} else if (event.type === 'allow') {
 				//被移除黑名单 当事人收到
-				event.actionContent = 'you ware removed the Block List'
+				event.whoName = 'you'
+				event.actionContent = 'ware removed the Block List'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'update') {
+			} else if (event.type === 'update') {
 				// modifyGroup 修改群信息 触发
 				event.actionContent = 'modify the Group Info'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'leaveGroup') {
+			} else if (event.type === 'leaveGroup') {
 				// ABSENCE （被移出群）
 				event.actionContent = 'ware removed the Group'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'changeOwner') {
+			} else if (event.type === 'changeOwner') {
 				//转让群组 当事的两个人收到
 				event.actionContent = 'becomes the new Group Owner'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'addAdmin') {
+			} else if (event.type === 'addAdmin') {
 				//成为管理员，当事人收到
 				event.actionContent = 'becomes the new Group Admin'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'removeAdmin') {
+			} else if (event.type === 'removeAdmin') {
 				//去除管理员 当事人收到
 				event.actionContent = 'ware removed the new Group Admin'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'addMute') {
+			} else if (event.type === 'addMute') {
 				//用户被管理员禁言 当事人收到
 				event.actionContent = 'ware muted'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'removeMute') {
+			} else if (event.type === 'removeMute') {
 				//用户被解除禁言 当事人收到
 				event.actionContent = 'ware removed muted'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'updateAnnouncement') {
+			} else if (event.type === 'updateAnnouncement') {
 				// 更新群公告
 				event.actionContent = 'update Group Announcement'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'addUserToGroupWhiteList') {
+			} else if (event.type === 'addUserToGroupWhiteList') {
 				//增加群/聊天室组白名单成员
 				event.actionContent = 'were added to Group Allow List'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'rmUserFromGroupWhiteList') {
+			} else if (event.type === 'rmUserFromGroupWhiteList') {
 				//删除群/聊天室白名单成员
 				event.actionContent = 'were removed the Group Allow List'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'muteGroup') {
+			} else if (event.type === 'muteGroup') {
 				//群组/聊天室一键禁言
 				event.actionContent = 'muted the Group'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
-			} else if (msg.type === 'rmGroupMute') {
+			} else if (event.type === 'rmGroupMute') {
 				//解除群组/聊天室一键禁言
 				event.actionContent = 'removed muted the Group'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
@@ -257,7 +277,7 @@ export default function createlistener(props) {
 			if(event.type === 'addAdmin' || event.type === 'removeAdmin' || event.type === 'changeOwner'){
 			  const { chatType, to } = uikit_store.getState().global.globalProps;
 			  if( chatType === 'groupChat' && to === event.gid){
-				dispatch(ThreadActions.getCurrentGroupRole({chatType, to}));
+					store.dispatch(ThreadActions.getCurrentGroupRole({chatType, to}));
 			  }
 			}
 		},

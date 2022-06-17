@@ -9,11 +9,12 @@ import { EaseChatContext } from "../index"
 
 const useStyles = makeStyles((theme) => ({
     pulldownListItem: {
-        padding: '10px 0',
         listStyle: 'none',
-        marginBottom: '26px',
         position: 'relative',
-        alignItems: 'center'
+        alignItems: 'center',
+        // '& :last-child': {
+        //     marginBottom: '26px'
+        // }
     },
     root: {
         width: '100%',
@@ -34,7 +35,7 @@ function Notify({ message }) {
     return (
         <li className={classes.pulldownListItem}>
             <div className={classes.root}>
-                <span className={classes.name}>{message.from}</span>
+                <span className={classes.name}>{message.whoName || message.from}</span>
                 {i18next.t(message.actionContent)}
             </div>
         </li>

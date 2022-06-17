@@ -59,7 +59,9 @@ function MessageList({ messageList, showByselfAvatar }) {
     })
     let time = tempArr.length ?  tempArr.length * 1000 : 510
     const TimerId = setInterval(() => {
-      setBoxScrollHeight(document.getElementById('pulldownList').scrollHeight)
+      if (document.getElementById('pulldownList')) {
+        setBoxScrollHeight(document.getElementById('pulldownList').scrollHeight)
+      }
     }, 500)
     const TimeId = setTimeout(() => {
       clearTimeout(TimeId)

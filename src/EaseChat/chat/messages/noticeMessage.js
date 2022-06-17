@@ -6,7 +6,7 @@ const useStyles = makeStyles((theme) => ({
     pulldownListItem: {
         padding: '10px 0',
         listStyle: 'none',
-        marginBottom: '26px',
+        marginTop: '26px',
         position: 'relative',
         alignItems:'center'
     },
