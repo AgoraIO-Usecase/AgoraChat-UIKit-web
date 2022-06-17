@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
 		padding: "10px 0",
 		listStyle: "none",
-		marginBottom: "26px",
+		marginTop: "26px",
 		position: "relative",
 		display: "flex",
 		flexDirection: (props) => (props.bySelf ? "row-reverse" : "row"),
@@ -253,7 +253,7 @@ function ImgMessage({ message, onRecallMessage, showByselfAvatar, onCreateThread
 					}
 					<span className={classes.userName}>{message.from}</span>
 					<div className={classes.imgBox} onContextMenu={handleClick}>
-						<img src={message.thumb || message.url + '?thumbnail=true'}  alt="img message" onClick={() => openBigImg(message.url)}></img>
+						<img src={message.thumb || (message.url.includes('blob') ? message.url : message.url + '?thumbnail=true')}  alt="img message" onClick={() => openBigImg(message.url)}></img>
 						<div className={classes.textReaction}>
 							{hoverDeviceModule ? (
 								<div className={classes.textReactionCon}>

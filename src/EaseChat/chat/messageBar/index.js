@@ -137,7 +137,7 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   const [sessionEl, setSessionEl] = useState(null);
 
   const { chatType, to, name, presenceExt } = globalProps;
-  console.log(presenceExt, 'presenceExt')
+  // console.log(presenceExt, 'presenceExt')
   const renderSessionInfoMenu = () => {
     const handleClickClearMessage = () => {
       dispatch(MessageActions.clearMessage(chatType, to));

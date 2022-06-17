@@ -479,7 +479,8 @@ const { Types, Creators } = createActions({
 		return (dispatch, getState) => {
 			const formatMsg = formatLocalMessage(gid, notifyType, message, 'notify')
 			formatMsg.from = from;
-			formatMsg.type = 'notify',
+			formatMsg.type = 'notify'
+			console.log(formatMsg, 'formatMsg')
 			dispatch(Creators.updateNotifyDetails(formatMsg))
 		}
 	}
