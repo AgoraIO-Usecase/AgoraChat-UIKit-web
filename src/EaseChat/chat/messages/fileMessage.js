@@ -18,6 +18,7 @@ import ico_img from "../../../common/images/img_file@2x.png";
 import ico_video from "../../../common/images/video_file@2x.png";
 
 import { userAvatar } from '../../../utils'
+import download from '../../../utils/download'
 
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
@@ -231,7 +232,17 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	const showThreaddInfo = showThread && (!isThreadPanel) && message.chatType === "groupChat" && message.chatThreadOverview && (JSON.stringify(message.chatThreadOverview) !== '{}')
 	const classes = useStyles({ bySelf: message.bySelf ,showThreadEntry,rnReactions: reactionMsg.length > 0,});
 
-
+	const handlerDownloadFile = () => {
+		fetch(message.body.url).then(res => {
+			return res.blob()
+		}).then(blob => {
+			download(blob, message.filename)
+		}).catch(err => {
+			return false
+		}).finally(res => {
+			return true
+		})
+	}
 	return (
 		<li
 			className={classes.pulldownListItem}
@@ -250,7 +261,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 			{showByselfAvatar && message.bySelf && (
 				<img className={classes.avatarStyle} src={userAvatar(message.from)}></img>
 			)}
-			<div className={classes.textBodyBox}>
+			<div className={classes.textBodyBox} onClick={handlerDownloadFile}>
 				<span className={classes.userName}>{message.from}</span>
 				<div className={classes.fileCard} onContextMenu={handleClick}>
 					<div className={classes.fileIcon}>
