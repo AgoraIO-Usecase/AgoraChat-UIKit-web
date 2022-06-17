@@ -10,7 +10,15 @@ const useStyles = makeStyles(() => {
             width: props => props.width + 'px',
             height: props => props.height + 'px',
             display: 'flex',
-            flexWrap: 'wrap'
+            flexWrap: 'wrap',
+            padding: '16px',
+        },
+        myselfPopover: {
+            '& .MuiPopover-paper': {
+                borderRadius: '12px',
+                backdropFilter: 'blur(12px)',
+                background: 'rgba(255,255,255,.8)',
+            }
         }
     }
 });
@@ -40,7 +48,7 @@ function Emoji({ anchorEl, onClose, onSelected }) {
                         }}
                     >
                         <img
-                            src={require(`../../../common/faces/${v}`).default}
+                            src={require(`../../../common/reactions/${v}`).default}
                             alt={k}
                             width={emojiWidth}
                             height={emojiWidth}
@@ -70,6 +78,7 @@ function Emoji({ anchorEl, onClose, onSelected }) {
                 vertical: 'bottom',
                 horizontal: 'left',
             }}
+            className={classes.myselfPopover}
         >
             <div className={classes.emojiBox} onClick={handleEmojiClick}>
                 {renderEmoji()}

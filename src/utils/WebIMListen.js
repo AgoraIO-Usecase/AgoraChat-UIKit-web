@@ -7,6 +7,36 @@ import SessionActions from "../redux/session";
 import GlobalPropsActions from "../redux/globalProps";
 import ThreadActions from "../redux/thread"
 import uikit_store from "../redux/index";
+import EaseApp from '../EaseApp/index'
+
+let conversationName = ''
+export function addLocalMessage (obj) {
+	console.log(obj, 'addLocalMessage')
+	const { to, from, chatType, groupName, createGroup, groupText, firstCrate, msgType } = obj
+	const message = {
+		chatType: chatType,
+		ext: {},
+		from: chatType === 'singleChat' ? to : from,
+		id: WebIM.conn.getUniqueId(),
+		msg: groupText,
+		onlineState: 3,
+		time: new Date().getTime(),
+		to: chatType === 'singleChat' ? from : to,
+		type: "groupNote",
+	}
+	if (firstCrate) {
+		store.dispatch(MessageActions.addMessage(message, msgType || "txt"))
+	}
+	if (!createGroup) {
+		store.dispatch(
+			SessionActions._pushSession({
+				sessionType: chatType,
+				sessionId: chatType === 'singleChat' ? from : to,
+				sessionName: groupName || ''
+			})
+		)
+	}
+}
 export default function createlistener(props) {
 	WebIM.conn.addEventHandler("EaseChat", {
 		onConnected: (msg) => {
@@ -88,7 +118,8 @@ export default function createlistener(props) {
 		// The other has read the message
 		onReadMessage: (message) => {
 			console.log("onReadMessage", message);
-			store.dispatch(MessageActions.updateMessageStatus(message, "read"));
+			const { mid, id } = message
+			store.dispatch(MessageActions.updateMessageStatus(message, "read", id, mid));
 		},
 
 		onReceivedMessage: function (message) {
@@ -97,8 +128,10 @@ export default function createlistener(props) {
 			store.dispatch(MessageActions.updateMessageMid(id, mid, to));
 		},
 		onDeliveredMessage: function (message) {
+			console.log("onDeliveredMessage",message)
+			const { mid, id } = message
 			store.dispatch(
-				MessageActions.updateMessageStatus(message, "received")
+				MessageActions.updateMessageStatus(message, "received", id, mid)
 			);
 		},
 
@@ -117,8 +150,30 @@ export default function createlistener(props) {
 		},
 		onGroupChange: (event) => {
 			console.log("onGroupChange",event);
+			const { to, from, groupName, gid } = event
+			if (from === WebIM.conn.context.userId) {
+				event.whoName = 'you'
+			} else {
+				event.whoName = ''
+			}
 			if(event.type === 'direct_joined'){
 			  store.dispatch(SessionActions.getJoinedGroupList())
+				const storeSessionList = store.getState().session;
+				const { sessionList } = storeSessionList;
+				const isNewSession = _.findIndex(sessionList, (v) => {
+					return v.sessionId === gid
+				})
+				if (isNewSession === -1) {
+					addLocalMessage({
+						to: gid,
+						from: WebIM.conn.context.userId,
+						chatType:'groupChat',
+						groupName,
+						groupText: `You joined the group`,
+						firstCrate: true,
+						msgType: 'notify',
+					})
+				}
 			}else if(event.type === 'joinPublicGroupSuccess'){
 			  const joinedGroup = store.getState().session.joinedGroups;
 			  const result = joinedGroup.find((item) => {
@@ -127,16 +182,105 @@ export default function createlistener(props) {
 			  if(!result){
 				store.dispatch(SessionActions.getJoinedGroupList())
 			  }
+			} else if (event.type === 'invite') {
+				conversationName = groupName
+			} else if (event.type === 'invite_accept') {
+				const storeSessionList = store.getState().session;
+				const { sessionList } = storeSessionList;
+				const isNewSession = _.findIndex(sessionList, (v) => {
+					return v.sessionId === gid
+				})
+				if (isNewSession === -1) {
+					addLocalMessage({
+						to: gid,
+						from: WebIM.conn.context.userId,
+						chatType: 'groupChat',
+						groupName: conversationName,
+						groupText: `You joined the group`,
+						firstCrate: true,
+						msgType: 'notify',
+					})
+				}
 			} else if (event.type === "memberJoinPublicGroupSuccess"){
+				event.actionContent = 'joined the Group'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'deleteGroupChat') {
+				//群组解散
+				event.actionContent = 'dissolution the Group'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'join') {
+				// 进群
+				event.actionContent = 'join the Group'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'leave') {
+				// 退群
+				event.actionContent = 'leave the Group'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'removedFromGroup') {
+				//被移出群 或者被加入黑名单
+				event.actionContent = 'ware removed the Group'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'allow') {
+				//被移除黑名单 当事人收到
+				event.whoName = 'you'
+				event.actionContent = 'ware removed the Block List'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'update') {
+				// modifyGroup 修改群信息 触发
+				event.actionContent = 'modify the Group Info'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'leaveGroup') {
+				// ABSENCE （被移出群）
+				event.actionContent = 'ware removed the Group'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'changeOwner') {
+				//转让群组 当事的两个人收到
+				event.actionContent = 'becomes the new Group Owner'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'addAdmin') {
+				//成为管理员，当事人收到
+				event.actionContent = 'becomes the new Group Admin'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'removeAdmin') {
+				//去除管理员 当事人收到
+				event.actionContent = 'ware removed the new Group Admin'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'addMute') {
+				//用户被管理员禁言 当事人收到
+				event.actionContent = 'ware muted'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'removeMute') {
+				//用户被解除禁言 当事人收到
+				event.actionContent = 'ware removed muted'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'updateAnnouncement') {
+				// 更新群公告
+				event.actionContent = 'update Group Announcement'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'addUserToGroupWhiteList') {
+				//增加群/聊天室组白名单成员
+				event.actionContent = 'were added to Group Allow List'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'rmUserFromGroupWhiteList') {
+				//删除群/聊天室白名单成员
+				event.actionContent = 'were removed the Group Allow List'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'muteGroup') {
+				//群组/聊天室一键禁言
+				event.actionContent = 'muted the Group'
+				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+			} else if (event.type === 'rmGroupMute') {
+				//解除群组/聊天室一键禁言
+				event.actionContent = 'removed muted the Group'
 				store.dispatch(MessageActions.addNotify(event,"groupChat"));
 			}
 			if(event.type === 'addAdmin' || event.type === 'removeAdmin' || event.type === 'changeOwner'){
 			  const { chatType, to } = uikit_store.getState().global.globalProps;
 			  if( chatType === 'groupChat' && to === event.gid){
-				dispatch(ThreadActions.getCurrentGroupRole({chatType, to}));
+					store.dispatch(ThreadActions.getCurrentGroupRole({chatType, to}));
 			  }
 			}
-		  },
+		},
 		onContactDeleted: (msg) => {
 			store.dispatch(MessageActions.clearMessage("singleChat", msg.from));
 			store.dispatch(SessionActions.deleteSession(msg.from));
@@ -158,5 +302,26 @@ export default function createlistener(props) {
 		onReactionMessage: (message) => {
 			console.log("onReactionMessage", message);
 		},
+		onContactAgreed: (msg) => {
+			console.log("onContactAgreed", msg);
+			const { to, from } = msg
+			EaseApp.addConversationItem({
+				conversationType: 'singleChat',
+				conversationId: from,
+				ext: {
+					from: {
+						ext: 'Online'
+					}
+				},
+				firstCrate: true,
+				groupText: 'Your friend request has been approved',
+				createGroup: false
+			})
+		},
+		onContactAdded: (msg) => {
+			console.log("onContactAdded", msg);
+			const { to, from } = msg
+			addLocalMessage({to, from, chatType: 'singleChat', groupText: 'You agreed the friend request', firstCrate: true})
+		}
 	});
 }

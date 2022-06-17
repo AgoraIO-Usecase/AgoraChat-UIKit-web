@@ -4,6 +4,7 @@ import store from "../../../redux/index";
 import MessageActions from "../../../redux/message";
 import ReactionIcon from "./renderReactionIcon";
 import addReactionIcon from "../../../common/icons/add_reaction@2x.png";
+import { Tooltip } from '@material-ui/core'
 const useStyles = makeStyles((theme) => ({
 	iconStyley: {
 		height: "24px",
@@ -14,6 +15,15 @@ const useStyles = makeStyles((theme) => ({
 		height: "24px",
 		width: "24px",
 		float: (props) => (props.bySelf? 'right':'left'),
+		borderRadius: '50%',
+		'&:hover': {
+			background: '#E6E6E6',
+		}
+	},
+	reactionTooltip: {
+		background: '#fff',
+		color: 'rgba(0, 0, 0, 0.87)',
+		boxShadow: '6px 6px 12px rgba(0, 0, 0, 0.12), -2px 0px 8px rgba(0, 0, 0, 0.08)',
 	}
 }));
 
@@ -34,12 +44,14 @@ const Reaction = ({ message }) => {
 
 	return (
 		<div className={classes.conatiner}>
-			<img
-				src={addReactionIcon}
-				alt="reaction"
-				className={classes.iconStyley}
-				onClick={handleClickEmoji}
-			/>
+			<Tooltip title='Add Reactions' placement="top" classes={{ tooltip: classes.reactionTooltip }}>
+				<img
+					src={addReactionIcon}
+					alt="reaction"
+					className={classes.iconStyley}
+					onClick={handleClickEmoji}
+				/>
+			</Tooltip>
 			<ReactionIcon
 				anchorEl={reactionVisible}
 				onSelected={handleEmojiSelected}

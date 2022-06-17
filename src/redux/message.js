@@ -167,6 +167,8 @@ const { Types, Creators } = createActions({
 					let url = data.uri + "/" + data.entities[0].uuid;
 					formatMsg.url = url;
 					formatMsg.body.url = url;
+					formatMsg.thumb = data.thumb
+					formatMsg.body.thumb = data.thumb
 					const type = isChatThread? 'threadMessage' : chatType;
 					dispatch(Creators.updateMessages(type, to, formatMsg ));
 					imageEl.current.value = "";
@@ -461,7 +463,8 @@ const { Types, Creators } = createActions({
 		return (dispatch, getState) => {
 			const formatMsg = formatLocalMessage(gid, notifyType, message, 'notify')
 			formatMsg.from = from;
-			formatMsg.type = 'notify',
+			formatMsg.type = 'notify'
+			console.log(formatMsg, 'formatMsg')
 			dispatch(Creators.updateNotifyDetails(formatMsg))
 		}
 	}
@@ -594,7 +597,17 @@ export const updateMessageStatus = (state, { message, status = "", localId, serv
 			status: status,
 		};
 		messages.splice(messages.indexOf(found), 1, msg);
-		AppDB.updateMessageStatus(id, serverMsgId, status)
+		AppDB.updateMessageStatus(id, serverMsgId, status).then(res => {
+			if (res === 0) {
+				AppDB.updateMessageStatus(serverMsgId, id, status).then(val => {
+					if (val === 0) {
+						AppDB.updateMessageStatus(id, serverMsgId, status).then(value => {
+							console.log(value)
+						})
+					}
+				})
+			}
+		})
 		
 		if(message.isChatThread){
 			state = state.setIn(['threadMessage', chatId], messages)

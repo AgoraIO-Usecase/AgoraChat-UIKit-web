@@ -34,14 +34,14 @@ const RenderReactions = ({ message }) => {
 	const classes = useStyles({
 		rnReaction: reactionMsg.length > 1
 	});
-	const [reactionInfoVisible, setReactionInfoVisible] = useState(null);
+	const [reactionInfoVisible, setReactionInfoVisible] = useState(false);
 
 	const handleDeleteReaction = (reaction) => {
 		store.dispatch(MessageActions.deleteReaction(message, reaction))
 	}
 
 	const handleReactionInfo = (e) => {
-		setReactionInfoVisible(e.currentTarget);
+		setReactionInfoVisible(true);
 	}
 
 	let reactiontotalNum = reactionMsg.reduce((total, item) => total + item.count, 0)
@@ -70,7 +70,7 @@ const RenderReactions = ({ message }) => {
 				anchorEl={reactionInfoVisible}
 				onClose={
 					() => {
-						setReactionInfoVisible(null)
+						setReactionInfoVisible(false)
 					}
 				}
 				message={message}

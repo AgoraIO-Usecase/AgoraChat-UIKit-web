@@ -3,8 +3,8 @@ import { makeStyles } from "@material-ui/styles";
 import avatar from "../../../common/icons/avatar1.png";
 // import clsx from 'clsx';
 import i18next from "i18next";
-import { IconButton, Icon, Menu, MenuItem } from "@material-ui/core";
-import { renderTime } from "../../../utils";
+import { IconButton, Icon, Menu, MenuItem, Tooltip } from "@material-ui/core";
+import { renderTime, sessionItemTime } from "../../../utils";
 import { EaseChatContext } from "../index";
 
 import Reaction from "../reaction";
@@ -13,16 +13,21 @@ import threadIcon from "../../../common/images/thread.png"
 import MsgThreadInfo from "./msgThreadInfo"
 
 import MessageStatus from "./messageStatus";
+import ico_file from "../../../common/images/ico_file.svg";
+import ico_img from "../../../common/images/img_file@2x.png";
+import ico_video from "../../../common/images/video_file@2x.png";
+
+import { userAvatar } from '../../../utils'
 
 const useStyles = makeStyles((theme) => ({
 	pulldownListItem: {
 		padding: "10px 0",
 		listStyle: "none",
-		marginBottom: "26px",
+		marginTop: "26px",
 		position: "relative",
 		display: "flex",
 		flexDirection: (props) => (props.bySelf ? "row-reverse" : "row"),
-		alignItems: "center",
+		alignItems: "flex-end",
 	},
 	userName: {
 		padding: "0 10px 4px",
@@ -40,34 +45,45 @@ const useStyles = makeStyles((theme) => ({
 		flexDirection: 'column',
 		maxWidth: "80%",
 		minWidth: "40%",
-		alignItems: (props) => (props.bySelf ? "inherit" : "unset"),
+		alignItems: (props) => (props.bySelf ? "flex-start" : "unset"),
 		position: "relative",
 		background: '#f2f2f2',
 		padding:  (props) => props.showThreadEntry? '0':'12px',
 		marginLeft:'12px',
-		padding: '12px',
+		padding: '0',
 		borderRadius: (props) =>
 			props.bySelf ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
 	},
 	fileCard: {
-		width: "252px",
-		height: "72px",
+		width: (props) => props.bySelf ? "252px" : '',
+		height: (props) => props.bySelf ? "72px" : '',
 		marginTop: (props) => (!props.bySelf && props.rnReactions ? "15px" : "0"),
-		backgroundColor: "#fff",
+		// backgroundColor: "#fff",
 		display: "flex",
 		alignItems: "center",
-		marginBottom: "6px",
+		justifyContent: (props) => props.bySelf ? '' : 'space-between',
+		flexDirection: (props) => props.bySelf ? '' : 'row-reverse',
+		// marginBottom: "6px",
+		padding: props => props.bySelf ? '' : '8px',
 	},
 	fileIcon: {
-		width: "59px",
-		height: "59px",
-		background: "rgba(35, 195, 129, 0.06)",
-		borderRadius: "4px",
+		width: "50px",
+		height: "50px",
+		background: "#fff",
+		borderRadius: "12px",
 		border: "1px solid rgba(35, 195, 129, 0.06)",
 		textAlign: "center",
-		lineHeight: "59px",
+		lineHeight: "47px",
 		margin: "0 7px 0 7px",
+		marginRight: (props) => props.bySelf ? '7px' : '0px',
 		flexShrink: 0,
+		'& img': {
+			width: '40px',
+			verticalAlign: 'middle',
+		}
+	},
+	icoFileImg: {
+		transform: 'rotateX(180deg)',
 	},
 	fileInfo: {
 		"& p": {
@@ -99,26 +115,27 @@ const useStyles = makeStyles((theme) => ({
 		fontSize: "11px",
 		height: "16px",
 		color: "rgba(1, 1, 1, .2)",
-		lineHeight: "16px",
+		lineHeight: "20px",
 		textAlign: "center",
 		top: "-18px",
 		width: "100%",
 	},
 	avatarStyle: {
-		height: "40px",
-		width: "40px",
+		height: "28px",
+		width: "28px",
 		borderRadius: "50%",
 	},
 	textReaction: {
 		position: "absolute",
 		right: (props) => (props.bySelf ? "" : "0"),
 		left: (props) => (props.bySelf ? "0" : ""),
-		bottom: "0",
+		bottom: "6px",
 		transform: (props) => (props.bySelf ? "translateX(-100%)" : "translateX(100%)"),
 		height: '24px',
+		left: '0px',
 	},
 	textReactionCon: {
-		width: '100%',
+		width: (props) => (props.showThreadEntry ? "48px" : "24px"),
 		height: '100%',
 		float: (props) => (props.bySelf ? 'right' : 'left'),
 	},
@@ -150,6 +167,11 @@ const useStyles = makeStyles((theme) => ({
 		background: `url(${threadIcon}) center center no-repeat`,
 		backgroundSize: 'contain',
 		cursor: 'pointer',
+	},
+	tooltipthread: {
+		background: '#fff',
+		color: 'rgba(0, 0, 0, 0.87)',
+		boxShadow: '6px 6px 12px rgba(0, 0, 0, 0.12), -2px 0px 8px rgba(0, 0, 0, 0.08)',
 	}
 }));
 const initialState = {
@@ -192,7 +214,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	const sentStatus = () => {
 		return (
 		  <div>
-			{message.bySelf && (isThreadPanel && message.status!=='sent') && (
+			{message.bySelf && !isThreadPanel && (
 			  <MessageStatus
 				status={message.status}
 				style={{
@@ -219,21 +241,30 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 			{!message.bySelf && (
 				<img
 					className={classes.avatarStyle}
-					src={avatar}
+					src={userAvatar(message.from)}
 					onClick={(e) =>
 						onAvatarChange && onAvatarChange(e, message)
 					}
 				></img>
 			)}
 			{showByselfAvatar && message.bySelf && (
-				<img className={classes.avatarStyle} src={avatar}></img>
+				<img className={classes.avatarStyle} src={userAvatar(message.from)}></img>
 			)}
 			<div className={classes.textBodyBox}>
 				<span className={classes.userName}>{message.from}</span>
 				<div className={classes.fileCard} onContextMenu={handleClick}>
 					<div className={classes.fileIcon}>
-						{/* <Icon className={clsx(classes.icon, 'iconfont icon-fujian')}></Icon> */}
-						{i18next.t("file")}
+						{
+							message.data && message.data.type ? (
+								message.data.type.includes('image') ? (
+									<img src={ico_img} alt="file" />
+								) : (
+									message.data.type.includes('video') ? <img src={ico_video} alt="file" /> : <img className={classes.icoFileImg} src={ico_file} alt="file" />
+								)
+							) : (
+								<img className={classes.icoFileImg} src={ico_file} alt="file" />
+							)
+						}
 					</div>
 					<div className={classes.fileInfo}>
 						<p>{message.filename}</p>
@@ -241,11 +272,11 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 							{Math.floor(message.body.size / 1024) + "kb"}
 						</span>
 					</div>
-					<div className={classes.download}>
+					{/* <div className={classes.download}>
 						<a href={message.body.url} download={message.filename}>
 							<IconButton className="iconfont icon-xiazai"></IconButton>
 						</a>
-					</div>
+					</div> */}
 				</div>
 				<div className={classes.textReaction}>
 					{hoverDeviceModule ? (
@@ -253,8 +284,14 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 							{isShowReaction && (
 								<Reaction message={message} />
 							)}
-							{showThreadEntry && <div className={classes.threadCon} onClick={createThread} title="Reply">
-								<div className={classes.thread}></div></div>}
+							{
+								showThreadEntry &&
+								<div className={classes.threadCon} onClick={createThread}>
+									<Tooltip title='Create Thread' placement="top" classes={{ tooltip: classes.tooltipthread }}>
+										<div className={classes.thread}></div>
+									</Tooltip>
+								</div>
+							}
 						</div>
 					) : (
 						sentStatus()
@@ -268,7 +305,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 				)}
 			</div>
 
-			<div className={classes.time}>{renderTime(message.time)}</div>
+			<div className={classes.time}>{sessionItemTime(message.time)}</div>
 			<Menu
 				keepMounted
 				open={state.mouseY !== null}
@@ -281,7 +318,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 				}
 			>
 				{message.bySelf && (
-					<MenuItem onClick={recallMessage}>{i18next.t("withdraw")}</MenuItem>
+					<MenuItem onClick={recallMessage}>{i18next.t("Withdraw")}</MenuItem>
 				)}
 				{customMessageList &&
 					customMessageList.map((val, key) => {

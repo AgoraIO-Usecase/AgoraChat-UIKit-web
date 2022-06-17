@@ -2,7 +2,7 @@ var path = require('path')
 module.exports = {
   type: "react-component",
   npm: {
-    esModules: false,
+    esModules: true,
     umd: false,
   },
   webpack: {
