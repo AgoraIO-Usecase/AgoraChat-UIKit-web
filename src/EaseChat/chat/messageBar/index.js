@@ -112,7 +112,7 @@ const useStyles = makeStyles((theme) => {
     userStatusOnline: {
       fontFamily: 'Roboto',
       fontStyle: 'normal',
-      fontWeight:' 500',
+      fontWeight: ' 500',
       fontSize: '12px',
       lineHeight: '14px',
       color: '#999999',
@@ -158,7 +158,7 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
         onClose={() => setSessionEl(null)}
       >
         <MenuItem onClick={handleClickClearMessage}>
-            <img src={clearIcon} alt="" style={{width:'30px'}}/>
+          <img src={clearIcon} alt="" style={{ width: '30px' }} />
           <Typography variant="inherit" noWrap>
             {i18next.t("Clear Messages")}
           </Typography>
@@ -213,7 +213,7 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   const [groupMembers, setGroupMembers] = useState([])
   const [callType, setCallType] = useState('')
   useEffect(() => {
-    let newwInfoData =usersInfoData && usersInfoData.length > 0 ? usersInfoData : localStorage.getItem("usersInfo_1.0")
+    let newwInfoData = usersInfoData && usersInfoData.length > 0 ? usersInfoData : localStorage.getItem("usersInfo_1.0")
     if (newwInfoData && !usersInfoData.length) {
       newwInfoData = JSON.parse(newwInfoData)
     }
@@ -293,8 +293,8 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
       to: members,
       agoraUid: agoraUid,
       message: `invite you to ${callType} call`,
-      groupId: to,
-      groupName: confrData.groupName || name,
+      groupId: to || confrData.groupId,
+      groupName: confrData.groupName || name[to],
       accessToken,
       channel
     }
@@ -380,16 +380,16 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
               ></IconButton>
             </>
           }
-        <IconButton className={`${classes.threadBtnBox} iconfont icon`} style={{display: chatType === "groupChat" && showThread ? "inline-flex" : "none"}} onClick={openThreadList} ref={threadListAnchorEl}>
-          <img alt="" className={classes.threadIcon} src={threadIcon} />
-        </IconButton>
-        <img src={moreIcon} className={classes.imgActive} style={{background: sessionEl ? '#ccc' : '' }} onClick={handleSessionInfoClick} alt="" />
-      </Box>
-      {renderSessionInfoMenu()}
-      <ThreadListPanel anchorEl={anchorEl} onClose={onClose}/>
-    </div>
-    <InviteModal open={inviteOpen} onClose={handleInviteClose} onCall={startCall} members={groupMembers} joinedMembers={confrData.joinedMembers} />
-  </>
+          <IconButton className={`${classes.threadBtnBox} iconfont icon`} style={{ display: chatType === "groupChat" && showThread ? "inline-flex" : "none" }} onClick={openThreadList} ref={threadListAnchorEl}>
+            <img alt="" className={classes.threadIcon} src={threadIcon} />
+          </IconButton>
+          <img src={moreIcon} className={classes.imgActive} style={{ background: sessionEl ? '#ccc' : '' }} onClick={handleSessionInfoClick} alt="" />
+        </Box>
+        {renderSessionInfoMenu()}
+        <ThreadListPanel anchorEl={anchorEl} onClose={onClose} />
+      </div>
+      <InviteModal open={inviteOpen} onClose={handleInviteClose} onCall={startCall} members={groupMembers} joinedMembers={confrData.joinedMembers} />
+    </>
   );
 };
 
