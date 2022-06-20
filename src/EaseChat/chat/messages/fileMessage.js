@@ -232,7 +232,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 	const showThreaddInfo = showThread && (!isThreadPanel) && message.chatType === "groupChat" && message.chatThreadOverview && (JSON.stringify(message.chatThreadOverview) !== '{}')
 	const classes = useStyles({ bySelf: message.bySelf ,showThreadEntry,rnReactions: reactionMsg.length > 0,});
 
-	const handlerDownloadFile = () => {
+	const handleDownloadFile = () => {
 		fetch(message.body.url).then(res => {
 			return res.blob()
 		}).then(blob => {
@@ -261,7 +261,7 @@ function FileMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 			{showByselfAvatar && message.bySelf && (
 				<img className={classes.avatarStyle} src={userAvatar(message.from)}></img>
 			)}
-			<div className={classes.textBodyBox} onClick={handlerDownloadFile}>
+			<div className={classes.textBodyBox} onClick={handleDownloadFile}>
 				<span className={classes.userName}>{message.from}</span>
 				<div className={classes.fileCard} onContextMenu={handleClick}>
 					<div className={classes.fileIcon}>
