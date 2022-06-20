@@ -239,7 +239,7 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
         chatType: 'singleChat',
         to: to,
         agoraUid,
-        message: 'invite you to audio call',
+        message: 'Start a voice call',
         accessToken,
         channel
       }
@@ -268,7 +268,7 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
         chatType: 'singleChat',
         to: to,
         agoraUid,
-        message: 'invite you to video call',
+        message: 'Start a video call',
         accessToken,
         channel
       }
@@ -292,7 +292,7 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
       chatType: 'groupChat',
       to: members,
       agoraUid: agoraUid,
-      message: `invite you to ${callType} call`,
+      message: `Start a ${callType == 'audio' ? 'voice' : 'video'} call`,
       groupId: to || confrData.groupId,
       groupName: confrData.groupName || name[to],
       accessToken,
