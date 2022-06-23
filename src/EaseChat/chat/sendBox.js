@@ -176,6 +176,7 @@ function SendBox(props) {
     setInputValue((value) => value + res);
     const src = require(`../../common/reactions/${emoji.map[res]}`).default
     insertCustomHtml(src, res)
+    setInputHaveValue(false)
     setTimeout(() => {
       let el = inputRef.current;
       el.focus();

@@ -911,7 +911,7 @@ export const setThreadHasHistory = (state, {status}) => {
 
 export const updateNotifyDetails = (state, { formatMsg }) => {
 	let { chatType, to, id ,type} = formatMsg;
-	let messageList = state[chatType][to].asMutable({ deep: true });
+	let messageList = state[chatType] && state[chatType][to] ? state[chatType][to].asMutable({ deep: true }) : [];
 	const message = {
 		...formatMsg,
 		body: {

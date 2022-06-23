@@ -2,7 +2,7 @@ import React, { memo, useEffect, useRef, useState, useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { Avatar, Icon, Tooltip } from "@material-ui/core";
 import { renderTime, sessionItemTime } from "../../../utils/index";
-import avatar from "../../../common/icons/avatar1.png";
+import avatar from "../../../common/icons/avatar1.jpg";
 import AudioPlayer from "./audioPlayer/audioPlayer";
 import { Menu, MenuItem } from "@mui/material";
 import { EaseChatContext } from "../index";
@@ -99,7 +99,6 @@ const useStyles = makeStyles((theme) => ({
 		left: (props) => (props.bySelf ? "0" : ""),
 		bottom: '6px',
 		transform: (props) => (props.bySelf ? "translateX(-100%)":"translateX(100%)"),
-    left: '0px',
   },
   reactionBox: {
     position: "absolute",
