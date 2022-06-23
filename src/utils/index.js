@@ -167,6 +167,10 @@ const msgTpl = {
     },
     threadNotify: {
         type: 'threadNotify'
+    },
+    cmd: {
+        type: 'cmd',
+        action: ''
     }
 }
 
@@ -285,4 +289,8 @@ export function userAvatar (id) {
     avatarSrc = userAvatars[findIndex.userAvatar] || avatarIcon11
     return avatarSrc
   }
+}
+
+export function getLocalStorageData() {
+    return localStorage.getItem('soundPreviewText') ? JSON.parse(localStorage.getItem('soundPreviewText')) : {}
 }

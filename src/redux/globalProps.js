@@ -5,6 +5,7 @@ import _ from "lodash";
 const { Types, Creators } = createActions({
   addGlobalProps: ["options"],
   updateGlobalProps: ["options"],
+  updateShowTyping: ["options"],
   logout:[],
   saveGlobalProps: (options) => {
     return (dispatch, getState) => {
@@ -17,11 +18,17 @@ const { Types, Creators } = createActions({
       dispatch(Creators.updateGlobalProps(options));
     };
   },
+  setShowTyping: (options) => {
+    return (dispatch) => {
+      dispatch(Creators.updateShowTyping(options));
+    };
+  },
 });
 
 /* ------------- Initial State ------------- */
 export const INITIAL_STATE = Immutable({
   globalProps: {},
+  showTyping: ''
 });
 
 /* ------------- Reducers ------------- */
@@ -52,6 +59,7 @@ export const updateGlobalProps = (state, { options }) => {
   state = state.setIn(["globalProps", "to"], options.to);
   state = state.setIn(["globalProps", "chatType"], options.chatType);
   state = state.setIn(["globalProps", "name"], {...name});
+  state = state.setIn(["globalProps", "showTyping"], options.showTyping)
   if (Object.keys(presenceObj).length) {
     for (let item in presenceObj) {
       for (let val in options.presenceExt) {
@@ -73,11 +81,17 @@ export const updateGlobalProps = (state, { options }) => {
   return state;
 };
 
+export const updateShowTyping = (state, { options }) => {
+  state = state.setIn(["showTyping"], options.showTyping)
+  return state
+}
+
 /* ------------- Hookup Reducers To Types ------------- */
 export const globalPropsReducer = createReducer(INITIAL_STATE, {
   [Types.ADD_GLOBAL_PROPS]: addGlobalProps,
   [Types.UPDATE_GLOBAL_PROPS]: updateGlobalProps,
   [Types.LOGOUT]: logout,
+  [Types.UPDATE_SHOW_TYPING]: updateShowTyping,
 });
 
 export default Creators;

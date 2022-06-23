@@ -133,11 +133,10 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   const groupById = useSelector((state) => state.group?.group.byId) || {};
   const globalProps = useSelector((state) => state.global.globalProps);
   const showThread = useSelector((state) => state.thread.showThread);
-
   const [sessionEl, setSessionEl] = useState(null);
-
+  const [showEnter, setShowEnter] = useState(false);
+  const showTyping = useSelector((state) => state.global.showTyping);
   const { chatType, to, name, presenceExt } = globalProps;
-  // console.log(presenceExt, 'presenceExt')
   const renderSessionInfoMenu = () => {
     const handleClickClearMessage = () => {
       dispatch(MessageActions.clearMessage(chatType, to));
@@ -361,9 +360,14 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
             {
               presenceExt && presenceExt[to]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
             }
-            {
-              chatType === "singleChat" && presenceExt && presenceExt[to]?.device && <div className={classes.userStatusOnline}>{presenceExt[to]?.device} {presenceExt[to]?.ext === '' ? 'Online' : presenceExt[to]?.ext}</div>
-            }
+            <div className={classes.userStatusOnline}>
+              {
+                chatType === "singleChat" && presenceExt && presenceExt[to]?.device && <span>{presenceExt[to]?.device} {presenceExt[to]?.ext === '' ? 'Online' : presenceExt[to]?.ext}</span>
+              }
+              {
+                showTyping && <span className={classes.userStatusOnline} style={{marginLeft: '5px'}}>Entering ...</span>
+              }
+            </div>
           </div>
         </Box>
 
