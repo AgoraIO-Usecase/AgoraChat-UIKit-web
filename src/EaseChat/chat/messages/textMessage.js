@@ -191,7 +191,7 @@ function TextMessage({ message, onRecallMessage, showByselfAvatar, onCreateThrea
 				const v = emoji.map[match[1]];
 				rnTxt.push(
 					<img
-						key={v + Math.floor(Math.random() * 99 + 1)}
+						key={v + Math.floor(Math.random() * 100000 + 1) + new Date().getTime().toString()}
 						alt={v}
 						src={require(`../../../common/reactions/${v}`).default}
 						width={20}

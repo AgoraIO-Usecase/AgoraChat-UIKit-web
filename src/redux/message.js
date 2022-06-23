@@ -467,6 +467,28 @@ const { Types, Creators } = createActions({
 			console.log(formatMsg, 'formatMsg')
 			dispatch(Creators.updateNotifyDetails(formatMsg))
 		}
+	},
+	sendCmdMessage: (to, chatType, action, isChatThread=false) => {
+		if (!to || !chatType) return
+		return (dispatch, getState) => {
+			const formatMsg = formatLocalMessage(to, chatType, action, 'cmd', isChatThread)
+			const { msg } = formatMsg.body;
+			let option = {
+				chatType,
+				type: 'cmd',
+				to,
+				msg,
+				isChatThread,
+				action
+			};
+			let msgObj = WebIM.message.create(option);
+			formatMsg.id = msgObj.id;
+			WebIM.conn.send(msgObj).then((res) => {
+				console.log("send private text Success",res);
+			}).catch((e) => {
+				console.log("Send private text error", e);
+			});
+		}
 	}
 });
 

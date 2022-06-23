@@ -10,6 +10,7 @@ import uikit_store from "../redux/index";
 import EaseApp from '../EaseApp/index'
 
 let conversationName = ''
+let TimerId = null
 export function addLocalMessage (obj) {
 	console.log(obj, 'addLocalMessage')
 	const { to, from, chatType, groupName, createGroup, groupText, firstCrate, msgType } = obj
@@ -322,6 +323,25 @@ export default function createlistener(props) {
 			console.log("onContactAdded", msg);
 			const { to, from } = msg
 			addLocalMessage({to, from, chatType: 'singleChat', groupText: 'You agreed the friend request', firstCrate: true})
+		},
+		onCmdMessage: msg => {
+			const { action } = msg
+			switch(action) {
+				case 'TypingBegin':
+					store.dispatch(GlobalPropsActions.setShowTyping({ showTyping: true }))
+					break;
+				case 'TypingEnd':
+					store.dispatch(GlobalPropsActions.setShowTyping({ showTyping: false }))
+					break;
+				default:
+					break;
+			}
+			if (TimerId) {
+				clearTimeout(TimerId)
+			}
+			TimerId = setTimeout(() => {
+				store.dispatch(GlobalPropsActions.setShowTyping({ showTyping: false }))
+			}, 5000)
 		}
 	});
 }
