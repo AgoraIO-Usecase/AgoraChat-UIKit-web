@@ -2,7 +2,7 @@ import React, { memo, useState, useEffect, useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
 import i18next from "i18next";
 import { Menu, MenuItem, Tooltip } from "@material-ui/core";
-import avatar from "../../../common/icons/avatar1.png";
+import avatar from "../../../common/icons/avatar1.jpg";
 import { emoji } from "../../../common/emoji";
 import { renderTime, sessionItemTime } from "../../../utils";
 
@@ -92,7 +92,7 @@ const useStyles = makeStyles((theme) => ({
 		transform: (props) => (props.bySelf ? "translateX(-100%)" : "translateX(100%)"),
 		marginLeft: (props) => (props.bySelf ? "-10px" : ""),
 		height: '24px',
-		left: '8px',
+		left: (props) => (props.bySelf ? "8px" : ""),
 	},
 	textReactionCon: {
 		height: '100%',

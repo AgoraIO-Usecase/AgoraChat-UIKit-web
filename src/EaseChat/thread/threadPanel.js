@@ -6,12 +6,12 @@ import SendBox from "../chat/sendBox";
 import ThreadMessageList from "./threadMessageList";
 import { renderTime } from "../../utils/index";
 import { useSelector, useDispatch } from "../../EaseApp/index";
-import deleteIcon from '../../common/images/delete.png'
+import deleteIcon from '../../common/images/cancel.png'
 import MessageActions from "../../redux/message"
 import { Box, IconButton } from "@material-ui/core";
 import { EaseChatContext } from "../chat/index";
 import _ from "lodash";
-import avatar from "../../common/icons/avatar1.png";
+import avatar from "../../common/icons/avatar1.jpg";
 // import "../../i18n";
 import i18next from "i18next";
 import { emoji } from "../../common/emoji";

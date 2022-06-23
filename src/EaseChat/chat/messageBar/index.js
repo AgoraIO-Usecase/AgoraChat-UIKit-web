@@ -17,14 +17,14 @@ import ThreadListPanel from "../../thread/threadList/index.js";
 import { EaseChatContext } from "../index";
 
 import _ from 'lodash'
-import avatarIcon1 from '../../../common/images/avatar1.png'
-import avatarIcon2 from '../../../common/images/avatar2.png'
-import avatarIcon3 from '../../../common/images/avatar3.png'
-import avatarIcon4 from '../../../common/images/avatar4.png'
-import avatarIcon5 from '../../../common/images/avatar5.png'
-import avatarIcon6 from '../../../common/images/avatar6.png'
-import avatarIcon7 from '../../../common/images/avatar7.png'
-import avatarIcon11 from '../../../common/images/avatar11.png'
+import avatarIcon1 from '../../../common/images/avatar1.jpg'
+import avatarIcon2 from '../../../common/images/avatar2.jpg'
+import avatarIcon3 from '../../../common/images/avatar3.jpg'
+import avatarIcon4 from '../../../common/images/avatar4.jpg'
+import avatarIcon5 from '../../../common/images/avatar5.jpg'
+import avatarIcon6 from '../../../common/images/avatar6.jpg'
+import avatarIcon7 from '../../../common/images/avatar7.jpg'
+import avatarIcon11 from '../../../common/images/avatar11.jpg'
 import groupAvatarIcon from '../../../common/images/groupAvatar.png'
 import CallKit from 'zd-callkit'
 import WebIM from '../../../utils/WebIM'
@@ -125,6 +125,8 @@ const useStyles = makeStyles((theme) => {
     }
   };
 });
+let intervalTime = null
+let timeoutTime = null
 const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   let easeChatProps = useContext(EaseChatContext);
   const { onChatAvatarClick, isShowRTC, getRTCToken, agoraUid, getIdMap, appId } = easeChatProps
@@ -212,16 +214,30 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   const [groupMembers, setGroupMembers] = useState([])
   const [callType, setCallType] = useState('')
   useEffect(() => {
-    let newwInfoData = usersInfoData && usersInfoData.length > 0 ? usersInfoData : localStorage.getItem("usersInfo_1.0")
-    if (newwInfoData && !usersInfoData.length) {
-      newwInfoData = JSON.parse(newwInfoData)
+    if (to) {
+      let newwInfoData = localStorage.getItem("usersInfo_1.0")
+      if (newwInfoData) {
+        newwInfoData = JSON.parse(newwInfoData)
+      }
+      setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 8)
+      if (intervalTime) {
+        clearInterval(intervalTime)
+      }
+      intervalTime = setInterval(() => {
+        let newwInfoData = localStorage.getItem("usersInfo_1.0")
+        if (newwInfoData) {
+          newwInfoData = JSON.parse(newwInfoData)
+        }
+        setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 8)
+      }, 500)
+      timeoutTime = setTimeout(() => {
+        clearInterval(intervalTime)
+        clearTimeout(timeoutTime)
+      }, 2000)
     }
-    setUsersInfoData(newwInfoData)
-    setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 8)
   }, [to])
 
   const callAudio = async () => {
-    console.log('to', to, chatType)
     setCallType('audio')
     const channel = Math.uuid(8)
     if (chatType === 'groupChat') {
