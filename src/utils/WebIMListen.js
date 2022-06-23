@@ -8,11 +8,13 @@ import GlobalPropsActions from "../redux/globalProps";
 import ThreadActions from "../redux/thread"
 import uikit_store from "../redux/index";
 import EaseApp from '../EaseApp/index'
+import { formatLocalMessage } from './index'
 
 let conversationName = ''
+let TimerId = null
 export function addLocalMessage (obj) {
 	console.log(obj, 'addLocalMessage')
-	const { to, from, chatType, groupName, createGroup, groupText, firstCrate, msgType } = obj
+	const { to, from, chatType, groupName, createGroup, groupText, firstCrate, msgType, addType } = obj
 	const message = {
 		chatType: chatType,
 		ext: {},
@@ -24,9 +26,6 @@ export function addLocalMessage (obj) {
 		to: chatType === 'singleChat' ? from : to,
 		type: "groupNote",
 	}
-	if (firstCrate) {
-		store.dispatch(MessageActions.addMessage(message, msgType || "txt"))
-	}
 	if (!createGroup) {
 		store.dispatch(
 			SessionActions._pushSession({
@@ -35,6 +34,29 @@ export function addLocalMessage (obj) {
 				sessionName: groupName || ''
 			})
 		)
+	}
+	if (firstCrate) {
+		if (addType === 'contactAdded') {
+			let who = chatType === 'singleChat' ? from : to
+			let message = {
+				msg: groupText,
+				type: "groupNote",
+			}
+			const formatMsg = formatLocalMessage(who, chatType, message, msgType || 'txt', false)
+			const { msg } = formatMsg.body;
+			let option = {
+				chatType,
+				type: msgType || 'txt',
+				to: who,
+				msg,
+				isChatThread: false,
+			};
+			let msgObj = WebIM.message.create(option);
+			formatMsg.id = msgObj.id;
+			store.dispatch(MessageActions.addMessage(formatMsg, msgType || "txt"))
+		} else {
+			store.dispatch(MessageActions.addMessage(message, msgType || "txt"))
+		}
 	}
 }
 export default function createlistener(props) {
@@ -321,7 +343,26 @@ export default function createlistener(props) {
 		onContactAdded: (msg) => {
 			console.log("onContactAdded", msg);
 			const { to, from } = msg
-			addLocalMessage({to, from, chatType: 'singleChat', groupText: 'You agreed the friend request', firstCrate: true})
+			addLocalMessage({to, from, chatType: 'singleChat', groupText: 'You agreed the friend request', firstCrate: true, addType: 'contactAdded'})
+		},
+		onCmdMessage: msg => {
+			const { action } = msg
+			switch(action) {
+				case 'TypingBegin':
+					store.dispatch(GlobalPropsActions.setShowTyping({ showTyping: true }))
+					break;
+				case 'TypingEnd':
+					store.dispatch(GlobalPropsActions.setShowTyping({ showTyping: false }))
+					break;
+				default:
+					break;
+			}
+			if (TimerId) {
+				clearTimeout(TimerId)
+			}
+			TimerId = setTimeout(() => {
+				store.dispatch(GlobalPropsActions.setShowTyping({ showTyping: false }))
+			}, 5000)
 		}
 	});
 }

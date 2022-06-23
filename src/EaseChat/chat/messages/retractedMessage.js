@@ -33,7 +33,7 @@ function RetractedMessage({ message }) {
     return (
         <li className={classes.pulldownListItem}>
             <div className={classes.text}>
-                {message.bySelf ? i18next.t('You retracted a message') : message.from + i18next.t('retracted a message')}
+                {message.bySelf ? i18next.t('You retracted a message') : message.from + i18next.t(' retracted a message')}
             </div>
             <div className={classes.time}>
                 {sessionItemTime(message.time)}

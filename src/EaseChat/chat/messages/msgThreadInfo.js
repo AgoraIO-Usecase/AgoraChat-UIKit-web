@@ -8,7 +8,7 @@ import ThreadActions from "../../../redux/thread"
 import MessageActions from "../../../redux/message"
 import { getTimeDiff } from "../../../utils/index";
 import WebIM from "../../../utils/WebIM";
-import avatar from "../../../common/icons/avatar1.png";
+import avatar from "../../../common/icons/avatar1.jpg";
 import i18next from "i18next";
 import { emoji } from "../../../common/emoji";
 import AppDB from "../../../utils/AppDB"

@@ -1,7 +1,7 @@
 import React, { memo, useState, useContext, useEffect } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { Avatar, Menu, MenuItem, Tooltip, Dialog } from "@material-ui/core";
-import avatar from "../../../common/icons/avatar1.png";
+import avatar from "../../../common/icons/avatar1.jpg";
 import i18next from "i18next";
 import { renderTime, sessionItemTime } from "../../../utils";
 import { EaseChatContext } from "../index";
@@ -74,7 +74,7 @@ const useStyles = makeStyles((theme) => ({
 		transform: (props) => (props.bySelf ? "translateX(-100%)":"translateX(100%)"),
 		marginLeft: (props) => (props.bySelf ? "-10px" : ""),
 		height: '24px',
-		left: '8px',
+		left: (props) => (props.bySelf ? "8px" : ""),
 	},
 	textReactionCon: {
 		width: (props) => (props.showThreadEntry ? "48px" : "24px"),

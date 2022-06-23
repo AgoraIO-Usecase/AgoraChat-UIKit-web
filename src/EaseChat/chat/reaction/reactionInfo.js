@@ -13,9 +13,9 @@ import Box from "@material-ui/core/Box";
 import Avatar from "@material-ui/core/Avatar";
 import deleteReactionIcon from "../../../common/icons/reaction_delete@2x.png";
 
-import avatarIcon1 from "../../../common/images/avatar1.png";
-import avatarIcon2 from "../../../common/images/avatar2.png";
-import avatarIcon3 from "../../../common/images/avatar3.png";
+import avatarIcon1 from "../../../common/images/avatar1.jpg";
+import avatarIcon2 from "../../../common/images/avatar2.jpg";
+import avatarIcon3 from "../../../common/images/avatar3.jpg";
 import threadClose from "../../../common/images/threadClose.png"
 
 const useStyles = makeStyles((theme) => ({

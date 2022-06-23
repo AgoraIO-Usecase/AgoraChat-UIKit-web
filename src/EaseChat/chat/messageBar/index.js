@@ -17,14 +17,14 @@ import ThreadListPanel from "../../thread/threadList/index.js";
 import { EaseChatContext } from "../index";
 
 import _ from 'lodash'
-import avatarIcon1 from '../../../common/images/avatar1.png'
-import avatarIcon2 from '../../../common/images/avatar2.png'
-import avatarIcon3 from '../../../common/images/avatar3.png'
-import avatarIcon4 from '../../../common/images/avatar4.png'
-import avatarIcon5 from '../../../common/images/avatar5.png'
-import avatarIcon6 from '../../../common/images/avatar6.png'
-import avatarIcon7 from '../../../common/images/avatar7.png'
-import avatarIcon11 from '../../../common/images/avatar11.png'
+import avatarIcon1 from '../../../common/images/avatar1.jpg'
+import avatarIcon2 from '../../../common/images/avatar2.jpg'
+import avatarIcon3 from '../../../common/images/avatar3.jpg'
+import avatarIcon4 from '../../../common/images/avatar4.jpg'
+import avatarIcon5 from '../../../common/images/avatar5.jpg'
+import avatarIcon6 from '../../../common/images/avatar6.jpg'
+import avatarIcon7 from '../../../common/images/avatar7.jpg'
+import avatarIcon11 from '../../../common/images/avatar11.jpg'
 import groupAvatarIcon from '../../../common/images/groupAvatar.png'
 import CallKit from 'zd-callkit'
 import WebIM from '../../../utils/WebIM'
@@ -112,7 +112,7 @@ const useStyles = makeStyles((theme) => {
     userStatusOnline: {
       fontFamily: 'Roboto',
       fontStyle: 'normal',
-      fontWeight:' 500',
+      fontWeight: ' 500',
       fontSize: '12px',
       lineHeight: '14px',
       color: '#999999',
@@ -125,6 +125,8 @@ const useStyles = makeStyles((theme) => {
     }
   };
 });
+let intervalTime = null
+let timeoutTime = null
 const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   let easeChatProps = useContext(EaseChatContext);
   const { onChatAvatarClick, isShowRTC, getRTCToken, agoraUid, getIdMap, appId } = easeChatProps
@@ -133,11 +135,10 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   const groupById = useSelector((state) => state.group?.group.byId) || {};
   const globalProps = useSelector((state) => state.global.globalProps);
   const showThread = useSelector((state) => state.thread.showThread);
-
   const [sessionEl, setSessionEl] = useState(null);
-
+  const [showEnter, setShowEnter] = useState(false);
+  const showTyping = useSelector((state) => state.global.showTyping);
   const { chatType, to, name, presenceExt } = globalProps;
-  // console.log(presenceExt, 'presenceExt')
   const renderSessionInfoMenu = () => {
     const handleClickClearMessage = () => {
       dispatch(MessageActions.clearMessage(chatType, to));
@@ -158,7 +159,7 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
         onClose={() => setSessionEl(null)}
       >
         <MenuItem onClick={handleClickClearMessage}>
-            <img src={clearIcon} alt="" style={{width:'30px'}}/>
+          <img src={clearIcon} alt="" style={{ width: '30px' }} />
           <Typography variant="inherit" noWrap>
             {i18next.t("Clear Messages")}
           </Typography>
@@ -213,16 +214,30 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   const [groupMembers, setGroupMembers] = useState([])
   const [callType, setCallType] = useState('')
   useEffect(() => {
-    let newwInfoData =usersInfoData && usersInfoData.length > 0 ? usersInfoData : localStorage.getItem("usersInfo_1.0")
-    if (newwInfoData && !usersInfoData.length) {
-      newwInfoData = JSON.parse(newwInfoData)
+    if (to) {
+      let newwInfoData = localStorage.getItem("usersInfo_1.0")
+      if (newwInfoData) {
+        newwInfoData = JSON.parse(newwInfoData)
+      }
+      setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 8)
+      if (intervalTime) {
+        clearInterval(intervalTime)
+      }
+      intervalTime = setInterval(() => {
+        let newwInfoData = localStorage.getItem("usersInfo_1.0")
+        if (newwInfoData) {
+          newwInfoData = JSON.parse(newwInfoData)
+        }
+        setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 8)
+      }, 500)
+      timeoutTime = setTimeout(() => {
+        clearInterval(intervalTime)
+        clearTimeout(timeoutTime)
+      }, 2000)
     }
-    setUsersInfoData(newwInfoData)
-    setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 8)
   }, [to])
 
   const callAudio = async () => {
-    console.log('to', to, chatType)
     setCallType('audio')
     const channel = Math.uuid(8)
     if (chatType === 'groupChat') {
@@ -239,7 +254,7 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
         chatType: 'singleChat',
         to: to,
         agoraUid,
-        message: 'invite you to audio call',
+        message: 'Start a voice call',
         accessToken,
         channel
       }
@@ -268,7 +283,7 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
         chatType: 'singleChat',
         to: to,
         agoraUid,
-        message: 'invite you to video call',
+        message: 'Start a video call',
         accessToken,
         channel
       }
@@ -292,9 +307,9 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
       chatType: 'groupChat',
       to: members,
       agoraUid: agoraUid,
-      message: `invite you to ${callType} call`,
-      groupId: to,
-      groupName: confrData.groupName || name,
+      message: `Start a ${callType == 'audio' ? 'voice' : 'video'} call`,
+      groupId: to || confrData.groupId,
+      groupName: confrData.groupName || name[to],
       accessToken,
       channel
     }
@@ -361,9 +376,14 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
             {
               presenceExt && presenceExt[to]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
             }
-            {
-              chatType === "singleChat" && presenceExt && presenceExt[to]?.device && <div className={classes.userStatusOnline}>{presenceExt[to]?.device} {presenceExt[to]?.ext === '' ? 'Online' : presenceExt[to]?.ext}</div>
-            }
+            <div className={classes.userStatusOnline}>
+              {
+                chatType === "singleChat" && presenceExt && presenceExt[to]?.device && <span>{presenceExt[to]?.device} {presenceExt[to]?.ext === '' ? 'Online' : presenceExt[to]?.ext}</span>
+              }
+              {
+                showTyping && <span className={classes.userStatusOnline} style={{marginLeft: '5px'}}>Entering ...</span>
+              }
+            </div>
           </div>
         </Box>
 
@@ -380,16 +400,16 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
               ></IconButton>
             </>
           }
-        <IconButton className={`${classes.threadBtnBox} iconfont icon`} style={{display: chatType === "groupChat" && showThread ? "inline-flex" : "none"}} onClick={openThreadList} ref={threadListAnchorEl}>
-          <img alt="" className={classes.threadIcon} src={threadIcon} />
-        </IconButton>
-        <img src={moreIcon} className={classes.imgActive} style={{background: sessionEl ? '#ccc' : '' }} onClick={handleSessionInfoClick} alt="" />
-      </Box>
-      {renderSessionInfoMenu()}
-      <ThreadListPanel anchorEl={anchorEl} onClose={onClose}/>
-    </div>
-    <InviteModal open={inviteOpen} onClose={handleInviteClose} onCall={startCall} members={groupMembers} joinedMembers={confrData.joinedMembers} />
-  </>
+          <IconButton className={`${classes.threadBtnBox} iconfont icon`} style={{ display: chatType === "groupChat" && showThread ? "inline-flex" : "none" }} onClick={openThreadList} ref={threadListAnchorEl}>
+            <img alt="" className={classes.threadIcon} src={threadIcon} />
+          </IconButton>
+          <img src={moreIcon} className={classes.imgActive} style={{ background: sessionEl ? '#ccc' : '' }} onClick={handleSessionInfoClick} alt="" />
+        </Box>
+        {renderSessionInfoMenu()}
+        <ThreadListPanel anchorEl={anchorEl} onClose={onClose} />
+      </div>
+      <InviteModal open={inviteOpen} onClose={handleInviteClose} onCall={startCall} members={groupMembers} joinedMembers={confrData.joinedMembers} />
+    </>
   );
 };
 

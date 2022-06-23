@@ -12,8 +12,8 @@ import createlistener from "../../utils/WebIMListen";
 import _ from "lodash";
 import "../../i18n";
 import "../../common/iconfont.css";
-import noMessage from "../../common/images/nomessage.png";
-import contactAvatar from "../../common/images/avatar1.png";
+import noMessage from "../../common/images/nomessage.jpg";
+import contactAvatar from "../../common/images/avatar1.jpg";
 import groupAvatar from "../../common/images/groupAvatar.png";
 import i18next from "i18next";
 

@@ -1,6 +1,6 @@
 import React, { memo, useState, useContext } from "react";
 import { makeStyles } from "@material-ui/styles";
-import avatar from "../../../common/icons/avatar1.png";
+import avatar from "../../../common/icons/avatar1.jpg";
 // import clsx from 'clsx';
 import i18next from "i18next";
 import { IconButton, Icon, Menu, MenuItem, Tooltip } from "@material-ui/core";
@@ -136,7 +136,6 @@ const useStyles = makeStyles((theme) => ({
 		bottom: "6px",
 		transform: (props) => (props.bySelf ? "translateX(-100%)" : "translateX(100%)"),
 		height: '24px',
-		left: '0px',
 	},
 	textReactionCon: {
 		width: (props) => (props.showThreadEntry ? "48px" : "24px"),

@@ -10,16 +10,16 @@ import _ from 'lodash'
 import SessionItem from './sessionItem';
 
 import groupIcon from "../../common/images/groupAvatar.png";
-import chatRoomIcon from "../../common/images/chatroom@2x.png";
+import chatRoomIcon from "../../common/images/chatroom@2x.jpg";
 import noticeIcon from "../../common/images/notice@2x.png";
-import avatarIcon1 from '../../common/images/avatar1.png'
-import avatarIcon2 from '../../common/images/avatar2.png'
-import avatarIcon3 from '../../common/images/avatar3.png'
-import avatarIcon4 from '../../common/images/avatar4.png'
-import avatarIcon5 from '../../common/images/avatar5.png'
-import avatarIcon6 from '../../common/images/avatar6.png'
-import avatarIcon7 from '../../common/images/avatar7.png'
-import avatarIcon11 from '../../common/images/avatar11.png'
+import avatarIcon1 from '../../common/images/avatar1.jpg'
+import avatarIcon2 from '../../common/images/avatar2.jpg'
+import avatarIcon3 from '../../common/images/avatar3.jpg'
+import avatarIcon4 from '../../common/images/avatar4.jpg'
+import avatarIcon5 from '../../common/images/avatar5.jpg'
+import avatarIcon6 from '../../common/images/avatar6.jpg'
+import avatarIcon7 from '../../common/images/avatar7.jpg'
+import avatarIcon11 from '../../common/images/avatar11.jpg'
 import searchgray from '../../common/images/searchgray.png'
 
 import i18next from "i18next";
