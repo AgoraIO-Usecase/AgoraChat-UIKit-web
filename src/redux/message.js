@@ -404,16 +404,53 @@ const { Types, Creators } = createActions({
 
 	addReactions: (msg, reaction) => {
 		return (dispatch, getState) => {
-			WebIM.conn.addReaction({ messageId: msg.id, reaction}).then((res) => {
+			WebIM.conn.addReaction({ messageId: msg.id, reaction }).then((res) => {
+				console.log('msg', msg, reaction)
+				let reactions = JSON.parse(JSON.stringify(msg.reactions || [])) || []
+				let findItem = reactions.find(item => {
+					return item.reaction === reaction
+				})
+				if (findItem) {
+					findItem.count++;
+					isAddedBySelf = true;
+					findItem.userList.push(WebIM.conn.context.userId)
+				} else {
+					reactions.push({
+						count: 1,
+						reaction: reaction,
+						isAddedBySelf: true,
+						userList: [WebIM.conn.context.userId]
+					})
+				}
+				// msg.reactions = reactions
+				const newMsg = Object.assign({}, msg)
+				newMsg.reactions = reactions
+				dispatch(Creators.updateReactionData(newMsg, reactions))
 			}).catch((e) => {
+				console.log('add reaction fail', e)
 				message.error('add reaction fail')
 			})
 		}
 	},
 	deleteReaction: (msg, reaction) => {
 		return (dispatch, getState) => {
-			WebIM.conn.deleteReaction({messageId: msg.id, reaction}).then(() => {
+			WebIM.conn.deleteReaction({ messageId: msg.id, reaction }).then(() => {
+				console.log('msg', msg)
+				const reactions = JSON.parse(JSON.stringify(msg.reactions || []))
+				reactions.forEach((item) => {
+					if (item.reaction === reaction) {
+						item.count--;
+						item.isAddedBySelf = false
+						item.userList = item.userList.filter((user) => {
+							return user !== WebIM.conn.context.userId
+						})
+					}
+				})
+				const newMsg = Object.assign({}, msg)
+				newMsg.reactions = reactions
+				dispatch(Creators.updateReactionData(newMsg))
 			}).catch((e) => {
+				console.log('delete reaction fail', e)
 				message.error('delete reaction fail')
 			})
 		}
@@ -546,7 +583,7 @@ export const addMessage = (state, { message, messageType = "txt" }) => {
 			isPushed = true;
 		}
 	});
-console.log(_message, '_message')
+	console.log(_message, '_message')
 	!isPushed && chatData.push(_message);
 	// add a message to db, if by myselt, isUnread equals 0
 	!isPushed && AppDB.addMessage(_message, !bySelf ? 1 : 0);
@@ -630,10 +667,10 @@ export const updateMessageStatus = (state, { message, status = "", localId, serv
 				})
 			}
 		})
-		
-		if(message.isChatThread){
+
+		if (message.isChatThread) {
 			state = state.setIn(['threadMessage', chatId], messages)
-		}else{
+		} else {
 			state = state.setIn([chatType, chatId], messages)
 		}
 		return state
@@ -773,9 +810,9 @@ export const updateReactionData = (state, { message, reaction }) => {
 
 	let addReactionUser = currentLoginUser === from ? to : from;
 
-	if(chatType === 'groupChat'){addReactionUser = to}
+	if (chatType === 'groupChat') { addReactionUser = to }
 
-	if (!messageId) messageId = state.getIn(["byMid", message.mid, "messageId"])
+	if (!messageId) messageId = state.getIn(["byMid", message.mid, "messageId"]) || message.mid
 	let mids = state.getIn(["byMid"]) || {};
 	let mid;
 	for (var i in mids) {
@@ -845,7 +882,7 @@ export const updateReactionData = (state, { message, reaction }) => {
 			let added = isAdded(reactionOp)
 			reactions && reactions.forEach((msgReaction) => {
 				if (msgReaction.reaction === item.reaction) {
-					
+
 					item.userList = mergeArray(item.userList, msgReaction.userList)
 					if(msgReaction.isAddedBySelf){
 						item.isAddedBySelf = msgReaction.isAddedBySelf
