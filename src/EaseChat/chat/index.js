@@ -272,6 +272,8 @@ EaseChatProvider.propTypes = {
   getRTCToken: PropTypes.func,
   getIdMap: PropTypes.func,
   appId: PropTypes.string,
+  
+  deleteSessionAndMessage: PropTypes.func
 };
 
 EaseChatProvider.defaultProps = {

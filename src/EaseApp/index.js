@@ -268,6 +268,8 @@ EaseAppProvider.propTypes = {
   isShowRTC: PropTypes.bool,
   getIdMap: PropTypes.func,
   appId: PropTypes.string,
+
+  deleteSessionAndMessage: PropTypes.func
 };
 EaseAppProvider.defaultProps = {
   isShowUnread: true,
