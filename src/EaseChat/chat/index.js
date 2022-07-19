@@ -12,8 +12,8 @@ import createlistener from "../../utils/WebIMListen";
 import _ from "lodash";
 import "../../i18n";
 import "../../common/iconfont.css";
-import noMessage from "../../common/images/nomessage.png";
-import contactAvatar from "../../common/images/avatar1.png";
+import noMessage from "../../common/images/nomessage.jpg";
+import contactAvatar from "../../common/images/avatar1.jpg";
 import groupAvatar from "../../common/images/groupAvatar.png";
 import i18next from "i18next";
 
@@ -50,7 +50,7 @@ const Chat = (props) => {
   }, []);
 
   useEffect(() => {
-    // let appId = '15cb0d28b87b425ea613fc46f7c9f974';
+    let appId = '15cb0d28b87b425ea613fc46f7c9f974';
     console.log('初始化 callkit', agoraUid)
     CallKit.init(appId, agoraUid || '', WebIM.conn)
   }, [agoraUid])
@@ -228,9 +228,9 @@ const EaseChatProvider = (props) => {
           <div style={{ flex: '1 1 auto', height: '100%' }}>
             <Chat {...props} />
           </div>
-          <div style={{ flex: '0 0 392px', overflow: 'hidden', display: threadPanelStates ? 'flex' : 'none', height: '100%' }}>
-            <hr style={{ width: 0, height: '100%', border: 'none', borderRight: '8px solid #edeff2' }} />
-            <Thread {...props} />
+          <div style={{flex: '0 0 392px',overflow:'hidden',display: threadPanelStates?'flex':'none',height: '100%'}}>
+            <hr style={{width:0,height:'100%',border:'none',borderRight:'8px solid #edeff2', marginTop: '0px'}}/>
+            <Thread {...props}/>
           </div>
         </div>
       </React.StrictMode>

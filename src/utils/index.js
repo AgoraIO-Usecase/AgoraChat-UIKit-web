@@ -2,6 +2,16 @@ import moment from 'moment'
 import WebIM from '../utils/WebIM'
 import Cookie from 'js-cookie';
 import qs from 'qs'
+import _ from 'lodash'
+import avatarIcon1 from '../common/images/avatar1.jpg'
+import avatarIcon2 from '../common/images/avatar2.jpg'
+import avatarIcon3 from '../common/images/avatar3.jpg'
+import avatarIcon4 from '../common/images/avatar4.jpg'
+import avatarIcon5 from '../common/images/avatar5.jpg'
+import avatarIcon6 from '../common/images/avatar6.jpg'
+import avatarIcon7 from '../common/images/avatar7.jpg'
+import avatarIcon11 from '../common/images/avatar11.jpg'
+
 export function renderTime(time,timeStyle) {
     if (!time) return ''
     const localStr = new Date(time)
@@ -157,6 +167,10 @@ const msgTpl = {
     },
     threadNotify: {
         type: 'threadNotify'
+    },
+    cmd: {
+        type: 'cmd',
+        action: ''
     }
 }
 
@@ -222,4 +236,61 @@ export function getGroupName(str) {
 export function getGroupId(str) {
     const [name, id] = str.split("_#-#_")
     return id
+}
+
+export function sessionItemTime (time) {
+    if(!time) return ''
+    // ['Fri', 'Jun', '10', '2022', '14:16:28', 'GMT+0800', '(中国标准时间)']
+    //    0       1      2      3       4
+    const localTimeList = new Date().toString().split(' ')
+    const MsgTimeList = new Date(time).toString().split(' ')
+    if (localTimeList[3] === MsgTimeList[3]) {
+        if (localTimeList[1] === MsgTimeList[1]) {
+            if (localTimeList[0] === MsgTimeList[0]) {
+                if (localTimeList[2] === MsgTimeList[2]) {
+                    return MsgTimeList[4].substr(0,5)
+                }
+            } else {
+                if ((Number(localTimeList[0]) - Number(MsgTimeList[0])) === 1) {
+                    return 'Yday'
+                } else {
+                    return MsgTimeList[0]
+                }
+            }
+        } else {
+            return MsgTimeList[1]
+        }
+    } else {
+        return MsgTimeList[1]
+    }
+}
+
+let userAvatars = {
+  1: avatarIcon1,
+  2: avatarIcon2,
+  3: avatarIcon3,
+  4: avatarIcon4,
+  5: avatarIcon5,
+  6: avatarIcon6,
+  7: avatarIcon7,
+}
+export function userAvatar (id) {
+  let adminInfo = JSON.parse(sessionStorage.getItem('webim_auth'))
+  if (adminInfo && adminInfo.agoraId === id) {
+    let adminAvatar = Number(localStorage.getItem('avatarIndex_1.0'))
+    return userAvatars[adminAvatar + 1] || avatarIcon11
+  } else {
+    let usersInfoData = localStorage.getItem("usersInfo_1.0")
+    let avatarSrc = "";
+    if (usersInfoData) {
+      usersInfoData = JSON.parse(usersInfoData)
+    }
+    let findIndex =  _.find(usersInfoData, { username: id }) || ''
+    avatarSrc = userAvatars[findIndex.userAvatar] || avatarIcon11
+    return avatarSrc
+  }
+}
+
+export function getLocalStorageData() {
+    return localStorage.getItem('soundPreviewText') ? JSON.parse(localStorage.getItem('soundPreviewText')) : {}
 }

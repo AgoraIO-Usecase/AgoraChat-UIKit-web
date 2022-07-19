@@ -1,5 +1,5 @@
 export const emoji = {
-    path: '../common/faces/',
+    path: '../common/reactions/',
     map: {
         '[):]': 'ee_1.png',
         '[:D]': 'ee_2.png',
@@ -35,6 +35,20 @@ export const emoji = {
         '[(k)]': 'ee_32.png',
         '[(F)]': 'ee_33.png',
         '[(W)]': 'ee_34.png',
-        '[(D)]': 'ee_35.png'
+        '[(D)]': 'ee_35.png',
+        '[(E)]': 'ee_36.png',
+        '[(T)]': 'ee_37.png',
+        '[(G)]': 'ee_38.png',
+        '[(Y)]': 'ee_39.png',
+        '[(I)]': 'ee_40.png',
+        '[(J)]': 'ee_41.png',
+        '[(K)]': 'ee_42.png',
+        '[(L)]': 'ee_43.png',
+        '[(M)]': 'ee_44.png',
+        '[(N)]': 'ee_45.png',
+        '[(O)]': 'ee_46.png',
+        '[(P)]': 'ee_47.png',
+        '[(U)]': 'ee_48.png',
+        '[(Z)]': 'ee_49.png',
     }
 }

@@ -65,7 +65,7 @@ const useStyles = makeStyles((theme) => {
 const InviteModal = (props) => {
     const { open, onClose, onCall, members, joinedMembers } = props
     const classes = useStyles();
-    const username = WebIM.conn.context.userId
+    const username = WebIM.conn?.context?.userId
     let contacts = members.length > 0 ? members.map((item) => {
         return { id: item.member || item.owner }
     }) : []

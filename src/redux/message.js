@@ -167,6 +167,8 @@ const { Types, Creators } = createActions({
 					let url = data.uri + "/" + data.entities[0].uuid;
 					formatMsg.url = url;
 					formatMsg.body.url = url;
+					formatMsg.thumb = data.thumb
+					formatMsg.body.thumb = data.thumb
 					const type = isChatThread? 'threadMessage' : chatType;
 					dispatch(Creators.updateMessages(type, to, formatMsg ));
 					imageEl.current.value = "";
@@ -402,16 +404,53 @@ const { Types, Creators } = createActions({
 
 	addReactions: (msg, reaction) => {
 		return (dispatch, getState) => {
-			WebIM.conn.addReaction({ messageId: msg.id, reaction}).then((res) => {
+			WebIM.conn.addReaction({ messageId: msg.id, reaction }).then((res) => {
+				console.log('msg', msg, reaction)
+				let reactions = JSON.parse(JSON.stringify(msg.reactions || [])) || []
+				let findItem = reactions.find(item => {
+					return item.reaction === reaction
+				})
+				if (findItem) {
+					findItem.count++;
+					isAddedBySelf = true;
+					findItem.userList.push(WebIM.conn.context.userId)
+				} else {
+					reactions.push({
+						count: 1,
+						reaction: reaction,
+						isAddedBySelf: true,
+						userList: [WebIM.conn.context.userId]
+					})
+				}
+				// msg.reactions = reactions
+				const newMsg = Object.assign({}, msg)
+				newMsg.reactions = reactions
+				dispatch(Creators.updateReactionData(newMsg, reactions))
 			}).catch((e) => {
+				console.log('add reaction fail', e)
 				message.error('add reaction fail')
 			})
 		}
 	},
 	deleteReaction: (msg, reaction) => {
 		return (dispatch, getState) => {
-			WebIM.conn.deleteReaction({messageId: msg.id, reaction}).then(() => {
+			WebIM.conn.deleteReaction({ messageId: msg.id, reaction }).then(() => {
+				console.log('msg', msg)
+				const reactions = JSON.parse(JSON.stringify(msg.reactions || []))
+				reactions.forEach((item) => {
+					if (item.reaction === reaction) {
+						item.count--;
+						item.isAddedBySelf = false
+						item.userList = item.userList.filter((user) => {
+							return user !== WebIM.conn.context.userId
+						})
+					}
+				})
+				const newMsg = Object.assign({}, msg)
+				newMsg.reactions = reactions
+				dispatch(Creators.updateReactionData(newMsg))
 			}).catch((e) => {
+				console.log('delete reaction fail', e)
 				message.error('delete reaction fail')
 			})
 		}
@@ -461,8 +500,31 @@ const { Types, Creators } = createActions({
 		return (dispatch, getState) => {
 			const formatMsg = formatLocalMessage(gid, notifyType, message, 'notify')
 			formatMsg.from = from;
-			formatMsg.type = 'notify',
+			formatMsg.type = 'notify'
+			console.log(formatMsg, 'formatMsg')
 			dispatch(Creators.updateNotifyDetails(formatMsg))
+		}
+	},
+	sendCmdMessage: (to, chatType, action, isChatThread=false) => {
+		if (!to || !chatType) return
+		return (dispatch, getState) => {
+			const formatMsg = formatLocalMessage(to, chatType, action, 'cmd', isChatThread)
+			const { msg } = formatMsg.body;
+			let option = {
+				chatType,
+				type: 'cmd',
+				to,
+				msg,
+				isChatThread,
+				action
+			};
+			let msgObj = WebIM.message.create(option);
+			formatMsg.id = msgObj.id;
+			WebIM.conn.send(msgObj).then((res) => {
+				console.log("send private text Success",res);
+			}).catch((e) => {
+				console.log("Send private text error", e);
+			});
 		}
 	}
 });
@@ -521,7 +583,7 @@ export const addMessage = (state, { message, messageType = "txt" }) => {
 			isPushed = true;
 		}
 	});
-console.log(_message, '_message')
+	console.log(_message, '_message')
 	!isPushed && chatData.push(_message);
 	// add a message to db, if by myselt, isUnread equals 0
 	!isPushed && AppDB.addMessage(_message, !bySelf ? 1 : 0);
@@ -594,11 +656,21 @@ export const updateMessageStatus = (state, { message, status = "", localId, serv
 			status: status,
 		};
 		messages.splice(messages.indexOf(found), 1, msg);
-		AppDB.updateMessageStatus(id, serverMsgId, status)
-		
-		if(message.isChatThread){
+		AppDB.updateMessageStatus(id, serverMsgId, status).then(res => {
+			if (res === 0) {
+				AppDB.updateMessageStatus(serverMsgId, id, status).then(val => {
+					if (val === 0) {
+						AppDB.updateMessageStatus(id, serverMsgId, status).then(value => {
+							console.log(value)
+						})
+					}
+				})
+			}
+		})
+
+		if (message.isChatThread) {
 			state = state.setIn(['threadMessage', chatId], messages)
-		}else{
+		} else {
 			state = state.setIn([chatType, chatId], messages)
 		}
 		return state
@@ -738,9 +810,9 @@ export const updateReactionData = (state, { message, reaction }) => {
 
 	let addReactionUser = currentLoginUser === from ? to : from;
 
-	if(chatType === 'groupChat'){addReactionUser = to}
+	if (chatType === 'groupChat') { addReactionUser = to }
 
-	if (!messageId) messageId = state.getIn(["byMid", message.mid, "messageId"])
+	if (!messageId) messageId = state.getIn(["byMid", message.mid, "messageId"]) || message.mid
 	let mids = state.getIn(["byMid"]) || {};
 	let mid;
 	for (var i in mids) {
@@ -810,7 +882,7 @@ export const updateReactionData = (state, { message, reaction }) => {
 			let added = isAdded(reactionOp)
 			reactions && reactions.forEach((msgReaction) => {
 				if (msgReaction.reaction === item.reaction) {
-					
+
 					item.userList = mergeArray(item.userList, msgReaction.userList)
 					if(msgReaction.isAddedBySelf){
 						item.isAddedBySelf = msgReaction.isAddedBySelf
@@ -876,7 +948,7 @@ export const setThreadHasHistory = (state, {status}) => {
 
 export const updateNotifyDetails = (state, { formatMsg }) => {
 	let { chatType, to, id ,type} = formatMsg;
-	let messageList = state[chatType][to].asMutable({ deep: true });
+	let messageList = state[chatType] && state[chatType][to] ? state[chatType][to].asMutable({ deep: true }) : [];
 	const message = {
 		...formatMsg,
 		body: {

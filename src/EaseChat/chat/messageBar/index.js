@@ -17,9 +17,14 @@ import ThreadListPanel from "../../thread/threadList/index.js";
 import { EaseChatContext } from "../index";
 
 import _ from 'lodash'
-import avatarIcon1 from '../../../common/images/avatar1.png'
-import avatarIcon2 from '../../../common/images/avatar2.png'
-import avatarIcon3 from '../../../common/images/avatar3.png'
+import avatarIcon1 from '../../../common/images/avatar1.jpg'
+import avatarIcon2 from '../../../common/images/avatar2.jpg'
+import avatarIcon3 from '../../../common/images/avatar3.jpg'
+import avatarIcon4 from '../../../common/images/avatar4.jpg'
+import avatarIcon5 from '../../../common/images/avatar5.jpg'
+import avatarIcon6 from '../../../common/images/avatar6.jpg'
+import avatarIcon7 from '../../../common/images/avatar7.jpg'
+import avatarIcon11 from '../../../common/images/avatar11.jpg'
 import groupAvatarIcon from '../../../common/images/groupAvatar.png'
 import CallKit from 'zd-callkit'
 import WebIM from '../../../utils/WebIM'
@@ -34,6 +39,8 @@ import donotdisturbIcon from '../../../common/images/Do_not_Disturb.png'
 import customIcon from '../../../common/images/custom.png'
 import leaveIcon from '../../../common/images/leave.png'
 import muteImg from '../../../common/images/gray@2x.png'
+import deleteChat from '../../../common/icons/reaction_delete@2x.png'
+import moreIcon from '../../../common/icons/menu@2x.png'
 
 import deleteIcon from '../../../common/icons/delete@2x.png'
 import clearIcon from '../../../common/icons/clear@2x.png'
@@ -44,12 +51,14 @@ const useStyles = makeStyles((theme) => {
       display: "flex",
       zIndex: "999",
       width: "100%",
-      height: "6.67vh",
+      height: "60px",
       maxHeight: "60px",
       minHeight: "40px",
       justifyContent: "space-between",
       alignItems: "center",
-      padding: "0 10px",
+      // padding: "0 10px",
+      backdropFilter: 'blur(32px)',
+      background: 'rgba(255,255,255,.8)',
     },
     leftBar: {
       display: "flex",
@@ -57,7 +66,7 @@ const useStyles = makeStyles((theme) => {
       position: 'relative'
     },
     avatar: {
-      margin: "0 20px 0 16px",
+      margin: "0 12px 0 16px",
     },
     imgBox: {
       position: 'absolute',
@@ -65,15 +74,15 @@ const useStyles = makeStyles((theme) => {
       left: '45px',
       zIndex: 1,
       borderRadius: '50%',
-      width: '20px',
-      height: '20px',
-      lineHeight: '26px',
+      width: '17px',
+      height: '17px',
+      lineHeight: '21px',
       textAlign: 'center',
       background: '#fff',
     },
     imgStyle: {
-      width: '18px',
-      height: '18px',
+      width: '15px',
+      height: '15px',
       borderRadius: '50%',
     },
     muteImgStyle: {
@@ -82,11 +91,42 @@ const useStyles = makeStyles((theme) => {
       height: '12px',
     },
     threadIcon: {
-      width: '21px',
+      width: '20px',
       height: '20px',
+    },
+    deleteChatImg: {
+      width: '30px',
+      height: '30px',
+      verticalAlign: 'middle',
+    },
+    imgActive: {
+      borderRadius: '50%',
+      width: '32px',
+      cursor: 'pointer',
+      marginRight: '12px',
+      verticalAlign: 'middle',
+      '&:hover': {
+        background: 'rgba(0, 0, 0, 0.04)',
+      }
+    },
+    userStatusOnline: {
+      fontFamily: 'Roboto',
+      fontStyle: 'normal',
+      fontWeight: ' 500',
+      fontSize: '12px',
+      lineHeight: '14px',
+      color: '#999999',
+    },
+    nameStatusMuteBox: {
+      textAlign: 'left'
+    },
+    threadBtnBox: {
+      padding: '6px',
     }
   };
 });
+let intervalTime = null
+let timeoutTime = null
 const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   let easeChatProps = useContext(EaseChatContext);
   const { onChatAvatarClick, isShowRTC, getRTCToken, agoraUid, getIdMap, appId } = easeChatProps
@@ -95,9 +135,9 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   const groupById = useSelector((state) => state.group?.group.byId) || {};
   const globalProps = useSelector((state) => state.global.globalProps);
   const showThread = useSelector((state) => state.thread.showThread);
-
   const [sessionEl, setSessionEl] = useState(null);
-
+  const [showEnter, setShowEnter] = useState(false);
+  const showTyping = useSelector((state) => state.global.showTyping);
   const { chatType, to, name, presenceExt } = globalProps;
   const renderSessionInfoMenu = () => {
     const handleClickClearMessage = () => {
@@ -119,13 +159,16 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
         onClose={() => setSessionEl(null)}
       >
         <MenuItem onClick={handleClickClearMessage}>
-            <img src={clearIcon} alt="" style={{width:'30px'}}/>
+          <img src={clearIcon} alt="" style={{ width: '30px' }} />
           <Typography variant="inherit" noWrap>
-            {i18next.t("Clear Message")}
+            {i18next.t("Clear Messages")}
           </Typography>
         </MenuItem>
         <MenuItem onClick={handleClickDeleteSession}>
-            <img src={clearIcon} alt=""  style={{width:'30px'}}/>
+          <Box className={classes.menuItemIconBox}>
+            {/* <Icon className="iconfont icon-shanchuhuihua"></Icon> */}
+            <img className={classes.deleteChatImg} src={deleteChat} alt="" />
+          </Box>
           <Typography variant="inherit" noWrap>
             {i18next.t("Delete Chat")}
           </Typography>
@@ -158,7 +201,12 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   let userAvatars = {
     1: avatarIcon1,
     2: avatarIcon2,
-    3: avatarIcon3
+    3: avatarIcon3,
+    4: avatarIcon4,
+    5: avatarIcon5,
+    6: avatarIcon6,
+    7: avatarIcon7,
+    8: avatarIcon11,
   }
   const [userAvatarIndex, setUserAvatarIndex] = useState([])
   const [usersInfoData, setUsersInfoData] = useState([])
@@ -166,13 +214,30 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   const [groupMembers, setGroupMembers] = useState([])
   const [callType, setCallType] = useState('')
   useEffect(() => {
-    let newInfoData = usersInfoData && usersInfoData.length > 0 ? usersInfoData : localStorage.getItem("usersInfo_1.0")
-    setUsersInfoData(newInfoData)
-    setUserAvatarIndex(_.find(newInfoData, { username: to })?.userAvatar || 1)
+    if (to) {
+      let newwInfoData = localStorage.getItem("usersInfo_1.0")
+      if (newwInfoData) {
+        newwInfoData = JSON.parse(newwInfoData)
+      }
+      setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 8)
+      if (intervalTime) {
+        clearInterval(intervalTime)
+      }
+      intervalTime = setInterval(() => {
+        let newwInfoData = localStorage.getItem("usersInfo_1.0")
+        if (newwInfoData) {
+          newwInfoData = JSON.parse(newwInfoData)
+        }
+        setUserAvatarIndex(_.find(newwInfoData, { username: to })?.userAvatar || 8)
+      }, 500)
+      timeoutTime = setTimeout(() => {
+        clearInterval(intervalTime)
+        clearTimeout(timeoutTime)
+      }, 2000)
+    }
   }, [to])
 
   const callAudio = async () => {
-    console.log('to', to, chatType)
     setCallType('audio')
     const channel = Math.uuid(8)
     if (chatType === 'groupChat') {
@@ -189,7 +254,7 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
         chatType: 'singleChat',
         to: to,
         agoraUid,
-        message: 'invite you to audio call',
+        message: 'Start a voice call',
         accessToken,
         channel
       }
@@ -218,7 +283,7 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
         chatType: 'singleChat',
         to: to,
         agoraUid,
-        message: 'invite you to video call',
+        message: 'Start a video call',
         accessToken,
         channel
       }
@@ -242,9 +307,9 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
       chatType: 'groupChat',
       to: members,
       agoraUid: agoraUid,
-      message: `invite you to ${callType} call`,
-      groupId: to,
-      groupName: confrData.groupName || name,
+      message: `Start a ${callType == 'audio' ? 'voice' : 'video'} call`,
+      groupId: to || confrData.groupId,
+      groupName: confrData.groupName || name[to],
       accessToken,
       channel
     }
@@ -306,7 +371,20 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
               </div>
               : null
           }
-          {name || to}
+          <div className={classes.nameStatusMuteBox}>
+            {name && name[to] || to}
+            {
+              presenceExt && presenceExt[to]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
+            }
+            <div className={classes.userStatusOnline}>
+              {
+                chatType === "singleChat" && presenceExt && presenceExt[to]?.device && <span>{presenceExt[to]?.device} {presenceExt[to]?.ext === '' ? 'Online' : presenceExt[to]?.ext}</span>
+              }
+              {
+                showTyping && <span className={classes.userStatusOnline} style={{marginLeft: '5px'}}>Entering ...</span>
+              }
+            </div>
+          </div>
         </Box>
 
         <Box position="static">
@@ -322,13 +400,13 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
               ></IconButton>
             </>
           }
-
-          <IconButton
-            onClick={handleSessionInfoClick}
-            className="iconfont icon-hanbaobao icon"
-          ></IconButton>
+          <IconButton className={`${classes.threadBtnBox} iconfont icon`} style={{ display: chatType === "groupChat" && showThread ? "inline-flex" : "none" }} onClick={openThreadList} ref={threadListAnchorEl}>
+            <img alt="" className={classes.threadIcon} src={threadIcon} />
+          </IconButton>
+          <img src={moreIcon} className={classes.imgActive} style={{ background: sessionEl ? '#ccc' : '' }} onClick={handleSessionInfoClick} alt="" />
         </Box>
         {renderSessionInfoMenu()}
+        <ThreadListPanel anchorEl={anchorEl} onClose={onClose} />
       </div>
       <InviteModal open={inviteOpen} onClose={handleInviteClose} onCall={startCall} members={groupMembers} joinedMembers={confrData.joinedMembers} />
     </>

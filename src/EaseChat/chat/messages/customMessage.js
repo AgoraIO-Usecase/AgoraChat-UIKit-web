@@ -9,7 +9,7 @@ import audioWhite from '../../../common/images/audio_white@2x.png';
 const useStyles = makeStyles((theme) => ({
     messageBox: {
         listStyle: 'none',
-        marginBottom: '26px',
+        marginTop: '26px',
         position: 'relative',
         alignItems:'center',
         display: 'flex',

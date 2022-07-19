@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/styles";
 import store from "../../../redux/index";
 import MessageActions from "../../../redux/message";
 import WebIM from "../../../utils/WebIM";
-import Popover from "@material-ui/core/Popover";
+import Dialog from "@material-ui/core/Dialog";
 import AppBar from "@material-ui/core/AppBar";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
@@ -13,9 +13,10 @@ import Box from "@material-ui/core/Box";
 import Avatar from "@material-ui/core/Avatar";
 import deleteReactionIcon from "../../../common/icons/reaction_delete@2x.png";
 
-import avatarIcon1 from "../../../common/images/avatar1.png";
-import avatarIcon2 from "../../../common/images/avatar2.png";
-import avatarIcon3 from "../../../common/images/avatar3.png";
+import avatarIcon1 from "../../../common/images/avatar1.jpg";
+import avatarIcon2 from "../../../common/images/avatar2.jpg";
+import avatarIcon3 from "../../../common/images/avatar3.jpg";
+import threadClose from "../../../common/images/threadClose.png"
 
 const useStyles = makeStyles((theme) => ({
 	infoBox: {
@@ -29,13 +30,13 @@ const useStyles = makeStyles((theme) => ({
 		justifyContent: "space-between",
 		padding: "0px 15px",
 		height: "58px",
-		borderBottom: "2px solid #C4C4C4",
+		borderBottom: "1px solid #C4C4C4",
 	},
 	infoReaction: {
 		height: `calc(100% - 60px)`,
 	},
-	textStyle: {
-		fontFamily: "SF Compact Text",
+	textStyleTitle: {
+		fontFamily: "Roboto",
 		fontWeight: "600",
 		fontStyle: "normal",
 		fontSize: "18px",
@@ -51,6 +52,19 @@ const useStyles = makeStyles((theme) => ({
 	},
 	root: {
 		background: "#FFFFFF",
+		'& .MuiTabs-scroller .MuiTabs-indicator': {
+			background: '#114EFF',
+			height: '3px',
+			display: 'inline-block',
+			borderRadius: '5px',
+		},
+		'& .MuiTabScrollButton-root': {
+			width: '25px',
+			'& .MuiSvgIcon-root': {
+				width: '25px',
+				height: '25px',
+			}
+		}
 	},
 	iconStyle: {
 		width: "24px",
@@ -58,11 +72,14 @@ const useStyles = makeStyles((theme) => ({
 		cursor: "pointer",
 	},
 	reactionItem: {
-		width: "80px !important",
+		width: "70px !important",
 		minWidth: "0 !important",
 	},
 	tabPanelItem: {
 		position: "relative",
+		'& .MuiBox-root': {
+			padding: '12px'
+		}
 	},
 	reactionNumLabel: {
 		display: "flex",
@@ -93,7 +110,14 @@ const useStyles = makeStyles((theme) => ({
 		alignItems: "center",
 	},
 	textStyle: {
-		marginLeft: '8px'
+		marginLeft: '8px !important',
+	},
+	myselfPopover: {
+		'& .MuiDialog-paper': {
+				borderRadius: '12px',
+				// backdropFilter: 'blur(12px)',
+				// background: 'rgba(255,255,255,.8)',
+		}
 	}
 }));
 
@@ -185,25 +209,16 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 	};
 
 	return (
-		<Popover
-			keepMounted
-			open={Boolean(anchorEl)}
+		<Dialog
+			open={anchorEl}
 			onClose={onClose}
-			anchorEl={anchorEl}
-			anchorOrigin={{
-				vertical: "bottom",
-				horizontal: "left",
-			}}
-			transformOrigin={{
-				vertical: "top",
-				horizontal: "left",
-			}}
+			className={classes.myselfPopover}
 		>
 			<Box className={classes.infoBox}>
 				<Box className={classes.infoTitle}>
-					<span className={classes.textStyle}>Reactions</span>
+					<span className={classes.textStyleTitle}>Reactions</span>
 					<span className={classes.closeStyle} onClick={onClose}>
-						X
+						<img slt="" src={threadClose} />
 					</span>
 				</Box>
 				<Box className={classes.infoReaction}>
@@ -257,7 +272,7 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 					})}
 				</Box>
 			</Box>
-		</Popover>
+		</Dialog>
 	);
 };
 

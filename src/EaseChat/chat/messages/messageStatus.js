@@ -5,45 +5,57 @@ import send from '../../../common/icons/sent@3x.png'
 import fail from '../../../common/icons/failed@3x.png'
 import read from '../../../common/icons/read@3x.png'
 import received from '../../../common/icons/received@3x.png'
+import sending from '../../../common/icons/sending@3x.png'
 const useStyles = makeStyles((theme) => ({
-	MuiCircularProgressSvg: {
-		width: "15px",
-		height: "15px",
-		color: "#e0e0e0",
-		margin: "0 4px",
-	},
-	failIcon: {
-		color: "red",
-	},
-	imgStyle: {
-		height: "20px",
-		marginRight: "5px",
-	},
-	hoverStyle: {
-		marginRight: "25px",
-	},
+    MuiCircularProgressSvg: {
+        width: "15px",
+        height: "15px",
+        color: "#e0e0e0",
+        margin: "0 4px",
+    },
+    failIcon: {
+        color: "red",
+    },
+    imgStyle: {
+        height: "20px",
+        marginRight: "5px",
+    },
+    rotate: {
+        animation: "rotate 800ms infinite"
+    },
+    "@keyframes rotate": {
+        "0%": {
+            transform: "rotate(0deg)"
+        },
+        "100%": {
+            transform: "rotate(360deg)"
+        }
+    },
+    hoverStyle: {
+        marginRight: "25px",
+    },
 }));
 function SedndingStatus({ status, style = {},hoverReaction }) {
     const classes = useStyles({
 		hoverReaction: hoverReaction,
 	});
     let statusIcon = ''
-    console.log('status>>',status);
+    // console.log('status>>',status);
     switch (status) {
         case 'sent':
-            statusIcon = <img src={!hoverReaction ? send : null} alt="" className={classes.imgStyle}></img>
+            statusIcon = <img src={!hoverReaction ? send : null} alt="sent" className={classes.imgStyle}></img>
             break;
         case 'sending':
-            statusIcon = <svg className={classes.MuiCircularProgressSvg} viewBox="22 22 44 44" style={style}><circle className="MuiCircularProgress-circle MuiCircularProgress-circleIndeterminate" cx="44" cy="44" r="20.2" fill="none" strokeWidth="3.6"></circle></svg>
+            statusIcon = <img src={!hoverReaction ? sending : null} alt="sent" className={classes.imgStyle + ' ' + classes.rotate}></img>
             break;
         case 'received':
-            statusIcon = <img src={received} alt="" className={classes.imgStyle}></img>
+            statusIcon = <img src={received} alt="received" className={classes.imgStyle}></img>
             break;
         case 'read':
-            statusIcon = <img src={read} alt="" className={classes.imgStyle}></img>
+            statusIcon = <img src={read} alt="read" className={classes.imgStyle}></img>
             break;
         case 'fail':
-            statusIcon = <img src={fail} alt="" className={classes.imgStyle}></img>
+            statusIcon = <img src={fail} alt="fail" className={classes.imgStyle}></img>
             break;
         default:
             statusIcon = ''

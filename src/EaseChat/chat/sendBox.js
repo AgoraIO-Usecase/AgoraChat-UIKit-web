@@ -15,7 +15,7 @@ import {
   TextareaAutosize,
   Menu,
 } from "@material-ui/core";
-import Emoji from "./toolbars/emoji";
+import EmojiCom from "./toolbars/emoji";
 import { useDispatch, useSelector } from "react-redux";
 import MessageActions from "../../redux/message";
 import PropTypes from "prop-types";
@@ -28,6 +28,8 @@ import icon_emoji from "../../common/icons/emoji@2x.png";
 import icon_yuyin from "../../common/icons/voice@2x.png";
 import attachment from "../../common/icons/attachment@2x.png";
 import { message } from '../common/alert' 
+import { getLocalStorageData } from '../../utils/index'
+import { emoji } from "../../common/emoji";
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -36,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
     background: "#fff",
     borderRadius: "2px",
     position: "absolute",
-    bottom: 0,
+    bottom: '-25px',
     padding: "10px 0",
   },
   emitter: {
@@ -53,8 +55,10 @@ const useStyles = makeStyles((theme) => ({
     color: "#010101",
     resize: "none",
     backgroundColor: "#efefef",
-    borderRadius: "10px",
+    borderRadius: "18px",
     padding: "5px",
+    fontFamily: 'Roboto',
+    width: '96%',
   },
   senderBar: {
     height: "12px",
@@ -65,13 +69,51 @@ const useStyles = makeStyles((theme) => ({
     display: "none",
   },
   iconStyle: {
-    width: "26px",
-    height: "26px",
+    width: "30px",
+    height: "30px",
   },
   menuItemIconBox: {
     marginRight: "5px",
     display: "flex",
   },
+  textareaBox: {
+    backgroundColor: "#efefef",
+    width: '100%',
+    borderRadius: "18px",
+    minHeight: '36px',
+    padding: '10px 0 0 8px',
+    outline: '0 none',
+    textAlign: 'left',
+    maxHeight: '70px',
+    overflow: 'auto',
+    position: 'relative',
+    '&::before': {
+      content: '"Say Something"',
+      position: 'absolute',
+      top: '10px',
+      left: '10px',
+      color: '#999'
+    }
+  },
+  iconbtnStyle: {
+    padding: '2px',
+    margin: '6px 0',
+  },
+  emojiInsert: {
+    marginLeft: '5px',
+    verticalAlign: 'middle',
+  },
+  textareaSubBox: {
+    backgroundColor: "#efefef",
+    width: '100%',
+    borderRadius: "18px",
+    minHeight: '36px',
+    padding: '10px 0 0 8px',
+    outline: '0 none',
+    textAlign: 'left',
+    maxHeight: '70px',
+    overflow: 'auto',
+  }
 }));
 
 function SendBox(props) {
@@ -91,6 +133,8 @@ function SendBox(props) {
   const imageEl = useRef(null);
   const [sessionEl, setSessionEl] = useState(null);
   const [showRecorder, setShowRecorder] = useState(false);
+  const [typingTime, setTypingTime] = useState(true);
+  const [inputHaveValue, setInputHaveValue] = useState(true);
   inputValueRef.current = inputValue;
   const handleClickEmoji = (e) => {
     setEmojiVisible(e.currentTarget);
@@ -98,10 +142,41 @@ function SendBox(props) {
   const handleEmojiClose = () => {
     setEmojiVisible(null);
   };
-  const handleEmojiSelected = (emoji) => {
-    if (!emoji) return;
+  const insertCustomHtml = (t, e) => {
+    var i = inputRef.current
+    i.innerText.length;
+    if ("getSelection" in window) {
+      var s = window.getSelection();
+      if (s && 1 === s.rangeCount) {
+        i.focus();
+        var n = s.getRangeAt(0),
+        a = new Image;
+        a.src = t,
+        a.setAttribute("data-key", e),
+        a.setAttribute("width", 20),
+        a.setAttribute("height", 20),
+        a.draggable = !1,
+        a.className = classes.emojiInsert,
+        a.setAttribute("title", e.replace("[", "").replace("]", "")),
+        n.deleteContents(),
+        n.insertNode(a),
+        n.collapse(!1),
+        s.removeAllRanges(),
+        s.addRange(n)
+      }
+    } else if ("selection" in document) {
+      i.focus(), (n = document.selection.createRange()).pasteHTML('<img class="emoj-insert" draggable="false" data-key="' + e + '" title="' + e.replace("[", "").replace("]", "") + '" src="' + t + '">'), i.focus()
+    }
+    const str = converToMessage(i.innerHTML).trim()
+    setInputValue(str)
+  }
+  const handleEmojiSelected = (res) => {
+    if (!res) return;
     setEmojiVisible(null);
-    setInputValue((value) => value + emoji);
+    setInputValue((value) => value + res);
+    const src = require(`../../common/reactions/${emoji.map[res]}`).default
+    insertCustomHtml(src, res)
+    setInputHaveValue(false)
     setTimeout(() => {
       let el = inputRef.current;
       el.focus();
@@ -109,10 +184,44 @@ function SendBox(props) {
       el.selectionEnd = inputValueRef.current.length;
     }, 0);
   };
-
+  const openTyping = () => {
+    dispatch(MessageActions.sendCmdMessage(to, chatType, 'TypingBegin', props.isChatThread))
+  }
+  function converToMessage (e) {
+    var t = function () {
+      var t = [],
+      r = document.createElement("div");
+      r.innerHTML = e.replace(/\\/g, "###h###");
+      for (var n = r.querySelectorAll("img"), a = r.querySelectorAll("div"), i = n.length, o = a.length; i--;) {
+        var s = document.createTextNode(n[i].getAttribute("data-key"));
+        n[i].parentNode.insertBefore(s, n[i])
+        n[i].parentNode.removeChild(n[i])
+      }
+      for (; o--;) t.push(a[o].innerHTML), a[o].parentNode.removeChild(a[o]);
+      var c = (t = t.reverse()).length ? "\n" + t.join("\n") : t.join("\n");
+      return (r.innerText + c).replace(/###h###/g, "&#92;").replace(/<br>/g, "\n").replace(/&amp;/g, "&")
+    }();
+    new RegExp("(^[\\s\\n\\t\\xa0\\u3000]+)|([\\u3000\\xa0\\n\\s\\t]+$)", "g");
+    return t.replace(/&nbsp;/g, " ").trim()
+  }
   const handleInputChange = (e) => {
-    setInputValue(e.target.value);
+    const html = e.target.innerHTML
+    if (html.length) {
+      setInputHaveValue(false)
+    } else {
+      setInputHaveValue(true)
+    }
+    const str = converToMessage(html).trim()
+    setInputValue(str)
+    if (getLocalStorageData().typingSwitch && typingTime) {
+      setTypingTime(false)
+      openTyping()
+      setTimeout(() => {
+        setTypingTime(true)
+      }, 10000)
+    }
   };
+  
   const isCreatingThread = useSelector((state) => state.thread?.isCreatingThread);
   const currentThreadInfo = useSelector((state) => state.thread?.currentThreadInfo);
   const threadOriginalMsg = useSelector((state) => state.thread?.threadOriginalMsg);
@@ -157,6 +266,8 @@ function SendBox(props) {
           msg: inputValue,
         }, props.isChatThread)
       );
+      inputRef.current.innerHTML = ''
+      setInputHaveValue(true)
       setInputValue("");
       inputRef.current.focus();
     })
@@ -251,7 +362,7 @@ function SendBox(props) {
         onClose={() => setSessionEl(null)}
         anchorOrigin={{
           vertical: "top",
-          horizontal: "left",
+          horizontal: "center",
         }}
         transformOrigin={{
           vertical: "bottom",
@@ -302,6 +413,7 @@ function SendBox(props) {
       <>
         {window.location.protocol === "https:" && (
           <IconButton
+            className={classes.iconbtnStyle}
             onClick={() => {
               setShowRecorder(true);
             }}
@@ -323,28 +435,32 @@ function SendBox(props) {
 
   const renderTextarea = () => {
     return (
-      <TextareaAutosize
-        className={classes.input}
-        minRows={2}
-        maxRows={3}
-        value={inputValue}
-        onChange={handleInputChange}
-        ref={inputRef}
-      ></TextareaAutosize>
+      // <div className={classes.textareaBox}>
+      //   <TextareaAutosize
+      //     placeholder="Say Something"
+      //     className={classes.input}
+      //     minRows={1}
+      //     maxRows={3}
+      //     value={inputValue}
+      //     onChange={handleInputChange}
+      //     ref={inputRef}
+      //   ></TextareaAutosize>
+      // </div>
+      <div contenteditable="true" className={`${inputHaveValue ? classes.textareaBox : classes.textareaSubBox}`} ref={inputRef} onInput={handleInputChange}></div>
     );
   };
 
   const renderEmoji = () => {
     return (
       <>
-        <IconButton ref={emojiRef} onClick={handleClickEmoji}>
+        <IconButton ref={emojiRef} className={classes.iconbtnStyle} onClick={handleClickEmoji}>
           <img alt="" className={classes.iconStyle} src={icon_emoji} />
         </IconButton>
-        <Emoji
+        <EmojiCom
           anchorEl={emojiVisible}
           onSelected={handleEmojiSelected}
           onClose={handleEmojiClose}
-        ></Emoji>
+        ></EmojiCom>
       </>
     );
   };
@@ -352,7 +468,7 @@ function SendBox(props) {
   const renderMoreFeatures = () => {
     return (
       <>
-        <IconButton onClick={handleClickMenu}>
+        <IconButton className={classes.iconbtnStyle} onClick={handleClickMenu}>
           <img alt="" className={classes.iconStyle} src={attachment} />
         </IconButton>
         {renderMenu()}

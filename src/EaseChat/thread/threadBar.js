@@ -10,7 +10,7 @@ import edit from '../../common/images/edit.png'
 import { useSelector, useDispatch } from "../../EaseApp/index";
 import ThreadActions from "../../redux/thread";
 import { EaseChatContext } from "../chat/index";
-import "../../i18n";
+// import "../../i18n";
 import i18next from "i18next";
 import muteImg from '../../common/images/gray@2x.png'
 
@@ -28,19 +28,19 @@ const useStyles = makeStyles((theme) => {
             alignItems: "center",
         },
         threadIconContainer: {
-            position: 'absolute',
+            // position: 'absolute',
             top: '4px',
             left: '16px',
             display: 'inline-block',
             width: '32px',
             height: '32px',
-            textAlign: 'center',
+            // textAlign: 'center',
         },
         threadIcon: {
             marginTop: '5px',
             display: 'inline-block',
-            width: '24px',
-            height: '22px',
+            width: '21px',
+            height: '20px',
             objectFit: 'contain',
         },
         close: {
@@ -48,14 +48,13 @@ const useStyles = makeStyles((theme) => {
             height: '14px',
         },
         leftBar: {
-            position: 'realtive',
-            paddingLeft: '36px',
+            // position: 'relative',
+            // paddingLeft: '36px',
             fontWeight: '600',
             textAlign: 'left',
             width: '315px',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
+            display: 'flex',
+            alignItems: 'center',
         },
         rightBar: {
             display: 'flex',
@@ -103,6 +102,15 @@ const useStyles = makeStyles((theme) => {
             width: '12px',
             marginLeft: '2px',
             height: '12px',
+        },
+        threadNameStyle: {
+            width: '250px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            display: 'inline-block',
+            fontSize: '16px',
+            fontWeight: '600',
         }
     };
 });
@@ -141,7 +149,7 @@ const ThreadBar = () => {
                 <div className={classes.threadIconContainer}>
                     <img alt="" className={classes.threadIcon} src={threadIcon} />
                 </div>
-                {threadName}
+                <span className={classes.threadNameStyle}>{threadName}</span>
                 {
                     presenceExt && presenceExt[threadId]?.muteFlag ? <img className={classes.muteImgStyle} alt="" src={muteImg} /> : null
                 }

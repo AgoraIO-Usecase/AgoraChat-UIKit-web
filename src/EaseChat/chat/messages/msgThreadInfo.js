@@ -8,12 +8,13 @@ import ThreadActions from "../../../redux/thread"
 import MessageActions from "../../../redux/message"
 import { getTimeDiff } from "../../../utils/index";
 import WebIM from "../../../utils/WebIM";
-import avatar from "../../../common/icons/avatar1.png";
+import avatar from "../../../common/icons/avatar1.jpg";
 import i18next from "i18next";
 import { emoji } from "../../../common/emoji";
 import AppDB from "../../../utils/AppDB"
 import { message as Alert } from '../../../EaseChat/common/alert'
 import { EaseChatContext } from "../index"
+import { userAvatar } from '../../../utils'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -199,7 +200,7 @@ const MsgThreadInfo = (props) => {
                     <img
                         key={v + Math.floor(Math.random() * 99 + 1)}
                         alt={v}
-                        src={require(`../../../common/faces/${v}`).default}
+                        src={require(`../../../common/reactions/${v}`).default}
                         width={20}
                         height={20}
                         style={{verticalAlign:'middle'}}
@@ -268,7 +269,7 @@ const MsgThreadInfo = (props) => {
                 {chatThreadOverview.lastMessage && JSON.stringify(chatThreadOverview.lastMessage) !== '{}' && <div className={classes.threadBottom}>
                     <div className={classes.threadInfo}>
                         <div className={classes.threadAva}>
-                            <img className={classes.threadAvaIcon} src={avatar} ></img>
+                            <img className={classes.threadAvaIcon} src={userAvatar(chatThreadOverview.lastMessage.from)} ></img>
                         </div>
                         <span className={classes.threadMsg}>{chatThreadOverview.lastMessage.from || ''}</span>
                         <span className={classes.time}>{getTimeDiff(chatThreadOverview.lastMessage.time)}</span>

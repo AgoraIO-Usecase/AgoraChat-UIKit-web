@@ -16,7 +16,7 @@ import ThreadActions from "../../redux/thread"
 import i18next from "i18next";
 import ThreadNotify from "./messages/threadNotify";
 import Notify from './messages/notify';
-
+import loadMore from '../../common/icons/loadmore@2x.png'
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
@@ -26,6 +26,19 @@ const useStyles = makeStyles((theme) => ({
     bottom: "0",
     top: "0",
     overflow: "hidden",
+  },
+  loadMore: {
+    width: '16px',
+    height: '16px',
+    animation: "rotate 800ms infinite"
+  },
+  "@keyframes rotate": {
+    "0%": {
+      transform: "rotate(0deg)"
+    },
+    "100%": {
+      transform: "rotate(360deg)"
+    }
   },
 }));
 
@@ -41,16 +54,40 @@ function MessageList({ messageList, showByselfAvatar }) {
   const [isPullingDown, setIsPullingDown] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   let _not_scroll_bottom = false;
+  const [boxScrollHeight, setBoxScrollHeight] = useState(0)
 
   useEffect(() => {
-    if (!_not_scroll_bottom) {
-      setTimeout(() => {
-        const dom = scrollEl.current;
-        if (!ReactDOM.findDOMNode(dom)) return;
-        dom.scrollTop = dom.scrollHeight;
-      }, 0);
-    }
+    // if (!_not_scroll_bottom) {
+    //   setTimeout(() => {
+    //     const dom = scrollEl.current;
+    //     if (!ReactDOM.findDOMNode(dom)) return;
+    //     dom.scrollTop = dom.scrollHeight;
+    //   }, 0);
+    // }
+    const tempArr = []
+    messageList.forEach(item => {
+      if (item.body.type === 'img' || item.body.type === 'video') {
+        tempArr.push(item.body)
+      }
+    })
+    let time = tempArr.length ? tempArr.length * 1000 : 510
+    const TimerId = setInterval(() => {
+      if (document.getElementById('pulldownList')) {
+        setBoxScrollHeight(document.getElementById('pulldownList').scrollHeight)
+      }
+    }, 500)
+    const TimeId = setTimeout(() => {
+      clearTimeout(TimeId)
+      clearInterval(TimerId)
+    }, time)
   }, [messageList.length]);
+
+  useEffect(() => {
+    document.getElementById('pulldownList').scrollIntoView({
+      behavior: 'smooth',
+      block: 'end'
+    })
+  }, [boxScrollHeight])
 
   const handleRecallMsg = useCallback(
     (message) => {
@@ -78,7 +115,7 @@ function MessageList({ messageList, showByselfAvatar }) {
     }
   };
 
-  const createThread = (message)=>{
+  const createThread = (message) => {
     //update currentThreadInfo
     dispatch(ThreadActions.setThreadOriginalMsg(message));
     dispatch(ThreadActions.setCurrentThreadInfo({}));
@@ -91,7 +128,7 @@ function MessageList({ messageList, showByselfAvatar }) {
   }
   return (
     <div className={classes.root}>
-      <div ref={scrollEl} className="pulldown-wrapper" onScroll={handleScroll}>
+      <div className="pulldown-wrapper" onScroll={handleScroll}>
         <div className="pulldown-tips">
           <div style={{ display: isLoaded ? "block" : "none" }}>
             <span style={{ fontSize: "12px" }}>
@@ -99,10 +136,10 @@ function MessageList({ messageList, showByselfAvatar }) {
             </span>
           </div>
           <div style={{ display: isPullingDown ? "block" : "none" }}>
-            <span>Loading...</span>
+            <span><img className={classes.loadMore} src={loadMore} alt='Loading...'></img></span>
           </div>
         </div>
-        <ul className="pulldown-list">
+        <ul ref={scrollEl} className="pulldown-list" id="pulldownList">
           {messageList.length
             ? messageList.map((msg, index) => {
               console.log('message>>>',msg);

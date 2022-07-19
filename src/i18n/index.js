@@ -15,7 +15,7 @@ i18n
             en,
             zh
         },
-        // lng: 'en',
+        lng: 'en',
         fallbackLng: 'en',
 
         interpolation: {
