@@ -17,7 +17,7 @@ import contactAvatar from "../../common/images/avatar1.jpg";
 import groupAvatar from "../../common/images/groupAvatar.png";
 import i18next from "i18next";
 
-import CallKit from 'zd-callkit'
+import CallKit from 'chat-callkit'
 import MessageActions from "../../redux/message";
 
 import ThreadPanel from "../thread/threadPanel";
@@ -179,13 +179,13 @@ const Chat = (props) => {
           showByselfAvatar={props.showByselfAvatar}
         />
         <SendBox />
-        {!showRTCCall ? <CallKit 
-            onAddPerson={showInvite} 
-            onStateChange={handleCallStateChange} 
-            onInvite={handleInvite} 
-            contactAvatar={contactAvatar} 
-            groupAvatar={groupAvatar}
-            ringingSource={props.ringingSource}></CallKit> : null}
+        {!showRTCCall ? <CallKit
+          onAddPerson={showInvite}
+          onStateChange={handleCallStateChange}
+          onInvite={handleInvite}
+          contactAvatar={contactAvatar}
+          groupAvatar={groupAvatar}
+          ringingSource={props.ringingSource}></CallKit> : null}
       </EaseChatContext.Provider>
     </div>
   ) : (
@@ -228,9 +228,9 @@ const EaseChatProvider = (props) => {
           <div style={{ flex: '1 1 auto', height: '100%' }}>
             <Chat {...props} />
           </div>
-          <div style={{flex: '0 0 392px',overflow:'hidden',display: threadPanelStates?'flex':'none',height: '100%'}}>
-            <hr style={{width:0,height:'100%',border:'none',borderRight:'8px solid #edeff2', marginTop: '0px'}}/>
-            <Thread {...props}/>
+          <div style={{ flex: '0 0 392px', overflow: 'hidden', display: threadPanelStates ? 'flex' : 'none', height: '100%' }}>
+            <hr style={{ width: 0, height: '100%', border: 'none', borderRight: '8px solid #edeff2', marginTop: '0px' }} />
+            <Thread {...props} />
           </div>
         </div>
       </React.StrictMode>
@@ -272,7 +272,7 @@ EaseChatProvider.propTypes = {
   getRTCToken: PropTypes.func,
   getIdMap: PropTypes.func,
   appId: PropTypes.string,
-  
+
   deleteSessionAndMessage: PropTypes.func
 };
 

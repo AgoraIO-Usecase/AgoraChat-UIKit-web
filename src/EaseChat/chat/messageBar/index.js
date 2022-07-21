@@ -26,7 +26,7 @@ import avatarIcon6 from '../../../common/images/avatar6.jpg'
 import avatarIcon7 from '../../../common/images/avatar7.jpg'
 import avatarIcon11 from '../../../common/images/avatar11.jpg'
 import groupAvatarIcon from '../../../common/images/groupAvatar.png'
-import CallKit from 'zd-callkit'
+import CallKit from 'chat-callkit'
 import WebIM from '../../../utils/WebIM'
 
 import InviteModal from './inviteModal'
@@ -381,7 +381,7 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
                 chatType === "singleChat" && presenceExt && presenceExt[to]?.device && <span>{presenceExt[to]?.device} {presenceExt[to]?.ext === '' ? 'Online' : presenceExt[to]?.ext}</span>
               }
               {
-                showTyping && <span className={classes.userStatusOnline} style={{marginLeft: '5px'}}>Entering ...</span>
+                showTyping && <span className={classes.userStatusOnline} style={{ marginLeft: '5px' }}>Entering ...</span>
               }
             </div>
           </div>
