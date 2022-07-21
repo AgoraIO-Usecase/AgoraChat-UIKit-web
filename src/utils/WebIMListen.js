@@ -12,9 +12,16 @@ import { formatLocalMessage } from './index'
 
 let conversationName = ''
 let TimerId = null
-export function addLocalMessage (obj) {
+export function addLocalMessage(obj) {
 	console.log(obj, 'addLocalMessage')
 	const { to, from, chatType, groupName, createGroup, groupText, firstCrate, msgType, addType } = obj
+
+	const session = store.getState().session
+	const sessionList = session.sessionList
+	const sessionId = chatType === 'singleChat' ? from : to
+	const found = sessionList.find((item) => {
+		return item.sessionId === sessionId
+	})
 	const message = {
 		chatType: chatType,
 		ext: {},
@@ -27,7 +34,7 @@ export function addLocalMessage (obj) {
 		type: "groupNote",
 	}
 	if (!createGroup) {
-		store.dispatch(
+		!found && store.dispatch(
 			SessionActions._pushSession({
 				sessionType: chatType,
 				sessionId: chatType === 'singleChat' ? from : to,
@@ -35,7 +42,7 @@ export function addLocalMessage (obj) {
 			})
 		)
 	}
-	if (firstCrate) {
+	if (firstCrate && !found) {
 		if (addType === 'contactAdded') {
 			let who = chatType === 'singleChat' ? from : to
 			let message = {
@@ -73,7 +80,7 @@ export default function createlistener(props) {
 			store.dispatch(SessionActions.getJoinedGroupList());
 			store.dispatch(GlobalPropsActions.saveGlobalProps(options));
 			props.successLoginCallback &&
-			props.successLoginCallback({ isLogin: true });
+				props.successLoginCallback({ isLogin: true });
 		},
 
 		onTextMessage: (message) => {
@@ -131,11 +138,11 @@ export default function createlistener(props) {
 			// When log in, have received the Recall message before get Message from db. so retract after 2 seconds
 			if (!uikit_store.getState().message.byId[message.mid]) {
 				setTimeout(() => {
-					store.dispatch(MessageActions.deleteMessage(message.mid,message.to,message.chatType));
+					store.dispatch(MessageActions.deleteMessage(message.mid, message.to, message.chatType));
 				}, 2000);
 				return;
 			}
-			store.dispatch(MessageActions.deleteMessage(message.mid,message.to,message.chatType));
+			store.dispatch(MessageActions.deleteMessage(message.mid, message.to, message.chatType));
 		},
 		// The other has read the message
 		onReadMessage: (message) => {
@@ -145,12 +152,12 @@ export default function createlistener(props) {
 		},
 
 		onReceivedMessage: function (message) {
-      		console.log("updateMessageMid",message)
+			console.log("updateMessageMid", message)
 			const { id, mid, to } = message;
 			store.dispatch(MessageActions.updateMessageMid(id, mid, to));
 		},
 		onDeliveredMessage: function (message) {
-			console.log("onDeliveredMessage",message)
+			console.log("onDeliveredMessage", message)
 			const { mid, id } = message
 			store.dispatch(
 				MessageActions.updateMessageStatus(message, "received", id, mid)
@@ -171,15 +178,15 @@ export default function createlistener(props) {
 			store.dispatch(GlobalPropsActions.logout());
 		},
 		onGroupChange: (event) => {
-			console.log("onGroupChange",event);
+			console.log("onGroupChange", event);
 			const { to, from, groupName, gid } = event
 			if (from === WebIM.conn.context.userId) {
 				event.whoName = 'you'
 			} else {
 				event.whoName = ''
 			}
-			if(event.type === 'direct_joined'){
-			  store.dispatch(SessionActions.getJoinedGroupList())
+			if (event.type === 'direct_joined') {
+				store.dispatch(SessionActions.getJoinedGroupList())
 				const storeSessionList = store.getState().session;
 				const { sessionList } = storeSessionList;
 				const isNewSession = _.findIndex(sessionList, (v) => {
@@ -189,21 +196,21 @@ export default function createlistener(props) {
 					addLocalMessage({
 						to: gid,
 						from: WebIM.conn.context.userId,
-						chatType:'groupChat',
+						chatType: 'groupChat',
 						groupName,
 						groupText: `You joined the group`,
 						firstCrate: true,
 						msgType: 'notify',
 					})
 				}
-			}else if(event.type === 'joinPublicGroupSuccess'){
-			  const joinedGroup = store.getState().session.joinedGroups;
-			  const result = joinedGroup.find((item) => {
-				item.groupid === event.gid
-			  })
-			  if(!result){
-				store.dispatch(SessionActions.getJoinedGroupList())
-			  }
+			} else if (event.type === 'joinPublicGroupSuccess') {
+				const joinedGroup = store.getState().session.joinedGroups;
+				const result = joinedGroup.find((item) => {
+					item.groupid === event.gid
+				})
+				if (!result) {
+					store.dispatch(SessionActions.getJoinedGroupList())
+				}
 			} else if (event.type === 'invite') {
 				conversationName = groupName
 			} else if (event.type === 'invite_accept') {
@@ -223,84 +230,84 @@ export default function createlistener(props) {
 						msgType: 'notify',
 					})
 				}
-			} else if (event.type === "memberJoinPublicGroupSuccess"){
+			} else if (event.type === "memberJoinPublicGroupSuccess") {
 				event.actionContent = 'joined the Group'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'deleteGroupChat') {
 				//群组解散
 				event.actionContent = 'dissolution the Group'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'join') {
 				// 进群
 				event.actionContent = 'join the Group'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'leave') {
 				// 退群
 				event.actionContent = 'leave the Group'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'removedFromGroup') {
 				//被移出群 或者被加入黑名单
 				event.actionContent = 'ware removed the Group'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'allow') {
 				//被移除黑名单 当事人收到
 				event.whoName = 'you'
 				event.actionContent = 'ware removed the Block List'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'update') {
 				// modifyGroup 修改群信息 触发
 				event.actionContent = 'modify the Group Info'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'leaveGroup') {
 				// ABSENCE （被移出群）
 				event.actionContent = 'ware removed the Group'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'changeOwner') {
 				//转让群组 当事的两个人收到
 				event.actionContent = 'becomes the new Group Owner'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'addAdmin') {
 				//成为管理员，当事人收到
 				event.actionContent = 'becomes the new Group Admin'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'removeAdmin') {
 				//去除管理员 当事人收到
 				event.actionContent = 'ware removed the new Group Admin'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'addMute') {
 				//用户被管理员禁言 当事人收到
 				event.actionContent = 'ware muted'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'removeMute') {
 				//用户被解除禁言 当事人收到
 				event.actionContent = 'ware removed muted'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'updateAnnouncement') {
 				// 更新群公告
 				event.actionContent = 'update Group Announcement'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'addUserToGroupWhiteList') {
 				//增加群/聊天室组白名单成员
 				event.actionContent = 'were added to Group Allow List'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'rmUserFromGroupWhiteList') {
 				//删除群/聊天室白名单成员
 				event.actionContent = 'were removed the Group Allow List'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'muteGroup') {
 				//群组/聊天室一键禁言
 				event.actionContent = 'muted the Group'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			} else if (event.type === 'rmGroupMute') {
 				//解除群组/聊天室一键禁言
 				event.actionContent = 'removed muted the Group'
-				store.dispatch(MessageActions.addNotify(event,"groupChat"));
+				store.dispatch(MessageActions.addNotify(event, "groupChat"));
 			}
-			if(event.type === 'addAdmin' || event.type === 'removeAdmin' || event.type === 'changeOwner'){
-			  const { chatType, to } = uikit_store.getState().global.globalProps;
-			  if( chatType === 'groupChat' && to === event.gid){
-					store.dispatch(ThreadActions.getCurrentGroupRole({chatType, to}));
-			  }
+			if (event.type === 'addAdmin' || event.type === 'removeAdmin' || event.type === 'changeOwner') {
+				const { chatType, to } = uikit_store.getState().global.globalProps;
+				if (chatType === 'groupChat' && to === event.gid) {
+					store.dispatch(ThreadActions.getCurrentGroupRole({ chatType, to }));
+				}
 			}
 		},
 		onContactDeleted: (msg) => {
@@ -313,13 +320,13 @@ export default function createlistener(props) {
 			store.dispatch(MessageActions.updateReaction(message));
 		},
 		//thread notify
-		onChatThreadChange:(msg) =>{
-			console.log("====thread change:",msg)
+		onChatThreadChange: (msg) => {
+			console.log("====thread change:", msg)
 			store.dispatch(ThreadActions.updateThreadInfo(msg));
 		},
 		onMultiDeviceEvent: (msg) => {
-		console.log("====thread mutiDeviceEvent：",msg)
-		store.dispatch(ThreadActions.updateMultiDeviceEvent(msg));
+			console.log("====thread mutiDeviceEvent：", msg)
+			store.dispatch(ThreadActions.updateMultiDeviceEvent(msg));
 		},
 		onReactionMessage: (message) => {
 			console.log("onReactionMessage", message);
@@ -343,11 +350,11 @@ export default function createlistener(props) {
 		onContactAdded: (msg) => {
 			console.log("onContactAdded", msg);
 			const { to, from } = msg
-			addLocalMessage({to, from, chatType: 'singleChat', groupText: 'You agreed the friend request', firstCrate: true, addType: 'contactAdded'})
+			addLocalMessage({ to, from, chatType: 'singleChat', groupText: 'You agreed the friend request', firstCrate: true, addType: 'contactAdded' })
 		},
 		onCmdMessage: msg => {
 			const { action } = msg
-			switch(action) {
+			switch (action) {
 				case 'TypingBegin':
 					store.dispatch(GlobalPropsActions.setShowTyping({ showTyping: true }))
 					break;

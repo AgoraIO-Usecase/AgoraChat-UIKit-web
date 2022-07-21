@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
   },
   grid: {
     backgroundColor: "rgb(237, 239, 242)",
-    width:'360px'
+    width: '360px'
   },
 }));
 const Item = styled(Grid)(({ theme }) => ({}));
@@ -74,13 +74,15 @@ const EaseApp = (props) => {
             to: sessionId,
             chatType: sessionType,
             name: name,
-            presenceExt: {[sessionId]: {
-              ext: dataExt.ext,
-              device
-            }}
+            presenceExt: {
+              [sessionId]: {
+                ext: dataExt.ext,
+                device
+              }
+            }
           })
         );
-      }).catch(e=>{
+      }).catch(e => {
         console.log(e);
         dispatch(
           GlobalPropsActions.setGlobalProps({
@@ -93,7 +95,7 @@ const EaseApp = (props) => {
       dispatch(SessionActions.setCurrentSession(sessionId));
       dispatch(MessageActions.clearUnreadAsync(sessionType, sessionId));
       dispatch(ThreadActions.updateThreadStates(false));
-      dispatch(ThreadActions.getCurrentGroupRole({sessionType, sessionId}));
+      dispatch(ThreadActions.getCurrentGroupRole({ sessionType, sessionId }));
     },
     [props.width]
   );
@@ -118,7 +120,7 @@ const EaseApp = (props) => {
               overflowY: "auto",
               display: "flex",
               flexDirection: "column",
-              width:'360px'
+              width: '360px'
             }}
           >
             <div>{props.header}</div>
@@ -127,8 +129,8 @@ const EaseApp = (props) => {
             </EaseAppContext.Provider>
           </div>
         </Grid>
-        <Grid 
-        style={{width:'100%',  minWidth: '788px'}}
+        <Grid
+          style={{ width: '100%', minWidth: '788px' }}
         >
           <EaseChat {...props} />
         </Grid>
@@ -183,12 +185,12 @@ EaseAppProvider.addConversationItem = (session) => {
         to: conversationId,
         chatType: conversationType,
         name: conversationName,
-        presenceExt: {[conversationId]: ext }
+        presenceExt: { [conversationId]: ext }
       })
     );
     dispatch(MessageActions.clearUnreadAsync(conversationType, conversationId));
     dispatch(ThreadActions.updateThreadStates(false));
-    dispatch(ThreadActions.getCurrentGroupRole({sessionType:conversationType, sessionId:conversationId}));
+    dispatch(ThreadActions.getCurrentGroupRole({ sessionType: conversationType, sessionId: conversationId }));
   }
 };
 EaseAppProvider.changePresenceStatus = (ext) => {
@@ -213,7 +215,7 @@ EaseAppProvider.thread = {
    * 
    * @param {boolean} status: thread服务可用状态
    */
-  setShowThread: function(status){
+  setShowThread: function (status) {
     store.dispatch(ThreadActions.setShowThread(status))
   },
   //是否有thread编辑面板，默认：否
@@ -221,14 +223,14 @@ EaseAppProvider.thread = {
    * 
    * @param {boolean} status 
    */
-  setHasThreadEditPanel:function(status){
+  setHasThreadEditPanel: function (status) {
     store.dispatch(ThreadActions.setHasThreadEditPanel(status))
   },
   //关闭thread面板
   /**
    * @param {boolean} status 
    */
-  closeThreadPanel:function(){
+  closeThreadPanel: function () {
     store.dispatch(ThreadActions.updateThreadStates(false))
   }
 }
@@ -237,31 +239,44 @@ EaseAppProvider.deleteSessionAndMessage = (session) => {
   const { dispatch } = store;
   dispatch(MessageActions.clearMessage(session.sessionType, session.sessionId));
   dispatch(SessionActions.deleteSession(session.sessionId));
-  dispatch(GlobalPropsActions.setGlobalProps({to: null}))
+  dispatch(GlobalPropsActions.setGlobalProps({ to: null }))
 }
 EaseAppProvider.propTypes = {
-	username: PropTypes.string,
-	agoraToken: PropTypes.string,
+  username: PropTypes.string,
+  agoraToken: PropTypes.string,
   password: PropTypes.string,
-	appkey: PropTypes.string,
+  appkey: PropTypes.string,
 
+  // custom header component
   header: PropTypes.node,
-  addConversationItem: PropTypes.func,
+  // addConversationItem: PropTypes.func,
+
+  // show unread message count in conversation list
   isShowUnread: PropTypes.bool,
+  // true: unread count; false: red dot
   unreadType: PropTypes.bool,
+  // callback of click conversation item
   onConversationClick: PropTypes.func,
+  // Whether to show my own avatar in message item
   showByselfAvatar: PropTypes.bool,
+  // sendBox support all， noAudio， noEmoji， noAudioAndEmoji， onlyText
   easeInputMenu: PropTypes.string,
+  // sendBox more menu options: image file video
   menuList: PropTypes.array,
+  // callback of click sendBox more menu item
   handleMenuItem: PropTypes.func,
-  onChatAvatarClick:PropTypes.func,
+  // callback of click chat component message bar avatar
+  onChatAvatarClick: PropTypes.func,
+  // Whether to show reaction
   isShowReaction: PropTypes.bool,
+  // message operation menu options
   customMessageList: PropTypes.array,
+  // callback of click message operation menu options item
   customMessageClick: PropTypes.func,
-  
-   //thread-click edit panel,get thread info
-  onEditThreadPanel:PropTypes.func,
-  onOpenThreadPanel:PropTypes.func,
+
+  //thread-click edit panel,get thread info
+  onEditThreadPanel: PropTypes.func,
+  onOpenThreadPanel: PropTypes.func,
 
   agoraUid: PropTypes.string,
   getRTCToken: PropTypes.func,
