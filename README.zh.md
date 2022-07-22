@@ -1,5 +1,7 @@
 # Agora Chat UIKit Web 使用指南
 
+_English | [中文](README.zh.md)_
+
 ## 简介
 
 agora-chat-uikit 是基于声网 IM SDK 的一款 UI 组件库，提供通用的 UI 组件，如“会话列表”和“聊天界面”，开发者可根据实际业务需求利用该库快速搭建自定义 IM 应用。agora-chat-uikit 中的组件在实现 UI 功能的同时，调用 IM SDK 相应的接口实现 IM 相关逻辑和数据的处理，因而开发者使用该库时只需关注自身业务或个性化扩展。
@@ -209,7 +211,7 @@ const WebIM = EaseApp.getSdk({ appkey: "xxxx" });
       .... })
 ```
 
-//[详细的 SDK 回调](https://docs-preprod.agora.io/cn/agora-chat/agora_chat_message_web?platform=Web#接收文本消息)
+[详细的 SDK 回调](https://docs-preprod.agora.io/cn/agora-chat/agora_chat_message_web?platform=Web#接收文本消息)
 
 #### 新增会话
 

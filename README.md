@@ -24,11 +24,11 @@ Agora provides an open-source Web Chat UIKit project for Agora Chat. You can clo
 
 Source code URL of Agora Chat UIKit for Web:
 
-- https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git
+- https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web
 
 URL of Agora Chat app using Agora Chat UIKit for Web:
 
-- https://github.com/AgoraIO-Usecase/AgoraChat-ios.git
+- https://github.com/AgoraIO-Usecase/AgoraChat-web
 
 ## Prerequisites
 
@@ -61,6 +61,7 @@ npx create-react-app my-app
 cd my-app
 ```
 
+```
 The project directory.
 
 ├── package.json
@@ -77,6 +78,7 @@ The project directory.
 │ ├── logo.svg
 │ └── serviceWorker.js
 └── yarn.lock
+```
 
 ### 2. Integrate the Web Chat UIKit
 
@@ -217,7 +219,7 @@ const WebIM = EaseApp.getSdk({ appkey: "xxx" });
   })
 ```
 
-//[SDK callbacks](https://docs-preprod.agora.io/en/agora-chat/agora_chat_send_receive_message_web?platform=Web#receive-a-message)
+[SDK callbacks](https://docs-preprod.agora.io/en/agora-chat/agora_chat_send_receive_message_web?platform=Web#receive-a-message)
 
 #### Create a conversation
 
