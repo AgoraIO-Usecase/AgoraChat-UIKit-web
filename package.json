@@ -1,7 +1,7 @@
 {
-  "name": "chat-uikit",
-  "version": "2.0.3-test",
-  "description": "chat-uikit React component",
+  "name": "agora-chat-uikit",
+  "version": "1.0.2",
+  "description": "agora-chat-uikit React component",
   "main": "lib/index.js",
   "module": "es/index.js",
   "files": [

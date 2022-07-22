@@ -1,101 +1,107 @@
-# Agora Chat UIKit Web 使用指南
+# Get Started with Agora Chat UIKit for Web
 
-## 功能描述
+_English | [中文](README.zh.md)_
 
- chat-uikit 是基于声网 IM SDK 的一款 UI 组件库，提供通用的 UI 组件，如“会话列表”和“聊天界面”，开发者可根据实际业务需求利用该库快速搭建自定义 IM 应用。chat-uikit 中的组件在实现 UI 功能的同时，调用 IM SDK 相应的接口实现 IM 相关逻辑和数据的处理，因而开发者使用该库时只需关注自身业务或个性化扩展。
+## Overview
 
-`chat-uikit` 目前有 2 个模块组件：
+agora-chat-uikit is a React UI component library built on top of Agora Chat SDK. It provides a set of general UI components, a conversation module, and a chat module that enable developers to easily craft a chat app to suit actual business needs. Also, this library calls APIs in Agora Chat SDK to implement related chat logics and data processing, allowing developers to only focus on their own business and personalized extensions.
 
-`EaseApp` 可快速集成聊天使用场景的一种组件方案、包含列表。
+The Web Chat UIKit has two components:
 
-`EaseChat` 仅有一个对话框的功能组件。它适用于绝大多数场景，例如收发消息、消息上屏、消息已读未读等，这些通用的场景已全部封装为一个通用组件。
+- `EaseApp`, which contains the conversation list and applies to use cases where you want to quickly launch a real-time chat app.
 
-默认情况下，chat-uikit 库提供以下功能：
+- `EaseChat`, which contains a conversation box and applies to most chat use cases such as sending and receiving messages, displaying the message on the UI, and managing unread messages.
 
-- 自动布局会话框高度及宽度；
-- 传入必选参数内部实现自动登录；
-- 实现收发消息、消息上屏、消息未读数、消息类型（文本、图片、文件、表情、音频、视频消息）；
-- 会话搜索；
-- 通过属性参数进行可视化定制。
+The Web Chat UIKit, by default, provides the following functions:
 
-Agora 在 GitHub 上提供一个开源的 AgoraChat-UIKit-web 项目，你可以克隆和运行该项目或参考其中的逻辑创建项目集成 chat-uikit。
+- Automatic layout of the conversation box with the adaptive width and height;
+- Automatic login by passing required parameters;
+- Sending and receiving messages, displaying messages on the screen, and displaying the number of unread messages. The text messages, image messages, file messages, emoji messages, voice messages, and video messages are supported;
+- Conversation retrieval;
+- Visual customization via attribute settings.
 
-- [Agora Chat UIKit Web 源代码 URL](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web) 
-- [利用 chat-uikit 的声网 IM 应用的 URL](https://github.com/AgoraIO-Usecase/AgoraChat-web)
+Agora provides an open-source Web Chat UIKit project for Agora Chat. You can clone or run the project or create a project to integrate the Web Chat UIKit by reference to the open-source project.
 
-## 前提条件
+Source code URL of Agora Chat UIKit for Web:
 
-开启 Agora Chat 服务前，请确保已经具备以下要素：
+- https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git
 
-- React 16.8.0 或以上版本；
-- React DOM 16.8.0 或以上版本；
-- 有效的 Agora Chat 开发者账号；
-- Agora Chat 项目和 App Key(//to do：加链接)。
+URL of Agora Chat app using Agora Chat UIKit for Web:
 
-## 支持的浏览器
+- https://github.com/AgoraIO-Usecase/AgoraChat-ios.git
 
-| 浏览器   | 支持的版本 |
-| -------- | ---------- |
-| IE浏览器 | 11 或以上  |
-| Edge     | 43 或以上  |
-| Firefox  | 10 或以上  |
-| Chrome   | 54 或以上  |
-| Safari   | 11 或以上 |
+## Prerequisites
 
-## 操作步骤
+In order to follow the procedure in this page, you must have:
 
-### 1.创建 chat-uikit 项目
+- React 16.8.0 or later
+- React DOM 16.8.0 or later
+- A valid [Agora account](https://docs.agora.io/cn/AgoraPlatform/sign_in_and_sign_up).
+- A valid [Agora project](https://docs.agora.io/cn/AgoraPlatform/sign_in_and_sign_up) with an App Key.
+
+## Compatible browsers
+
+| Browser | Supported Version |
+| ------- | ----------------- |
+| IE      | 11 or later       |
+| Edge    | 43 or later       |
+| Firefox | 10 or later       |
+| Chrome  | 54 or later       |
+| Safari  | 11 or later       |
+
+## Project setup
+
+### 1. Create a Web Chat UIKit project
 
 ```bash
-# 安装 CLI 工具。
+# Install a CLI tool.
 npm install create-react-app
-# 构建一个 my-app 的项目。
+# Create an my-app project.
 npx create-react-app my-app
 cd my-app
 ```
 
-```
-项目目录：
+The project directory.
+
 ├── package.json
-├── public                  # Webpack 的静态目录。
-│   ├── favicon.ico
-│   ├── index.html          # 默认的单页面应用。
-│   └── manifest.json
+├── public # The static directory of Webpack.
+│ ├── favicon.ico
+│ ├── index.html # The default single-page app.
+│ └── manifest.json
 ├── src
-│   ├── App.css             # App 根组件的 CSS。
-│   ├── App.js              # App 组件代码。
-│   ├── App.test.js
-│   ├── index.css           # 启动文件样式。
-│   ├── index.js            # 启动文件。
-│   ├── logo.svg
-│   └── serviceWorker.js
+│ ├── App.css # The CSS of the app's root component.
+│ ├── App.js # The app component code.
+│ ├── App.test.js
+│ ├── index.css # The style of the startup file.
+│ ├── index.js # The startup file.
+│ ├── logo.svg
+│ └── serviceWorker.js
 └── yarn.lock
-```
 
-### 2.集成 chat-uikit
+### 2. Integrate the Web Chat UIKit
 
-#### 安装 chat-uikit
+#### Install the Web Chat UIKit
 
-- 通过 npm 安装，运行以下命令：
-
-```bash
-npm  install chat-uikit --save
-```
-
-- 通过 yarn 安装，运行以下命令：
+- To install the Web Chat UIKit with npm, run the following command:
 
 ```bash
-yarn add chat-uikit
+npm install agora-chat-uikit --save
 ```
 
-#### 添加 EaseApp 组件
+- To Install Agora chat UIKit for Web with Yarn, run the following command:
 
-将 chat-uikit 库导入你的代码中：
+```bash
+yarn add agora-chat-uikit
+```
 
-```javascript
+#### Add the EaseApp component
+
+Import agora-chat-uikit into your code.
+
+```jsx
 // App.js
 import React, {Component} from 'react';
-import { EaseApp } from "chat-uikit"
+import { EaseApp } from "agora-chat-uikit"
 import './App.scss';
 
 class App extends Component {
@@ -103,10 +109,10 @@ class App extends Component {
     return (
       <div className="container">
          <EaseApp
-              appkey="xxx",     // 你注册的 App Key。
-          username="xxx",  // 当前登录的用户 ID。
-          agoraToken="xxx"  // 声网 token。关于如何获取声网 token 下文有介绍。
-            /> 
+            appkey="xxx",     // Your registered App Key.
+            username="xxx",  // The user ID of the current user.
+            agoraToken="xxx"  // The Agora token. For how to obtain an Agora token, see descriptions in the Reference.
+            />
       </div>
     );
   }
@@ -115,145 +121,143 @@ class App extends Component {
 export default App;
 ```
 
-#### 设定聊天界面的尺寸 
+#### Set the chat page size
 
 ```css
-/** App.css */ 
+/** App.css */
 .container {
   height: 100%;
-  width: 100%
+  width: 100%;
 }
 ```
 
-#### 运行项目并发送你的第一条消息
+#### Run the project and send your first message
 
-在默认 App Key 情况下，我们默认支持几种类型的消息下发，方便快速体验。点击选中一个成员后，输入你的第一条消息并发送。
+Now, you can run your app to send messages. In this example, you can use the default App Key, but need to register your own App Key in the formal development environment. When the default App Key is used, a user will receive a one-to-one chat message and a group chat message upon the first login and can type the first message in a type of conversation and send it.
 
-**注意**
-使用自定义 App Key 时，由于没有联系人，需先[添加好友](https://docs-preprod.agora.io/cn/agora-chat/agora_chat_relationship_web?platform=Web#申请添加好友)或[加入群组](https://docs-preprod.agora.io/cn/agora-chat/agora_chat_group_web?platform=Web#用户申请入群与退出群组)。
+**Note**
+
+If a custom App Key is used, no contact is available by default and you need to first [add contacts](https://docs-preprod.agora.io/en/agora-chat/agora_chat_contact_web?platform=Web#Send a contact invitation) or [join a group](https://docs-preprod.agora.io/en/agora-chat/agora_chat_group_web?platform=Web#Create and destroy a chat group).
 
 ```bash
 npm run start
 ```
 
-在浏览器可看到你的应用。
+Now, you can see your app in the browser.
 
-## 使用 EaseApp 属性自定义功能
+## EaseApp attributes
 
-EaseApp 提供一些属性用于支持自定义 UIKit 的工作方式。你可以自主选择功能和布局，为保证 EaseApp 的组件正常使用，请务必填写必选的属性参数。
+EaseApp provides a list of attributes for customization. You can customize the features and layout by setting these attributes. To ensure the functionality of EaseApp, ensure that you set all the required parameters.
 
-```javascript
-import { EaseApp } from "chat-uikit";
-  const header = () =>{
-    return (
-      <div>Hello Word</div>
-    )
-  }
-  const app = () => {
-    return (
-      <EaseApp
-        appkey={'xxxx'}
-        username={'xx'}
-        agoraToken={'xxxxxx'}
-
-        header={header} // 自定义 header。
-      />
-    )
-  }
+```jsx
+import { EaseApp } from "agora-chat-uikit";
+const header = () => {
+  return <div>Hello Word</div>;
+};
+const app = () => {
+  return (
+    <EaseApp
+      appkey={"xxx"}
+      username={"xxx"}
+      agoraToken={"xxx"}
+      header={header} // Custom header.
+    />
+  );
+};
 ```
 
-### EaseApp 属性列表
+### Attribute list of EaseApp
 
-| 属性  | 类型   | 是否必需 | 描述                                    |
-| :---------- | :------ | :------| :---------------------------------------------- |
-| appkey     | String |必需 | 你在控制台注册的 APP 唯一标识，规则是 ${org_name}#${app_name}。 |
-| username   | String |必需 | 用户 ID。                                         |
-| agoraToken | String |必需 | 声网 token。                                     |
-| header | ReactNode|非必需 | 头部标题栏。        |
-| isShowUnread  | Boolean   |非必需 | 未读消息是否展示。<br/> - （默认）`true`：是；<br/> - `false`：否。           |
-| unreadType    | Boolean  |非必需  | 未读消息展示类型: <br/> - （默认）`true`：展示未读消息数量；<br/> - `false`：展示未读消息红点。 |
-| onConversationClick  | function({ item, key }) |非必需 | 当前点击的联系人。     |
-| showByselfAvatar  |Boolean|非必需  | 是否展示自己聊天头像。<br/> - `true`：是；<br/> - （默认）`false`：否。|
-| easeInputMenu   | String   |非必需 | 输入区模式：<br/> - （默认）all：完整模式；<br/> - noAudio：不可用语音模式；<br/> - noEmoji：不可用表情模式；<br/> - noAudioAndEmoji：不可用语音和表情模式；<br/> - onlyText：只有文本输入模式。 |
-| menuList    | Array     |非必需 |  menuList:[ {name:'发送图片'，value:'img},{name:'发送文件'，value:'file}] | 输入框右侧功能扩展。   |
-| handleMenuItem       | function({ item, key }) |非必需   | 输入框右侧功能扩展点击回调事件。       |
-| successLoginCallback | function(res) |非必需    | 登录成功回调。             |
-| failLoginCallback    | function(err) |非必需  | 失败回调（包含登录以及sdk所有失败事件）。   |
-| onChatAvatarClick | Function | 非必需 | 点击回话顶部头像的回调。 |
-| isShowReaction | Boolean | 非必需 | 是否展示 reaction 功能。 |
-| customMessageList | Array | 非必需 | 操作消息菜单选项。 |
-| deleteSessionAndMessage | Function | 非必需 | 删除会话和会话里的消息的方法。|
-| customMessageClick | Function | 非必需 | 点击自定义消息菜单选项的回调。 |
-| onEditThreadPanel | Function | 非必需 | 点击编辑子区的回调。|
-| onOpenThreadPanel | Function | 非必需 | 点击打开子区的回调。|
-| isShowRTC | Boolean | 非必需 | 是否使用 RTC 功能。|
-| agoraUid | String | 非必需 | 使用 RTC 时，需要用到的 agora uid。|
-| appId |  String | 非必需 | 使用 RTC 时，需要的 appId。|
-| getRTCToken | Function | 非必需 | 使用 RTC 时，需要的获取声网 token 的函数。|
-| getIdMap | Function | 非必需 | 使用 RTC 时，需要的获取 userId 和 用户名映射的函数。|
+| Attribute               | Type                    | Required | Description                                                                                                                                                                                               |
+| :---------------------- | :---------------------- | :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `appkey`                | String                  | Yes      | The unique identifier that the Chat service assigns to each app. The rule is `You can't use 'macro parameter character #' in math mode `${org_name}#$`{app_name}`.                                        |
+| `username`              | String                  | Yes      | The user ID.                                                                                                                                                                                              |
+| `agoraToken`            | String                  | Yes      | The Agora token.                                                                                                                                                                                          |
+| header                  | ReactNode               | No       | The title bar above the conversation list.                                                                                                                                                                |
+| isShowUnread            | Boolean                 | No       | Whether to show the number of unread messages: <br/> - (Default)`true`: Yes. <br/> - `false`: No.                                                                                                         |
+| unreadType              | Boolean                 | No       | The display style of unread messages: <br/> - (Default)`true`: Displays the number of unread messages; - `false`: Displays a red dot.                                                                     |
+| onConversationClick     | function({ item, key }) | No       | The callback for clicking a contact on the conversation list.                                                                                                                                             |
+| `showByselfAvatar`      | Bool                    | No       | Whether to display the avatar of the current user: <br/> - (Default)`true`: Yes.<br/> - `false`: No.                                                                                                      |
+| `easeInputMenu`         | String                  | No       | The mode of the input menu.<br/> - (Default) `all`: The complete mode.<br/> - `noAudio`: No audio.<br/> - `noEmoji`: No emoji.<br/> - `noAudioAndEmoji`: No audio or emoji.<br/> - `onlyText`: Only text. |
+| `menuList`              | Array                   | No       | menuList:[ {name:'Send a pic'，value:'img},{name:'Send a file'，value:'file}]                                                                                                                             |
+| `handleMenuItem`        | function({item, key})   | No       | The callback event triggered by clicking on the right panel of the input box.                                                                                                                             |
+| `successLoginCallback`  | function(res)           | No       | The callback event for a successful login.                                                                                                                                                                |
+| `failCallback`          | function(err)           | No       | The callback event for a failed method call.                                                                                                                                                              |
+| onChatAvatarClick       | Function                | No       | The callback for clicking the avatar on the top of the conversation.                                                                                                                                      |
+| isShowReaction          | Boolean                 | No       | Whether to show the Reaction function.                                                                                                                                                                    |
+| customMessageList       | Array                   | No       | Custom shortcut menu items for messages.                                                                                                                                                                  |
+| deleteSessionAndMessage | Function                | No       | The method for deleting a conversation and its messages.                                                                                                                                                  |
+| customMessageClick      | Function                | No       | The callback for clicking a custom shortcut menu item for messages.                                                                                                                                       |
+| onEditThreadPanel       | Function                | No       | The callback for editing a thread.                                                                                                                                                                        |
+| onOpenThreadPanel       | Function                | No       | The callback for opening a thread.                                                                                                                                                                        |
+| isShowRTC               | Boolean                 | No       | Whether to use the RTC function.                                                                                                                                                                          |
+| agoraUid                | String                  | No       | Agora UID required to use RTC.                                                                                                                                                                            |
+| appId                   | String                  | No       | The App ID required to use RTC.                                                                                                                                                                           |
+| getRTCToken             | Function                | No       | The method for getting the Agora token to use RTC.                                                                                                                                                        |
+| getIdMap                | Function                | No       | The method for getting the mapping between the Agora Chat user ID and the user ID you expect to display on the Web UI, when RTC is used.                                                                  |
 
-### 高级定制功能
+### Advanced customization features
 
-某些场景下你可能需要在各种消息回调中嵌入自身的业务逻辑，`chat-uikit` 对此提供如下解决方案：
+You may need to embed your business logic in various message callbacks in certain scenarios. For this purpose, the Web Chat UIKit provides the following solution.
 
-#### 获取声网 IM SDK 实例
+#### Get the Agora Chat SDK
 
 ```javascript
-const WebIM = EaseApp.getSdk({ appkey: 'xxxx' })
-// 注意：登录成功时无需填写 App Key。
+const WebIM = EaseApp.getSdk({ appkey: "xxx" });
+// Note: The App Key is not required if you log in to the chat app successfully.
 ```
 
-#### 注册监听 SDK 事件回调
+#### Add an event listener
 
 ```javascript
-  WebIM.conn.addEventHandler('nameSpace'),{ 
-      onOpend:()=>{},
-      onTextMessage:()=>{}, 
-      .... })
+  WebIM.conn.addEventHandler('handlerName'),{
+    onConnected:()=>{},
+    onTextMessage:()=>{},
+    // ....
+  })
 ```
 
-//[详细的 SDK 回调](https://docs-preprod.agora.io/cn/agora-chat/agora_chat_message_web?platform=Web#接收文本消息)
+//[SDK callbacks](https://docs-preprod.agora.io/en/agora-chat/agora_chat_send_receive_message_web?platform=Web#receive-a-message)
 
-#### 新增会话
+#### Create a conversation
 
 ```javascript
-  const conversationItem = {
-     conversationType: "singleChat", // 会话类型：'singleChat' 为单聊， :'groupChat' 为群聊。
-     conversationId: "TOM", //会话 ID：单聊时为用户 ID，群聊时为群组 ID。
-  }
-  EaseApp.addConversationItem(conversationItem)
+const conversationItem = {
+  conversationType: "singleChat", // The conversation type. 'singleChat': one-to-one chat. 'groupChat': group chat.
+  conversationId: "TOM", //The conversation ID. One-to-one chat: the user ID of the message recipient. group chat: The group ID.
+};
+EaseApp.addConversationItem(conversationItem);
 ```
 
-#### 注意事项
+#### Notes
 
-使用 EaseApp 组件时，理论上不需要用户自主实现登录功能，只需传入以上 3 个必填参数内部即可自动登录。但在某些场景下，如果不需要在 UIKit 内部自动登录，可调用 EaseApp.getSdk() 获取声网 IM SDK 对象，自主调用 SDK 实现登录功能。
+With the EaseApp component, the user, in theory, only needs to pass the above three required parameters for automatic login, instead of implementing the login function. However, in some scenarios, if you do not need implement login inside UIKit, you can call EaseApp.getSdk() to get the Agora Chat SDK object and call the SDK to implement the login function.
 
 ```javascript
-// 手动登录。
+// Manual login.
 WebIM.conn.open({
-   user: 'xxxx',
-   agoraToken: 'xxxx',
-   appKey: 'xxxx',
-})
+  user: "xxxx",
+  agoraToken: "xxxx",
+  appKey: "xxxx",
+});
 ```
 
-## 使用 EaseChat 属性自定义功能
+## EaseChat attributes
 
-同样，为保证 EaseChat 的组件正常使用，请务必填写必选的属性参数。
-EaseChat 作为一个单独的会话框组件，实用性较为广泛，可快速实现绝大数场景。
+Likewise, to ensure the normal operation of EaseChat, you must fill in the required attribute parameters. As an independent conversation component, EaseChat is widely available and can easily implement most scenarios.
 
-例如，通过一个点击事件弹出指定会话框，并在登录成功后自定义监听：
+For example, pop up a specific dialog box upon a click event and customize the listener after a successful login:
 
-```javascript
+```jsx
 import React, { useState } from "react";
-import { EaseChat } from "chat-uikit";
-  const addListen = (res) => {
+import { EaseChat } from "agora-chat-uikit";
+  const addListener = (res) => {
     if(res.isLogin){
         const WebIM = EaseChat.getSdk()
         WebIM.conn.addEventHandler('testListen',{
           onTextMessage:()=>{},
           onError:()=>{},
-          ...
+          // ...
         })
      }
   }
@@ -265,7 +269,6 @@ import { EaseChat } from "chat-uikit";
         username={'xxx'}
         agoraToken={'xxx'}
         to={'xxx'}
-
         successLoginCallback={addListener}
       />
      <div/>
@@ -283,55 +286,74 @@ import { EaseChat } from "chat-uikit";
   }
 ```
 
-#### EaseChat 属性列表
+#### Attribute list of EaseChat
 
-| 属性描述  |类型| 是否必需 | 描述                                                 |
-| ---------- | ------ | ------ | ------------------------------------- |
-| `appkey`     |String| 必需  | 你在控制台的 APP 的唯一标识。 |
-| `username`   |String| 必需  | 用户 ID。                                                     |
-| `agoraToken` |String| 必需  | 声网 token。      |
-| `chatType`   |String| 必需  | 会话类型。<br/> - `singleChat` ：单聊；<br/> - `groupChat` ：群聊。      |
-| `to`         |String|必需| 接收消息的人或者群组。单聊：接收方用户 ID；群聊：接收方群组 ID。|
-| `showByselfAvatar`|Bool|非必需| 是否展示自己聊天头像。<br/> - `true` ：是；<br/> - （默认）`false` ：否。     |
-| `easeInputMenu`|String|非必需| 输入区模式：<br/> - （默认）all：完整模式；<br/>- noAudio：禁用语音模式；<br/> - noEmoji：禁用表情模式；<br/> - noAudioAndEmoji：禁用语音和表情模式；<br/> - onlyText：只开启文本输入模式。 |
-|`menuList`|Array|非必需|输入框右侧功能扩展：<br/> （默认） menuList:[ {name:'发送图片'，value:'img},{name:'发送文件'，value:'file}]  |
-|`handleMenuItem`|function({item, key}) | 非必需 | 输入框右侧功能扩展点击回调事件。|
-|`successLoginCallback`|function(res) | 非必需 | 登录成功回调。 |
-| `failCallback|function(err)`| 非必需 | 失败回调（包含登录以及 SDK 所有失败事件）。  |
+| Attribute              | Type                  | Required | Description                                                                                                                                                                                               |
+| :--------------------- | :-------------------- | :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `appkey`               | String                | Yes      | The unique identifier that the Chat service assigns to each app.                                                                                                                                          |
+| `username`             | String                | Yes      | The user ID.                                                                                                                                                                                              |
+| `agoraToken`           | String                | Yes      | The Agora token.                                                                                                                                                                                          |
+| `chatType`             | String                | Yes      | The chat type: <br/> - `singleChat`: one-to-one chat. <br/> - `groupChat`: group chat.                                                                                                                    |
+| `to`                   | String                | Yes      | The message recipient or the group: <br/> - one-to-one chat: The user ID of the message recipient. <br/> - group chat: The group ID.                                                                      |
+| `showByselfAvatar`     | Bool                  | No       | Whether to display the avatar of the current user.<br/> - (Default) `true`: Yes. <br/> - `false`: No.                                                                                                     |
+| `easeInputMenu`        | String                | No       | The mode of the input menu.<br/> - (Default) `all`: The complete mode.<br/> - `noAudio`: No audio.<br/> - `noEmoji`: No emoji.<br/> - `noAudioAndEmoji`: No audio or emoji.<br/> - `onlyText`: Only text. |
+| `menuList`             | Array                 | No       | The extensions of the input box on the right panel. <br/> - (Default) menuList:[ {name:'Send a pic'，value:'img},{name:'Send a file'，value:'file}]                                                       |
+| `handleMenuItem`       | function({item, key}) | No       | The callback event triggered by clicking on the right panel of the input box.                                                                                                                             |
+| `successLoginCallback` | function(res)         | No       | The callback event for a successful login.                                                                                                                                                                |
+| `failCallback`         | function(err)         | No       | The callback event for a failed method call (including a failed login and all failure events of the SDK).                                                                                                 |
 
+### Advanced Customizations
 
-### 高级定制
+Both `EaseChat` and `EaseApp` support advanced customizations.
 
-`EaseChat` 和 `EaseApp` 均支持高级定制的使用，使用方法相似。
-
-#### 获取声网 IM SDK 实例
-
-```javascript
-  const WebIM = EaseChat.getSdk({ appkey: 'xxxx' })
-  // 注意：登录成功时可不传。
-```
-
-#### 注册监听 SDK 事件回调
+#### Get the Agora Chat SDK
 
 ```javascript
-  WebIM.conn.addEventHandler('nameSpace',{ 
-      onOpend:()=>{},
-      onTextMessage:()=>{}, 
-      //.... 
-  })
+const WebIM = EaseChat.getSdk({ appkey: "xxx" });
+// The App Key is not required when you successfully log in to the Chat app.
 ```
 
-#### 注意事项
+#### Add the event handler
 
-- EaseChat 在填入必选参数后内部会自动登录，无需用户实现登录。如需要在外部实现主动登录请参考上文主动登录的用法。
-- `nameSpace` 为命名空间用以区分。结合自身业务需求可同时存在多个事件监听回调。
+```javascript
+WebIM.conn.addEventHandler("handlerName", {
+  onConnected: () => {},
+  onTextMessage: () => {},
+  // ...
+});
+```
 
-#### 关于样式
+#### Notes
 
-关于样式，我们提供 UIKit 源码确保最大限度定制你的风格。源码地址：https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web
+- EaseChat implements automatic login after you fill in required parameters, saving you the trouble of login. If you need to implement manual login outside EaseChat, follow the steps above mentioned.
 
-## 社区贡献者
+- `handlerName` indicates the custom event handler. You can add multiple event handlers to satisfy your business requirements.
 
-如果你认为可将一些功能添加到 EaseChat 中让更多用户受益，请随时 Fork 存储库并添加拉取请求。如果你在使用上有任何问题，也请在存储库上提交。感谢你的贡献！
+#### About the UI Styles
 
+For the UI styles, we provide the [source code of Web Chat UIKit] (https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web) to satisfy your customization requirements to the maximum extent possible.
 
+## Community Contribution
+
+If you want to add extra functions to EaseChat to share with others, you can fork our repository on GitHub and create a pull request. For any questions, you can also create a pull request. Thank you for your contributions.
+
+## Feedback
+
+If you have any problems or suggestions regarding the sample projects, feel free to file an issue.
+
+## Reference
+
+- [Agora Chat SDK Product Overview](https://docs-preprod.agora.io/en/agora-chat/agora_chat_overview?platform=Web)
+- [Agora Chat SDK API Reference](https://docs-preprod.agora.io/en/agora-chat/API%20Reference/im_ts/index.html?transId=4dbea540-f2cd-11ec-bafe-3fe630a7aac4)
+
+## Related resources
+
+- Check our [FAQ](https://docs.agora.io/en/faq) to see if your issue has been recorded.
+- Dive into [Agora SDK Samples](https://github.com/AgoraIO) to see more tutorials
+- Take a look at [Agora Use Case](https://github.com/AgoraIO-usecase) for more complicated real use case
+- Repositories managed by developer communities can be found at [Agora Community](https://github.com/AgoraIO-Community)
+- If you encounter problems during integration, feel free to ask questions in [Stack Overflow](https://stackoverflow.com/questions/tagged/agora.io)
+
+## License
+
+The sample projects are under the MIT license.
