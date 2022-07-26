@@ -325,21 +325,22 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
     onInviteClose && onInviteClose()
   }
 
-  useEffect(async () => {
-    console.log('监听 invite 变化', chatType, showinvite, confrData)
-
-    if (chatType === 'groupChat' || !chatType) {
-      let gid = to
-      if (!to) {
-        gid = confrData.groupId
+  useEffect(() => {
+    async function updateGroupMember() {
+      // console.log('监听 invite 变化', chatType, showinvite, confrData)
+      if (chatType === 'groupChat' || !chatType) {
+        let gid = to
+        if (!to) {
+          gid = confrData.groupId
+        }
+        console.log('gid', gid)
+        if (!gid) return
+        let members = await getGroupMembers(gid) || []
+        setGroupMembers(members)
+        setInviteOpen(showinvite)
       }
-      console.log('gid', gid)
-      if (!gid) return
-      let members = await getGroupMembers(gid) || []
-      setGroupMembers(members)
-      setInviteOpen(showinvite)
     }
-
+    updateGroupMember()
   }, [showinvite])
 
   const getGroupMembers = async (gid) => {
