@@ -27,7 +27,7 @@ import Recorder from "./messages/recorder";
 import icon_emoji from "../../common/icons/emoji@2x.png";
 import icon_yuyin from "../../common/icons/voice@2x.png";
 import attachment from "../../common/icons/attachment@2x.png";
-import { message } from '../common/alert' 
+import { message } from '../common/alert'
 import { getLocalStorageData } from '../../utils/index'
 import { emoji } from "../../common/emoji";
 const useStyles = makeStyles((theme) => ({
@@ -150,19 +150,19 @@ function SendBox(props) {
       if (s && 1 === s.rangeCount) {
         i.focus();
         var n = s.getRangeAt(0),
-        a = new Image;
+          a = new Image;
         a.src = t,
-        a.setAttribute("data-key", e),
-        a.setAttribute("width", 20),
-        a.setAttribute("height", 20),
-        a.draggable = !1,
-        a.className = classes.emojiInsert,
-        a.setAttribute("title", e.replace("[", "").replace("]", "")),
-        n.deleteContents(),
-        n.insertNode(a),
-        n.collapse(!1),
-        s.removeAllRanges(),
-        s.addRange(n)
+          a.setAttribute("data-key", e),
+          a.setAttribute("width", 20),
+          a.setAttribute("height", 20),
+          a.draggable = !1,
+          a.className = classes.emojiInsert,
+          a.setAttribute("title", e.replace("[", "").replace("]", "")),
+          n.deleteContents(),
+          n.insertNode(a),
+          n.collapse(!1),
+          s.removeAllRanges(),
+          s.addRange(n)
       }
     } else if ("selection" in document) {
       i.focus(), (n = document.selection.createRange()).pasteHTML('<img class="emoj-insert" draggable="false" data-key="' + e + '" title="' + e.replace("[", "").replace("]", "") + '" src="' + t + '">'), i.focus()
@@ -187,10 +187,10 @@ function SendBox(props) {
   const openTyping = () => {
     dispatch(MessageActions.sendCmdMessage(to, chatType, 'TypingBegin', props.isChatThread))
   }
-  function converToMessage (e) {
+  function converToMessage(e) {
     var t = function () {
       var t = [],
-      r = document.createElement("div");
+        r = document.createElement("div");
       r.innerHTML = e.replace(/\\/g, "###h###");
       for (var n = r.querySelectorAll("img"), a = r.querySelectorAll("div"), i = n.length, o = a.length; i--;) {
         var s = document.createTextNode(n[i].getAttribute("data-key"));
@@ -221,18 +221,18 @@ function SendBox(props) {
       }, 10000)
     }
   };
-  
+
   const isCreatingThread = useSelector((state) => state.thread?.isCreatingThread);
   const currentThreadInfo = useSelector((state) => state.thread?.currentThreadInfo);
   const threadOriginalMsg = useSelector((state) => state.thread?.threadOriginalMsg);
   const threadPanelStates = useSelector((state) => state.thread?.threadPanelStates);
-  useEffect(()=>{
-    if(threadPanelStates){
+  useEffect(() => {
+    if (threadPanelStates) {
       setInputValue('')
     }
-  },[isCreatingThread,currentThreadInfo?.id,threadOriginalMsg?.id,threadPanelStates])
-  const createChatThread = ()=>{
-    return new Promise((resolve,reject) => {
+  }, [isCreatingThread, currentThreadInfo?.id, threadOriginalMsg?.id, threadPanelStates])
+  const createChatThread = () => {
+    return new Promise((resolve, reject) => {
       if (isCreatingThread && props.isChatThread) {
         if (!props.threadName) {
           message.warn(i18next.t('ThreadName can not empty'));
@@ -246,21 +246,21 @@ function SendBox(props) {
           messageId: threadOriginalMsg.id,
           parentId: threadOriginalMsg.to,
         }
-        WebIM.conn.createChatThread(options).then(res=>{
+        WebIM.conn.createChatThread(options).then(res => {
           const threadId = res.data?.chatThreadId;
-          onOpenThreadPanel && onOpenThreadPanel({id: threadId})
+          onOpenThreadPanel && onOpenThreadPanel({ id: threadId })
           resolve(threadId)
         })
-      }else if(props.isChatThread){
+      } else if (props.isChatThread) {
         resolve(currentThreadInfo.id)
-      }else {
+      } else {
         resolve(to)
       }
     })
   }
   const sendMessage = useCallback(() => {
     if (!inputValue) return;
-    createChatThread().then(to=>{
+    createChatThread().then(to => {
       dispatch(
         MessageActions.sendTxtMessage(to, chatType, {
           msg: inputValue,
@@ -271,7 +271,7 @@ function SendBox(props) {
       setInputValue("");
       inputRef.current.focus();
     })
-  }, [inputValue, to, chatType, dispatch,currentThreadInfo,props ]);
+  }, [inputValue, to, chatType, dispatch, currentThreadInfo, props]);
 
   const onKeyDownEvent = useCallback(
     (e) => {
@@ -295,8 +295,8 @@ function SendBox(props) {
     };
   }, [onKeyDownEvent]);
 
-  const handlefocus = (v) =>{
-    const {value} = v
+  const handlefocus = (v) => {
+    const { value } = v
     switch (value) {
       case 'img':
         imageEl.current.focus();
@@ -318,7 +318,7 @@ function SendBox(props) {
     if (!file.filename) {
       return false;
     }
-    createChatThread().then(to=>{
+    createChatThread().then(to => {
       dispatch(MessageActions.sendFileMessage(to, chatType, file, fileEl, props.isChatThread));
     })
   }
@@ -327,8 +327,8 @@ function SendBox(props) {
     if (!file.filename) {
       return false;
     }
-    createChatThread().then(to=>{
-      dispatch(MessageActions.sendVideoMessage(to, chatType, file,videoEl, props.isChatThread));
+    createChatThread().then(to => {
+      dispatch(MessageActions.sendVideoMessage(to, chatType, file, videoEl, props.isChatThread));
     })
   }
   const handleImageChange = (e) => {
@@ -336,17 +336,17 @@ function SendBox(props) {
     if (!file.filename) {
       return false;
     }
-    createChatThread().then(to=>{
+    createChatThread().then(to => {
       dispatch(MessageActions.sendImgMessage(to, chatType, file, imageEl, props.isChatThread));
     })
-    
+
   };
   const handleClickMenu = (e) => {
     setSessionEl(e.currentTarget);
   };
 
   const onClickMenuItem = (v) => (e) => {
-    handleMenuItem && handleMenuItem(v,e)
+    handleMenuItem && handleMenuItem(v, e)
     handlefocus(v)
     setSessionEl(null);
   };
@@ -393,7 +393,7 @@ function SendBox(props) {
                   className={classes.hide}
                 />
               )}
-               {option.value === "video" && (
+              {option.value === "video" && (
                 <input
                   ref={videoEl}
                   onChange={handleVideoChange}
@@ -426,8 +426,8 @@ function SendBox(props) {
           onClose={() => {
             setShowRecorder(false);
           }}
-          isChatThread = {props.isChatThread}
-          threadName = {props.threadName}
+          isChatThread={props.isChatThread}
+          threadName={props.threadName}
         />
       </>
     );
@@ -446,7 +446,7 @@ function SendBox(props) {
       //     ref={inputRef}
       //   ></TextareaAutosize>
       // </div>
-      <div contenteditable="true" className={`${inputHaveValue ? classes.textareaBox : classes.textareaSubBox}`} ref={inputRef} onInput={handleInputChange}></div>
+      <div contentEditable="true" className={`${inputHaveValue ? classes.textareaBox : classes.textareaSubBox}`} ref={inputRef} onInput={handleInputChange}></div>
     );
   };
 
