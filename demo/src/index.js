@@ -1,4 +1,4 @@
-import React, { Component,useState } from "react";
+import React, { Component, useState } from "react";
 import { render } from "react-dom";
 import { EaseChat, EaseApp } from "../../src/index";
 import axios from 'axios'
@@ -55,22 +55,22 @@ export default class Demo extends Component {
       conversationId: "zd132",
     };
     EaseApp.addConversationItem(session);
-    EaseApp.changePresenceStatus({[session.conversationId] : 'Online'})
+    EaseApp.changePresenceStatus({ [session.conversationId]: 'Online' })
     EaseApp.thread.setShowThread(true)
     // EaseApp.thread.closeThreadPanel()
     // EaseApp.thread.setHasThreadEditPanel(true)
   };
-  test = (res) =>{
-    console.log('test登录成功',res);
+  test = (res) => {
+    console.log('test登录成功', res);
   }
-  test2 = (err) =>{
-    console.log('登录失败',err)
+  test2 = (err) => {
+    console.log('登录失败', err)
   }
-  test3 = (res) =>{
-    console.log('res>>',res);
+  test3 = (res) => {
+    console.log('res>>', res);
   }
-  test4 = (val) =>{
-    console.log('val',val);
+  test4 = (val) => {
+    console.log('val', val);
   }
   handleGetToken = async (data) => {
     let token = ''
@@ -90,14 +90,14 @@ export default class Demo extends Component {
     return member
   }
 
-  test5 = (val1,val2) => {
-    console.log('val',val1,val2)
+  test5 = (val1, val2) => {
+    console.log('val', val1, val2)
   }
   render() {
     console.log("this.state.token>>", this.state.token);
     return (
       <div>
-          <button onClick={this.addSessionItem}> 测试 </button>
+        <button onClick={this.addSessionItem}> 测试 </button>
         <h3>EaseApp</h3>
         <div>
           <EaseApp
@@ -108,11 +108,11 @@ export default class Demo extends Component {
             onAvatarChange={this.test3}
             onChatAvatarClick={this.test4}
             onEditThreadPanel={this.test5}
-            appkey= "easemob-demo#easeim"
+            appkey="41117440#383391"
             username="zd3"
-            password="1"
-            // agoraToken="007eJxTYAiTXhXwV2WKwARx+Xxlv3x9dZfw6xXTdT42T5v7PqsuNUeBIc0wJdnc3CIpJSXZzMQsMcUizcjMwNLcLDnRKMXA0DSZ48XUJAUZBoZZ35YHMDKwMjACIYivwpBkYGaSmGJmoGtmZJKka2iYmqxrkWpopGuaZGRikWRgapGWZAkAkzwlRw=="
-            header={<div style={{ height: "100px" }}>TestHeader</div>}/>
+            // password="1"
+            agoraToken="007eJxTYHjAyRq9/uNezSP37kybrdpm+mL97eRWPfmA+S7urvnmRScVGNIMU5LNzS2SUlKSzUzMElMs0ozMDCzNzZITjVIMDE2TTSbeSlKQYWB48kXEn5GBlYERCEF8FQYLy5TkJHNjA10zI5MUXUPD1GRdyzQTQ11jYwsLw9RE06TUJCMAl70nXg=="
+            header={<div style={{ height: "100px" }}>TestHeader</div>} />
         </div>
       </div>
     );
