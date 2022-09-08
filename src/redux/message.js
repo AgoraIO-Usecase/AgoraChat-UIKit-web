@@ -811,7 +811,7 @@ export const updateReactionData = (state, { message, reaction }) => {
 
 	if (chatType === 'groupChat') { addReactionUser = to }
 
-	if (!messageId) messageId = state.getIn(["byMid", message.mid, "messageId"]) || message.mid
+	if (!messageId) messageId = state.getIn(["byMid", message.mid, "messageId"]) || message.id
 	let mids = state.getIn(["byMid"]) || {};
 	let mid;
 	for (var i in mids) {
@@ -873,13 +873,13 @@ export const updateReactionData = (state, { message, reaction }) => {
 		}
 		// const { chatType } = byId;
 		// let messages = state.getIn([chatType, addReactionUser]).asMutable();
-		let found = _.find(messages, { id: messageId })
-		let { reactions } = found;
+		let found = _.find(messages, { id: messageId})
+		let reactions = found?.reactions || []
 		let newReactions = [];
-		newReactionsData.map((item => {
+		newReactionsData.forEach((item => {
 			let reactionOp = item?.op || [];
 			let added = isAdded(reactionOp)
-			reactions && reactions.forEach((msgReaction) => {
+			reactions.length > 0 && reactions.forEach((msgReaction) => {
 				if (msgReaction.reaction === item.reaction) {
 
 					item.userList = mergeArray(item.userList, msgReaction.userList)
