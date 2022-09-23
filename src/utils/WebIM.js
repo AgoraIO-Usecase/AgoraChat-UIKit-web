@@ -1,6 +1,5 @@
-// import websdk from 'easemob-websdk';
-// import websdk from 'websdk';
-import websdk from './Easemob-chat';
+import websdk from 'agora-chat';
+// import websdk from './Agora-chat-4.1.0';
 import config from './WebIMConfig';
 let WebIM = window.WebIM || {};
 WebIM.config = config;
