@@ -139,7 +139,7 @@ Now, you can run your app to send messages. In this example, you can use the def
 
 **Note**
 
-If a custom App Key is used, no contact is available by default and you need to first [add contacts](https://docs-preprod.agora.io/en/agora-chat/agora_chat_contact_web?platform=Web#Send a contact invitation) or [join a group](https://docs-preprod.agora.io/en/agora-chat/agora_chat_group_web?platform=Web#Create and destroy a chat group).
+If a custom App Key is used, no contact is available by default and you need to first [add contacts](https://docs.agora.io/en/agora-chat/client-api/contacts) or [join a group](https://docs.agora.io/en/agora-chat/client-api/chat-group/manage-chat-groups).
 
 ```bash
 npm run start
@@ -219,7 +219,7 @@ const WebIM = EaseApp.getSdk({ appkey: "xxx" });
   })
 ```
 
-[SDK callbacks](https://docs-preprod.agora.io/en/agora-chat/agora_chat_send_receive_message_web?platform=Web#receive-a-message)
+[SDK callbacks](https://docs.agora.io/en/agora-chat/client-api/messages/send-receive-messages)
 
 #### Create a conversation
 
@@ -345,8 +345,8 @@ If you have any problems or suggestions regarding the sample projects, feel free
 
 ## Reference
 
-- [Agora Chat SDK Product Overview](https://docs-preprod.agora.io/en/agora-chat/agora_chat_overview?platform=Web)
-- [Agora Chat SDK API Reference](https://docs-preprod.agora.io/en/agora-chat/API%20Reference/im_ts/index.html?transId=4dbea540-f2cd-11ec-bafe-3fe630a7aac4)
+- [Agora Chat SDK Product Overview](https://docs.agora.io/en/agora-chat/overview/product-overview)
+- [Agora Chat SDK API Reference](https://api-ref.agora.io/en/chat-sdk/web/1.x/index.html)
 
 ## Related resources
 
