@@ -95,7 +95,7 @@ const ReactionIcon = ({ anchorEl, onClose, onSelected, message }) => {
 			return (
 				<div
 					className={classes.emojiItem}
-					key={i}
+					key={k}
 					onClick={isStatus(v) ? handleDelete : handleEmojiClick}
 				>
 					<Button

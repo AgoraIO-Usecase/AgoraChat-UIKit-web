@@ -412,7 +412,7 @@ const { Types, Creators } = createActions({
 				})
 				if (findItem) {
 					findItem.count++;
-					isAddedBySelf = true;
+					findItem.isAddedBySelf = true;
 					findItem.userList.push(WebIM.conn.context.userId)
 				} else {
 					reactions.push({
@@ -811,7 +811,7 @@ export const updateReactionData = (state, { message, reaction }) => {
 
 	if (chatType === 'groupChat') { addReactionUser = to }
 
-	if (!messageId) messageId = state.getIn(["byMid", message.mid, "messageId"]) || message.mid
+	if (!messageId) messageId = state.getIn(["byMid", message.id, "messageId"]) || message.id
 	let mids = state.getIn(["byMid"]) || {};
 	let mid;
 	for (var i in mids) {

@@ -52,7 +52,7 @@ const RenderReactions = ({ message }) => {
 			{reactionMsg.map((item, i) => {
 					if (i > 3 && reactionMsg.length != 5) return;
 					return (
-						<div key={i} className={classes.reactionItem}>
+						<div key={item.reaction} className={classes.reactionItem}>
 							{rnReactionEmoji(item.reaction)}
 						</div>
 					);
