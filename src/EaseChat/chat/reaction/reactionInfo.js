@@ -186,7 +186,7 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 						userName = val;
 					}
 					return (
-						<div key={i} className={classes.reactionUserStyle}>
+						<div key={val} className={classes.reactionUserStyle}>
 							<div className={classes.userBox}>
 								<Avatar src={userAvatars[1]} />
 								<Typography className={classes.textStyle}>{userName}</Typography>
@@ -250,7 +250,7 @@ const ReactionInfo = ({ anchorEl, onClose, message }) => {
 										label={label}
 										{...a11yProps(i)}
 										className={classes.reactionItem}
-										key={i}
+										key={item.reaction}
 									/>
 								);
 							})}
