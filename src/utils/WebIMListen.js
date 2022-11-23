@@ -109,22 +109,28 @@ export default function createlistener(props) {
 				store.dispatch(MessageActions.addMessage(message, "txt"));
 			}
 
-			store.dispatch(SessionActions.topSession(sessionId, chatType))
+			store.dispatch(SessionActions.topSession(sessionId, chatType, message))
 		},
 		onFileMessage: (message) => {
 			console.log("onFileMessage", message);
+			const { chatType, from, to } = message;
+			const sessionId = chatType === "singleChat" ? from : to;
 			store.dispatch(MessageActions.addMessage(message, "file"));
+			store.dispatch(SessionActions.topSession(sessionId, chatType, message))
 		},
 		onVideoMessage: (message) => {
 			console.log("onVideoMessage", message);
+			const { chatType, from, to } = message;
+			const sessionId = chatType === "singleChat" ? from : to;
 			store.dispatch(MessageActions.addMessage(message, "video"));
+			store.dispatch(SessionActions.topSession(sessionId, chatType, message))
 		},
 		onImageMessage: (message) => {
 			console.log("onImageMessage", message);
 			const { chatType, from, to } = message;
 			const sessionId = chatType === "singleChat" ? from : to;
 			store.dispatch(MessageActions.addMessage(message, "img"));
-			store.dispatch(SessionActions.topSession(sessionId, chatType))
+			store.dispatch(SessionActions.topSession(sessionId, chatType, message))
 		},
 
 		onAudioMessage: (message) => {
@@ -132,6 +138,7 @@ export default function createlistener(props) {
 			const { chatType, from, to } = message;
 			const sessionId = chatType === "singleChat" ? from : to;
 			store.dispatch(MessageActions.addAudioMessage(message, "audio"));
+			store.dispatch(SessionActions.topSession(sessionId, chatType, message))
 		},
 
 		onRecallMessage: (message) => {
