@@ -1,5 +1,5 @@
 import websdk from 'agora-chat';
-// import websdk from './Agora-chat-4.1.0';
+// import websdk from './Agora-chat-1.0.8';
 import config from './WebIMConfig';
 let WebIM = window.WebIM || {};
 WebIM.config = config;
