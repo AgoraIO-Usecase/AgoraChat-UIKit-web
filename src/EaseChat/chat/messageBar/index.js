@@ -295,12 +295,15 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
 
   const startCall = async (members) => {
     setInviteOpen(false)
+    onInviteClose && onInviteClose()
     const channel = confrData.channel || Math.uuid(8)
     const type = confrData.type || callType == 'audio' ? 3 : 2
     const { agoraUid, accessToken } = await getRTCToken({
       channel: channel,
       username: WebIM.conn.context.userId
     })
+    // confrData.token = accessToken
+    // confrData.agoraUid = agoraUid
 
     let options = {
       callType: type,
@@ -308,7 +311,7 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
       to: members,
       agoraUid: agoraUid,
       message: `Start a ${callType == 'audio' ? 'voice' : 'video'} call`,
-      groupId: to || confrData.groupId,
+      groupId: confrData.groupId || to,
       groupName: confrData.groupName || name[to],
       accessToken,
       channel
@@ -328,10 +331,16 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
   useEffect(() => {
     async function updateGroupMember() {
         let gid = confrData.groupId
-        if (!gid) return
+        if (!gid) {
+          console.warn('groupId is null')
+          return
+        }
+        setInviteOpen(showinvite)
+        if(!showinvite){
+          onInviteClose && onInviteClose()
+        }
         let members = await getGroupMembers(gid) || []
         setGroupMembers(members)
-        setInviteOpen(showinvite)
     }
     updateGroupMember()
   }, [showinvite])
