@@ -188,8 +188,8 @@ const app = () => {
 | isShowRTC               | Boolean                 | 非必需   | 是否使用 RTC 功能。                                                                                                                                                                              |
 | agoraUid                | String                  | 非必需   | 使用 RTC 时，需要用到的 agora uid。                                                                                                                                                              |
 | appId                   | String                  | 非必需   | 使用 RTC 时，需要的 appId。                                                                                                                                                                      |
-| getRTCToken             | Function                | 非必需   | 使用 RTC 时，需要的获取声网 token 的函数。                                                                                                                                                       |
-| getIdMap                | Function                | 非必需   | 使用 RTC 时，需要的获取 userId 和 用户名映射的函数。                                                                                                                                             |
+| getRTCToken             | Function                | 非必需   | 使用 RTC 时，需要的获取声网 token 的函数。getRTCToken({channel: string, username: string}) => {accessToken: string}                                                                              |
+| getIdMap                | Function                | 非必需   | 使用 RTC 时，需要的获取 userId 和 用户名映射的函数。 getIdMap({userId: string, channel: string}) => {[key: string]:string}                                                                       |
 
 ### 高级定制功能
 
