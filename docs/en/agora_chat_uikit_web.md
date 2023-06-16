@@ -2,11 +2,11 @@
 
 Instant messaging connects people wherever they are and allows them to communicate with others in real time. With built-in user interfaces (UI) for the conversation list and contact list, the [Agora Chat UI Samples](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web) enables you to quickly embed real-time messaging into your app without requiring extra effort on the UI.
 
-This page shows a sample code to add one on one chat into your app by using the Agora Chat UI Samples.
+This page shows a sample code to add one-to-one chat into your app by using the Agora Chat UI Samples.
 
 ## Understand the tech
 
-The following figure shows the workflow of how clients send and receive one on one chat messages:
+The following figure shows the workflow of how clients send and receive one-to-one chat messages:
 
 ![agora_chat](https://docs.agora.io/en/assets/images/get-started-sdk-understand-009486abec0cc276183ab535456cf889.png)
 
