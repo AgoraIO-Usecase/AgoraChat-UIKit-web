@@ -6,4 +6,7 @@
 /umd
 npm-debug.log*
 /publish
+/storybook-static
+/build
+/dist
 .DS_Store
