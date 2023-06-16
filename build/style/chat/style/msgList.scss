@@ -1,0 +1,9 @@
+$chat-prefix-cls: #{$cui-prefix}-messageList;
+
+.#{$chat-prefix-cls}{
+    flex: 1;
+    overflow: hidden;
+    &-msgItem{
+        overflow: hidden;
+    }
+}

@@ -1,0 +1,67 @@
+$conversation-prefix-cls: #{$cui-prefix}-conversationItem;
+
+.#{$conversation-prefix-cls}{
+    height: 74px;
+    // background: $gray-98;
+    display: flex;
+    align-items: center;
+    padding: $padding-s;
+    box-sizing: border-box;
+    position: relative;
+    border-radius: 16px;
+    margin: $margin-xss $margin-xs;
+    &-selected{
+        background-color: #E6F5FF !important;
+        .#{$conversation-prefix-cls}-nickname{
+            color: $blue-6;
+        }
+    }
+    &:hover{
+        background: $gray-98;
+    }
+    &:active{
+        background-color: $gray-9;
+    }
+    &-content, &-info{
+        display: flex;
+        flex-direction: column;
+        align-items: baseline;
+    }
+    &-content{
+        max-width: calc(100% - 136px);
+        overflow: hidden;
+        flex: 1;
+    }
+    
+    &-info{
+        position: absolute;
+        right: 16px;
+        align-items: end;
+    }
+    &-nickname{
+        margin: 0 $margin-sm;
+        font-size: $font-size-lg;
+        line-height: 24px;
+        /* identical to box height, or 150% */
+        color: $title-color;;
+        flex: 1;
+        overflow: hidden;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+    &-message{
+        margin-left: $margin-sm;
+        font-size: $font-size-base;
+        font-weight: 400;
+        color: $font-color;
+        white-space: nowrap;
+    }
+
+    &-time{
+        font-weight: 400;
+        font-size: $font-size-sm;
+        line-height: 16px;
+        color: $gray-5;
+        margin-bottom: 9px;
+    }
+}

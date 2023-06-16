@@ -1,0 +1,33 @@
+{
+  "name": "chatuim2",
+  "version": "1.2.2",
+  "description": "",
+  "main": "ChatUI.umd.js",
+  "type": "module",
+  "module": "ChatUI.esm.js",
+  "types": "types/ChatUI.d.ts",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "pnpm build:components",
+    "build:all": "vite build",
+    "build:components": "esno ./scripts/build.ts",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:serve": "vitepress serve docs",
+    "test": "vitest",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook",
+    "coverage": "vitest run --coverage",
+    "fix-memory-limit": "cross-env LIMIT=4096 increase-memory-limit"
+  },
+  "formats": [
+    "es",
+    "umd",
+    "iife"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {},
+  "dependencies": {}
+}

@@ -1,0 +1,43 @@
+import type { ReactNode, CSSProperties, SyntheticEvent } from 'react';
+import type { GetContainer } from 'rc-util/lib/PortalWrapper';
+export interface DialogPropTypes {
+    className?: string;
+    keyboard?: boolean;
+    style?: CSSProperties;
+    mask?: boolean;
+    children?: any;
+    afterClose?: () => any;
+    onClose?: (e: SyntheticEvent) => void;
+    closable?: boolean;
+    maskClosable?: boolean;
+    visible?: boolean;
+    destroyOnClose?: boolean;
+    mousePosition?: {
+        x: number;
+        y: number;
+    } | null;
+    title?: ReactNode;
+    footer?: ReactNode;
+    transitionName?: string;
+    maskTransitionName?: string;
+    animation?: any;
+    maskAnimation?: any;
+    wrapStyle?: Record<string, any>;
+    bodyStyle?: Record<string, any>;
+    maskStyle?: Record<string, any>;
+    prefixCls?: string;
+    wrapClassName?: string;
+    width?: string | number;
+    height?: string | number;
+    zIndex?: number;
+    bodyProps?: any;
+    maskProps?: any;
+    rootClassName?: string;
+    wrapProps?: any;
+    getContainer?: GetContainer | false;
+    closeIcon?: ReactNode;
+    modalRender?: (node: ReactNode) => ReactNode;
+    forceRender: boolean;
+    focusTriggerAfterClose?: boolean;
+}
+export default function Dialog(props: DialogPropTypes): import("react/jsx-runtime").JSX.Element;

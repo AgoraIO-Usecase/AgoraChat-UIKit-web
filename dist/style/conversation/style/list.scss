@@ -1,0 +1,11 @@
+$conversation-prefix-cls: #{$cui-prefix}-conversationList;
+
+
+.#{$conversation-prefix-cls}{
+    background: $component-background;
+    height: 100%;
+    position: relative;
+    &-search{
+        margin: $margin-xs $margin-sm;
+    }
+}

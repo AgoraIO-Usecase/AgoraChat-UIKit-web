@@ -1,0 +1,12 @@
+
+$chat-prefix-cls: #{$cui-prefix}-chat;
+
+.#{$chat-prefix-cls}{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: $chat-bg;
+    &-messageList{
+        flex: 1;
+    }
+}

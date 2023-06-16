@@ -1,0 +1,143 @@
+$status-prefix-cls: #{$cui-prefix}-message-base;
+
+.#{$status-prefix-cls} {
+    width: 100%;
+    font-size: $msg-base-font-size;
+    line-height: 24px;
+    color: $msg-base-color;
+    order: 0;
+    display: flex;
+    align-items: flex-end;
+    margin: $msg-base-margin;
+    box-sizing: border-box;
+    padding: $msg-base-padding;
+    &-arrow{
+        &.#{$status-prefix-cls}-left{
+            .#{$status-prefix-cls}-content{
+                &::before{
+                    content: " ";
+                }
+            }
+        }
+        &.#{$status-prefix-cls}-right{
+            .#{$status-prefix-cls}-content{
+                &::after{
+                    content: " ";
+                }
+            }
+        }
+    }
+
+    &-left{
+        direction: ltr;
+        .#{$status-prefix-cls}-content{
+            border-radius: $msg-bubble-border-radius-left;
+            &::before{
+                border: $msg-bubble-arrow-border-size solid transparent;
+                border-right: $msg-bubble-arrow-border-size solid $msg-bubble-color-secondly;
+                position: absolute;
+                pointer-events: none;
+                left: $msg-bubble-arrow-left;
+                bottom: $msg-bubble-arrow-bottom;
+            }
+        }
+    }
+    &-right{
+        direction: rtl;
+        .#{$status-prefix-cls}-content{
+            border-radius: $msg-bubble-border-radius-right;
+            &::after{
+                border: $msg-bubble-arrow-border-size solid transparent;
+                border-left: $msg-bubble-arrow-border-size solid $msg-bubble-color-primary;
+                position: absolute;
+                pointer-events: none;
+                bottom: $msg-bubble-arrow-bottom;
+                right: $msg-bubble-arrow-right;
+            }
+        }
+    }
+    &-box{
+        max-width: 100%;
+        overflow: hidden;
+    }
+    &-body{
+        flex-grow: 0;
+        display: flex;
+        align-items: flex-end;
+    }
+    &-content{
+        // flex: 1;
+        margin: $msg-base-content-margin;
+        padding: $msg-base-content-padding;
+        gap: 10px;
+        min-height: $msg-base-content-minheight;
+        position: relative;
+        /* color_primary/95 */
+        background: $msg-bubble-color-primary;
+        color: $msg-bubble-font-color-primary;
+        // overflow: hidden; // TODO: 加会遮挡住 arrow, 不加url preview 下面圆角会被覆盖
+    }
+
+    &-primary {
+        .#{$status-prefix-cls}-content{
+            background: $msg-bubble-color-primary;
+            color: $msg-bubble-font-color-primary;
+            &::before{
+                border-right: $msg-bubble-arrow-border-size solid $msg-bubble-color-primary;
+            }
+        }
+    }
+    &-secondly {
+        .#{$status-prefix-cls}-content{
+            background: $msg-bubble-color-secondly;
+            color: $msg-bubble-font-color-secondly;
+            &::after{
+                border-left: $msg-bubble-arrow-border-size solid $msg-bubble-color-secondly!important;
+            }
+            &::before{
+                border-right: $msg-bubble-arrow-border-size solid $msg-bubble-color-secondly!important;
+            }
+        }
+    }
+    &-none {
+        .#{$status-prefix-cls}-content{
+            background: $msg-bubble-none-bg;
+            color: $msg-bubble-none-color;
+            &::before{
+                border: none;
+                content: "";
+                position: absolute;
+                pointer-events: none;
+                left: 0px;
+                bottom: 0px;
+            }
+        }
+    }
+    &-square{
+        .#{$status-prefix-cls}-content{
+            border-radius: $msg-bubble-square-border-radius;
+        }
+    }
+    &-info{
+        margin-left: $msg-info-margin-left;
+        display: flex;
+    }
+    &-nickname{
+        display: inline-block;
+        height: $msg-nickname-height;
+        font-weight: $msg-nickname-font-weight;
+        font-size: $msg-nickname-font-size;
+        line-height: $msg-nickname-height;
+        color: $msg-nickname-font-color;
+    }
+    &-time{
+        display: inline-block;
+        width: $msg-time-width;
+        height: $msg-time-height;
+        margin: $msg-time-margin;
+        font-weight: $msg-time-font-weight;
+        font-size: $msg-time-font-size;
+        line-height: $msg-time-height;
+        color: $msg-time-font-color;
+    }
+}

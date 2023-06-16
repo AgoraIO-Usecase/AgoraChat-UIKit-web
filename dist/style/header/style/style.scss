@@ -1,0 +1,38 @@
+$header-prefix-cls: #{$cui-prefix}-header;
+
+.#{$header-prefix-cls} {
+    height: 60px;
+    // background-color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 $padding-s;
+    justify-content: space-between;
+    flex-shrink: 0;
+    &-content{
+        display: flex;
+        align-items: center;
+
+        &-text{
+            margin-left: $margin-sm;
+        }
+    }
+
+    &-more{
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        width: max-content;
+        li{
+            font-weight: 500;
+            font-size: $font-size-base;
+            line-height: 20px;
+            padding: 0 $padding-s;
+            height: 36px;
+            line-height: 36px;
+            cursor: pointer;
+        }
+        li:hover{
+            background: #F1F2F3;
+        }
+    }
+}
