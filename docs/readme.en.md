@@ -1,11 +1,5 @@
 # Get Started with Agora Chat UIKit for Web
 
-To use the UIKit 2.0 beta version, use `chatuim2` instead of `agora-chat-uikit`
-
-```bash
-npm i chatuim2 -S
-```
-
 ## Overview
 
 `agora-chat-uikit` is a UI component library based on the Chat SDK. It provides common UI components, module components containing chat business logic, and container components, which allows users to customize using renderX method. `agora-chat-uikit` provides a provider to manage data. The provider automatically listens for chat SDK events to update data and drive UI updates. Developers can use the library to quickly build custom IM applications based on actual business requirements.
@@ -359,9 +353,15 @@ Import agora-chat-uikit into your code.
 
 ```javascript
 // App.js
-import React, { Component, useEffect } from 'react';
-import { Provider, Chat, ConversationList, useClient, rootStore } from 'agora-chat-uikit';
-import 'agora-chat-uikit/style.css';
+import React, { Component, useEffect } from "react";
+import {
+  Provider,
+  Chat,
+  ConversationList,
+  useClient,
+  rootStore,
+} from "agora-chat-uikit";
+import "agora-chat-uikit/style.css";
 
 const ChatApp = () => {
   const client = useClient();
@@ -369,16 +369,16 @@ const ChatApp = () => {
     client &&
       client
         .open({
-          user: '',
-          agoraToken: '',
+          user: "",
+          agoraToken: "",
         })
-        .then(res => {
-          console.log('get token success', res);
+        .then((res) => {
+          console.log("get token success", res);
           // create a conversation
           rootStore.conversationStore.addConversation({
-            chatType: '', // 'singleChat' || 'groupChat'
-            conversationId: '', // target user id or group id
-            name: '', // target user nickname or group name
+            chatType: "", // 'singleChat' || 'groupChat'
+            conversationId: "", // target user id or group id
+            name: "", // target user nickname or group name
           });
         });
   }, [client]);
@@ -400,7 +400,7 @@ class App extends Component {
     return (
       <Provider
         initConfig={{
-          appKey: 'you app key',
+          appKey: "you app key",
         }}
       >
         <ChatApp />
@@ -440,13 +440,13 @@ Agora provides an open source AgoraChat UIKit web project on GitHub, where you c
 You can modify the style by passing className, style, and prefix through the component props
 
 ```javascript
-import { Chat, Button } from 'agora-chat-uikit';
+import { Chat, Button } from "agora-chat-uikit";
 
 const ChatApp = () => {
   return (
     <div>
       <Chat className="customClass" prefix="custom" />
-      <Button style={{ width: '100px' }}>Button</Button>
+      <Button style={{ width: "100px" }}>Button</Button>
     </div>
   );
 };
@@ -520,10 +520,10 @@ module.exports = {
       {
         test: /\.s[ac]ss$/i,
         use: [
-          'style-loader',
-          'css-loader',
+          "style-loader",
+          "css-loader",
           {
-            loader: 'sass-loader',
+            loader: "sass-loader",
             options: {
               additionalData: `@import "@/styles/index.scss";`,
             },
