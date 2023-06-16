@@ -1,7 +1,5 @@
 # Get Started with Agora Chat UIKit for Web
 
-文中图片链接有的还是 Easemob 的，需要替换为 Agora Chat 的？
-
 Instant messaging connects people wherever they are and allows them to communicate with others in real time. With built-in user interfaces (UI) for the conversation list and contact list, the [Agora Chat UI Samples](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web) enables you to quickly embed real-time messaging into your app without requiring extra effort on the UI.
 
 This page shows a sample code to add peer-to-peer messaging into your app by using the Agora Chat UI Samples.
@@ -192,8 +190,7 @@ npm run start
 ```
 
 Now, you can see your app in the browser.
-
-![img](https://github.com/easemob/Easemob-UIKit-web/raw/dev/docs/chat.png)
+![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/main/docs/image/chat.png)
 
 If the default App Key is used, the UIKit allows you to send the text, emoji, image, and voice messages.
 
@@ -205,5 +202,5 @@ If a custom App Key is used, no contact is available by default and you need to 
 
 Agora provides an open-source Web project for Agora Chat UIKit on GitHub. You can clone and run the project or reference the logic to create a project that integrates agora-chat-uikit.
 
-- [URL for Agora Chat UIKit Web source code](https://github.com/easemob/Easemob-UIKit-web)
+- [URL for Agora Chat UIKit Web source code](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web)
 - [URL for Agora Chat application using agora-chat-uikit](https://github.com/AgoraIO-Usecase/AgoraChat-web/tree/dev-2.0)

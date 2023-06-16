@@ -15,7 +15,7 @@ ReactDOM.createRoot(document.getElementById('root') as Element).render(
       initConfig={{
         appKey: 'your app key',
       }},
-      // All the UI texts can be viewed in the URL: https://github.com/easemob/Easemob-UIKit-web/tree/dev/local
+      // All the UI texts can be viewed in the URL: https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/main/local
       local={{
         fallbackLng: 'en',
         lng: 'en',
