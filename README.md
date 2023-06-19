@@ -34,6 +34,8 @@ The `agora-chat-uikit` repository provides the following functions:
 - Module components: `BaseMessage`, `AudioMessage`, `FileMessage`， `VideoMessage`, `ImageMessage`, `TextMessage`, `Header`, `Empty`, `MessageList`, `ConversationItem`, `MessageEditor`, `MessageStatus`.
 - Pure UI components: `Avatar`, `Badge`, `Button`, `Checkbox`, `Icon`, `Modal`, `Tooltip`.
 
+The full list of components by the UIKit can be view on the [Storybook page](Todo: you need to deploy storybook-static.zip and add the link here).
+
 ## store
 
 UIKit provides the rootStore that contains all the data. rootStore consists of the following parts:
