@@ -13,7 +13,6 @@ import { formatLocalMessage } from './index'
 let conversationName = ''
 let TimerId = null
 export function addLocalMessage(obj) {
-	console.log(obj, 'addLocalMessage')
 	const { to, from, chatType, groupName, createGroup, groupText, firstCrate, msgType, addType } = obj
 
 	const session = store.getState().session
@@ -84,7 +83,6 @@ export default function createlistener(props) {
 		},
 
 		onTextMessage: (message) => {
-			console.log("onTextMessage", message);
 			const { chatType, from, to, ext } = message;
 			const sessionId = chatType === "singleChat" ? from : to;
 			if (ext.action === 'invite') {
@@ -112,21 +110,18 @@ export default function createlistener(props) {
 			store.dispatch(SessionActions.topSession(sessionId, chatType, message))
 		},
 		onFileMessage: (message) => {
-			console.log("onFileMessage", message);
 			const { chatType, from, to } = message;
 			const sessionId = chatType === "singleChat" ? from : to;
 			store.dispatch(MessageActions.addMessage(message, "file"));
 			store.dispatch(SessionActions.topSession(sessionId, chatType, message))
 		},
 		onVideoMessage: (message) => {
-			console.log("onVideoMessage", message);
 			const { chatType, from, to } = message;
 			const sessionId = chatType === "singleChat" ? from : to;
 			store.dispatch(MessageActions.addMessage(message, "video"));
 			store.dispatch(SessionActions.topSession(sessionId, chatType, message))
 		},
 		onImageMessage: (message) => {
-			console.log("onImageMessage", message);
 			const { chatType, from, to } = message;
 			const sessionId = chatType === "singleChat" ? from : to;
 			store.dispatch(MessageActions.addMessage(message, "img"));
@@ -134,7 +129,6 @@ export default function createlistener(props) {
 		},
 
 		onAudioMessage: (message) => {
-			console.log("onAudioMessage", message);
 			const { chatType, from, to } = message;
 			const sessionId = chatType === "singleChat" ? from : to;
 			store.dispatch(MessageActions.addAudioMessage(message, "audio"));
@@ -153,18 +147,15 @@ export default function createlistener(props) {
 		},
 		// The other has read the message
 		onReadMessage: (message) => {
-			console.log("onReadMessage", message);
 			const { mid, id } = message
 			store.dispatch(MessageActions.updateMessageStatus(message, "read", id, mid));
 		},
 
 		onReceivedMessage: function (message) {
-			console.log("updateMessageMid", message)
 			const { id, mid, to } = message;
 			store.dispatch(MessageActions.updateMessageMid(id, mid, to));
 		},
 		onDeliveredMessage: function (message) {
-			console.log("onDeliveredMessage", message)
 			const { mid, id } = message
 			store.dispatch(
 				MessageActions.updateMessageStatus(message, "received", id, mid)
@@ -173,7 +164,6 @@ export default function createlistener(props) {
 
 		onPresence: (msg) => { },
 		onError: (err) => {
-			console.log("error");
 			console.error(err);
 			props.failCallback && props.failCallback(err);
 		},
@@ -185,7 +175,6 @@ export default function createlistener(props) {
 			store.dispatch(GlobalPropsActions.logout());
 		},
 		onGroupChange: (event) => {
-			console.log("onGroupChange", event);
 			const { to, from, groupName, gid } = event
 			if (from === WebIM.conn.context.userId) {
 				event.whoName = 'you'
@@ -323,23 +312,19 @@ export default function createlistener(props) {
 			store.dispatch(GlobalPropsActions.setGlobalProps({ to: null }));
 		},
 		onReactionChange: (message) => {
-			console.log("onReactionChange", message);
 			store.dispatch(MessageActions.updateReaction(message));
 		},
 		//thread notify
 		onChatThreadChange: (msg) => {
-			console.log("====thread change:", msg)
 			store.dispatch(ThreadActions.updateThreadInfo(msg));
 		},
 		onMultiDeviceEvent: (msg) => {
-			console.log("====thread mutiDeviceEvent：", msg)
 			store.dispatch(ThreadActions.updateMultiDeviceEvent(msg));
 		},
 		onReactionMessage: (message) => {
-			console.log("onReactionMessage", message);
+			// console.log("onReactionMessage", message);
 		},
 		onContactAgreed: (msg) => {
-			console.log("onContactAgreed", msg);
 			const { to, from } = msg
 			EaseApp.addConversationItem({
 				conversationType: 'singleChat',
@@ -355,7 +340,6 @@ export default function createlistener(props) {
 			})
 		},
 		onContactAdded: (msg) => {
-			console.log("onContactAdded", msg);
 			const { to, from } = msg
 			addLocalMessage({ to, from, chatType: 'singleChat', groupText: 'You agreed the friend request', firstCrate: true, addType: 'contactAdded' })
 		},

@@ -263,7 +263,6 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
     let idMap = await getIdMap({ userId: WebIM.conn.context.userId, channel })
     CallKit.setUserIdMap(idMap)
   }
-  console.log('easeChatProps @@@@', easeChatProps)
   const callVideo = async () => {
     const channel = Math.uuid(8)
     const { agoraUid, accessToken } = await getRTCToken({
@@ -271,7 +270,6 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
       // agoraId: WebIM.conn.agoraUid,
       username: WebIM.conn.context.userId
     })
-    console.log('token', agoraUid, accessToken)
     setCallType('video')
     if (chatType === 'groupChat') {
       let members = await getGroupMembers(to) || []
@@ -330,17 +328,17 @@ const MessageBar = ({ showinvite, onInviteClose, confrData }) => {
 
   useEffect(() => {
     async function updateGroupMember() {
-        let gid = confrData.groupId
-        if (!gid) {
-          console.warn('groupId is null')
-          return
-        }
-        setInviteOpen(showinvite)
-        if(!showinvite){
-          onInviteClose && onInviteClose()
-        }
-        let members = await getGroupMembers(gid) || []
-        setGroupMembers(members)
+      let gid = confrData.groupId
+      if (!gid) {
+        console.warn('groupId is null')
+        return
+      }
+      setInviteOpen(showinvite)
+      if (!showinvite) {
+        onInviteClose && onInviteClose()
+      }
+      let members = await getGroupMembers(gid) || []
+      setGroupMembers(members)
     }
     updateGroupMember()
   }, [showinvite])

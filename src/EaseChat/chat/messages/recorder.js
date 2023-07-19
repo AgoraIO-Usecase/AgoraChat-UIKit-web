@@ -25,14 +25,14 @@ const useStyles = makeStyles((theme) => ({
     color: "red",
     border: "1px solid",
   },
-  tipText:{
+  tipText: {
     textAlign: 'center',
     color: '#727272',
     marginBottom: '20px'
   }
 }));
 let MediaStream
-function Recorder({ open, onClose, isChatThread,threadName }) {
+function Recorder({ open, onClose, isChatThread, threadName }) {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [status, setStatus] = useState("");
@@ -79,9 +79,8 @@ function Recorder({ open, onClose, isChatThread,threadName }) {
     setStartTime(_startTime);
     clearTimer();
 
-    recording.get((rec,val) => {
+    recording.get((rec, val) => {
       setRecorderObj(rec);
-      console.log('recrecrecrecrec', rec,val.getTracks())
       MediaStream = val
       if (rec) {
         let _interval = setInterval(() => {
@@ -110,7 +109,6 @@ function Recorder({ open, onClose, isChatThread,threadName }) {
     let _endTime = new Date().getTime();
     let duration = (_endTime - startTime) / 1000;
     if (recorderObj) {
-      console.log('recorderObj>>',recording);
       recorderObj.stop();
       // 重置说话时间
       setNum(60);
@@ -126,7 +124,7 @@ function Recorder({ open, onClose, isChatThread,threadName }) {
           length: duration,
           duration: duration,
         };
-        createChatThread().then(to=>{
+        createChatThread().then(to => {
           dispatch(MessageActions.sendRecorder(to, chatType, uri, isChatThread));
         })
         onClose();
@@ -134,8 +132,8 @@ function Recorder({ open, onClose, isChatThread,threadName }) {
       }
     }
   };
-  const createChatThread = ()=>{
-    return new Promise((resolve,reject) => {
+  const createChatThread = () => {
+    return new Promise((resolve, reject) => {
       if (isCreatingThread && isChatThread) {
         if (!threadName) {
           console.log('threadName can not empty')
@@ -146,13 +144,13 @@ function Recorder({ open, onClose, isChatThread,threadName }) {
           messageId: threadOriginalMsg.id,
           parentId: threadOriginalMsg.to,
         }
-        WebIM.conn.createChatThread(options).then(res=>{
+        WebIM.conn.createChatThread(options).then(res => {
           const threadId = res.data?.chatThreadId;
           resolve(threadId)
         })
-      }else if(isChatThread){
+      } else if (isChatThread) {
         resolve(currentThreadInfo.id)
-      }else {
+      } else {
         resolve(to)
       }
     })

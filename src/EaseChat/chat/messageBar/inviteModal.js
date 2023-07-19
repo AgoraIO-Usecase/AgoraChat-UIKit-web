@@ -76,7 +76,6 @@ const InviteModal = (props) => {
             return true
         }
     })
-    console.log('joinedMembers', joinedMembers)
     joinedMembers && joinedMembers.forEach((item) => {
         let user = contacts.find((el) => {
             if (el.id === item.imUserId) {
@@ -92,7 +91,6 @@ const InviteModal = (props) => {
     const [searchValue, setSearchValue] = useState('')
     const [groupMembers, setGroupMembers] = useState([]);
     const [contactsObjs, setContactsObjs] = useState(contacts);
-    console.log('contactsObjs', contactsObjs)
     useEffect(() => {
         setContactsObjs(contacts)
     }, [members])
@@ -103,7 +101,6 @@ const InviteModal = (props) => {
 
     // click search
     const handleSearchValue = () => {
-        console.log(searchValue)
         if (searchValue === '') {
             contacts.forEach((user) => {
                 if (groupMembers.includes(user.id)) {
@@ -125,7 +122,6 @@ const InviteModal = (props) => {
     }
 
     const handleSelect = (val) => (e) => {
-        console.log('e.target.checked', e.target)
         if (e.target.checked) {
             let joinedNum = joinedMembers ? joinedMembers.length : 0
 
@@ -140,7 +136,6 @@ const InviteModal = (props) => {
 
             let newSelected = [...groupMembers]
             newSelected.push(val)
-            console.log('groupMembers', [...newSelected])
             setGroupMembers(newSelected)
             let newContactsObjs = [...contactsObjs]
             newContactsObjs.forEach((value) => {
@@ -242,7 +237,7 @@ const InviteModal = (props) => {
             </Box>
 
             <Box className={classes.btnBox}>
-                <Button style={{ textTransform: "none"}} variant="contained" color="primary" onClick={startCall} disabled={groupMembers.length == 0}>Call</Button>
+                <Button style={{ textTransform: "none" }} variant="contained" color="primary" onClick={startCall} disabled={groupMembers.length == 0}>Call</Button>
             </Box>
         </Box>
     }

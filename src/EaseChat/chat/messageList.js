@@ -49,7 +49,6 @@ function MessageList({ messageList, showByselfAvatar }) {
   const globalProps = useSelector((state) => state.global.globalProps);
   const showThread = useSelector((state) => state.thread.showThread);
   const { to, chatType } = globalProps;
-  console.log("** Render MessageList **", messageList);
   const scrollEl = useRef(null);
   const [isPullingDown, setIsPullingDown] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -91,7 +90,6 @@ function MessageList({ messageList, showByselfAvatar }) {
 
   const handleRecallMsg = useCallback(
     (message) => {
-      console.log("handleRecallMsg", message);
       const { to, chatType } = message;
       dispatch(MessageActions.recallMessage(to, chatType, message));
     },
@@ -142,65 +140,65 @@ function MessageList({ messageList, showByselfAvatar }) {
         <ul ref={scrollEl} className="pulldown-list" id="pulldownList">
           {messageList.length
             ? messageList.map((msg, index) => {
-                if (msg.body.type === "txt") {
-                  return (
-                    <TextMessage
-                      message={msg}
-                      key={msg.id + index}
-                      onRecallMessage={handleRecallMsg}
-                      onCreateThread={createThread}
-                      showByselfAvatar={showByselfAvatar}
-                      showThread={showThread}
-                    />
-                  );
-                } else if (msg.body.type === "file") {
-                  return (
-                    <FileMessage
-                      message={msg}
-                      key={msg.id + index}
-                      onRecallMessage={handleRecallMsg}
-                      onCreateThread={createThread}
-                      showByselfAvatar={showByselfAvatar}
-                      showThread={showThread}
-                    />
-                  );
-                } else if (msg.body.type === "img") {
-                  return (
-                    <ImgMessage
-                      message={msg}
-                      key={msg.id + index}
-                      onRecallMessage={handleRecallMsg}
-                      onCreateThread={createThread}
-                      showByselfAvatar={showByselfAvatar}
-                      showThread={showThread}
-                    />
-                  );
-                } else if (msg.body.type === "audio" || msg.body.type === "video") {
-                  return <AudioOrVideoMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar}/>;
-                } else if (msg.body.type === "recall") {
-                  return (
-                    <RetractedMessage message={msg} key={msg.id + index}/>
-                  );
-                } else if(msg.body.type === "notice"){
-                    return (
-                      <NoticeMessage message={msg} key={msg.id + index}/>
-                    )
-                } else if(msg.body.type === 'custom'){
-                  return (
-                      <CustomMessage message={msg} key={msg.id + index}/>
-                    )
-                } else if (msg.body.type === "threadNotify") {
-                  return (
-                    <ThreadNotify message={msg} key={msg.id + index}/>
-                  );
-                } else if (msg.body.type === "notify") {
-                  return (
-                    <Notify message={msg} key={msg.id + index}></Notify>
-                  )
-                } else {
-                  return null;
-                }
-              })
+              if (msg.body.type === "txt") {
+                return (
+                  <TextMessage
+                    message={msg}
+                    key={msg.id + index}
+                    onRecallMessage={handleRecallMsg}
+                    onCreateThread={createThread}
+                    showByselfAvatar={showByselfAvatar}
+                    showThread={showThread}
+                  />
+                );
+              } else if (msg.body.type === "file") {
+                return (
+                  <FileMessage
+                    message={msg}
+                    key={msg.id + index}
+                    onRecallMessage={handleRecallMsg}
+                    onCreateThread={createThread}
+                    showByselfAvatar={showByselfAvatar}
+                    showThread={showThread}
+                  />
+                );
+              } else if (msg.body.type === "img") {
+                return (
+                  <ImgMessage
+                    message={msg}
+                    key={msg.id + index}
+                    onRecallMessage={handleRecallMsg}
+                    onCreateThread={createThread}
+                    showByselfAvatar={showByselfAvatar}
+                    showThread={showThread}
+                  />
+                );
+              } else if (msg.body.type === "audio" || msg.body.type === "video") {
+                return <AudioOrVideoMessage message={msg} key={msg.id + index} showByselfAvatar={showByselfAvatar} />;
+              } else if (msg.body.type === "recall") {
+                return (
+                  <RetractedMessage message={msg} key={msg.id + index} />
+                );
+              } else if (msg.body.type === "notice") {
+                return (
+                  <NoticeMessage message={msg} key={msg.id + index} />
+                )
+              } else if (msg.body.type === 'custom') {
+                return (
+                  <CustomMessage message={msg} key={msg.id + index} />
+                )
+              } else if (msg.body.type === "threadNotify") {
+                return (
+                  <ThreadNotify message={msg} key={msg.id + index} />
+                );
+              } else if (msg.body.type === "notify") {
+                return (
+                  <Notify message={msg} key={msg.id + index}></Notify>
+                )
+              } else {
+                return null;
+              }
+            })
             : null}
         </ul>
       </div>

@@ -50,9 +50,10 @@ const Chat = (props) => {
   }, []);
 
   useEffect(() => {
-    let appId = '15cb0d28b87b425ea613fc46f7c9f974';
-    console.log('初始化 callkit', agoraUid)
-    CallKit.init(appId, agoraUid || '', WebIM.conn)
+    // let appId = '15cb0d28b87b425ea613fc46f7c9f974';
+    if (appId) {
+      CallKit.init(appId, agoraUid || '', WebIM.conn)
+    }
   }, [agoraUid])
 
 
@@ -86,7 +87,6 @@ const Chat = (props) => {
 
   const [showInviteModal, setShowInvite] = useState(false)
   const showInvite = (confr) => {
-    console.log('点击添加人', confr)
     setConfr(confr)
     setShowInvite(!showInviteModal)
   }
@@ -96,7 +96,6 @@ const Chat = (props) => {
   }
 
   const handleCallStateChange = async (info) => {
-    console.log('info ----', info)
     switch (info.type) {
       case 'hangup':
       case 'refuse':
@@ -147,7 +146,6 @@ const Chat = (props) => {
         // getIdMap
         if (!info.confr) return;
         let idMap = await getIdMap({ userId: WebIM.conn.context.userId, channel: info.confr.channel })
-        console.log('idMap', idMap)
         if (Object.keys(idMap).length > 0) {
           CallKit.setUserIdMap(idMap)
         }
@@ -159,7 +157,6 @@ const Chat = (props) => {
 
   const handleInvite = async (data) => {
     // props.onRTCInvite && props.onRTCInvite(data)
-    console.log('收到邀请', data)
     const { agoraUid, accessToken } = await props.getRTCToken({
       channel: data.channel,
       username: WebIM.conn.context.userId

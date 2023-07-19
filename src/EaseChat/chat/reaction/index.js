@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
 	conatiner: {
 		height: "24px",
 		width: "24px",
-		float: (props) => (props.bySelf? 'right':'left'),
+		float: (props) => (props.bySelf ? 'right' : 'left'),
 		borderRadius: '50%',
 		'&:hover': {
 			background: '#E6E6E6',
@@ -38,7 +38,6 @@ const Reaction = ({ message }) => {
 	};
 	const handleEmojiSelected = (emoji) => {
 		if (!emoji) return;
-		console.log('>>> handleEomji');
 		store.dispatch(MessageActions.addReactions(message, emoji));
 	};
 
