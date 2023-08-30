@@ -32,23 +32,15 @@ The `agora-chat-uikit` library provides the following functions:
         <td>description</td>
     </tr>
    <tr>
-      <td rowspan="5" style=font-weight:bold>Conversation List</td>
+      <td rowspan="3" style=font-weight:bold>Conversation List</td>
    </tr>
    <tr>
-      <td>Conversation list</td>
-      <td style=font-size:10px>The session list displays the profile avatar, nickname, latest message content, unread message count, and time</td>
+      <td>Display conversation information</td>
+      <td style=font-size:10px>Display information such as avatars, nicknames, last message, unread message count etc. of the conversation</td>
    </tr>
    <tr>
       <td>Delete conversation</td>
       <td style=font-size:10px>Deletes the conversation from the conversation list</td>
-   </tr>
-   <tr>
-      <td>Do not disturb (under development)</td>
-      <td style=font-size:10px>Enable message do Not disturb or disable message do not disturb</td>
-   </tr>
-   <tr>
-      <td>Top conversation (in development)</td>
-      <td style=font-size:10px>Pin the conversation to the top of the list</td>
    </tr>
     <tr>
       <td rowspan="6" style=font-weight:bold>Chat</td>
@@ -60,6 +52,12 @@ The `agora-chat-uikit` library provides the following functions:
    <tr>
       <td>Display message </td>
       <td style=font-size:10px>Single or group chat message display, including profile avatar, nickname, message content, time, sent status, and read status. Message types include text, picture, video, file, and voice</td>
+   </tr>
+   <tr>
+      <td>Operate on messages </td>
+      <td style=font-size:10px>
+      Including editing, deleting, replying, recalling, translating, selecting, reacting, threading, and other operations on messages
+      </td>
    </tr>
 </table>
 
