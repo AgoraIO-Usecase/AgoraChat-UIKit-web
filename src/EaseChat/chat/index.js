@@ -125,20 +125,41 @@ const Chat = (props) => {
         store.dispatch(MessageActions.addMessage(cusMessage))
 
         if (info.type == 'hangup') {
-          if (info.reson == 'timeout') {
-            message.error('No response.')
-          } else if (info.reson == 'refuse') {
-            message.error('Request declined.')
-          } else if (info.reson == 'cancel') {
-            message.error('The call has been canceled.')
-          } else if (info.reson == 'accepted on other devices') {
-            message.error('Other devices connected.')
-          } else if (info.reson == 'refused on other devices') {
-            message.error('Other devices declined.')
-          } else if (info.reson == 'busy') {
-            message.error('The line is busy.')
-          } else {
-            message.error(info.reson || 'normal hangup')
+          switch (info.reason) {
+            case 'timeout':
+              message.info('Timeout.')
+              break;
+            case 'refused':
+              message.error('Declined.')
+              break;
+            case 'refuse':
+              message.warn('Declined.')
+              break;
+            case 'cancel':
+              message.info('Hung Up.')
+              break;
+            case 'accepted on other devices':
+              message.info('Answered on another device.')
+              break;
+            case 'refused on other devices':
+              message.error('Rejected on another device.')
+              break;
+            case 'busy':
+              message.warn('The other party is busy.')
+              break;
+            case 'invitation has expired':
+              message.info('Invitation Expired.')
+              break;
+            case 'user-left':
+              message.info('Hung Up.')
+              break;
+            case 'normal':
+              message.info('Canceled')
+              break;
+            default:
+              console.log(info.reason)
+              // message.error(info.reason || 'normal hangup')
+              break;
           }
         }
         break;
