@@ -61,6 +61,160 @@ The `agora-chat-uikit` library provides the following functions:
    </tr>
 </table>
 
+
+## Prerequisites
+
+In order to follow the procedure in this page, you must have:
+
+- React 16.8.0 or later
+- React DOM 16.8.0 or later
+- A valid [Agora account](https://docs.agora.io/cn/AgoraPlatform/sign_in_and_sign_up).
+- A valid [Agora project](https://docs.agora.io/cn/AgoraPlatform/sign_in_and_sign_up) with an App Key.
+
+## Compatible browsers
+
+| Browser | Supported Version |
+| ------- | ----------------- |
+| IE      | 11 or later       |
+| Edge    | 43 or later       |
+| Firefox | 10 or later       |
+| Chrome  | 54 or later       |
+| Safari  | 11 or later       |
+
+## Project setup
+
+### 1. Create a Web Chat UIKit project
+
+```bash
+# Install a CLI tool.
+npm install create-react-app
+# Create an my-app project.
+npx create-react-app my-app
+cd my-app
+```
+
+```
+The project directory.
+
+├── package.json
+├── public # The static directory of Webpack.
+│ ├── favicon.ico
+│ ├── index.html # The default single-page app.
+│ └── manifest.json
+├── src
+│ ├── App.css # The CSS of the app's root component.
+│ ├── App.js # The app component code.
+│ ├── App.test.js
+│ ├── index.css # The style of the startup file.
+│ ├── index.js # The startup file.
+│ ├── logo.svg
+│ └── serviceWorker.js
+└── yarn.lock
+```
+
+### 2. Integrate the Web Chat UIKit
+
+#### Install the Web Chat UIKit
+
+- To install the Web Chat UIKit with npm, run the following command:
+
+```bash
+npm install chatuim2 --save
+```
+
+- To Install Agora chat UIKit for Web with Yarn, run the following command:
+
+```bash
+yarn add chatuim2
+```
+
+#### Build the application using the agora-chat-uikit component
+
+Import agora-chat-uikit into your code.
+
+```javascript
+// App.js
+import React, { Component, useEffect } from 'react';
+import { Provider, Chat, ConversationList, useClient, rootStore } from 'chatuim2';
+import 'chatuim2/style.css';
+
+const appKey = 'you app key'; // your appKey
+const user = ''; // your user ID
+const agoraToken = ''; // agora chat token
+
+const conversation = {
+  chatType: 'singleChat', // 'singleChat' || 'groupChat'
+  conversationId: 'agora',  // target user id or group id
+  name: 'Agora', // target user nickname or group name
+  lastMessage: {}
+}
+const ChatApp = () => {
+  const client = useClient();
+  useEffect(() => {
+    client &&
+      client
+        .open({
+          user,
+          agoraToken,
+        })
+        .then(res => {
+          console.log('get token success', res);
+          // create a conversation
+          rootStore.conversationStore.addConversation(conversation);
+        });
+  }, [client]);
+
+  return (
+    <div>
+      <div>
+        <ConversationList />
+      </div>
+      <div>
+        <Chat />
+      </div>
+    </div>
+  );
+};
+
+class App extends Component {
+  render() {
+    return (
+      <Provider
+        initConfig={{
+          appKey
+        }}
+      >
+        <ChatApp />
+      </Provider>
+    );
+  }
+}
+
+export default App;
+```
+
+#### Run the project and send your first message
+
+```bash
+npm run start
+```
+
+Now, you can see your app in the browser.
+
+<div align=center style="background: #ddd; padding-top: 8px"> <img src="./docs/image/chat.png" width = "480" height = "350" /></div>
+
+In the default App Key situation, for the convenience of quick experience, we support several types of message distribution by default. After clicking to select a member, enter your first message and send it.
+
+**Note**
+
+If a custom App Key is used, no contact is available by default and you need to first [add contacts](https://docs.agora.io/en/agora-chat/client-api/contacts) or [join a group](https://docs.agora.io/en/agora-chat/client-api/chat-group/manage-chat-groups).
+
+Agora provides an open source AgoraChat UIKit web project on GitHub, where you can clone and run the project or reference the logic to create a project that integrates agora-chat-uikit.
+- [How to get agora chat token](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-2.0/docs/en/agora_chat_uikit_web.md)
+- [URL for Agora Chat UIKit Web source code ](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-2.0)
+- [URL for Agora chat application using agora-chat-uikit](https://github.com/AgoraIO-Usecase/AgoraChat-web/tree/dev-2.0)
+
+
 ## Component
 
 `agora-chat-uikit` Currently provided components:
@@ -271,166 +425,17 @@ UIKit provides a rootStore that contains all the data. rootStore contains:
     
 </table>
 
-## Prerequisites
-
-In order to follow the procedure in this page, you must have:
-
-- React 16.8.0 or later
-- React DOM 16.8.0 or later
-- A valid [Agora account](https://docs.agora.io/cn/AgoraPlatform/sign_in_and_sign_up).
-- A valid [Agora project](https://docs.agora.io/cn/AgoraPlatform/sign_in_and_sign_up) with an App Key.
-
-## Compatible browsers
-
-| Browser | Supported Version |
-| ------- | ----------------- |
-| IE      | 11 or later       |
-| Edge    | 43 or later       |
-| Firefox | 10 or later       |
-| Chrome  | 54 or later       |
-| Safari  | 11 or later       |
-
-## Project setup
-
-### 1. Create a Web Chat UIKit project
-
-```bash
-# Install a CLI tool.
-npm install create-react-app
-# Create an my-app project.
-npx create-react-app my-app
-cd my-app
-```
-
-```
-The project directory.
-
-├── package.json
-├── public # The static directory of Webpack.
-│ ├── favicon.ico
-│ ├── index.html # The default single-page app.
-│ └── manifest.json
-├── src
-│ ├── App.css # The CSS of the app's root component.
-│ ├── App.js # The app component code.
-│ ├── App.test.js
-│ ├── index.css # The style of the startup file.
-│ ├── index.js # The startup file.
-│ ├── logo.svg
-│ └── serviceWorker.js
-└── yarn.lock
-```
-
-### 2. Integrate the Web Chat UIKit
-
-#### Install the Web Chat UIKit
-
-- To install the Web Chat UIKit with npm, run the following command:
-
-```bash
-npm install agora-chat-uikit --save
-```
-
-- To Install Agora chat UIKit for Web with Yarn, run the following command:
-
-```bash
-yarn add agora-chat-uikit
-```
-
-#### Build the application using the agora-chat-uikit component
-
-Import agora-chat-uikit into your code.
-
-```javascript
-// App.js
-import React, { Component, useEffect } from 'react';
-import { Provider, Chat, ConversationList, useClient, rootStore } from 'agora-chat-uikit';
-import 'agora-chat-uikit/style.css';
-
-const appKey = 'you app key'; // your appKey
-const user = ''; // your user ID
-const agoraToken = ''; // agora chat token
-
-const conversation = {
-  chatType: 'singleChat', // 'singleChat' || 'groupChat'
-  conversationId: 'agora',  // target user id or group id
-  name: 'Agora', // target user nickname or group name
-  lastMessage: {}
-}
-const ChatApp = () => {
-  const client = useClient();
-  useEffect(() => {
-    client &&
-      client
-        .open({
-          user,
-          agoraToken,
-        })
-        .then(res => {
-          console.log('get token success', res);
-          // create a conversation
-          rootStore.conversationStore.addConversation(conversation);
-        });
-  }, [client]);
-
-  return (
-    <div>
-      <div>
-        <ConversationList />
-      </div>
-      <div>
-        <Chat />
-      </div>
-    </div>
-  );
-};
-
-class App extends Component {
-  render() {
-    return (
-      <Provider
-        initConfig={{
-          appKey
-        }}
-      >
-        <ChatApp />
-      </Provider>
-    );
-  }
-}
-
-export default App;
-```
-
-#### Run the project and send your first message
-
-```bash
-npm run start
-```
-
-Now, you can see your app in the browser.
-
-<div align=center style="background: #ddd; padding-top: 8px"> <img src="./docs/image/chat.png" width = "480" height = "350" /></div>
-
-In the default App Key situation, for the convenience of quick experience, we support several types of message distribution by default. After clicking to select a member, enter your first message and send it.
-
-**Note**
-
-If a custom App Key is used, no contact is available by default and you need to first [add contacts](https://docs.agora.io/en/agora-chat/client-api/contacts) or [join a group](https://docs.agora.io/en/agora-chat/client-api/chat-group/manage-chat-groups).
-
-Agora provides an open source AgoraChat UIKit web project on GitHub, where you can clone and run the project or reference the logic to create a project that integrates agora-chat-uikit.
-
-- [URL for Agora Chat UIKit Web source code ](https://github.com/easemob/Easemob-UIKit-web)
-- [URL for Agora chat application using agora-chat-uikit](https://github.com/AgoraIO-Usecase/AgoraChat-web/tree/dev-2.0)
 
 ## How to customize
+
+Example how to customize the [Chat](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-2.0/docs/en/chat.md) component 
 
 ### Modify Component Style
 
 You can modify the style by passing className, style, and prefix through the component props
 
 ```javascript
-import { Chat, Button } from 'agora-chat-uikit';
+import { Chat, Button } from 'chatuim2';
 
 const ChatApp = () => {
   return (
@@ -447,7 +452,7 @@ const ChatApp = () => {
 Custom components can be rendered through the renderX method of container components
 
 ```javascript
-import {Chat, Header} from 'agora-chat-uikit'
+import {Chat, Header} from 'chatuim2'
 
 const ChatApp = () => {
   const CustomHeader = <Header back content="Custom Header">
