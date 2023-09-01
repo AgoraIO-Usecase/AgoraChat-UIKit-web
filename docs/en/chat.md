@@ -25,7 +25,7 @@ const ChatContainer = () => {
 
 <div align=center> <img src="../image/buble1.png" width = "400" height = "450" /></div>
 
-## How to Customize Chat component 添加截图？
+## How to Customize Chat component
 
 ### Modify the message bubble style
 
