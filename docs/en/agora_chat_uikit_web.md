@@ -1,6 +1,5 @@
 # Get Started with Agora Chat UIKit for Web
 
-文中图片链接有的还是 Easemob 的，需要替换为 Agora Chat 的？
 
 Instant messaging connects people wherever they are and allows them to communicate with others in real time. With built-in user interfaces (UI) for the conversation list and contact list, the [Agora Chat UI Samples](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web) enables you to quickly embed real-time messaging into your app without requiring extra effort on the UI.
 
@@ -128,29 +127,35 @@ yarn add agora-chat-uikit
 
 Import agora-chat-uikit into your code.
 
-```
+```javascript
 // App.js
 import React, { Component, useEffect } from 'react';
-import { UIKitProvider, Chat, ConversationList, useClient, rootStore } from 'agora-chat-uikit';
+import { Provider, Chat, ConversationList, useClient, rootStore } from 'agora-chat-uikit';
 import 'agora-chat-uikit/style.css';
 
+const appKey = 'you app key'; // your appKey
+const user = ''; // your user ID
+const agoraToken = ''; // agora chat token
+
+const conversation = {
+  chatType: 'singleChat', // 'singleChat' || 'groupChat'
+  conversationId: 'agora',  // target user id or group id
+  name: 'Agora', // target user nickname or group name
+  lastMessage: {}
+}
 const ChatApp = () => {
   const client = useClient();
   useEffect(() => {
     client &&
       client
         .open({
-          user: '',
-          agoraToken: '',
+          user,
+          agoraToken,
         })
         .then(res => {
           console.log('get token success', res);
-          // Creates a conversation.
-          rootStore.conversationStore.addConversation({
-            chatType: '', // 'singleChat' || 'groupChat'
-            conversationId: '', // The user ID of the peer user for one-to-one chats for group ID for group chats.
-            name: '', // The nickname of the peer user for one-to-one chats for group name for group chats.
-          });
+          // create a conversation
+          rootStore.conversationStore.addConversation(conversation);
         });
   }, [client]);
 
@@ -169,13 +174,13 @@ const ChatApp = () => {
 class App extends Component {
   render() {
     return (
-      <UIKitProvider
+      <Provider
         initConfig={{
-          appKey: 'you app key',
+          appKey
         }}
       >
         <ChatApp />
-      </UIKitProvider>
+      </Provider>
     );
   }
 }
