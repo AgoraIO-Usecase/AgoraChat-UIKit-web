@@ -7,6 +7,7 @@ import {
   useClient,
   rootStore,
   Button,
+  Conversation,
 } from "chatuim2";
 import "chatuim2/style.css";
 import "./index.css";
@@ -30,11 +31,14 @@ const ChatApp = () => {
   }, [client]);
 
   const createConversation = () => {
-    const conversation = {
+    const conversation: Conversation = {
       chatType: "singleChat", // 'singleChat' || 'groupChat'
       conversationId: "agora", // target user id or group id
       name: "Agora", // target user nickname or group name
       lastMessage: {
+        id: "1",
+        chatType: "singleChat",
+        to: "agora2",
         type: "txt",
         msg: "hello",
         time: Date.now(),

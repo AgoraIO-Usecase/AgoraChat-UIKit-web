@@ -15,6 +15,7 @@ import {
   MessageList,
   MessageEditor,
   TextMessage,
+  CurrentConversation,
 } from "chatuim2";
 import "chatuim2/style.css";
 
@@ -44,7 +45,6 @@ const ChatApp = () => {
     rootStore.conversationStore.setCurrentCvs({
       chatType: "singleChat",
       conversationId: "13681272808",
-      lastMessage: {},
     });
   };
 
