@@ -61,7 +61,6 @@ The `agora-chat-uikit` library provides the following functions:
    </tr>
 </table>
 
-
 ## Prerequisites
 
 In order to follow the procedure in this page, you must have:
@@ -134,20 +133,26 @@ Import agora-chat-uikit into your code.
 
 ```javascript
 // App.js
-import React, { Component, useEffect } from 'react';
-import { Provider, Chat, ConversationList, useClient, rootStore } from 'chatuim2';
-import 'chatuim2/style.css';
+import React, { Component, useEffect } from "react";
+import {
+  Provider,
+  Chat,
+  ConversationList,
+  useClient,
+  rootStore,
+} from "chatuim2";
+import "chatuim2/style.css";
 
-const appKey = 'you app key'; // your appKey
-const user = ''; // your user ID
-const agoraToken = ''; // agora chat token
+const appKey = "you app key"; // your appKey
+const user = ""; // your user ID
+const agoraToken = ""; // agora chat token
 
 const conversation = {
-  chatType: 'singleChat', // 'singleChat' || 'groupChat'
-  conversationId: 'agora',  // target user id or group id
-  name: 'Agora', // target user nickname or group name
-  lastMessage: {}
-}
+  chatType: "singleChat", // 'singleChat' || 'groupChat'
+  conversationId: "agora", // target user id or group id
+  name: "Agora", // target user nickname or group name
+  lastMessage: {},
+};
 const ChatApp = () => {
   const client = useClient();
   useEffect(() => {
@@ -157,8 +162,8 @@ const ChatApp = () => {
           user,
           agoraToken,
         })
-        .then(res => {
-          console.log('get token success', res);
+        .then((res) => {
+          console.log("get token success", res);
           // create a conversation
           rootStore.conversationStore.addConversation(conversation);
         });
@@ -181,7 +186,7 @@ class App extends Component {
     return (
       <Provider
         initConfig={{
-          appKey
+          appKey,
         }}
       >
         <ChatApp />
@@ -210,10 +215,10 @@ In the default App Key situation, for the convenience of quick experience, we su
 If a custom App Key is used, no contact is available by default and you need to first [add contacts](https://docs.agora.io/en/agora-chat/client-api/contacts) or [join a group](https://docs.agora.io/en/agora-chat/client-api/chat-group/manage-chat-groups).
 
 Agora provides an open source AgoraChat UIKit web project on GitHub, where you can clone and run the project or reference the logic to create a project that integrates agora-chat-uikit.
+
 - [How to get agora chat token](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-2.0/docs/en/agora_chat_uikit_web.md)
 - [URL for Agora Chat UIKit Web source code ](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-2.0)
 - [URL for Agora chat application using agora-chat-uikit](https://github.com/AgoraIO-Usecase/AgoraChat-web/tree/dev-2.0)
-
 
 ## Component
 
@@ -233,8 +238,8 @@ Container components introduction:
 		<td>Props Description</td>
     </tr> 
    <tr>
-      <td rowspan="2" style=font-weight:bold>Provider</td>
-      <td rowspan="2"  style=font-size:10px>The Provider does not render any UI but only provides global context for components. It automatically listens to SDK events, transmits data downward, and drives component rendering</td>
+      <td rowspan="4" style=font-weight:bold>Provider</td>
+      <td rowspan="4"  style=font-size:10px>The Provider does not render any UI but only provides global context for components. It automatically listens to SDK events, transmits data downward, and drives component rendering</td>
       <td style=font-size:10px>
       initConfig: {
         appkey: string
@@ -249,6 +254,14 @@ Container components introduction:
       </td>
 	   <td style=font-size:10px>To configure the localized copy, see the parameters of the i18next init method</td>
 	   </tr>
+     <tr>
+     <td style=font-size:10px>features</td>
+     <td style=font-size:10px>Configure the features you need globally. If the required features are also configured in the component, the configuration in the component shall prevail</td>
+     </tr>
+     <tr>
+     <td style=font-size:10px>onError</td>
+     <td style=font-size:10px>Callback when an error occurs when calling sdk</td>
+     </tr>
    </tr>
    <tr>
       <td rowspan="8" style=font-weight:bold>ConversationList</td>
@@ -289,8 +302,8 @@ Container components introduction:
 	  </tr>
    </tr>
    <tr>
-      <td rowspan="9" style=font-weight:bold>Chat</td>
-      <td rowspan="9" style=font-size:10px>Chat component</td>
+      <td rowspan="10" style=font-weight:bold>Chat</td>
+      <td rowspan="10" style=font-size:10px>Chat component</td>
       <td style=font-size:10px>
 	  className: string
 	  </td>
@@ -312,6 +325,10 @@ Container components introduction:
 	  <tr>
 	    <td style=font-size:10px>messageEditorProps: MessageEditorProps</td>
 		<td style=font-size:10px>Props for the MessageEditor component</td>
+	  </tr>
+    <tr>
+	    <td style=font-size:10px>rtcConfig: ChatProps['rtcConfig']</td>
+		<td style=font-size:10px>Parameters required when using audio and video calls</td>
 	  </tr>
 	  <tr>
 	    <td style=font-size:10px>renderHeader: (cvs: CurrentCvs) => React.ReactNode</td>
@@ -425,23 +442,22 @@ UIKit provides a rootStore that contains all the data. rootStore contains:
     
 </table>
 
-
 ## How to customize
 
-Example how to customize the [Chat](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-2.0/docs/en/chat.md) component 
+Example how to customize the [Chat](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-2.0/docs/en/chat.md) component
 
 ### Modify Component Style
 
 You can modify the style by passing className, style, and prefix through the component props
 
 ```javascript
-import { Chat, Button } from 'chatuim2';
+import { Chat, Button } from "chatuim2";
 
 const ChatApp = () => {
   return (
     <div>
       <Chat className="customClass" prefix="custom" />
-      <Button style={{ width: '100px' }}>Button</Button>
+      <Button style={{ width: "100px" }}>Button</Button>
     </div>
   );
 };
@@ -517,10 +533,10 @@ module.exports = {
       {
         test: /\.s[ac]ss$/i,
         use: [
-          'style-loader',
-          'css-loader',
+          "style-loader",
+          "css-loader",
           {
-            loader: 'sass-loader',
+            loader: "sass-loader",
             options: {
               additionalData: `@import "@/styles/index.scss";`,
             },
@@ -537,9 +553,9 @@ module.exports = {
 creating a scss file within variables to override style.scss. Need to ensure the order of importing files
 
 ```scss
-@import 'agora-chat-uikit/style.scss'; // agora-chat-uikit theme
-@import 'your-theme.scss'; // your theme
-@import 'agora-chat-uikit/components.scss'; // components style
+@import "agora-chat-uikit/style.scss"; // agora-chat-uikit theme
+@import "your-theme.scss"; // your theme
+@import "agora-chat-uikit/components.scss"; // components style
 ```
 
 If these cannot meet the customization requirements, you can also find the elements to cover the style of UIKit.
