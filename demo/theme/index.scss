@@ -1,0 +1,35 @@
+
+@import 'chatuim2/style.scss'; // Theme of agora-chat-uikit
+@import './var.scss';
+// $gray-98: red;
+// $component-background: $blue-6;
+// $white: pink;
+// $blue-6: green;
+// $avatar-bg: yellow;
+// $blue-5: red;
+// $cui-primary-color: red;
+// $border-radius-base: '1px';
+@import 'chatuim2/components.scss'; // Styles of UIKit components
+
+.container{
+    display: flex;
+    position: absolute;
+    width: 90%;
+    height: 90%;
+    margin-left: 5%;
+}
+
+.conversation-header{
+    background-color: #2196f3;
+    height: 50px;
+    margin-top: 10px;
+}
+.custom-message{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #2196F3;
+    width: 300px;
+    border-radius: 12px;
+    margin-left: calc(50% - 150px);
+}

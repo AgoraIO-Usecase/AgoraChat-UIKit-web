@@ -11,25 +11,12 @@ import {
 } from "chatuim2";
 import "chatuim2/style.css";
 import "./index.css";
-const appKey = ""; // your appKey
-const user = ""; // your chat user ID
-const agoraToken = ""; // agora chat token (007)
+import { appKey, userId, token } from "../config";
+// const appKey = ""; // your appKey
+// const userId = ""; // your chat user ID
+// const token = ""; // agora chat token (007)
 
 const ChatApp = () => {
-  const client = useClient();
-  useEffect(() => {
-    client &&
-      client
-        .open({
-          user,
-          agoraToken,
-        })
-        .then((res) => {
-          console.log("get token success", res);
-          // create a conversation
-        });
-  }, [client]);
-
   const createConversation = () => {
     const conversation: Conversation = {
       chatType: "singleChat", // 'singleChat' || 'groupChat'
@@ -66,6 +53,8 @@ ReactDOM.createRoot(
   <Provider
     initConfig={{
       appKey,
+      userId,
+      token,
     }}
   >
     <ChatApp />
