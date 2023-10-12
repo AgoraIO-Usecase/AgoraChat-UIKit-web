@@ -4,11 +4,9 @@
 
 ## Technical principles
 
-Agora Chat UIKit consists of three parts: UI components, mobx store for data management, and chat SDK. UI components include container components, compound components module, and pure UI components. These components at different levels are accessible to the public. Users can reference any of these components to build their own applications. UIKit uses mobx to manage global data, and users can reference the rootStore to get all the data and the action methods for data manipulation. UIKit integrates the chat SDK and interacts with the server through the Chat SDK.
-
 Agora Chat UIKit consists of three parts: UI components, rootStore for managing data, and chat SDK. UI components include container components, module components, and pure UI components. These different levels of components are accessible to the public, and users can reference any of these components to build their own applications. UIkit uses React Context to manage global data. Users can use custom hooks to obtain the required data from the global data rootStore, or they can use custom hooks to obtain methods for manipulating this data. UIKit integrates the chat SDK internally and interacts with the server through the chat SDK.
 
-![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-2.0/docs/uikit.png)
+![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-2.0/docs/uikit.png)
 
 ## Functions
 
