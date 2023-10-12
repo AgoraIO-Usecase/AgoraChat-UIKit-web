@@ -1,6 +1,5 @@
 # Get Started with Agora Chat UIKit for Web
 
-
 Instant messaging connects people wherever they are and allows them to communicate with others in real time. With built-in user interfaces (UI) for the conversation list and contact list, the [Agora Chat UI Samples](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web) enables you to quickly embed real-time messaging into your app without requiring extra effort on the UI.
 
 This page shows a sample code to add peer-to-peer messaging into your app by using the Agora Chat UI Samples.
@@ -129,35 +128,30 @@ Import agora-chat-uikit into your code.
 
 ```javascript
 // App.js
-import React, { Component, useEffect } from 'react';
-import { Provider, Chat, ConversationList, useClient, rootStore } from 'agora-chat-uikit';
-import 'agora-chat-uikit/style.css';
+import React, { Component, useEffect } from "react";
+import {
+  Provider,
+  Chat,
+  ConversationList,
+  useClient,
+  rootStore,
+} from "agora-chat-uikit";
+import "agora-chat-uikit/style.css";
 
-const appKey = 'you app key'; // your appKey
-const user = ''; // your user ID
-const agoraToken = ''; // agora chat token
+const appKey = "you app key"; // your appKey
+const user = ""; // your user ID
+const agoraToken = ""; // agora chat token
 
 const conversation = {
-  chatType: 'singleChat', // 'singleChat' || 'groupChat'
-  conversationId: 'agora',  // target user id or group id
-  name: 'Agora', // target user nickname or group name
-  lastMessage: {}
-}
+  chatType: "singleChat", // 'singleChat' || 'groupChat'
+  conversationId: "agora", // target user id or group id
+  name: "Agora", // target user nickname or group name
+  lastMessage: {},
+};
 const ChatApp = () => {
-  const client = useClient();
   useEffect(() => {
-    client &&
-      client
-        .open({
-          user,
-          agoraToken,
-        })
-        .then(res => {
-          console.log('get token success', res);
-          // create a conversation
-          rootStore.conversationStore.addConversation(conversation);
-        });
-  }, [client]);
+    rootStore.conversationStore.addConversation(conversation);
+  }, []);
 
   return (
     <div>
@@ -176,7 +170,12 @@ class App extends Component {
     return (
       <Provider
         initConfig={{
-          appKey
+          appKey,
+          userId: user,
+          token: agoraToken,
+        }}
+        onError={(err) => {
+          console.log("error: ", err);
         }}
       >
         <ChatApp />
@@ -198,7 +197,7 @@ npm run start
 
 Now, you can see your app in the browser.
 
-![img](https://github.com/easemob/Easemob-UIKit-web/raw/dev/docs/chat.png)
+![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-2.0/docs/image/chat.png)
 
 If the default App Key is used, the UIKit allows you to send the text, emoji, image, and voice messages.
 
@@ -210,5 +209,6 @@ If a custom App Key is used, no contact is available by default and you need to 
 
 Agora provides an open-source Web project for Agora Chat UIKit on GitHub. You can clone and run the project or reference the logic to create a project that integrates agora-chat-uikit.
 
-- [URL for Agora Chat UIKit Web source code](https://github.com/easemob/Easemob-UIKit-web)
-- [URL for Agora Chat application using agora-chat-uikit](https://github.com/AgoraIO-Usecase/AgoraChat-web/tree/dev-2.0)
+- [URL for Agora Chat UIKit Web source code](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-2.0)
+- [URL for Agora Chat application using agora-chat-uikit source code](https://github.com/AgoraIO-Usecase/AgoraChat-web/tree/dev-2.0)
+- [URL for Agora Chat application using agora-chat-uikit](https://webim-g-hsb.easemob.com/#/login)
