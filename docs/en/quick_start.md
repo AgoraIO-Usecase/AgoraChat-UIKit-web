@@ -212,3 +212,4 @@ Agora provides an open-source Web project for Agora Chat UIKit on GitHub. You ca
 - [URL for Agora Chat UIKit Web source code](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-2.0)
 - [URL for Agora Chat application using agora-chat-uikit source code](https://github.com/AgoraIO-Usecase/AgoraChat-web/tree/dev-2.0)
 - [URL for Agora Chat application using agora-chat-uikit](https://webim-g-hsb.easemob.com/#/login)
+- [UIKit story book](https://livestream-hsb.oss-cn-beijing.aliyuncs.com/?path=/story/pure-component-avatar--avatar-1)
