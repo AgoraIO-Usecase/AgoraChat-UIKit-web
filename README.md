@@ -1,6 +1,6 @@
 # Get Started with Agora Chat UIKit for Web
 
-To use the UIKit 2.0 beta version, use `chatuim2` instead of `agora-chat-uikit`
+To use the UIKit 1.2 beta version, use `chatuim2` instead of `agora-chat-uikit`
 
 ```bash
 npm i chatuim2 -S
