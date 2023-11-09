@@ -197,7 +197,7 @@ npm run start
 
 Now, you can see your app in the browser.
 
-![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-2.0/docs/image/chat.png)
+![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-1.2/docs/image/chat.png)
 
 If the default App Key is used, the UIKit allows you to send the text, emoji, image, and voice messages.
 
@@ -209,7 +209,7 @@ If a custom App Key is used, no contact is available by default and you need to 
 
 Agora provides an open-source Web project for Agora Chat UIKit on GitHub. You can clone and run the project or reference the logic to create a project that integrates agora-chat-uikit.
 
-- [URL for Agora Chat UIKit Web source code](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-2.0)
-- [URL for Agora Chat application using agora-chat-uikit source code](https://github.com/AgoraIO-Usecase/AgoraChat-web/tree/dev-2.0)
+- [URL for Agora Chat UIKit Web source code](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-1.2)
+- [URL for Agora Chat application using agora-chat-uikit source code](https://github.com/AgoraIO-Usecase/AgoraChat-web/tree/dev-1.2)
 - [URL for Agora Chat application using agora-chat-uikit](https://webim-g-hsb.easemob.com/#/login)
 - [UIKit story book](https://livestream-hsb.oss-cn-beijing.aliyuncs.com/?path=/story/pure-component-avatar--avatar-1)

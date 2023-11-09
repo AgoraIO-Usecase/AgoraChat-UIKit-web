@@ -195,7 +195,7 @@ const ChatContainer = () => {
 <div align=center> <img src="../image/custom-msg.png" width = "400" height = "450" /></div>
 ### Modify the theme
 
-Chat provides the following variables related to the chat page theme. For how to modify the theme, see the [how to modify the theme](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-2.0/docs/en/theme.md).
+Chat provides the following variables related to the chat page theme. For how to modify the theme, see the [how to modify the theme](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-1.2/docs/en/theme.md).
 
 ```scss
 $chat-bg: $component-background;

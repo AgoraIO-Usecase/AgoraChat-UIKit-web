@@ -208,7 +208,7 @@ const Conversation = () => {
 <div align=center > <img src="../image/cvs-action.png" width = "200" height = "450" /></div>
 5. Modify the conversation theme.
 
-The conversation list provides the following conversation theme variables. For how to modify the theme, see the [how to modify the theme](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-2.0/docs/en/theme.md).
+The conversation list provides the following conversation theme variables. For how to modify the theme, see the [how to modify the theme](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-1.2/docs/en/theme.md).
 
 ```scss
 // Variables used to set the conversation theme.

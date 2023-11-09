@@ -1,4 +1,4 @@
-UIKit 1.2.0 Features
+UIKit 1.2 Features
 
 <table>
     <tr>

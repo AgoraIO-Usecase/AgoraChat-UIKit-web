@@ -216,9 +216,9 @@ If a custom App Key is used, no contact is available by default and you need to 
 
 Agora provides an open source AgoraChat UIKit web project on GitHub, where you can clone and run the project or reference the logic to create a project that integrates agora-chat-uikit.
 
-- [How to get agora chat token](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-2.0/docs/en/agora_chat_uikit_web.md)
-- [URL for Agora Chat UIKit Web source code ](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-2.0)
-- [URL for Agora chat application using agora-chat-uikit](https://github.com/AgoraIO-Usecase/AgoraChat-web/tree/dev-2.0)
+- [How to get agora chat token](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-1.2/docs/en/agora_chat_uikit_web.md)
+- [URL for Agora Chat UIKit Web source code ](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-1.2)
+- [URL for Agora chat application using agora-chat-uikit](https://github.com/AgoraIO-Usecase/AgoraChat-web/tree/dev-1.2)
 
 ## Component
 
@@ -444,7 +444,7 @@ UIKit provides a rootStore that contains all the data. rootStore contains:
 
 ## How to customize
 
-Example how to customize the [Chat](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-2.0/docs/en/chat.md) component
+Example how to customize the [Chat](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-1.2/docs/en/chat.md) component
 
 ### Modify Component Style
 

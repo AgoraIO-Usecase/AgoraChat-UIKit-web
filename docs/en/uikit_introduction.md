@@ -6,7 +6,7 @@
 
 Agora Chat UIKit consists of three parts: UI components, rootStore for managing data, and chat SDK. UI components include container components, module components, and pure UI components. These different levels of components are accessible to the public, and users can reference any of these components to build their own applications. UIkit uses React Context to manage global data. Users can use custom hooks to obtain the required data from the global data rootStore, or they can use custom hooks to obtain methods for manipulating this data. UIKit integrates the chat SDK internally and interacts with the server through the chat SDK.
 
-![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-2.0/docs/uikit.png)
+![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-1.2/docs/uikit.png)
 
 ## Functions
 
@@ -28,7 +28,7 @@ The `agora-chat-uikit` repository provides the following functions:
 
 `agora-chat-uikit` provides the following components:
 
-- Container components: [`UIKitProvider`](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-2.0/docs/en/provider.md), [`Chat`](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-2.0/docs/en/chat.md)，and [`ConversationList`](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-2.0/docs/en/conversation.md).
+- Container components: [`UIKitProvider`](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-1.2/docs/en/provider.md), [`Chat`](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-1.2/docs/en/chat.md)，and [`ConversationList`](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-1.2/docs/en/conversation.md).
 - Module components: `BaseMessage`，`AudioMessage`，`FileMessage`， `VideoMessage`，`ImageMessage`，`TextMessage`，`Header`，`Empty`，`MessageList`， `ConversationItem`，`MessageEditor`，`MessageStatus`.
 - Pure UI components: `Avatar`，`Badge`，`Button`，`Checkbox`，`Icon`，`Modal`，`Tooltip`.
 
@@ -36,7 +36,7 @@ The `agora-chat-uikit` repository provides the following functions:
 
 UIKit uses React context manage global data. Users can use customized hooks to get the data and methods which can be used to modify the data. UIKit provided `RootContext`, `useConversationContext`, `useChatContext`, `useAddressContext`, `useThreadContext`.
 
-For attributes and methods in the Context, see the [Context document](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-2.0/docs/en/context.md).
+For attributes and methods in the Context, see the [Context document](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-1.2/docs/en/context.md).
 
 ## How to customize the UIKit
 
@@ -84,6 +84,6 @@ const ChatApp = () => {
 
 2. The UIKit style is developed using the SCSS framework and defines a series of global style variables, including but not limited to global styles (the primary color, background color, rounded corners, borders, and font size).
 
-For how to modify the theme, see the [Github URL](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-2.0/docs/en/theme.md).
+For how to modify the theme, see the [Github URL](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-1.2/docs/en/theme.md).
 
 If the above three UIKit customization methods cannot meet your requirements, you can also find the elements to overwrite the style of UIKit.
