@@ -1,0 +1,22 @@
+@import '~/common/style/index.scss';
+$conversation-prefix-cls: #{$cui-prefix}-conversationList;
+
+
+.#{$conversation-prefix-cls}{
+    background: $cvs-background;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    &-search{
+        margin: $cvs-search-margin;
+    }
+
+    &-dark{
+        background-color: $gray-2;
+        color: $gray-98;
+        .cui-search-input{
+            background-color: $gray-3;
+        }
+    }
+}

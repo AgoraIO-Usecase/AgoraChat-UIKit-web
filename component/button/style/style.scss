@@ -1,0 +1,32 @@
+@import './mixin.scss';
+
+$btn-prefix-cls: #{$cui-prefix}-button;
+
+.#{$btn-prefix-cls} {
+    @include btn();
+    @include btn-default();
+
+    &-primary {
+        @include btn-primary()
+    }
+
+    &-ghost {
+        @include btn-ghost();
+    }
+
+    &-text {
+        @include btn-text();
+    }
+
+    &-round {
+        @include btn-round($btn-prefix-cls);
+    }
+
+    &-circle {
+        @include btn-circle($btn-prefix-cls);
+    }
+
+    &-dark{
+        @include btn-dark();
+    }
+}

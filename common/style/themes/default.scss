@@ -1,0 +1,378 @@
+@import '../color/color.scss';
+
+$theme: light;
+// The prefix to use on all css classes from Chat UI.
+$cui-prefix: cui;
+
+$white: #fff;
+$black: #000;
+$font-color: $gray-3;
+$title-color: $gray-1;
+// Base background color for most components
+$component-background: $gray-98;
+
+$heading-color: rgba(0, 0, 0, 0.85);
+$text-color-secondary: rgba(0, 0, 0, 0.45);
+$icon-color-hover: rgba(0, 0, 0, 0.75);
+// height rules
+$height-base: 36px;
+$height-lg: 48px;
+$height-sm: 28px;
+
+// vertical margins
+$margin-lg: 24px; // containers
+$margin-md: 16px; // small containers and buttons
+$margin-sm: 12px; // Form controls and items
+$margin-xs: 8px; // small items
+$margin-xss: 4px; // more small
+
+// vertical paddings
+$padding-lg: 24px; // containers
+$padding-md: 20px; // small containers and buttons
+$padding-sm: 16px; // Form controls and items
+$padding-s: 12px; // small items
+$padding-xs: 8px; // small items
+$padding-xss: 4px; // more small
+// font
+$font-size-base: 14px;
+$font-size-lg: $font-size-base + 2px;
+$font-size-sm: 12px;
+
+$line-height-base: 1.5715;
+
+$text-color: fade($black, 85%);
+
+// Media queries breakpoints
+// @screen-xs and @screen-xs-min is not used in Grid
+// smallest break point is @screen-md
+$screen-xs: 480px;
+$screen-xs-min: $screen-xs;
+// 👆 Extra small screen / phone
+
+// 👇 Small screen / tablet
+$screen-sm: 576px;
+$screen-sm-min: $screen-sm;
+
+// Medium screen / desktop
+$screen-md: 768px;
+$screen-md-min: $screen-md;
+
+// Large screen / wide desktop
+$screen-lg: 992px;
+$screen-lg-min: $screen-lg;
+
+// Extra large screen / full hd
+$screen-xl: 1200px;
+$screen-xl-min: $screen-xl;
+
+// Extra extra large screen / large desktop
+$screen-xxl: 1600px;
+$screen-xxl-min: $screen-xxl;
+
+// provide a maximum
+$screen-xs-max: (
+  $screen-sm-min - 1px
+);
+$screen-sm-max: (
+  $screen-md-min - 1px
+);
+$screen-md-max: (
+  $screen-lg-min - 1px
+);
+$screen-lg-max: (
+  $screen-xl-min - 1px
+);
+$screen-xl-max: (
+  $screen-xxl-min - 1px
+);
+
+
+// -------- Colors -----------
+
+// $primary-color: var(--cui-primary-color);
+// $secondary-color: var(--cui-secondary-color);
+// $error-color: var(--cui-error-color);
+// $neural-color: var(--cui-neutral-color);
+// $neutral-special-color: var(--cui-neutral-special-color);
+
+$highlight-color: $red-5;
+
+
+// Shadow
+$shadow-1-up: 0 -6px 16px -8px rgba(0, 0, 0, 0.08), 0 -9px 28px 0 rgba(0, 0, 0, 0.05),
+  0 -12px 48px 16px rgba(0, 0, 0, 0.03);
+$shadow-1-down: 0 6px 16px -8px rgba(0, 0, 0, 0.08), 0 9px 28px 0 rgba(0, 0, 0, 0.05),
+  0 12px 48px 16px rgba(0, 0, 0, 0.03);
+$shadow-1-left: -6px 0 16px -8px rgba(0, 0, 0, 0.08), -9px 0 28px 0 rgba(0, 0, 0, 0.05),
+  -12px 0 48px 16px rgba(0, 0, 0, 0.03);
+$shadow-1-right: 6px 0 16px -8px rgba(0, 0, 0, 0.08), 9px 0 28px 0 rgba(0, 0, 0, 0.05),
+  12px 0 48px 16px rgba(0, 0, 0, 0.03);
+$shadow-2: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08),
+  0 9px 28px 8px rgba(0, 0, 0, 0.05);
+$shadow-color: rgba(0, 0, 0, 0.15);
+$shadow-color-inverse: $component-background;
+$box-shadow-base: $shadow-2;
+
+// Animation
+$ease-base-out: cubic-bezier(0.7, 0.3, 0.1, 1);
+$ease-base-in: cubic-bezier(0.9, 0, 0.3, 0.7);
+$ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
+$ease-in: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+$ease-in-out: cubic-bezier(0.645, 0.045, 0.355, 1);
+$ease-out-back: cubic-bezier(0.12, 0.4, 0.29, 1.46);
+$ease-in-back: cubic-bezier(0.71, -0.46, 0.88, 0.6);
+$ease-in-out-back: cubic-bezier(0.71, -0.46, 0.29, 1.46);
+$ease-out-circ: cubic-bezier(0.08, 0.82, 0.17, 1);
+$ease-in-circ: cubic-bezier(0.6, 0.04, 0.98, 0.34);
+$ease-in-out-circ: cubic-bezier(0.78, 0.14, 0.15, 0.86);
+$ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+$ease-in-quint: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+$ease-in-out-quint: cubic-bezier(0.86, 0, 0.07, 1);
+
+$animation-duration-slow: 0.3s; // Modal
+$animation-duration-base: 0.2s;
+$animation-duration-fast: 0.1s; // Tooltip
+
+/** Border */
+$border-width-base: 1px; // width of the border for a component
+$border-style-base: solid; // style of a components border
+$border-radius-base: 4px;
+$border-color-base: $gray-8; // base border outline a component
+$border-color-split: $gray-9; // split border inside a component
+$border-color-inverse: $white;
+
+$background-color-light: $gray-98; // background of header and selected item
+$background-color-base: $gray-95; // Default grey background color
+
+// Disabled states
+$disabled-color: $gray-7;
+$disabled-bg: $gray-95;
+$disabled-active-bg: $gray-95;
+$disabled-color-dark: rgba(255, 255, 255, 0.75);
+
+/** Button */
+$btn-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
+
+$btn-text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
+$btn-font-weight: 40;
+$btn-border-width: $border-width-base;
+$btn-border-style: $border-style-base;
+$btn-border-radius-base: $border-radius-base;
+$btn-height-base: $height-base;
+$btn-padding-horizontal-base: $padding-md -1px;
+$btn-padding-horizontal-lg: $btn-padding-horizontal-base;
+$btn-padding-horizontal-sm: $padding-xs - 1px;
+
+$btn-default-color: $gray-3;
+$btn-default-bg: $component-background;
+$btn-default-border: $border-color-base;
+
+$btn-primary-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+$btn-primary-color: #fff;
+$btn-primary-bg: $blue-5;
+
+$btn-height-lg: $height-lg;
+$btn-font-size-lg: $font-size-lg;
+
+$btn-height-sm: $height-sm;
+$btn-font-size-sm: $font-size-base;
+$btn-border-radius-sm: $border-radius-base;
+
+$primary-color-hover: $blue-5;
+$primary-color-active: $blue-7;
+
+$btn-disable-color: $disabled-color;
+$btn-disable-bg: $disabled-bg;
+$btn-disable-border: $disabled-bg;
+
+$btn-ghost-color: $text-color;
+$btn-ghost-bg: transparent;
+$btn-ghost-border: $border-color-base;
+
+$btn-circle-size: $btn-height-base;
+$btn-circle-size-lg: $btn-height-lg;
+$btn-circle-size-sm: $btn-height-sm;
+
+// Avatar
+$avatar-size-base: 32px;
+$avatar-size-lg: 40px;
+$avatar-size-sm: 24px;
+$avatar-font-size-base: 18px;
+$avatar-font-size-lg: 24px;
+$avatar-font-size-sm: 14px;
+$avatar-bg: $blue-5;
+$avatar-color: #fff;
+$avatar-border-radius: $border-radius-base;
+$avatar-group-overlapping: -8px;
+$avatar-group-space: 3px;
+$avatar-group-border-color: #fff;
+
+// Badge
+$badge-height: 20px;
+$badge-height-sm: 14px;
+$badge-dot-size: 6px;
+$badge-font-size: $font-size-sm;
+$badge-font-size-sm: $font-size-sm;
+$badge-font-weight: normal;
+$badge-status-size: 6px;
+$badge-text-color: $component-background;
+$badge-color: $highlight-color;
+
+// z-index list, order by `z-index`
+$zindex-badge: auto;
+$zindex-table-fixed: 2;
+$zindex-affix: 10;
+$zindex-back-top: 10;
+$zindex-picker-panel: 10;
+$zindex-popup-close: 10;
+$zindex-modal: 1090;
+$zindex-modal-mask: 1080;
+$zindex-message: 1010;
+$zindex-notification: 1010;
+$zindex-popover: 1030;
+$zindex-dropdown: 1050;
+$zindex-picker: 1050;
+$zindex-popoconfirm: 1060;
+$zindex-tooltip: 1070;
+$zindex-image: 1080;
+
+// Modal
+$modal-header-padding-vertical: $padding-md;
+$modal-header-padding-horizontal: $padding-lg;
+$modal-body-padding: $padding-lg;
+$modal-header-bg: $component-background;
+$modal-header-padding: $modal-header-padding-vertical $modal-header-padding-horizontal;
+$modal-header-border-width: $border-width-base;
+$modal-header-border-style: $border-style-base;
+$modal-header-title-line-height: 22px;
+$modal-header-title-font-size: $font-size-lg;
+$modal-header-border-color-split: $border-color-split;
+$modal-header-close-size: $modal-header-title-line-height + 2 * $modal-header-padding-vertical;
+$modal-content-bg: $component-background;
+$modal-heading-color: $heading-color;
+$modal-close-color: $text-color-secondary;
+$modal-footer-bg: transparent;
+$modal-footer-border-color-split: $border-color-split;
+$modal-footer-border-style: $border-style-base;
+$modal-footer-padding-vertical: 10px;
+$modal-footer-padding-horizontal: 16px;
+$modal-footer-border-width: $border-width-base;
+$modal-mask-bg: rgba(0, 0, 0, 0.45);
+$modal-confirm-body-padding: 32px 32px 24px;
+$modal-confirm-title-font-size: $font-size-lg;
+$modal-border-radius: $border-radius-base;
+
+// Tooltip
+// Tooltip max width
+$tooltip-max-width: 350px;
+// Tooltip text color
+$tooltip-color: $text-color;
+// Tooltip background color
+$tooltip-bg: #fff;
+// Tooltip arrow width
+$tooltip-arrow-width: 8px * 1.414; // sqrt(2)
+// Tooltip distance with trigger
+$tooltip-distance: $tooltip-arrow-width - 1px + 4px;
+// Tooltip arrow color
+$tooltip-arrow-color: $tooltip-bg;
+$tooltip-border-radius: $border-radius-base;
+$arrow-border-radius: 2px;
+
+
+// Popover
+// Popover body background color
+$popover-bg: $component-background;
+// Popover text color
+$popover-color: $text-color;
+// Popover maximum width
+$popover-min-width: 177px;
+$popover-min-height: 32px;
+// Popover arrow width
+$popover-arrow-width: $tooltip-arrow-width;
+// Popover arrow color
+$popover-arrow-color: $popover-bg;
+// Popover outer arrow width
+// Popover outer arrow color
+$popover-arrow-outer-color: $popover-bg;
+// Popover distance with trigger
+$popover-distance: $popover-arrow-width + 4px;
+$popover-padding-horizontal: $padding-md;
+
+// Conversation
+$cvs-background: $component-background;
+$cvs-search-margin: $margin-xs $margin-sm;
+$cvs-item-height: 74px;
+$cvs-item-padding: $padding-s;
+$cvs-item-border-radius: 16px;
+$cvs-item-margin: $margin-xss $margin-xs;
+$cvs-item-selected-bg-color: $blue-95;
+$cvs-item-selected-name-color: $blue-6;
+$cvs-item-hover-bg-color: $gray-98;
+$cvs-item-active-bg-color: $gray-9;
+$cvs-item-info-right: 16px;
+$cvs-item-name-margin: 0 $margin-sm;
+$cvs-item-name-font-size: $font-size-lg;
+$cvs-item-name-font-weight: 500;
+$cvs-item-name-color: $title-color;
+$cvs-item-message-margin-left: $margin-sm;
+$cvs-item-message-font-size: $font-size-base;
+$cvs-item-message-font-weight: 400;
+$cvs-item-message-color: $font-color;
+$cvs-item-time-font-weight: 400;
+$cvs-item-time-font-size: $font-size-sm;
+$cvs-item-time-color: $gray-5;
+$cvs-item-time-margin-bottom: 9px;
+
+// Chat
+$chat-bg: $component-background;
+$msg-base-font-size: $font-size-lg;
+$msg-base-color: $font-color;
+$msg-base-margin: $margin-xs 0;
+$msg-base-padding: $padding-xs $padding-lg;
+$msg-bubble-border-radius-left: 12px 16px 16px 4px;
+$msg-bubble-border-radius-right: 16px 12px 4px 16px;
+// has reply message bubble radius
+$msg-bubble-border-radius-right-reply: 16px 4px 4px 16px;
+$msg-bubble-border-radius-left-reply: 4px 16px 16px 4px;
+$msg-bubble-arrow-border-size: 6px;
+$msg-bubble-arrow-bottom: 8px;
+$msg-bubble-arrow-left: -11px;
+$msg-bubble-arrow-right: -11px;
+$msg-bubble-color-secondly: $blue-95;
+$msg-bubble-color-primary: $blue-5;
+$msg-bubble-font-color-secondly: $font-color;
+$msg-bubble-font-color-primary: $gray-98;
+$msg-base-content-margin: 0 $margin-xs;
+$msg-base-content-padding: $padding-xs $padding-sm;
+$msg-base-content-minheight: 24px;
+$msg-bubble-none-bg: transparent;
+$msg-bubble-none-color: $font-color;
+$msg-bubble-square-border-radius: 4px;
+$msg-info-margin-left: $margin-sm;
+$msg-nickname-font-size: $font-size-sm;
+$msg-nickname-font-weight: 500;
+$msg-nickname-font-color: #5270AD;
+$msg-nickname-height: 16px;
+$msg-time-font-size: $font-size-sm;
+$msg-time-font-weight: 400;
+$msg-time-font-color: $gray-7;
+$msg-time-height: 16px;
+$msg-time-margin: 0 $margin-xss;
+$msg-time-width: 106px;
+
+// unsent reply message
+$msg-reply-background-color: $gray-95;
+$msg-reply-height: 52px;
+$msg-reply-font-size: $font-size-sm;
+$msg-reply-line-height: 16px;
+$msg-reply-padding: 0 24px;
+$msg-reply-title-color: $gray-1;
+$msg-reply-desc-color: $gray-5;
+$msg-reply-img-width: 36px;
+$msg-reply-img-height: 36px;
+$msg-reply-img-background-color: $gray-9;
+$msg-reply-img-border-radius: 4px;
+$msg-reply-img-top: 8px;
+$msg-reply-img-right: 36px;
+$msg-reply-close-top: 8px;
+$msg-reply-close-right: 8px;

@@ -1,0 +1,130 @@
+@import '~/common/style/index.scss';
+$conversation-prefix-cls: #{$cui-prefix}-conversationItem;
+
+.#{$conversation-prefix-cls}{
+    height: $cvs-item-height;
+    // background: $gray-98;
+    display: flex;
+    align-items: center;
+    padding: $cvs-item-padding;
+    box-sizing: border-box;
+    position: relative;
+    border-radius: $cvs-item-border-radius;
+    margin: $cvs-item-margin;
+    &-selected{
+        background-color: $cvs-item-selected-bg-color !important;
+        .#{$conversation-prefix-cls}-nickname{
+            color: $cvs-item-selected-name-color;
+            &-silent{
+                fill: $blue-5;
+            }
+        }
+    }
+    &:hover{
+        background: $gray-98;
+    }
+    &:active{
+        background-color: $gray-9;
+    }
+    &-content, &-info{
+        display: flex;
+        flex-direction: column;
+        align-items: baseline;
+    }
+    &-content{
+        max-width: calc(100% - 136px);
+        overflow: hidden;
+        flex: 1;
+    }
+    
+    &-info{
+        position: absolute;
+        right: $cvs-item-info-right;
+        align-items: end;
+    }
+    &-nickname{
+        margin: $cvs-item-name-margin;
+        font-size: $cvs-item-name-font-size;
+        line-height: 24px;
+        /* identical to box height, or 150% */
+        color: $cvs-item-name-color;
+        flex: 1;
+        overflow: hidden;
+        font-weight: $cvs-item-name-font-weight;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+    }
+    &-message{
+        margin-left: $cvs-item-message-margin-left;
+        font-size: $cvs-item-message-font-size;
+        font-weight: $cvs-item-message-font-weight;
+        color: $font-color;
+        white-space: nowrap;
+    }
+
+    &-time{
+        font-weight: $cvs-item-time-font-weight;
+        font-size: $cvs-item-time-font-size;
+        line-height: 16px;
+        color: $gray-5;
+        margin-bottom: $cvs-item-time-margin-bottom;
+    }
+    &-sticky{
+        background-color: $gray-9;
+        border-radius: 0;
+        margin: 4px 0;
+        padding: 12px 20px;
+
+        .#{$conversation-prefix-cls}-info{
+            position: absolute;
+            right: 24px;
+            align-items: end;
+        }
+    }
+    &-dark{
+        .#{$conversation-prefix-cls}-nickname{
+            color: $gray-98;
+        }
+        .#{$conversation-prefix-cls}-message{
+            color: $gray-8;
+        }
+    }
+    &-dark:hover{
+        background: $blue-2;
+    }
+}
+
+.#{$conversation-prefix-cls}-at-tag{
+    display: inline-block;
+    color: $blue-5;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+    margin-right: 5px;
+}
+
+.cui-moreAction{
+    padding: 0;
+    margin: 0;
+    display: grid;
+    li{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        list-style: none;
+        height: 36px;
+        border-radius: 8px;
+        padding: 0 $padding-xs;
+        line-height: 36px;
+        cursor: pointer;
+    }
+    li:hover{
+        /* color_neutral/95 */
+        background-color: $gray-95;
+    }
+    .cui-li-dark:hover{
+        background: $gray-2;
+    }
+}

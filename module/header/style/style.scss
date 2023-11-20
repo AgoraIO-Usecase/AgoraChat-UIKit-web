@@ -1,0 +1,70 @@
+@import '~/common/style/index.scss';
+$header-prefix-cls: #{$cui-prefix}-header;
+
+.#{$header-prefix-cls} {
+    height: 60px;
+    // background-color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 $padding-s;
+    justify-content: space-between;
+    flex-shrink: 0;
+    &-content{
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        flex: 1;
+        &-box{
+            display: flex;
+            flex-direction: column;
+            margin-left: 12px;
+            margin-left: $margin-sm;
+        }
+        &-text{
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            text-align: left;
+        }
+        &-sub{
+            text-align: left;
+            color: $gray-5;
+            font-size: 12px;
+            font-style: normal;
+            line-height: 16px;
+        }
+    }
+
+    &-more{
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        width: max-content;
+        li{
+            font-weight: 500;
+            font-size: $font-size-base;
+            line-height: 20px;
+            padding: 0 $padding-s;
+            height: 36px;
+            line-height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        li:hover{
+            background: #F1F2F3;
+        }
+        .cui-li-dark:hover{
+            background: $gray-2;
+        }
+    }
+
+    &-iconBox{
+        display: flex;
+    }
+}
+
+.#{$header-prefix-cls}-dark{
+    color: $gray-98;
+    // background-color: $gray-1;
+}
