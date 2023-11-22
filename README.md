@@ -80,6 +80,10 @@ In order to follow the procedure in this page, you must have:
 | Chrome  | 54 or later       |
 | Safari  | 11 or later       |
 
+## Limitations
+
+URL Preview Limitations：If a website does not have cross-origin resource sharing (CORS) configured, it may lead to issues with URL resolution. CORS is a security mechanism that restricts cross-origin requests initiated from a web browser. When a cross-origin request is made from a web page using JavaScript or other client-side technologies, the browser sends a preflight request (OPTIONS request) to confirm whether the target server allows the cross-origin request. If the target server is not properly configured for CORS, the browser rejects the cross-origin request, resulting in the inability to access and resolve the URL. It's important to note that CORS restrictions are enforced by the browser as a security policy, and they only apply to cross-origin requests initiated from the client-side. If URL resolution is performed on the server-side, it usually won't be subject to CORS limitations. In such cases, URL resolution can be directly performed on the server-side without the need for client-side scripting to initiate the request.
+
 ## Project setup
 
 ### 1. Create a Web Chat UIKit project
@@ -133,24 +137,18 @@ Import agora-chat-uikit into your code.
 
 ```javascript
 // App.js
-import React, { Component, useEffect } from "react";
-import {
-  Provider,
-  Chat,
-  ConversationList,
-  useClient,
-  rootStore,
-} from "chatuim2";
-import "chatuim2/style.css";
+import React, { Component, useEffect } from 'react';
+import { Provider, Chat, ConversationList, useClient, rootStore } from 'chatuim2';
+import 'chatuim2/style.css';
 
-const appKey = "you app key"; // your appKey
-const user = ""; // your user ID
-const agoraToken = ""; // agora chat token
+const appKey = 'you app key'; // your appKey
+const user = ''; // your user ID
+const agoraToken = ''; // agora chat token
 
 const conversation = {
-  chatType: "singleChat", // 'singleChat' || 'groupChat'
-  conversationId: "agora", // target user id or group id
-  name: "Agora", // target user nickname or group name
+  chatType: 'singleChat', // 'singleChat' || 'groupChat'
+  conversationId: 'agora', // target user id or group id
+  name: 'Agora', // target user nickname or group name
   lastMessage: {},
 };
 const ChatApp = () => {
@@ -162,8 +160,8 @@ const ChatApp = () => {
           user,
           agoraToken,
         })
-        .then((res) => {
-          console.log("get token success", res);
+        .then(res => {
+          console.log('get token success', res);
           // create a conversation
           rootStore.conversationStore.addConversation(conversation);
         });
@@ -451,13 +449,13 @@ Example how to customize the [Chat](https://github.com/AgoraIO-Usecase/AgoraChat
 You can modify the style by passing className, style, and prefix through the component props
 
 ```javascript
-import { Chat, Button } from "chatuim2";
+import { Chat, Button } from 'chatuim2';
 
 const ChatApp = () => {
   return (
     <div>
       <Chat className="customClass" prefix="custom" />
-      <Button style={{ width: "100px" }}>Button</Button>
+      <Button style={{ width: '100px' }}>Button</Button>
     </div>
   );
 };
@@ -533,10 +531,10 @@ module.exports = {
       {
         test: /\.s[ac]ss$/i,
         use: [
-          "style-loader",
-          "css-loader",
+          'style-loader',
+          'css-loader',
           {
-            loader: "sass-loader",
+            loader: 'sass-loader',
             options: {
               additionalData: `@import "@/styles/index.scss";`,
             },
@@ -553,9 +551,9 @@ module.exports = {
 creating a scss file within variables to override style.scss. Need to ensure the order of importing files
 
 ```scss
-@import "agora-chat-uikit/style.scss"; // agora-chat-uikit theme
-@import "your-theme.scss"; // your theme
-@import "agora-chat-uikit/components.scss"; // components style
+@import 'agora-chat-uikit/style.scss'; // agora-chat-uikit theme
+@import 'your-theme.scss'; // your theme
+@import 'agora-chat-uikit/components.scss'; // components style
 ```
 
 If these cannot meet the customization requirements, you can also find the elements to cover the style of UIKit.
