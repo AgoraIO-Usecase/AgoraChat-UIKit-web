@@ -1,11 +1,5 @@
 # Get Started with Agora Chat UIKit for Web
 
-To use the UIKit 1.2 beta version, use `chatuim2` instead of `agora-chat-uikit`
-
-```bash
-npm i chatuim2 -S
-```
-
 ## Overview
 
 `agora-chat-uikit` is a UI component library based on the Chat SDK. It provides pure UI components, module components containing chat business logic, and container components, which allows users to customize using renderX method. `agora-chat-uikit` provides a provider to manage data. The provider automatically listens for chat SDK events to update data and drive UI updates. Developers can use the library to quickly build custom IM applications based on actual business requirements.
@@ -14,7 +8,7 @@ npm i chatuim2 -S
 
 UIKIt consists of three parts: UI component, mobx store for managing data, chat SDK. UI components include container components, composite Components module, and pure UI components. These components at different levels are exposed to the outside world. Users can reference any of these components to build their own applications. UIkit uses mobx to manage global data, and users can reference the rootStore to get all the data and the action method, which can be used to modify the data. UIKit integrates chat SDK internally and interacts with the server through chat SDK.
 
-<div align=center> <img src="./docs/uikit.png" width = "400" height = "450" /></div>
+<div align=center> <img src="https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/dev/docs/uikit.png" width = "400" height = "450" /></div>
 
 ## Function
 
@@ -122,13 +116,13 @@ The project directory.
 - To install the Web Chat UIKit with npm, run the following command:
 
 ```bash
-npm install chatuim2 --save
+npm install agora-chat-uikit --save
 ```
 
 - To Install Agora chat UIKit for Web with Yarn, run the following command:
 
 ```bash
-yarn add chatuim2
+yarn add agora-chat-uikit
 ```
 
 #### Build the application using the agora-chat-uikit component
@@ -138,8 +132,8 @@ Import agora-chat-uikit into your code.
 ```javascript
 // App.js
 import React, { Component, useEffect } from 'react';
-import { Provider, Chat, ConversationList, useClient, rootStore } from 'chatuim2';
-import 'chatuim2/style.css';
+import { UIKitProvider, Chat, ConversationList, useClient, rootStore } from 'agora-chat-uikit';
+import 'agora-chat-uikit/style.css';
 
 const appKey = 'you app key'; // your appKey
 const user = ''; // your user ID
@@ -182,13 +176,13 @@ const ChatApp = () => {
 class App extends Component {
   render() {
     return (
-      <Provider
+      <UIKitProvider
         initConfig={{
           appKey,
         }}
       >
         <ChatApp />
-      </Provider>
+      </UIKitProvider>
     );
   }
 }
@@ -204,7 +198,7 @@ npm run start
 
 Now, you can see your app in the browser.
 
-<div align=center style="background: #ddd; padding-top: 8px"> <img src="./docs/image/chat.png" width = "480" height = "350" /></div>
+<div align=center style="background: #ddd; padding-top: 8px"> <img src="https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/dev/docs/image/chat.png" width = "480" height = "350" /></div>
 
 In the default App Key situation, for the convenience of quick experience, we support several types of message distribution by default. After clicking to select a member, enter your first message and send it.
 
@@ -222,7 +216,7 @@ Agora provides an open source AgoraChat UIKit web project on GitHub, where you c
 
 `agora-chat-uikit` Currently provided components:
 
-- Container components: `Provider`， `Chat`，`ConversationList`;
+- Container components: `UIKitProvider`， `Chat`，`ConversationList`;
 - Module components: `BaseMessage`，`AudioMessage`，`FileMessage`， `VideoMessage`，`ImageMessage`，`TextMessage`，`Header`，`Empty`，`MessageList`， `ConversationItem`，`MessageEditor`，`MessageStatus`;
 - Pure UI components: `Avatar`，`Badge`，`Button`，`Checkbox`，`Icon`，`Modal`，`Tooltip`;
 
@@ -236,8 +230,8 @@ Container components introduction:
 		<td>Props Description</td>
     </tr> 
    <tr>
-      <td rowspan="4" style=font-weight:bold>Provider</td>
-      <td rowspan="4"  style=font-size:10px>The Provider does not render any UI but only provides global context for components. It automatically listens to SDK events, transmits data downward, and drives component rendering</td>
+      <td rowspan="3" style=font-weight:bold>UIKitProvider</td>
+      <td rowspan="3"  style=font-size:10px>The UIKitProvider does not render any UI but only provides global context for components. It automatically listens to SDK events, transmits data downward, and drives component rendering</td>
       <td style=font-size:10px>
       initConfig: {
         appkey: string
@@ -255,10 +249,6 @@ Container components introduction:
      <tr>
      <td style=font-size:10px>features</td>
      <td style=font-size:10px>Configure the features you need globally. If the required features are also configured in the component, the configuration in the component shall prevail</td>
-     </tr>
-     <tr>
-     <td style=font-size:10px>onError</td>
-     <td style=font-size:10px>Callback when an error occurs when calling sdk</td>
      </tr>
    </tr>
    <tr>
@@ -466,7 +456,7 @@ const ChatApp = () => {
 Custom components can be rendered through the renderX method of container components
 
 ```javascript
-import {Chat, Header} from 'chatuim2'
+import {Chat, Header} from 'agora-chat-uikit'
 
 const ChatApp = () => {
   const CustomHeader = <Header back content="Custom Header">
