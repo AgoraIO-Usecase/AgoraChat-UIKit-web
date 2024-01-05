@@ -353,9 +353,15 @@ Import agora-chat-uikit into your code.
 
 ```javascript
 // App.js
-import React, { Component, useEffect } from 'react';
-import { Provider, Chat, ConversationList, useClient, rootStore } from 'agora-chat-uikit';
-import 'agora-chat-uikit/style.css';
+import React, { Component, useEffect } from "react";
+import {
+  Provider,
+  Chat,
+  ConversationList,
+  useClient,
+  rootStore,
+} from "agora-chat-uikit";
+import "agora-chat-uikit/style.css";
 
 const ChatApp = () => {
   const client = useClient();
@@ -363,16 +369,16 @@ const ChatApp = () => {
     client &&
       client
         .open({
-          user: '',
-          agoraToken: '',
+          user: "",
+          agoraToken: "",
         })
-        .then(res => {
-          console.log('get token success', res);
+        .then((res) => {
+          console.log("get token success", res);
           // create a conversation
           rootStore.conversationStore.addConversation({
-            chatType: '', // 'singleChat' || 'groupChat'
-            conversationId: '', // target user id or group id
-            name: '', // target user nickname or group name
+            chatType: "", // 'singleChat' || 'groupChat'
+            conversationId: "", // target user id or group id
+            name: "", // target user nickname or group name
           });
         });
   }, [client]);
@@ -394,7 +400,7 @@ class App extends Component {
     return (
       <Provider
         initConfig={{
-          appKey: 'you app key',
+          appKey: "you app key",
         }}
       >
         <ChatApp />
@@ -434,13 +440,13 @@ Agora provides an open source AgoraChat UIKit web project on GitHub, where you c
 You can modify the style by passing className, style, and prefix through the component props
 
 ```javascript
-import { Chat, Button } from 'agora-chat-uikit';
+import { Chat, Button } from "agora-chat-uikit";
 
 const ChatApp = () => {
   return (
     <div>
       <Chat className="customClass" prefix="custom" />
-      <Button style={{ width: '100px' }}>Button</Button>
+      <Button style={{ width: "100px" }}>Button</Button>
     </div>
   );
 };
@@ -514,10 +520,10 @@ module.exports = {
       {
         test: /\.s[ac]ss$/i,
         use: [
-          'style-loader',
-          'css-loader',
+          "style-loader",
+          "css-loader",
           {
-            loader: 'sass-loader',
+            loader: "sass-loader",
             options: {
               additionalData: `@import "@/styles/index.scss";`,
             },
@@ -541,8 +547,12 @@ If you have any problems or suggestions regarding the sample projects, feel free
 
 ## Reference
 
+- [Other documents](https://github.com/easemob/Easemob-UIKit-web/tree/main/docs/en)
+- [Demos](https://github.com/easemob/Easemob-UIKit-web/tree/main/demo)
+- [Example project](https://github.com/AgoraIO-Usecase/AgoraChat-web/tree/main)
 - [Agora Chat SDK Product Overview](https://docs.agora.io/en/agora-chat/overview/product-overview)
 - [Agora Chat SDK API Reference](https://api-ref.agora.io/en/chat-sdk/web/1.x/index.html)
+- [Components storybook](https://storybook.chat.agora.io/)
 
 ## Related resources
 

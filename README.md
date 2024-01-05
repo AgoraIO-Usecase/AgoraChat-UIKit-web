@@ -1,11 +1,5 @@
 # Get Started with Agora Chat UIKit for Web
 
-To use the UIKit 1.2 beta version, use `chatuim2` instead of `agora-chat-uikit`
-
-```bash
-npm i chatuim2 -S
-```
-
 ## Overview
 
 `agora-chat-uikit` is a UI component library based on the Chat SDK. It provides common UI components, module components containing the chat business logic, and container components, allowing users to customize the UI using the renderX methods. `agora-chat-uikit` provides a UIKitProvider for data management. The UIKitProvider automatically listens for Chat SDK events to modify data for UI updates. Developers can use the library to quickly build custom instant messaging applications based on actual business requirements.
@@ -24,7 +18,6 @@ The `agora-chat-uikit` repository provides the following functions:
 - Sends and receives messages, displays messages, shows the unread message count, and clears messages. The text, image, file, emoji, and audio messages are supported.
 - Searches for and deletes conversations.
 - Customizes UI styles.
-
 
 The `agora-chat-uikit` library provides the following functions:
 
@@ -126,13 +119,13 @@ The project directory.
 - To install the Web Chat UIKit with npm, run the following command:
 
 ```bash
-npm install chatuim2 --save
+npm install agora-chat-uikit --save
 ```
 
 - To Install Agora chat UIKit for Web with Yarn, run the following command:
 
 ```bash
-yarn add chatuim2
+yarn add agora-chat-uikit
 ```
 
 #### Build the application using the agora-chat-uikit component
@@ -148,8 +141,8 @@ import {
   ConversationList,
   useClient,
   rootStore,
-} from "chatuim2";
-import "chatuim2/style.css";
+} from "agora-chat-uikit";
+import "agora-chat-uikit/style.css";
 
 const appKey = "you app key"; // your appKey
 const user = ""; // your user ID
@@ -461,7 +454,6 @@ For attributes and methods in the rootStore, see the [rootStore document](https:
 
 In this section, the `Chat` and `Button` components are used as an example to describe how to modify the component style.
 
-
 Example how to customize the [Chat](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/UIKit-1.2/docs/en/chat.md) component
 
 ### Modify Component Style
@@ -469,7 +461,7 @@ Example how to customize the [Chat](https://github.com/AgoraIO-Usecase/AgoraChat
 You can modify the style by passing className, style, and prefix through the component props
 
 ```javascript
-import { Chat, Button } from "chatuim2";
+import { Chat, Button } from "agora-chat-uikit";
 
 const ChatApp = () => {
   return (
@@ -490,7 +482,7 @@ This section uses the `CustomHeader` component to describe how to use custom com
 Custom components can be rendered through the renderX method of container components
 
 ```javascript
-import {Chat, Header} from 'chatuim2'
+import {Chat, Header} from 'agora-chat-uikit'
 
 const ChatApp = () => {
   const CustomHeader = <Header back content="Custom Header">
@@ -591,8 +583,12 @@ If you have any problems or suggestions regarding the sample projects, feel free
 
 ## Reference
 
+- [Other documents](https://github.com/easemob/Easemob-UIKit-web/tree/main/docs/en)
+- [Demos](https://github.com/easemob/Easemob-UIKit-web/tree/main/demo)
+- [Example project](https://github.com/AgoraIO-Usecase/AgoraChat-web/tree/main)
 - [Agora Chat SDK Product Overview](https://docs.agora.io/en/agora-chat/overview/product-overview)
 - [Agora Chat SDK API Reference](https://api-ref.agora.io/en/chat-sdk/web/1.x/index.html)
+- [Components storybook](https://storybook.chat.agora.io/)
 
 ## Related resources
 
