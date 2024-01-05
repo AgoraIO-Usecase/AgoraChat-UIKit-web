@@ -149,15 +149,16 @@ import React from "react";
 import {
   ConversationList,
   ConversationItem,
-  rootStore,
+  useConversationContext,
   Button,
 } from "agora-chat-uikit";
 import "agora-chat-uikit/style.css";
 
 const Conversation = () => {
+  const context = useConversationContext();
   // Pins a conversation.
   const topConversation = () => {
-    rootStore.conversationStore.topConversation({
+    context.topConversation({
       chatType: "singleChat", // For group chats, the value is `groupChat`.
       conversationId: "userID", // Enter a conversation ID obtained from your conversation list.
       lastMessage: {},
@@ -166,7 +167,7 @@ const Conversation = () => {
 
   // Creates a new conversation.
   const createConversation = () => {
-    rootStore.conversationStore.addConversation({
+    context.addConversation({
       chatType: "singleChat",
       conversationId: "conversationId",
       lastMessage: {},
@@ -207,7 +208,7 @@ const Conversation = () => {
 <div align=center > <img src="../image/cvs-action.png" width = "200" height = "450" /></div>
 5. Modify the conversation theme.
 
-The conversation list provides the following conversation theme variables. For how to modify the theme, see the [Get Started with Agora Chat UIKit for Web](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/main/docs/en/theme.md).
+The conversation list provides the following conversation theme variables. For how to modify the theme, see the [how to modify the theme](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-1.2/docs/en/theme.md).
 
 ```scss
 // Variables used to set the conversation theme.

@@ -1,0 +1,22 @@
+.container{
+    display: flex;
+    position: absolute;
+    width: 90%;
+    height: 90%;
+    margin-left: 5%;
+    margin-top: 4%;
+}
+
+.conversation{
+    width: 30%;
+    max-width: 300px;
+    height: 100%;
+    border-right: 1px solid #ccc;
+    overflow: hidden;
+}
+.cui-conversationList {
+    background: #eee;
+}
+.chat{
+    flex: 1
+}

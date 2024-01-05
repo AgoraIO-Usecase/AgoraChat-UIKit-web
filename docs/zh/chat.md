@@ -1,13 +1,14 @@
 # Chat
 
-The Chat component provides the following functions:
+Chat 组件提供了以下功能:
 
-- Sends and receives messages, including text, emoji, image, voice, and file messages.
-- Clears messages.
-- Deletes a conversation.
-- Uses the message roaming function to pull historical messages from the server.
+- 发送和接收消息, 包括文本，表情，图片，语音，文件，合并类型的消息。
+- 对消息进行表情回复，引用，撤回，删除，翻译，创建子区的操作。
+- 清除本地消息。
+- 删除会话。
+- 拉历史消息。
 
-## Usage example
+## 使用示例
 
 ```jsx
 import React from "react";
@@ -25,15 +26,15 @@ const ChatContainer = () => {
 
 <div align=center> <img src="../image/buble1.png" width = "400" height = "450" /></div>
 
-## How to Customize Chat component
+## 怎样自定义组件
 
-### Modify the message bubble style
+### 修改消息气泡样式
 
-Take text messages as an example. You can modify the message bubble style as follows:
+以文本消息为例，你可以按如下方式修改消息气泡样式：
 
-- Use the `renderMessageList` method to render the custom message list.
-- Use the `renderMessage` method to render custom messages.
-- Customize text messages through the props of the `TextMessage` component.
+- 使用 `renderMessageList` 方法来自定义渲染消息列表。
+- 使用 `renderMessage` 方法来自定义渲染消息。
+- 通过使用 `TextMessage` 的 props 来自定义文本消息。
 
 ```jsx
 import React from "react";
@@ -71,12 +72,12 @@ const ChatContainer = () => {
 
 <div align=center> <img src="../image/buble2.png" width = "400" height = "450" /></div>
 
-### Add an icon to the MessageEditor component
+### 在消息编辑器中添加一个自定义图标
 
-Add an icon to the MessageEditor component to implement a specific custom function:
+给消息编辑器添加一个自定义图标来实现指定的功能:
 
-1. Use the `renderMessageEditor` method to render the custom message editor component.
-2. Customize `MessageEditor` with `actions` props.
+1. 使用 `renderMessageEditor` 方法来自定义渲染消息编辑器。
+2. 使用 `actions` 来自定义 `MessageEditor` 组件。
 
 ```jsx
 import React from "react";
@@ -111,14 +112,14 @@ const ChatContainer = () => {
 
 <div align=center> <img src="../image/editor2.png" width = "400" height = "450" /></div>
 
-### How to implement the sending of custom messages
+### 怎样实现发送自定义消息
 
-1. Use the `sendMessage` method in `messageStore` to send custom messages.
-2. Use `renderMessage` to display custom messages.
+1. 使用 `messageStore` 中提供的 `sendMessage` 方法来发送自定义消息。
+2. 使用 `renderMessage` 来渲染自定义消息。
 
-**Note：**
+**提示：**
 
-To make sure that the message is displayed in the current conversation, the `to` parameter in the `sendCustomMessage` method must be the user ID of the peer user for one-to-one chat or the current group ID for group chat.
+为了保证消息展示在当前会话中，消息中的 `to` 字段必须是对方的 userID，或者群组的 ID。
 
 ```jsx
 import React from "react";
@@ -129,12 +130,10 @@ import {
   rootStore,
   MessageEditor,
   Icon,
-  useChatContext,
 } from "agora-chat-uikit";
 import "agora-chat-uikit/style.css";
 
 const ChatContainer = () => {
-  const { sendMessage } = useChatContext();
   // Display custom messages
   const renderCustomMsg = (msg) => {
     return (
@@ -177,7 +176,7 @@ const ChatContainer = () => {
         id: "userId3",
       },
     });
-    sendMessage(customMsg).then(() => {
+    rootStore.messageStore.sendMessage(customMsg).then(() => {
       console.log("send success");
     });
   };
@@ -193,9 +192,10 @@ const ChatContainer = () => {
 ```
 
 <div align=center> <img src="../image/custom-msg.png" width = "400" height = "450" /></div>
-### Modify the theme
 
-Chat provides the following variables related to the chat page theme. For how to modify the theme, see the [how to modify the theme](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/tree/UIKit-1.2/docs/en/theme.md).
+### 修改主题
+
+`Chat` 组件提供了以下与聊天页面主题相关的变量，关于怎样修改主题请查看 [Github URL](https://github.com/easemob/Easemob-UIKit-web/blob/dev/docs/theme.md)。
 
 ```scss
 $chat-bg: $component-background;
@@ -232,7 +232,7 @@ $msg-time-margin: 0 $margin-xss;
 $msg-time-width: 106px;
 ```
 
-## Overview of Chat props
+## Chat props 总览
 
 <table>
 <tr>

@@ -1,69 +1,49 @@
-import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom/client';
+import React, { useEffect, useState } from "react";
+import ReactDOM from "react-dom/client";
 
-import Header from '../../module/header';
-import { Search } from '../../component/input/Search';
-import Chat from '../../module/chat';
-import { RootProvider } from '../../module/store/rootContext';
-import rootStore from '../../module/store/index';
-import { ConversationList, ConversationItem } from '../../module/conversation';
-import Provider from '../../module/store/Provider';
-import { useClient } from '../../module/hooks/useClient';
-import Button from '../../component/button';
-import Avatar from '../../component/avatar';
-import Icon from '../../component/icon';
-import { MessageList } from '../../module/chat/MessageList';
-import './index.css';
-// import {
-// 	Chat,
-// 	rootStore,
-// 	ConversationList,
-// 	Provider,
-// 	useClient,
-// } from 'chatuim2';
-// import 'chatuim2/style.css';
+import {
+  Provider,
+  Header,
+  Chat,
+  useConversationContext,
+  ConversationList,
+  ConversationItem,
+} from "chatuim2";
+import "chatuim2/style.css";
+import Button from "../../component/button";
+import Avatar from "../../component/avatar";
+import Icon from "../../component/icon";
+import "./index.css";
+import { appKey, userId, token } from "../config";
 
 const ChatApp = () => {
-  const client = useClient();
-  useEffect(() => {
-    client &&
-      client
-        .open({
-          user: '13681272809',
-          pwd: '272809',
-        })
-        .then(res => {
-          console.log('获取token成功', res, rootStore.client);
-        });
-  }, [client]);
-
-  console.log('rootStore', rootStore);
+  const context = useConversationContext();
   const topConversation = () => {
-    rootStore.conversationStore.topConversation({
-      chatType: 'singleChat',
-      conversationId: '9a0dac930f', // Enter a conversation ID from your conversation list.
+    context.topConversation({
+      chatType: "singleChat",
+      conversationId: "conversationId", // Enter a conversation ID from your conversation list.
       lastMessage: {},
     });
   };
 
   const createConversation = () => {
-    rootStore.conversationStore.addConversation({
-      chatType: 'singleChat',
-      conversationId: 'conversationId',
+    context.addConversation({
+      chatType: "singleChat",
+      conversationId: "conversationId",
       lastMessage: {},
       unreadCount: 3,
     });
   };
 
   const idToName = {
-    userId1: 'name1',
-    zd2: 'Henry 2',
+    userId1: "name1",
+    zd2: "Henry 2",
   };
   return (
     <>
       <div
         style={{
-          width: '35%',
+          width: "35%",
         }}
       >
         <ConversationList
@@ -77,37 +57,40 @@ const ChatApp = () => {
                 visible: true,
                 actions: [
                   {
-                    content: 'my info',
+                    content: "my info",
                     onClick: () => {
-                      console.log('my info');
+                      console.log("my info");
                     },
                   },
                 ],
               }}
             ></Header>
           )}
-          renderItem={cvs => {
+          renderItem={(cvs) => {
             return (
               <ConversationItem
                 avatar={
                   <Avatar
                     size="normal"
                     shape="square"
-                    style={{ background: 'yellow', color: 'black' }}
+                    style={{ background: "yellow", color: "black" }}
                   >
                     {idToName[cvs.conversationId] || cvs.conversationId}
                   </Avatar>
                 }
-                data={{ ...cvs, name: idToName[cvs.conversationId] || cvs.conversationId }}
+                data={{
+                  ...cvs,
+                  name: idToName[cvs.conversationId] || cvs.conversationId,
+                }}
                 moreAction={{
                   visible: true,
                   actions: [
                     {
                       // Uikit provides default deletion conversation event
-                      content: 'DELETE',
+                      content: "DELETE",
                     },
                     {
-                      content: 'Top Conversation',
+                      content: "Top Conversation",
                       onClick: topConversation,
                     },
                   ],
@@ -124,14 +107,16 @@ const ChatApp = () => {
   );
 };
 
-ReactDOM.createRoot(document.getElementById('chatRoot') as Element).render(
+ReactDOM.createRoot(document.getElementById("chatRoot") as Element).render(
   <div className="container">
     <Provider
       initConfig={{
-        appKey: 'easemob#easeim',
+        appKey,
+        userId,
+        token,
       }}
     >
       <ChatApp></ChatApp>
     </Provider>
-  </div>,
+  </div>
 );

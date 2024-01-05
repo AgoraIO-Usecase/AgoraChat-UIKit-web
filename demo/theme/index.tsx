@@ -16,21 +16,22 @@ import {
   MessageEditor,
   TextMessage,
   CurrentConversation,
-  useChatContext,
-  useConversationContext,
 } from "chatuim2";
-import "chatuim2/style.css";
-
-import "./index.css";
+// import "chatuim2/style.css";
+import "./index.scss";
 import AgoraChat from "agora-chat";
 import { appKey, userId, token } from "../config";
+/**
+ * 1. use theme.primaryColor to change the primary color
+ * 2. use style props to change components style
+ * 3. use className to change Header style
+ * 4. use scss variables to button style
+ */
 
 const ChatApp = () => {
-  const { setCurrentConversation } = useConversationContext();
-  const { sendMessage } = useChatContext();
   // create a conversation
   const setCurrentCvs = () => {
-    setCurrentConversation({
+    rootStore.conversationStore.setCurrentCvs({
       chatType: "singleChat",
       conversationId: "jim",
       name: "Jim",
@@ -41,10 +42,14 @@ const ChatApp = () => {
   const renderTxtMsg = (msg) => {
     return (
       <TextMessage
-        bubbleStyle={{ background: "hsl(135.79deg 88.79% 36.46%)" }}
+        bubbleStyle={{
+          //   background: "hsl(135.79deg 88.79% 36.46%)",
+          borderRadius: "2px",
+        }}
+        style={{ color: "red", fontSize: "20px" }}
         shape="square"
         status={msg.status}
-        avatar={<Avatar style={{ background: "pink" }}>A</Avatar>}
+        avatar={<Avatar style={{ background: "pink" }}>{msg.from}</Avatar>}
         textMessage={msg}
       ></TextMessage>
     );
@@ -84,14 +89,14 @@ const ChatApp = () => {
         id: "userId3",
       },
     });
-    sendMessage(customMsg).then(() => {
+    rootStore.messageStore.sendMessage(customMsg).then(() => {
       console.log("send success");
     });
   };
 
   const renderCustomMsg = (msg) => {
     return (
-      <div>
+      <div className="custom-message">
         <h1>Business Card </h1>
         <div>{msg.customExts.id}</div>
       </div>
@@ -101,26 +106,61 @@ const ChatApp = () => {
   actions.splice(2, 0, CustomIcon);
   return (
     <>
+      <div style={{ width: "35%", maxWidth: "350px" }}>
+        <ConversationList
+          style={{ background: "#00BCD4" }}
+          renderHeader={() => <Header className="conversation-header"></Header>}
+        ></ConversationList>
+      </div>
       <div style={{ width: "65%", borderLeft: "1px solid transparent" }}>
         <Chat
-          renderMessageList={() => (
-            <MessageList renderMessage={renderMessage} />
+          style={{ background: "#009688" }}
+          renderHeader={() => (
+            <Header
+              style={{
+                background: "#0b7a88",
+                marginTop: "10px",
+                height: "50px",
+              }}
+            />
           )}
-          renderMessageEditor={() => <MessageEditor actions={actions} />}
+          renderMessageList={() => (
+            <MessageList
+              renderMessage={renderMessage}
+              style={{ background: "#00BCD4" }}
+            />
+          )}
+          renderMessageEditor={() => (
+            <MessageEditor
+              actions={actions}
+              style={{
+                background: "#9E9E9E",
+                height: "60px",
+                display: "flex",
+                alignItems: "center",
+                margin: "0 20px",
+              }}
+            />
+          )}
         ></Chat>
       </div>
-      <Button onClick={setCurrentCvs}>setCurrentCvs</Button>
+      <Button type="primary" onClick={setCurrentCvs}>
+        setCurrentCvs
+      </Button>
     </>
   );
 };
 
-ReactDOM.createRoot(document.getElementById("chatRoot") as Element).render(
+ReactDOM.createRoot(document.getElementById("themeRoot") as Element).render(
   <div className="container">
     <Provider
       initConfig={{
         appKey,
         userId,
         token,
+      }}
+      theme={{
+        primaryColor: "#06af68", // Hexadecimal color value
       }}
     >
       <ChatApp></ChatApp>
