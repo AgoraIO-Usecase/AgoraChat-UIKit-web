@@ -20,7 +20,6 @@ const useHistoryMessages = (cvs: CurrentConversation) => {
     const currentChatMsgs = messageStore.message[cvs.chatType][cvs.conversationId] || [];
     // 第一次加载过的缓存和加载更多之后的缓存
     if (currentChatMsgs.length > 0 && (cursor === -1 || cursor != currentChatMsgs[0].id)) {
-      console.log('有缓存');
       return setHistoryMsgs(currentChatMsgs);
     }
 
@@ -43,7 +42,6 @@ const useHistoryMessages = (cvs: CurrentConversation) => {
           searchDirection: 'up',
         })
         .then(res => {
-          console.log('历史消息', res);
           let msgs = res.messages.reverse();
 
           // 连续调用，第一次没返回又调用第二次，两次结果是一样的
@@ -62,7 +60,6 @@ const useHistoryMessages = (cvs: CurrentConversation) => {
           setLoading(false);
         })
         .catch(err => {
-          console.log('获取历史消息失败', err);
           setLoading(false);
         });
   }, [cvs.conversationId, cursor]);
@@ -75,7 +72,6 @@ const useHistoryMessages = (cvs: CurrentConversation) => {
     if (cvs.conversationId != cvsId) {
       nextCursor = -1;
     }
-    console.log('我要加载更多', cvs.conversationId, nextCursor);
     setCursor(nextCursor);
   };
 
