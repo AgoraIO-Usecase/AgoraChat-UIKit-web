@@ -5,16 +5,20 @@ import { useClient } from './useClient';
 import { getStore } from '../store';
 import { getCvsIdFromMessage, getGroupItemFromGroupsById } from '../utils';
 import { useGroupMembersAttributes } from '../hooks/useAddress';
-const useEventHandler = () => {
+import { BaseMessageType } from '../baseMessage/BaseMessage';
+import ts from 'typescript';
+import { ProviderProps } from '../store/Provider';
+
+const useEventHandler = (props: ProviderProps) => {
+  const { initConfig, features } = props;
   const rootStore = getStore();
-  const { messageStore, threadStore, conversationStore } = rootStore;
+  const { messageStore, threadStore, conversationStore, addressStore } = rootStore;
   const client = rootStore.client;
-  console.log('useEventHandler ---', rootStore);
+  const { useUserInfo } = initConfig;
+
   useEffect(() => {
-    console.log('****client', client);
     client?.addEventHandler?.('UIKitMessage', {
       onTextMessage: message => {
-        console.log('onTextMessage 22', message);
         messageStore.receiveMessage(message);
       },
       onImageMessage: message => {
@@ -33,7 +37,7 @@ const useEventHandler = () => {
         messageStore.receiveMessage(message);
       },
       onCmdMessage: message => {
-        const conversationId = getCvsIdFromMessage(message as unknown as ChatSDK.MessageBody);
+        const conversationId = getCvsIdFromMessage(message as BaseMessageType);
 
         const cvs = {
           chatType: message.chatType,
@@ -73,13 +77,19 @@ const useEventHandler = () => {
         if (chatType === 'singleChat') {
           setTimeout(() => {
             rootStore.messageStore.message?.[chatType]?.[from]
-              .filter(message => {
-                //@ts-ignore
-                return message.status === 'received';
+              ?.filter(message => {
+                return (
+                  //@ts-ignore
+                  message.status === 'received' &&
+                  message.type != 'audio' &&
+                  message.type != 'video' &&
+                  message.type != 'file' &&
+                  message.type != 'combine'
+                );
               })
-              .map(receivedMessage => {
+              .forEach(receivedMessage => {
                 // @ts-ignore
-                receivedMessage.status = 'read';
+                messageStore.updateMessageStatus(receivedMessage.mid || receivedMessage.id, 'read');
               });
           }, 10);
         }
@@ -108,7 +118,7 @@ const useEventHandler = () => {
       },
 
       onReactionChange: data => {
-        const conversationId = getCvsIdFromMessage(data as unknown as ChatSDK.MessageBody);
+        const conversationId = getCvsIdFromMessage(data as unknown as BaseMessageType);
 
         const cvs = {
           chatType: data.chatType,
@@ -125,6 +135,7 @@ const useEventHandler = () => {
         const groupItem = getGroupItemFromGroupsById(id);
         switch (operation) {
           case 'memberAttributesUpdate':
+            // @ts-ignore
             const { userId, attributes } = message;
             addressStore.setGroupMemberAttributes(id, userId, attributes);
             break;
@@ -170,10 +181,28 @@ const useEventHandler = () => {
               },
             ]);
             break;
+          case 'destroy':
+            addressStore.removeGroupFromContactList(id);
+            break;
           default:
         }
       },
+      onGroupChange: message => {
+        const { type, gid } = message;
+        const { addressStore } = rootStore;
+        switch (type) {
+          case 'changeOwner':
+            addressStore.setGroupOwner(gid, message.to);
+            break;
+          case 'removedFromGroup':
+            if (message.kicked == rootStore.client.user) {
+              addressStore.removeGroupFromContactList(gid);
+            }
+            break;
+        }
+      },
       onPresenceStatusChange: message => {
+        if (features?.conversationList?.item?.presence == false) return;
         const { addressStore } = rootStore;
         message.length > 0 &&
           message.forEach(presenceInfo => {
@@ -208,7 +237,7 @@ const useEventHandler = () => {
         conversationStore.setOnlineStatus(changeList);
       },
       // @ts-ignore
-      onCombineMessage: (message: ChatSDK.MessageBody) => {
+      onCombineMessage: (message: BaseMessageType) => {
         messageStore.receiveMessage(message);
       },
 
@@ -223,6 +252,34 @@ const useEventHandler = () => {
         } else {
           threadStore.updateThreadInfo(message);
         }
+      },
+
+      onContactInvited: message => {
+        addressStore.addContactRequest({
+          ...message,
+          type: 'subscribe',
+          requestStatus: 'pending',
+        });
+        if (useUserInfo) {
+          addressStore.getUserInfo(message.from);
+        }
+      },
+      onContactDeleted: message => {
+        console.log('onContactDeleted', message);
+        const { addressStore } = rootStore;
+        addressStore.deleteContactFromContactList(message.from);
+        // addressStore.removeContact(message.from);
+      },
+      onContactAdded: message => {
+        console.log('onContactAdded', message);
+
+        const { addressStore } = rootStore;
+        addressStore.addContactToContactList(message.from);
+        // addressStore.addContact(message.from);
+      },
+      onContactAgreed: message => {
+        const { addressStore } = rootStore;
+        addressStore.addContactToContactList(message.from);
       },
     });
 

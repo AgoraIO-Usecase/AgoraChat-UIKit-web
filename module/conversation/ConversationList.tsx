@@ -34,7 +34,9 @@ export interface ConversationListProps {
   renderSearch?: () => React.ReactNode; // 自定义渲染 search
   renderItem?: (cvs: Conversation, index: number) => React.ReactNode; // 自定义渲染 item
   headerProps?: HeaderProps;
-  itemProps?: ConversationItemProps;
+  itemProps?: Partial<ConversationItemProps>; //Omit<ConversationItemProps, 'data'>;
+  presence?: boolean; // 是否显示在线状态
+  showSearchList?: boolean; // 是否显示搜索列表, 当使用renderHeader时，可以用这个参数来控制是否显示搜索列表
 }
 
 const ConversationScrollList = ScrollList<Conversation>();
@@ -51,6 +53,8 @@ let Conversations: FC<ConversationListProps> = props => {
     headerProps = {},
     itemProps = {},
     style = {},
+    presence,
+    showSearchList,
   } = props;
   const { getPrefixCls } = React.useContext(ConfigContext);
   const prefixCls = getPrefixCls('conversationList', customizePrefixCls);
@@ -62,7 +66,8 @@ let Conversations: FC<ConversationListProps> = props => {
   const [renderData, setRenderData] = useState<ConversationData>([]);
   const [initRenderData, setInitRenderData] = useState<ConversationData>([]);
   const context = useContext(RootContext);
-  const { rootStore, features, theme } = context;
+  const { rootStore, features, theme, initConfig } = context;
+  const { useUserInfo: useUserInfoConfig } = initConfig;
   const themeMode = theme?.mode || 'light';
   const classString = classNames(
     prefixCls,
@@ -72,14 +77,19 @@ let Conversations: FC<ConversationListProps> = props => {
     className,
   );
   const cvsStore = rootStore.conversationStore;
-  const { appUsersInfo } = rootStore.addressStore;
+  const { appUsersInfo, contacts } = rootStore.addressStore;
   const { t } = useTranslation();
   const { getConversationList, hasConversationNext } = useConversations();
-  useUserInfo();
+  const globalConfig = features?.conversationList || {};
+
+  const withPresence = presence || globalConfig?.item?.presence != false;
+  if (useUserInfoConfig) {
+    useUserInfo('conversation', withPresence);
+  }
 
   const groupData = rootStore.addressStore.groups;
   // 获取加入群组，把群组名放在 conversationList
-  const globalConfig = features?.conversationList || {};
+
   const handleItemClick = (cvs: ConversationData[0], index: number) => () => {
     setActiveCvsId(cvs.conversationId);
     cvsStore.setCurrentCvs({
@@ -103,7 +113,7 @@ let Conversations: FC<ConversationListProps> = props => {
   }, [cvsStore.currentCvs]);
 
   useEffect(() => {
-    if (isSearch) {
+    if (isSearch || showSearchList) {
       // @ts-ignore
       setRenderData(cvsStore.searchList);
     } else {
@@ -113,6 +123,7 @@ let Conversations: FC<ConversationListProps> = props => {
           groupData.forEach(group => {
             if (item.conversationId == group.groupid) {
               renderItem.name = renderItem.name || group.groupname;
+              renderItem.avatarUrl = group.avatarUrl;
             }
           });
         } else if (item.chatType == 'singleChat') {
@@ -120,6 +131,13 @@ let Conversations: FC<ConversationListProps> = props => {
             renderItem.name || appUsersInfo?.[item.conversationId as string]?.nickname;
           renderItem.avatarUrl = appUsersInfo?.[item.conversationId as string]?.avatarurl;
           // renderItem.isOnline = appUsersInfo?.[item.conversationId as string]?.isOnline;
+          // 如果contacts里包含这个联系人，并且有remark 则 name = remark
+          const contact = contacts?.find(contact => {
+            return contact.userId == item.conversationId;
+          });
+          if (contact?.remark) {
+            renderItem.name = contact.remark;
+          }
         }
         return renderItem;
       });
@@ -129,7 +147,7 @@ let Conversations: FC<ConversationListProps> = props => {
       // @ts-ignore
       setInitRenderData(renderData);
     }
-  }, [cvsStore.conversationList, cvsStore.searchList, groupData.length, appUsersInfo]);
+  }, [cvsStore.conversationList, cvsStore.searchList, groupData.length, appUsersInfo, contacts]);
 
   useEffect(() => {
     cvsStore.conversationList?.forEach(cvs => {
@@ -147,7 +165,10 @@ let Conversations: FC<ConversationListProps> = props => {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const returnValue = onSearch?.(e);
-    if (returnValue === false) return;
+    if (returnValue === false) {
+      setIsSearch(value.length > 0 ? true : false);
+      return;
+    }
     const searchList = initRenderData.filter(cvs => {
       if (cvs.conversationId.includes(value) || cvs.name?.includes(value)) {
         return true;
@@ -163,12 +184,16 @@ let Conversations: FC<ConversationListProps> = props => {
   useEffect(() => {
     if (rootStore.loginState) {
       getConversationList().then(() => {
-        rootStore.conversationStore.getServerPinnedConversations();
+        if (globalConfig?.item?.pinConversation != false) {
+          rootStore.conversationStore.getServerPinnedConversations();
+        }
       });
       getJoinedGroupList();
-      getUsersInfo({
-        userIdList: [rootStore.client.user],
-      });
+      if (useUserInfoConfig) {
+        getUsersInfo({
+          userIdList: [rootStore.client.user],
+        });
+      }
     }
   }, [rootStore.loginState]);
 
@@ -178,12 +203,20 @@ let Conversations: FC<ConversationListProps> = props => {
       visible: true,
       actions: [],
     };
-    if (globalConfig?.item?.deleteConversation) {
-      itemMoreAction.actions = [
-        {
-          content: 'DELETE',
-        },
-      ];
+    if (globalConfig?.item?.deleteConversation != false) {
+      itemMoreAction.actions.push({
+        content: 'DELETE',
+      });
+    }
+    if (globalConfig?.item?.pinConversation != false) {
+      itemMoreAction.actions.push({
+        content: 'PIN',
+      });
+    }
+    if (globalConfig?.item?.muteConversation != false) {
+      itemMoreAction.actions.push({
+        content: 'SILENT',
+      });
     }
   }
   if (globalConfig?.item?.moreAction == false) {
@@ -205,7 +238,7 @@ let Conversations: FC<ConversationListProps> = props => {
           {...headerProps}
           back={headerProps.back || false}
           content={headerProps.content || t('conversationTitle')}
-          icon={headerProps.icon || <Icon type="PLUS_CIRCLE" height={24} width={24} />}
+          icon={headerProps.icon || <Icon type="PLUS_IN_CIRCLE" height={24} width={24} />}
         ></Header>
       )}
 

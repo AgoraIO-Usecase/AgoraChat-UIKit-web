@@ -6,7 +6,7 @@ $contact-prefix-cls: #{$cui-prefix}-contactItem;
     // background: #E6F5FF;
     display: flex;
     align-items: center;
-    padding: 12px;
+    // padding: 12px;
     box-sizing: border-box;
     margin: 4px 0;
     &-nickname{
@@ -32,7 +32,9 @@ $contact-prefix-cls: #{$cui-prefix}-contactItem;
     // }
 }
 
-.cui-contact-tag{
+$contact-tag-prefix-cls: #{$cui-prefix}-contactItem-tag;
+
+.#{$contact-tag-prefix-cls}{
     display: flex;
     height: 24px;
     padding: 2px 12px 0.5px 12px;
@@ -42,4 +44,9 @@ $contact-prefix-cls: #{$cui-prefix}-contactItem;
     align-items: flex-start;
     gap: 1.5px;
     border-bottom: 1px solid $gray-9;
+}
+
+.#{$contact-prefix-cls}-dark{
+    border-bottom: 1px solid $gray-2;
+    color: $gray-98;
 }

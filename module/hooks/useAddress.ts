@@ -3,43 +3,65 @@ import { RootContext } from '../store/rootContext';
 import { getStore } from '../store/index';
 import { getGroupItemFromGroupsById } from '../../module/utils';
 import { getUsersInfo } from '../utils';
-
+import { ChatSDK } from 'module/SDK';
+import { eventHandler } from '../../eventHandler';
 const useContacts = () => {
   const rootStore = useContext(RootContext).rootStore;
 
   const { client, addressStore } = rootStore;
 
-  let [contacts, setContacts] = useState<Array<{ userId: string; nickname: string }>>([]);
+  let [contacts, setContacts] = useState<Array<{ userId: string; nickname: string }>>(
+    rootStore.addressStore.contacts,
+  );
+
   useEffect(() => {
+    if (rootStore.addressStore.contacts?.length > 0) {
+      return;
+    }
     rootStore.loginState &&
       client
-        .getContacts()
-        .then(res => {
-          const contacts = res.data?.map(userId => ({
-            userId: userId,
+        .getAllContacts()
+        .then((res: ChatSDK.AsyncResult<ChatSDK.ContactItem[]>) => {
+          const contacts = res.data?.map(userItem => ({
+            userId: userItem.userId,
             nickname: '',
+            remark: userItem.remark,
           }));
           setContacts(contacts || []);
+          addressStore.setContacts(contacts);
+          eventHandler.dispatchSuccess('getAllContacts');
         })
         .catch(err => {
           console.warn('get contacts failed', err);
+          eventHandler.dispatchError('getAllContacts', err);
         });
   }, [rootStore.loginState]);
   return contacts;
 };
 
-const useUserInfo = () => {
+const useUserInfo = (userList: 'conversation' | 'contacts', withPresence?: boolean) => {
   const rootStore = useContext(RootContext).rootStore;
   useEffect(() => {
+    if (!rootStore.loginState) return;
     let keys = Object.keys(rootStore.addressStore.appUsersInfo);
     let cvsUserIds = rootStore.conversationStore.conversationList
       .filter(item => item.chatType === 'singleChat' && !keys.includes(item.conversationId))
       .map(cvs => cvs.conversationId);
+    let contactsUserIds = rootStore.addressStore.contacts
+      .filter(item => {
+        return !keys.includes(item.userId);
+      })
+      .map(item => item.userId);
 
     getUsersInfo({
-      userIdList: cvsUserIds,
+      userIdList: userList == 'conversation' ? cvsUserIds : contactsUserIds,
+      withPresence,
     });
-  }, [rootStore.conversationStore.conversationList.length]);
+  }, [
+    rootStore.conversationStore.conversationList.length,
+    rootStore.addressStore.contacts.length,
+    rootStore.loginState,
+  ]);
 };
 
 const useGroups = () => {
@@ -63,6 +85,10 @@ const useGroups = () => {
         } else {
           addressStore.setHasGroupsNext(false);
         }
+        eventHandler.dispatchSuccess('getJoinedGroups');
+      })
+      .catch(error => {
+        eventHandler.dispatchError('getJoinedGroups', error);
       });
   };
 
@@ -71,7 +97,7 @@ const useGroups = () => {
   };
 };
 
-const useGroupMembers = (groupId: string) => {
+const useGroupMembers = (groupId: string, withUserInfo: boolean) => {
   if (!groupId) return {};
   const pageSize = 20;
   let pageNum = 1;
@@ -97,6 +123,13 @@ const useGroupMembers = (groupId: string) => {
           }) || [];
 
         userIds.length && useGroupMembersAttributes(groupId, userIds).getMemberAttributes();
+        if (withUserInfo == true) {
+          getUsersInfo({
+            userIdList: userIds,
+            withPresence: false,
+          });
+        }
+
         if ((res.data?.length || 0) === pageSize) {
           pageNum++;
           getGroupMemberList();
@@ -117,20 +150,46 @@ const useGroupMembersAttributes = (
   attributesKeys?: string[],
 ) => {
   const { client, addressStore } = getStore();
+
   const getMemberAttributes = () => {
-    client
-      .getGroupMembersAttributes({
-        groupId,
-        userIds,
-        keys: attributesKeys,
-      })
-      .then(res => {
-        if (res.data) {
-          Object.keys(res.data).forEach(key => {
-            res?.data && addressStore.setGroupMemberAttributes(groupId, key, res.data[key]);
-          });
-        }
-      });
+    let groupUserIds = [];
+    if (userIds.length > 10) {
+      // 如果用户数量大于10，分组，每组10个userId去调用getMemberAttributes
+      for (let i = 0; i < userIds.length; i += 10) {
+        groupUserIds.push(userIds.slice(i, i + 10));
+      }
+    } else {
+      groupUserIds = [userIds];
+    }
+
+    groupUserIds.forEach(item => {
+      client
+        .getGroupMembersAttributes({
+          groupId,
+          userIds: item,
+          keys: attributesKeys,
+        })
+        .then(res => {
+          if (res.data) {
+            Object.keys(res.data).forEach(key => {
+              res?.data && addressStore.setGroupMemberAttributes(groupId, key, res.data[key]);
+            });
+          }
+        });
+    });
+    // client
+    //   .getGroupMembersAttributes({
+    //     groupId,
+    //     userIds,
+    //     keys: attributesKeys,
+    //   })
+    //   .then(res => {
+    //     if (res.data) {
+    //       Object.keys(res.data).forEach(key => {
+    //         res?.data && addressStore.setGroupMemberAttributes(groupId, key, res.data[key]);
+    //       });
+    //     }
+    //   });
   };
 
   return {

@@ -1,10 +1,10 @@
-import React, { ReactNode, useContext, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useContext, useEffect, useRef, useState, memo } from 'react';
 import classNames from 'classnames';
 import Avatar from '../../component/avatar';
 import MessageStatus, { MessageStatusProps } from '../messageStatus';
 import { ConfigContext } from '../../component/config/index';
 import './style/style.scss';
-import { emoji } from '../messageEditor/emoji/emojiConfig';
+import { emoji } from '../messageInput/emoji/emojiConfig';
 import { getConversationTime } from '../utils';
 import BaseMessage, { BaseMessageProps, renderUserProfileProps } from '../baseMessage';
 import rootStore from '../store/index';
@@ -15,11 +15,11 @@ import reactStringReplace from 'react-string-replace';
 import { chatSDK, ChatSDK } from '../SDK';
 import Modal from '../../component/modal';
 import { getCvsIdFromMessage, renderHtml, formatHtmlString } from '../utils';
-import { convertToMessage } from '../messageEditor/textarea/util';
+import { convertToMessage } from '../messageInput/textarea/util';
 import Icon from '../../component/icon';
 import { useTranslation } from 'react-i18next';
-import Textarea from '../messageEditor/textarea';
-import { ForwardRefProps } from '../messageEditor/textarea/Textarea';
+import Textarea from '../messageInput/textarea';
+import { ForwardRefProps } from '../messageInput/textarea/Textarea';
 import { observer } from 'mobx-react-lite';
 import { RootContext } from '../store/rootContext';
 export interface TextMessageProps extends BaseMessageProps {
@@ -35,10 +35,11 @@ export interface TextMessageProps extends BaseMessageProps {
   style?: React.CSSProperties;
   renderUserProfile?: (props: renderUserProfileProps) => React.ReactNode;
   onCreateThread?: () => void;
-  onTranslateTextMessage?: (textMessage: TextMessageType) => boolean;
+  onTranslateTextMessage?: (textMessage: ChatSDK.TextMsgBody) => boolean;
   targetLanguage?: string;
   showTranslation?: boolean; // 是否展示翻译后的消息
   onlyContent?: boolean;
+  onOpenThreadPanel?: (threadId: string) => void;
 }
 
 export const renderTxt = (txt: string | undefined | null, parseUrl: boolean = true) => {
@@ -48,8 +49,9 @@ export const renderTxt = (txt: string | undefined | null, parseUrl: boolean = tr
   }
   let rnTxt: React.ReactNode[] = [];
   let match;
+
   const regex =
-    /(U\+1F600|U\+1F604|U\+1F609|U\+1F62E|U\+1F92A|U\+1F60E|U\+1F971|U\+1F974|U\+263A|U\+1F641|U\+1F62D|U\+1F610|U\+1F607|U\+1F62C|U\+1F913|U\+1F633|U\+1F973|U\+1F620|U\+1F644|U\+1F910|U\+1F97A|U\+1F928|U\+1F62B|U\+1F637|U\+1F912|U\+1F631|U\+1F618|U\+1F60D|U\+1F922|U\+1F47F|U\+1F92C|U\+1F621|U\+1F44D|U\+1F44E|U\+1F44F|U\+1F64C|U\+1F91D|U\+1F64F|U\+2764|U\+1F494|U\+1F495|U\+1F4A9|U\+1F48B|U\+2600|U\+1F31C|U\+1F308|U\+2B50|U\+1F31F|U\+1F389|U\+1F490|U\+1F382|U\+1F381)/g;
+    /(U\+1F600|U\+1F604|U\+1F609|U\+1F62E|U\+1F92A|U\+1F60E|U\+1F971|U\+1F974|U\+263A|U\+1F641|U\+1F62D|U\+1F610|U\+1F607|U\+1F62C|U\+1F913|U\+1F633|U\+1F973|U\+1F620|U\+1F644|U\+1F910|U\+1F97A|U\+1F928|U\+1F62B|U\+1F637|U\+1F912|U\+1F631|U\+1F618|U\+1F60D|U\+1F922|U\+1F47F|U\+1F92C|U\+1F621|U\+1F44D|U\+1F44E|U\+1F44F|U\+1F64C|U\+1F91D|U\+1F64F|U\+2764|U\+1F494|U\+1F495|U\+1F4A9|U\+1F48B|U\+2600|U\+1F31C|U\+1F308|U\+2B50|U\+1F31F|U\+1F389|U\+1F490|U\+1F382|U\+1F381|😀|😄|😉|😮|🤪|😎|🥱|🥴|☺|🙁|😭|😐|😇|😬|🤓|😳|🥳|😠|🙄|🤐|🥺|🤨|😫|😷|🤒|😱|😘|😍|🤢|👿|🤬|😡|👍|👎|👏|🙌|🤝|🙏|❤️|💔|💕|💩|💋|☀️|🌜|🌈|⭐|🌟|🎉|💐|🎂|🎁)/g;
   let start = 0;
   let index = 0;
   while ((match = regex.exec(txt))) {
@@ -57,8 +59,8 @@ export const renderTxt = (txt: string | undefined | null, parseUrl: boolean = tr
     if (index > start) {
       rnTxt.push(txt.substring(start, index));
     }
-    if (match[1] in emoji.map) {
-      const v = emoji.map[match[1] as keyof typeof emoji.map];
+    if (match[1] in emoji.oldMap) {
+      const v = emoji.oldMap[match[1] as keyof typeof emoji.oldMap];
       rnTxt.push(
         <img
           key={Math.floor(Math.random() * 100000 + 1) + new Date().getTime().toString()}
@@ -143,9 +145,10 @@ const TextMessage = (props: TextMessageProps) => {
     renderUserProfile,
     thread,
     onTranslateTextMessage,
-    targetLanguage = 'en',
+    targetLanguage,
     showTranslation = true,
     onlyContent = false,
+    onOpenThreadPanel,
     ...others
   } = props;
   if (!textMessage.chatType) return null;
@@ -158,8 +161,12 @@ const TextMessage = (props: TextMessageProps) => {
   let { bySelf, time, from, msg, reactions } = textMessage;
   const classString = classNames(prefixCls, className);
   const textareaRef = useRef<ForwardRefProps>(null);
+  const context = React.useContext(RootContext);
+  const { initConfig } = context;
+  const { translationTargetLanguage } = initConfig;
+  const targetLng = targetLanguage || translationTargetLanguage || 'en';
   const [modifyMessageVisible, setModifyMessageVisible] = useState<boolean>(false);
-
+  const [text, setText] = useState<string>('');
   let urlTxtClass = '';
   if (urlData?.images?.length > 0) {
     urlTxtClass = 'message-text-hasImage';
@@ -301,6 +308,7 @@ const TextMessage = (props: TextMessageProps) => {
       // @ts-ignore
       textMessage.mid || textMessage.id,
       textMessage.isChatThread,
+      true,
     );
   };
 
@@ -326,7 +334,7 @@ const TextMessage = (props: TextMessageProps) => {
         },
         // @ts-ignore
         textMessage.mid || textMessage.id,
-        targetLanguage,
+        targetLng,
       )
       ?.then(() => {
         setTransStatus('translated');
@@ -340,7 +348,9 @@ const TextMessage = (props: TextMessageProps) => {
   const handleSelectMessage = () => {
     let conversationId = getCvsIdFromMessage(textMessage);
     const selectable =
-      rootStore.messageStore.selectedMessage[textMessage.chatType][conversationId]?.selectable;
+      rootStore.messageStore.selectedMessage[textMessage.chatType as 'singleChat' | 'groupChat'][
+        conversationId
+      ]?.selectable;
     if (selectable) return; // has shown checkbox
 
     rootStore.messageStore.setSelectedMessage(
@@ -360,11 +370,15 @@ const TextMessage = (props: TextMessageProps) => {
   };
 
   const select =
-    rootStore.messageStore.selectedMessage[textMessage.chatType][conversationId]?.selectable;
+    rootStore.messageStore.selectedMessage[textMessage.chatType as 'singleChat' | 'groupChat'][
+      conversationId
+    ]?.selectable;
 
   const handleMsgCheckChange = (checked: boolean) => {
     const checkedMessages =
-      rootStore.messageStore.selectedMessage[textMessage.chatType][conversationId]?.selectedMessage;
+      rootStore.messageStore.selectedMessage[textMessage.chatType as 'singleChat' | 'groupChat'][
+        conversationId
+      ]?.selectedMessage;
 
     let changedList = checkedMessages;
     if (checked) {
@@ -399,7 +413,7 @@ const TextMessage = (props: TextMessageProps) => {
     setModifyMessageVisible(false);
     const currentCVS = rootStore.conversationStore.currentCvs;
     let msg = convertToMessage(textareaRef?.current?.divRef?.current?.innerHTML || '').trim();
-    const { isChatThread, to, chatThread } = textMessage;
+    const { isChatThread, to, chatThread } = textMessage as ChatSDK.TextMsgBody;
     const isThread = !!(isChatThread || chatThread);
     const message = chatSDK.message.create({
       to: isThread ? to : currentCVS.conversationId,
@@ -453,8 +467,30 @@ const TextMessage = (props: TextMessageProps) => {
     rootStore.threadStore.setThreadVisible(true);
 
     rootStore.threadStore.getChatThreadDetail(textMessage?.chatThreadOverview?.id || '');
+    onOpenThreadPanel?.(textMessage.chatThreadOverview?.id || '');
   };
 
+  useEffect(() => {
+    if ((textMessage as any).printed != false) {
+      return;
+    }
+    const msgArr = renderTxt(msg, true);
+    const message = (msgArr.length > 1 ? msgArr : msgArr[0] || '') as string[] | string;
+    let currentIndex = 0;
+    const typingInterval = setInterval(() => {
+      setText(prevMessage => prevMessage + message?.[currentIndex]);
+      currentIndex++;
+      if (currentIndex >= message.length - 1) {
+        clearInterval(typingInterval);
+        // @ts-ignore
+        textMessage.printed = true;
+      }
+    }, 50);
+
+    return () => {
+      clearInterval(typingInterval);
+    };
+  }, [msg]);
   return (
     <>
       {onlyContent ? (
@@ -521,7 +557,7 @@ const TextMessage = (props: TextMessageProps) => {
           >
             <div>
               <span className={classString} style={{ ...style }}>
-                {renderTxt(msg, true)}
+                {(textMessage as any).printed == false ? text : renderTxt(msg, true)}
               </span>
               {!!(urlData?.title || urlData?.description) && (
                 <UrlMessage {...urlData} isLoading={isFetching}></UrlMessage>
@@ -566,7 +602,7 @@ const TextMessage = (props: TextMessageProps) => {
                 className={modifyPrefix}
                 ref={textareaRef}
                 enableEnterSend={false}
-                enabledMenton={false}
+                enabledMention={false}
               />
             </Modal>
           }
@@ -576,4 +612,4 @@ const TextMessage = (props: TextMessageProps) => {
   );
 };
 
-export default observer(TextMessage);
+export default memo(observer(TextMessage));

@@ -28,7 +28,7 @@ function rgbToHsla(rgb: number[]) {
     l = (max + min) / 2;
 
   // 计算饱和度值
-  var s = 0;
+  var s: any = 0;
   var d = 0;
   if (max !== min) {
     d = max - min;
@@ -36,7 +36,7 @@ function rgbToHsla(rgb: number[]) {
   }
 
   // 计算色相值
-  var h = 0;
+  var h: any = 0;
   if (max !== min) {
     switch (max) {
       case r:
@@ -104,4 +104,11 @@ function setGlobalColors(colors: string[]) {
   document.documentElement.style.setProperty('--cui-primary-color10', colors[11]);
 }
 
-export { hexToHsla, generateColors };
+const isHueValue = (value: number) => {
+  return typeof value === 'number' && value >= 0 && value <= 360;
+};
+
+const isHexColor = (value: string) => {
+  return typeof value === 'string' && /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(value);
+};
+export { hexToHsla, generateColors, isHueValue, isHexColor };

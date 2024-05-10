@@ -18,14 +18,12 @@ import Modal from '../../component/modal';
 import { useTranslation } from 'react-i18next';
 import { eventHandler } from '../../eventHandler';
 import { ChatSDK } from '../SDK';
+import { i } from 'vitest/dist/index-2f5b6168';
 export interface ChatroomMemberProps {
   prefix?: string;
   className?: string;
   style?: React.CSSProperties;
   chatroomId: string;
-  renderEmpty?: () => ReactNode;
-  renderMemberListEmpty?: () => ReactNode;
-  renderMuteListEmpty?: () => ReactNode;
   renderHeader?: (cvs: {
     chatType: 'singleChat' | 'groupChat' | 'chatRoom';
     conversationId: string;
@@ -161,7 +159,7 @@ const ChatroomMember = (props: ChatroomMemberProps) => {
     visible: owner == rootStore.client.user,
     actions: [
       {
-        content: 'Unmute',
+        content: t('unmute'),
         onClick: unmuteMember,
       },
     ],
@@ -211,6 +209,18 @@ const ChatroomMember = (props: ChatroomMemberProps) => {
                   return memberListProps?.renderItem?.(item);
                 }
               : item => {
+                  let actionConfig = allMoreAction;
+                  if (muteDataToRender?.includes(item.userId)) {
+                    actionConfig = {
+                      visible: owner == rootStore.client.user,
+                      actions: [
+                        {
+                          content: 'remove',
+                          onClick: removeMember,
+                        },
+                      ],
+                    };
+                  }
                   return (
                     <UserItem
                       key={item.userId}
@@ -221,7 +231,7 @@ const ChatroomMember = (props: ChatroomMemberProps) => {
                         description: owner == item.userId ? (t('owner') as string) : '',
                       }}
                       moreAction={
-                        owner == item.userId ? { visible: false, actions: [] } : allMoreAction
+                        owner == item.userId ? { visible: false, actions: [] } : actionConfig
                       }
                       {...memberListProps?.UserItemProps}
                     />
@@ -302,7 +312,7 @@ const ChatroomMember = (props: ChatroomMemberProps) => {
       ) : (
         <Header
           close={true}
-          content="Participants"
+          content={t('Participants')}
           avatar={<div></div>}
           onClickClose={handleClose}
           {...headerProps}

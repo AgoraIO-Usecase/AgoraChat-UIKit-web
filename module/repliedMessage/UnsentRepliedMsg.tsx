@@ -6,6 +6,7 @@ import './style/style.scss';
 import { useTranslation } from 'react-i18next';
 import { renderTxt } from '../textMessage/TextMessage';
 import { RootContext } from '../store/rootContext';
+import { ChatSDK } from 'module/SDK';
 export interface UnsentRepliedMsgProps {
   prefixCls?: string;
   className?: string;
@@ -34,7 +35,11 @@ const UnsentRepliedMsg = (props: UnsentRepliedMsgProps) => {
     let content: ReactNode;
     switch (msg.type) {
       case 'txt':
-        content = <div className={`${prefixCls}-summary-desc`}>{renderTxt(msg.msg, '')}</div>;
+        content = (
+          <div className={`${prefixCls}-summary-desc`}>
+            {renderTxt(msg.msg, '' as unknown as false)}
+          </div>
+        );
         break;
       case 'file':
         content = (
@@ -73,6 +78,29 @@ const UnsentRepliedMsg = (props: UnsentRepliedMsgProps) => {
           </div>
         );
         break;
+      case 'custom':
+        if (msg.customEvent === 'userCard') {
+          content = (
+            <div className={`${prefixCls}-summary-desc`}>
+              <Icon type="PERSON_SINGLE_FILL" color="#75828A" width={16} height={16}></Icon>
+              <span>{t('Contact')}:</span>
+              {msg.customExts?.nickname}
+            </div>
+          );
+        }
+        break;
+      case 'video':
+        content = (
+          <div className={`${prefixCls}-summary-desc`}>
+            <span>{t('video')}</span>
+            <div className={`${prefixCls}-summary-desc-img`}>
+              {/* <Icon type="IMG" color="#75828A" width={24} height={24}></Icon> */}
+              {/* <img src={msg.thumb || msg.url}></img> */}
+              <Icon type="TRIANGLE_IN_RECTANGLE_FILL" color="#75828A" width={24} height={24}></Icon>
+            </div>
+          </div>
+        );
+        break;
       default:
         content = '';
         break;
@@ -85,12 +113,22 @@ const UnsentRepliedMsg = (props: UnsentRepliedMsgProps) => {
   };
 
   const myUserId = rootStore.client.user;
-  const from = repliedMessage?.from === myUserId ? t('you') : repliedMessage?.from;
+  const from = repliedMessage?.from === myUserId ? t('yourself') : repliedMessage?.from;
+
+  let msgQuote = (repliedMessage as ChatSDK.TextMsgBody)?.ext?.msgQuote;
+  if (typeof msgQuote === 'string') {
+    msgQuote = JSON.parse(msgQuote);
+  }
+  const to =
+    repliedMessage?.from === myUserId
+      ? t('yourself')
+      : rootStore.addressStore.appUsersInfo?.[repliedMessage?.from as string]?.nickname ||
+        msgQuote?.msgSender;
 
   return (
     <div className={classString}>
       <div className={`${prefixCls}-summary-title`}>
-        {t('replyingTo')} <span>{from}</span>
+        {t('replyingTo')} <span>{to}</span>
       </div>
       {renderMsgContent(repliedMessage)}
       <Icon

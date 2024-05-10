@@ -5,7 +5,7 @@ import './style/style.scss';
 import Icon from '../../component/icon';
 import Avatar from '../../component/avatar';
 import Button from '../../component/button';
-import { Tooltip } from '../../component/tooltip/Tooltip';
+import { Tooltip, TooltipProps } from '../../component/tooltip/Tooltip';
 import { RootContext } from '../store/rootContext';
 export interface HeaderProps {
   className?: string;
@@ -17,10 +17,11 @@ export interface HeaderProps {
   icon?: ReactNode; // 右侧更多按钮 icon
   back?: boolean; // 是否显示左侧返回按钮
   avatarSrc?: string;
+  avatarShape?: 'circle' | 'square';
   close?: boolean; // 是否显示右侧关闭按钮
   suffixIcon?: ReactNode; // 右侧自定义 icon
   renderContent?: () => React.ReactElement; // 自定义渲染中间内容部分；
-  onIconClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void; // 右侧更多按钮的点击事件
+  onClickEllipsis?: () => void; // 右侧更多按钮的点击事件
   // 右侧更多按钮配置
   moreAction?: {
     visible?: boolean;
@@ -31,9 +32,11 @@ export interface HeaderProps {
       content: ReactNode;
       onClick?: () => void;
     }>;
+    tooltipProps?: TooltipProps;
   };
-  onAvatarClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  onClickAvatar?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   onClickClose?: () => void;
+  onClickBack?: () => void;
 }
 
 const Header: FC<HeaderProps> = props => {
@@ -44,10 +47,11 @@ const Header: FC<HeaderProps> = props => {
     content = <div>Header</div>,
     prefix: customizePrefixCls,
     back = false,
+    onClickBack,
     renderContent,
-    onIconClick,
+    onClickEllipsis,
     moreAction,
-    onAvatarClick,
+    onClickAvatar,
     close,
     onClickClose,
     suffixIcon,
@@ -57,6 +61,10 @@ const Header: FC<HeaderProps> = props => {
   } = props;
   const { theme } = React.useContext(RootContext);
   const themeMode = theme?.mode;
+  let avatarShape = props.avatarShape || 'circle';
+  if (theme?.avatarShape) {
+    avatarShape = theme?.avatarShape;
+  }
   const { getPrefixCls } = React.useContext(ConfigContext);
   const prefixCls = getPrefixCls('header', customizePrefixCls);
   const classString = classNames(
@@ -88,6 +96,7 @@ const Header: FC<HeaderProps> = props => {
                 item.onClick?.();
               }}
             >
+              {item.icon}
               {item.content}
             </li>
           );
@@ -104,18 +113,31 @@ const Header: FC<HeaderProps> = props => {
       <>
         <div className={`${prefixCls}-content`}>
           {back ? (
-            <Button type="text">
-              <Icon type="ARROW_LEFT" width={24} height={24}></Icon>
+            <Button
+              type="text"
+              onClick={() => {
+                onClickBack?.();
+              }}
+            >
+              <Icon
+                type="ARROW_LEFT"
+                color={themeMode == 'dark' ? '#C8CDD0' : '#464E53'}
+                width={24}
+                height={24}
+              ></Icon>
             </Button>
           ) : null}
           {avatar ? (
             avatar
           ) : (
             <Avatar
+              shape={avatarShape}
               src={avatarSrc}
               onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-                onAvatarClick?.(e);
+                onClickAvatar?.(e);
               }}
+              style={{ marginRight: 12 }}
+              size={40}
             >
               {content}
             </Avatar>
@@ -126,33 +148,65 @@ const Header: FC<HeaderProps> = props => {
           </div>
         </div>
 
-        <div
-          onClick={e => {
-            onIconClick?.(e);
-          }}
-          className={`${prefixCls}-iconBox`}
-        >
+        <div className={`${prefixCls}-iconBox`}>
           {suffixIcon}
-          {moreAction?.visible && (
-            <Tooltip
-              title={menuNode}
-              trigger="click"
-              placement="bottom"
-              open={menuOpen}
-              onOpenChange={c => {
-                setMenuOpen(c);
-              }}
-            >
-              {
-                <Button type="text" shape="circle">
-                  <Icon type="ELLIPSIS" color={themeMode == 'dark' ? '#C8CDD0' : '#464E53'}></Icon>
-                </Button>
-              }
-            </Tooltip>
-          )}
+          {moreAction?.visible &&
+            (moreAction.actions.length > 0 ? (
+              <Tooltip
+                title={menuNode}
+                trigger="click"
+                placement="bottom"
+                open={menuOpen}
+                onOpenChange={c => {
+                  setMenuOpen(c);
+                }}
+                {...moreAction?.tooltipProps}
+              >
+                {
+                  <Button
+                    type="text"
+                    shape="circle"
+                    onClick={() => {
+                      onClickEllipsis?.();
+                    }}
+                  >
+                    {moreAction.icon ? (
+                      moreAction.icon
+                    ) : (
+                      <Icon
+                        type="ELLIPSIS"
+                        color={themeMode == 'dark' ? '#C8CDD0' : '#464E53'}
+                        width={24}
+                        height={24}
+                      ></Icon>
+                    )}
+                  </Button>
+                }
+              </Tooltip>
+            ) : (
+              <Button
+                type="text"
+                shape="circle"
+                onClick={() => {
+                  onClickEllipsis?.();
+                }}
+              >
+                <Icon
+                  type="ELLIPSIS"
+                  color={themeMode == 'dark' ? '#C8CDD0' : '#464E53'}
+                  width={24}
+                  height={24}
+                ></Icon>
+              </Button>
+            ))}
           {close && (
             <Button type="text" shape="circle" onClick={clickClose}>
-              <Icon type="CLOSE" color={themeMode == 'dark' ? '#C8CDD0' : '#464E53'}></Icon>
+              <Icon
+                type="CLOSE"
+                color={themeMode == 'dark' ? '#C8CDD0' : '#464E53'}
+                width={24}
+                height={24}
+              ></Icon>
             </Button>
           )}
         </div>

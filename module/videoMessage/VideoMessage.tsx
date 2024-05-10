@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import classNames from 'classnames';
 import BaseMessage, { BaseMessageProps, renderUserProfileProps } from '../baseMessage';
 import { ConfigContext } from '../../component/config/index';
@@ -9,69 +9,294 @@ import Mask from '../../component/modal/Mast';
 import Modal from '../../component/modal';
 import rootStore from '../store/index';
 // @ts-ignore
-import videoData from './video.mp4';
-
-export interface VideoMessageProps {
-  videoMessage: VideoMessageType; // 从SDK收到的视频消息
+import { ChatSDK } from '../SDK';
+import { getCvsIdFromMessage } from '../utils';
+import { observer } from 'mobx-react-lite';
+import { RootContext } from '../store/rootContext';
+export interface VideoMessageProps extends BaseMessageProps {
+  videoMessage: ChatSDK.VideoMsgBody & VideoMessageType; // 从SDK收到的视频消息
   prefix?: string;
   style?: React.CSSProperties;
   nickName?: string;
-  status?: 'received' | 'read' | 'sent' | 'sending';
   renderUserProfile?: (props: renderUserProfileProps) => React.ReactNode;
+  type?: 'primary' | 'secondly';
+  className?: string;
+  videoProps?: React.VideoHTMLAttributes<HTMLVideoElement>;
 }
 const VideoMessage = (props: VideoMessageProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [imgSrc, setImgsrc] = useState('');
-  const { videoMessage, style, status = 'default', renderUserProfile } = props;
-  const getFirstFrame = () => {
-    const canvas = document.createElement('canvas');
-    const videoEle = document.getElementById('videoEle') as HTMLVideoElement;
-    canvas.width = 200;
-    canvas.height = 200;
-    canvas.getContext('2d')?.drawImage(videoEle, 0, 0, canvas.width, canvas.height);
-    const firstFrame = canvas.toDataURL('image/png', 1);
-    console.log('firstFrame', firstFrame);
-    return firstFrame;
-  };
-  useEffect(() => {
-    setTimeout(() => {
-      // const src = getFirstFrame();
-      // setImgsrc(src);
-    }, 1000);
-  }, []);
+  const {
+    videoMessage,
+    renderUserProfile,
+    type,
+    shape,
+    nickName,
+    thread,
+    className,
+    prefix,
+    videoProps,
+    ...baseMsgProps
+  } = props;
 
-  let { bySelf, time, from } = videoMessage;
-  console.log('textMessage --->', from, bySelf, rootStore.client);
+  let { bySelf, from, reactions, status } = videoMessage;
+
+  const { getPrefixCls } = React.useContext(ConfigContext);
+  const prefixCls = getPrefixCls('message-video', prefix);
+  const context = useContext(RootContext);
+  const { theme } = context;
+  let bubbleShape = shape;
+  if (theme?.bubbleShape) {
+    bubbleShape = theme?.bubbleShape;
+  }
+  const classString = classNames(
+    prefixCls,
+    {
+      [`${prefixCls}-${bubbleShape}`]: !!bubbleShape,
+    },
+    className,
+  );
+
   if (typeof bySelf == 'undefined') {
-    console.log('bySelf 是 undefined', rootStore.client.context.userId, from, rootStore);
     bySelf = from == rootStore.client.context.userId;
   }
 
+  const handleReplyMsg = () => {
+    rootStore.messageStore.setRepliedMessage(videoMessage);
+  };
+
+  const handleDeleteMsg = () => {
+    let conversationId = getCvsIdFromMessage(videoMessage);
+
+    rootStore.messageStore.deleteMessage(
+      {
+        chatType: videoMessage.chatType,
+        conversationId: conversationId,
+      },
+      // @ts-ignore
+      videoMessage.mid || videoMessage.id,
+    );
+  };
+
+  const handleClickEmoji = (emojiString: string) => {
+    let conversationId = getCvsIdFromMessage(videoMessage);
+
+    rootStore.messageStore.addReaction(
+      {
+        chatType: videoMessage.chatType,
+        conversationId: conversationId,
+      },
+      // @ts-ignore
+      videoMessage.mid || videoMessage.id,
+      emojiString,
+    );
+  };
+
+  const handleDeleteEmoji = (emojiString: string) => {
+    let conversationId = getCvsIdFromMessage(videoMessage);
+    rootStore.messageStore.deleteReaction(
+      {
+        chatType: videoMessage.chatType,
+        conversationId: conversationId,
+      },
+      // @ts-ignore
+      videoMessage.mid || videoMessage.id,
+      emojiString,
+    );
+  };
+
+  const handleShowReactionUserList = (emojiString: string) => {
+    let conversationId = getCvsIdFromMessage(videoMessage);
+    reactions?.forEach(item => {
+      if (item.reaction === emojiString) {
+        if (item.count > 3 && item.userList.length <= 3) {
+          rootStore.messageStore.getReactionUserList(
+            {
+              chatType: videoMessage.chatType,
+              conversationId: conversationId,
+            },
+            // @ts-ignore
+            videoMessage.mid || videoMessage.id,
+            emojiString,
+          );
+        }
+
+        if (item.isAddedBySelf) {
+          const index = item.userList.indexOf(rootStore.client.user);
+          if (index > -1) {
+            const findItem = item.userList.splice(index, 1)[0];
+            item.userList.unshift(findItem);
+          } else {
+            item.userList.unshift(rootStore.client.user);
+          }
+        }
+      }
+    });
+  };
+
+  const handleRecallMessage = () => {
+    let conversationId = getCvsIdFromMessage(videoMessage);
+    rootStore.messageStore.recallMessage(
+      {
+        chatType: videoMessage.chatType,
+        conversationId: conversationId,
+      },
+      // @ts-ignore
+      videoMessage.mid || videoMessage.id,
+      videoMessage.isChatThread,
+      true,
+    );
+  };
+  let conversationId = getCvsIdFromMessage(videoMessage);
+  const handleSelectMessage = () => {
+    const selectable =
+      rootStore.messageStore.selectedMessage[videoMessage.chatType as 'singleChat' | 'groupChat'][
+        conversationId
+      ]?.selectable;
+    if (selectable) return; // has shown checkbox
+
+    rootStore.messageStore.setSelectedMessage(
+      {
+        chatType: videoMessage.chatType,
+        conversationId: conversationId,
+      },
+      {
+        selectable: true,
+        selectedMessage: [],
+      },
+    );
+  };
+
+  const handleResendMessage = () => {
+    rootStore.messageStore.sendMessage(videoMessage);
+  };
+
+  const select =
+    rootStore.messageStore.selectedMessage[videoMessage.chatType as 'singleChat' | 'groupChat'][
+      conversationId
+    ]?.selectable;
+
+  const handleMsgCheckChange = (checked: boolean) => {
+    const checkedMessages =
+      rootStore.messageStore.selectedMessage[videoMessage.chatType as 'singleChat' | 'groupChat'][
+        conversationId
+      ]?.selectedMessage;
+
+    let changedList = checkedMessages;
+    if (checked) {
+      changedList.push(videoMessage);
+    } else {
+      changedList = checkedMessages.filter(item => {
+        // @ts-ignore
+        return !(item.id == videoMessage.id || item.mid == videoMessage.id);
+      });
+    }
+    rootStore.messageStore.setSelectedMessage(
+      {
+        chatType: videoMessage.chatType,
+        conversationId: conversationId,
+      },
+      {
+        selectable: true,
+        selectedMessage: changedList,
+      },
+    );
+  };
+
+  // @ts-ignore
+  let _thread =
+    // @ts-ignore
+    videoMessage.chatType == 'groupChat' &&
+    thread &&
+    // @ts-ignore
+    !videoMessage.chatThread &&
+    !videoMessage.isChatThread;
+
+  // open thread panel to create thread
+  const handleCreateThread = () => {
+    rootStore.threadStore.setCurrentThread({
+      visible: true,
+      creating: true,
+      originalMessage: videoMessage,
+    });
+    rootStore.threadStore.setThreadVisible(true);
+  };
+
+  // join the thread
+  const handleClickThreadTitle = () => {
+    rootStore.threadStore.joinChatThread(videoMessage.chatThreadOverview?.id || '');
+    rootStore.threadStore.setCurrentThread({
+      visible: true,
+      creating: false,
+      originalMessage: videoMessage,
+      info: videoMessage.chatThreadOverview as unknown as ChatSDK.ThreadChangeInfo,
+    });
+    rootStore.threadStore.setThreadVisible(true);
+
+    rootStore.threadStore.getChatThreadDetail(videoMessage?.chatThreadOverview?.id || '');
+  };
+
+  const handlePlayVideo = () => {
+    // 消息是发给自己的单聊消息，回复read ack， 引用、转发的消息、已经是read状态的消息，不发read ack
+    if (
+      videoMessage.chatType == 'singleChat' &&
+      videoMessage.from != rootStore.client.context.userId &&
+      // @ts-ignore
+      videoMessage.status != 'read' &&
+      !videoMessage.isChatThread &&
+      videoMessage.to == rootStore.client.context.userId
+    ) {
+      rootStore.messageStore.sendReadAck(videoMessage.id, videoMessage.from || '');
+    }
+  };
   return (
     <BaseMessage
-      bubbleType="none"
+      id={videoMessage.id}
+      message={videoMessage}
+      bubbleType={type}
       direction={bySelf ? 'rtl' : 'ltr'}
-      style={style}
-      time={time}
-      nickName={props?.nickName}
-      status={status}
+      shape={shape}
+      // shape="ground"
+      bubbleStyle={{
+        padding: 0,
+        background: videoMessage.chatThreadOverview ? undefined : 'transparent',
+      }}
+      time={videoMessage.time}
+      nickName={nickName}
+      onReplyMessage={handleReplyMsg}
+      onDeleteMessage={handleDeleteMsg}
+      reactionData={reactions}
+      onAddReactionEmoji={handleClickEmoji}
+      onDeleteReactionEmoji={handleDeleteEmoji}
+      onShowReactionUserList={handleShowReactionUserList}
+      onRecallMessage={handleRecallMessage}
+      onSelectMessage={handleSelectMessage}
+      onResendMessage={handleResendMessage}
       renderUserProfile={renderUserProfile}
+      select={select}
+      onMessageCheckChange={handleMsgCheckChange}
+      onCreateThread={handleCreateThread}
+      thread={_thread}
+      chatThreadOverview={videoMessage.chatThreadOverview}
+      onClickThreadTitle={handleClickThreadTitle}
+      status={status}
+      // bubbleStyle={{ padding: '0' }}
+      {...baseMsgProps}
     >
-      <div>
+      <div className={classString}>
         <video
           id="videoEle"
           ref={videoRef}
-          width={374}
-          autoPlay
+          autoPlay={false}
           controls
           crossOrigin="anonymous"
           preload="metadata"
-          src={videoData}
-          // src="https://a5-v2.easemob.com/easemob/easeim/chatfiles/4db7f110-b676-11ed-929f-1fcef06124f9?em-redirect=true&share-secret=TbgYILZ2Ee2IYD1BAxWxusBH_NV8dnJY6jFq1PwVkIaY3uys"
+          onPlay={handlePlayVideo}
+          poster={videoMessage.thumb}
+          src={videoMessage.url}
+          {...videoProps}
         ></video>
-        {/* <img src={imgSrc}></img> */}
       </div>
     </BaseMessage>
   );
 };
-export { VideoMessage };
+export default observer(VideoMessage);

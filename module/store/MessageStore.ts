@@ -5,9 +5,17 @@ import { CurrentConversation, Conversation } from './ConversationStore';
 import type { ReactionData } from '../reaction/ReactionMessage';
 import { getCvsIdFromMessage, getMessages, getMessageIndex, getReactionByEmoji } from '../utils';
 import { RootStore } from './index';
-import { AT_ALL } from '../messageEditor/suggestList/SuggestList';
+import { AT_ALL } from '../messageInput/suggestList/SuggestList';
 import { TextMessageType } from 'chatuim2/types/module/types/messageType';
 import { eventHandler } from '../../eventHandler';
+import { BaseMessageType } from '../baseMessage/BaseMessage';
+import {
+  getGroupMemberIndexByUserId,
+  getGroupItemFromGroupsById,
+  getGroupMemberNickName,
+  getMsgSenderNickname,
+} from '../utils/index';
+
 export interface RecallMessage {
   type: 'recall';
   [key: string]: any;
@@ -62,7 +70,7 @@ class MessageStore {
     this.selectedMessage = {
       singleChat: {},
       groupChat: {},
-      chatRoom: {},
+      // chatRoom: {},
     };
     this.currentCVS = {} as CurrentConversation;
     this.repliedMessage = null;
@@ -177,31 +185,52 @@ class MessageStore {
         // @ts-ignore
         msgID: this.repliedMessage.mid || this.repliedMessage.id,
         msgPreview: msgPreview,
-        msgSender: this.repliedMessage.from || this.rootStore?.client?.user,
+        msgSender:
+          getMsgSenderNickname(this.repliedMessage as BaseMessageType) ||
+          this.rootStore?.client?.user,
         msgType: this.repliedMessage.type,
       };
       message.ext = ext;
     }
     if (message.isChatThread) {
       const { currentThread } = this.rootStore.threadStore;
+      // @ts-ignore
       message.chatThread = {
         parentId: currentThread.info?.parentId || currentThread.originalMessage.to,
       };
     }
+    const myInfo = this.rootStore.addressStore.appUsersInfo[this.rootStore.client.user] || {};
     //聊天室消息，在消息的ext里添加自己的信息
     if (chatType === 'chatRoom') {
-      const myInfo = this.rootStore.addressStore.appUsersInfo[this.rootStore.client.user] || {};
       (message as TextMessageType).ext = {
         ...(message as TextMessageType).ext,
         chatroom_uikit_userInfo: {
           userId: myInfo?.userId,
-          nickName: myInfo?.nickname,
+          nickname: myInfo?.nickname,
           avatarURL: myInfo?.avatarurl,
           gender: Number(myInfo?.gender),
           identify: myInfo?.ext?.identify,
         },
       };
-      console.log('发的聊天室消息', message, this.rootStore.addressStore.appUsersInfo);
+    } else {
+      if (chatType == 'groupChat') {
+        const groupItem = getGroupItemFromGroupsById(to);
+        if (groupItem) {
+          const memberIdx =
+            getGroupMemberIndexByUserId(groupItem, this.rootStore.client.user) ?? -1;
+          if (memberIdx > -1) {
+            let memberItem = groupItem?.members?.[memberIdx]!;
+            myInfo.nickname = getGroupMemberNickName(memberItem);
+          }
+        }
+      }
+      (message as TextMessageType).ext = {
+        ...(message as TextMessageType).ext,
+        ease_chat_uikit_user_info: {
+          nickname: myInfo?.nickname,
+          avatarURL: myInfo?.avatarurl,
+        },
+      };
     }
 
     // @ts-ignore
@@ -210,7 +239,6 @@ class MessageStore {
         this.message.byId[message.id] = message;
       }
     }
-    console.log('---chatType', chatType);
     if (chatType !== 'chatRoom') {
       // @ts-ignore
       if (!this.message[chatType][to]) {
@@ -228,26 +256,29 @@ class MessageStore {
     if (this.repliedMessage != null) {
       this.setRepliedMessage(null);
     }
-
     return this.rootStore.client
       .send(message as unknown as ChatSDK.MessageBody)
       .then((data: { serverMsgId: string }) => {
         if (chatType == 'chatRoom') {
           // @ts-ignore
           if (!this.message[chatType][to]) {
-            // @ts-ignore
-            this.message[chatType][to] = [this.message.byId[message.id]];
+            runInAction(() => {
+              // @ts-ignore
+              this.message[chatType][to] = [this.message.byId[message.id]];
+            });
           } else {
             // 处理重发的消息，重发的消息不push
             // @ts-ignore
             if (this.message.byId[message.id].status !== 'failed') {
-              // @ts-ignore
-              this.message[chatType][to].push(this.message.byId[message.id]);
+              runInAction(() => {
+                // @ts-ignore
+                this.message[chatType][to].push(this.message.byId[message.id]);
+              });
             }
           }
         }
         // message.status = 'sent';
-        const msg = this.message.byId[message.id];
+        const msg = this.message.byId[message.id] || {};
         // @ts-ignore
         msg.status = 'sent';
         // @ts-ignore
@@ -265,18 +296,26 @@ class MessageStore {
           //@ts-ignore
           msg.combineLevel = level + 1;
         }
+        if ((message as ChatSDK.ImgMsgBody).url) {
+          (msg as ChatSDK.ImgMsgBody).url = (message as ChatSDK.ImgMsgBody).url;
+          if (msg && (msg as ChatSDK.ImgMsgBody).file) {
+            // @ts-ignore
+            msg.file.url = (message as ChatSDK.ImgMsgBody).url || '';
+          }
+        }
 
-        this.message.byId[data.serverMsgId] = this.message.byId[message.id];
-        // @ts-ignore
-        this.message.byId[message.id].status = 'sent';
-        // @ts-ignore
-        this.message.byId[message.id].mid = data.serverMsgId;
-        // @ts-ignore
-        const i = this.message[chatType][to].indexOf(this.message.byId[message.id]);
-        // @ts-ignore
-        this.message[chatType][to].splice(i, 1, msg);
-        // this.message[chatType][to][i] = msg;
-
+        runInAction(() => {
+          this.message.byId[data.serverMsgId] = this.message.byId[message.id];
+          // @ts-ignore
+          this.message.byId[message.id].status = 'sent';
+          // @ts-ignore
+          this.message.byId[message.id].mid = data.serverMsgId;
+          // @ts-ignore
+          const i = this.message[chatType][to].indexOf(this.message.byId[message.id]);
+          // @ts-ignore
+          this.message[chatType][to].splice(i, 1, msg);
+          // this.message[chatType][to][i] = msg;
+        });
         // 更新会话last message
         let cvs: Conversation = this.rootStore.conversationStore.getConversation(
           // @ts-ignore
@@ -303,14 +342,13 @@ class MessageStore {
         eventHandler.dispatchSuccess('sendMessage');
       })
       .catch((error: ChatSDK.ErrorEvent) => {
-        console.warn('send fail', error);
         this.updateMessageStatus(message.id, 'failed');
         eventHandler.dispatchError('sendMessage', error);
-        throw error;
+        // throw error;
       });
   }
 
-  receiveMessage(message: ChatSDK.MessageBody) {
+  receiveMessage(message: BaseMessageType) {
     const curCvs = this.rootStore.conversationStore.currentCvs;
     //@ts-ignore
     if (
@@ -321,6 +359,11 @@ class MessageStore {
     ) {
       this.sendChannelAck(curCvs);
     }
+    const isChatbot = message.from?.includes?.('chatbot_');
+    if (isChatbot) {
+      //@ts-ignore
+      message.printed = false;
+    }
     this.message.byId[message.id] = message;
     if (message.from !== this.rootStore.client.user) {
       // @ts-ignore
@@ -330,7 +373,6 @@ class MessageStore {
       message.bySelf = true;
     }
     const conversationId = getCvsIdFromMessage(message);
-    console.log('收到消息', message);
     // @ts-ignore
     if (message.broadcast) {
       this.message.broadcast.push(message);
@@ -344,8 +386,8 @@ class MessageStore {
       // @ts-ignore
       this.message[message.chatType][conversationId].push(message);
     }
-
-    if (this.holding) {
+    // 是当前会话的消息，并且是holding状态， unreadMessageCount +1
+    if (this.holding && this.currentCVS.conversationId == conversationId) {
       this.unreadMessageCount += 1;
     }
 
@@ -365,13 +407,27 @@ class MessageStore {
       this.rootStore.addressStore.setAppUserInfo({
         ...appUsersInfo,
         [senderInfo.userId]: {
-          nickname: senderInfo.nickName,
+          nickname: senderInfo.nickname,
           userId: senderInfo.userId,
           avatarurl: senderInfo.avatarURL,
           gender: senderInfo.gender,
         },
       });
       return;
+    }
+
+    if (message.ext && message.ext.ease_chat_uikit_user_info) {
+      const appUsersInfo = this.rootStore.addressStore.appUsersInfo;
+      message.from &&
+        appUsersInfo[message.from] == undefined &&
+        this.rootStore.addressStore.setAppUserInfo({
+          ...appUsersInfo,
+          [message.from]: {
+            nickname: message.ext.ease_chat_uikit_user_info.nickname,
+            userId: message.from,
+            avatarurl: message.ext.ease_chat_uikit_user_info.avatarURL,
+          },
+        });
     }
 
     const isCurrentCvs =
@@ -443,27 +499,27 @@ class MessageStore {
 
   updateMessageStatus(msgId: string, status: string) {
     setTimeout(() => {
-      let msg = this.message.byId[msgId];
-      if (!msg) {
-        // ack message
-        return; // console.error('not found message:', msgId);
-      }
-      let conversationId = getCvsIdFromMessage(msg);
-      // @ts-ignore
-      this.message.byId[msgId].status = status;
-      // @ts-ignore
-      const i = this.message[msg.chatType][conversationId]?.indexOf(this.message.byId[msg.id]); // 聊天室没发送成功的消息不会存，会找不到这个会话或消息
-      console.log('111 --', i);
-      if (typeof i === 'undefined' || i == -1) return;
-      // @ts-ignore
-      this.message[msg.chatType][conversationId].splice(i, 1, msg);
-      // this.message[chatType][to][i] = msg;
+      runInAction(() => {
+        let msg = this.message.byId[msgId];
+        if (!msg) {
+          // ack message
+          return; // console.error('not found message:', msgId);
+        }
+        let conversationId = getCvsIdFromMessage(msg as BaseMessageType);
+        // @ts-ignore
+        this.message.byId[msgId].status = status;
+        // @ts-ignore
+        const i = this.message[msg.chatType][conversationId]?.indexOf(this.message.byId[msg.id]); // 聊天室没发送成功的消息不会存，会找不到这个会话或消息
+        if (typeof i === 'undefined' || i == -1) return;
+        // @ts-ignore
+        this.message[msg.chatType][conversationId].splice(i, 1, msg);
+        // this.message[chatType][to][i] = msg;
+      });
     }, 10);
   }
 
   addHistoryMsgs(cvs: CurrentConversation, msgs: any) {
     if (!cvs || !msgs.length) return;
-    // console.log('-->addHistoryMsgs', cvs, msgs, this.message[cvs.chatType]);
     if (!this.message[cvs.chatType]?.[cvs.conversationId]) {
       this.message[cvs.chatType][cvs.conversationId] = msgs;
     } else {
@@ -475,6 +531,11 @@ class MessageStore {
 
   clearMessage(cvs: CurrentConversation) {
     if (!cvs) return;
+    this.rootStore.client.removeHistoryMessages({
+      targetId: cvs.conversationId,
+      chatType: cvs.chatType as 'singleChat' | 'groupChat',
+      beforeTimeStamp: Date.now(),
+    });
     this.message[cvs.chatType][cvs.conversationId] = [];
   }
 
@@ -523,7 +584,7 @@ class MessageStore {
     return this.rootStore.client
       .removeHistoryMessages({
         targetId: cvs.conversationId,
-        chatType: cvs.chatType,
+        chatType: cvs.chatType as 'singleChat' | 'groupChat',
         messageIds: msgIds,
       })
       .then(() => {
@@ -537,10 +598,19 @@ class MessageStore {
         // @ts-ignore
         conversation.lastMessage = {};
         this.rootStore.conversationStore.modifyConversation(conversation);
+        eventHandler.dispatchSuccess('removeHistoryMessages');
+      })
+      .catch(error => {
+        eventHandler.dispatchError('removeHistoryMessages', error);
       });
   }
 
-  recallMessage(cvs: CurrentConversation, messageId: string, isChatThread: boolean = false) {
+  recallMessage(
+    cvs: CurrentConversation,
+    messageId: string,
+    isChatThread: boolean = false,
+    recallMySelfMsg: boolean = false,
+  ) {
     if (!cvs || !messageId) {
       throw new Error('recallMessage params error');
     }
@@ -562,11 +632,14 @@ class MessageStore {
     const messages = getMessages(conversation);
     if (!messages) return;
     const msgIndex = getMessageIndex(messages, messageId);
-    if (messages[msgIndex].from !== this.rootStore.client.user) {
+    if (!recallMySelfMsg) {
       if (msgIndex > -1) {
         messages[msgIndex].type = 'recall';
         //@ts-ignore
         messages[msgIndex].ext = {};
+        runInAction(() => {
+          this.message[cvs.chatType][cvs.conversationId] = messages;
+        });
       }
       if (!conversation) return;
       //@ts-ignore
@@ -578,6 +651,7 @@ class MessageStore {
       this.rootStore.conversationStore.modifyConversation(conversation);
       return;
     }
+
     // mySelf recall the message
     return this.rootStore.client
       .recallMessage({
@@ -590,10 +664,14 @@ class MessageStore {
         const messages = getMessages(cvs);
         const msgIndex = getMessageIndex(messages, messageId);
         if (msgIndex > -1) {
-          messages[msgIndex].type = 'recall';
-          //@ts-ignore
-          messages[msgIndex].ext = {};
-
+          runInAction(() => {
+            let msg = { ...messages[msgIndex] };
+            msg.type = 'recall';
+            //@ts-ignore
+            msg.ext = {};
+            messages[msgIndex] = msg;
+            this.message[cvs.chatType][cvs.conversationId] = messages;
+          });
           if (!conversation) return;
           // @ts-ignore
           conversation.lastMessage = messages[msgIndex];
@@ -617,34 +695,39 @@ class MessageStore {
         const messages = getMessages(cvs);
         const messageIndex = getMessageIndex(messages, messageId);
         if (messageIndex > -1) {
-          const message = messages[messageIndex];
-          const reaction = getReactionByEmoji(message, emoji);
-          if (reaction) {
-            reaction.count += 1;
-            reaction.isAddedBySelf = true;
-            reaction.userList.unshift(this.rootStore.client.user);
-          } else {
-            const newAction = {
-              count: 1,
-              isAddedBySelf: true,
-              reaction: emoji,
-              userList: [this.rootStore.client.user],
-            };
-            if (Array.isArray(message.reactions)) {
-              messages[messageIndex].reactions.push(newAction);
+          runInAction(() => {
+            const message = messages[messageIndex];
+            const reaction = getReactionByEmoji(message, emoji);
+            if (reaction) {
+              reaction.count += 1;
+              reaction.isAddedBySelf = true;
+              reaction.userList.unshift(this.rootStore.client.user);
             } else {
-              messages[messageIndex].reactions = [newAction];
+              const newAction = {
+                count: 1,
+                isAddedBySelf: true,
+                reaction: emoji,
+                userList: [this.rootStore.client.user],
+              };
+              if (Array.isArray((message as BaseMessageType).reactions)) {
+                // @ts-ignore
+                messages[messageIndex].reactions.push(newAction);
+              } else {
+                // @ts-ignore
+                messages[messageIndex].reactions = [newAction];
+              }
             }
-          }
+          });
         }
         // const filterMsgs = messages.filter(msg => {
         //   // @ts-ignore
         //   return msg.id != messageId && msg.mid != messageId;
         // });
         // this.message[cvs.chatType][cvs.conversationId] = filterMsgs;
+        eventHandler.dispatchSuccess('addReaction');
       })
       .catch((err: ChatSDK.ErrorEvent) => {
-        console.error(err);
+        eventHandler.dispatchError('addReaction', err);
       });
   }
 
@@ -666,7 +749,11 @@ class MessageStore {
           if (reaction) {
             reaction.count -= 1;
             if (reaction.count <= 0) {
-              message.reactions?.splice(message.reactions?.indexOf(reaction), 1);
+              (message as BaseMessageType).reactions?.splice(
+                // @ts-ignore
+                message.reactions?.indexOf(reaction),
+                1,
+              );
             }
             const index = reaction.userList?.indexOf(this.rootStore.client.user);
             if (index > -1) {
@@ -674,9 +761,10 @@ class MessageStore {
             }
           }
         }
+        eventHandler.dispatchSuccess('deleteReaction');
       })
       .catch((err: ChatSDK.ErrorEvent) => {
-        console.error(err);
+        eventHandler.dispatchError('deleteReaction', err);
       });
   }
 
@@ -690,7 +778,10 @@ class MessageStore {
     if (messageIndex > -1) {
       const message = messages[messageIndex];
       // has reaction list
-      if (!message.reactions || message.reactions?.length === 0) {
+      if (
+        !(message as BaseMessageType).reactions ||
+        (message as BaseMessageType).reactions?.length === 0
+      ) {
         reactions.forEach((item: ReactionData) => {
           if (item.op) {
             item.isAddedBySelf = !!item?.op?.find(
@@ -698,7 +789,7 @@ class MessageStore {
             );
           }
         });
-        message.reactions = reactions;
+        (message as BaseMessageType).reactions = reactions;
       } else {
         filterActs.forEach(item => {
           let reaction = getReactionByEmoji(message, item.reaction);
@@ -715,11 +806,13 @@ class MessageStore {
                 }
               }
             });
-            message.reactions = [...message.reactions];
+            // @ts-ignore
+            (message as BaseMessageType).reactions = [...message.reactions];
           } else {
             item.isAddedBySelf = !!item?.op?.find(
               op => op.operator === this.rootStore.client.user && op.reactionType === 'create',
             );
+            // @ts-ignore
             message.reactions.push(item);
           }
         });
@@ -742,8 +835,13 @@ class MessageStore {
         if (!reactionData) return;
         if (messageIndex > -1) {
           const message = messages[messageIndex];
+          // @ts-ignore
           message.reactions.userList = reactionData.userList;
         }
+        eventHandler.dispatchSuccess('getReactionDetail');
+      })
+      .catch(error => {
+        eventHandler.dispatchError('getReactionDetail', error);
       });
   }
 
@@ -773,9 +871,11 @@ class MessageStore {
               currentMsg.translations = translations;
             }
             res(true);
+            eventHandler.dispatchSuccess('translateMessage');
           })
-          .catch(() => {
+          .catch(error => {
             rej(false);
+            eventHandler.dispatchError('translateMessage', error);
           });
       }
     });
@@ -831,7 +931,8 @@ class MessageStore {
       selectedMessage: (ChatSDK.MessageBody | RecallMessage)[];
     },
   ) {
-    this.selectedMessage[cvs.chatType][cvs.conversationId] = selectedData;
+    this.selectedMessage[cvs.chatType as 'singleChat' | 'groupChat'][cvs.conversationId] =
+      selectedData;
   }
 
   setTyping(cvs: CurrentConversation, typing: boolean) {
@@ -866,11 +967,27 @@ class MessageStore {
     this.message.broadcast.shift();
   }
 
+  sendReadAck(messageId: string, to: string) {
+    if (!messageId || !to) {
+      return console.error(`Invalid parameter, messageId: ${messageId}, to: ${to}`);
+    }
+
+    const readMsg = chatSDK.message.create({
+      type: 'read',
+      chatType: 'singleChat',
+      to: to,
+      id: messageId,
+    });
+    this.rootStore.client.send(readMsg);
+  }
+
   clear() {
     this.message = {
       singleChat: {},
       groupChat: {},
       byId: {},
+      chatRoom: {},
+      broadcast: [],
     };
 
     this.selectedMessage = {

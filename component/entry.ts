@@ -12,10 +12,11 @@ import List, { ListProps } from './list';
 import Modal, { ModalProps } from './modal';
 import Popover, { PopoverProps } from './popover';
 import Switch, { SwitchProps } from './switch';
-import Tooltip from 'rc-tooltip';
+import Tooltip, { TooltipProps } from './tooltip';
 import ScrollList, { ScrollListProps } from './scrollList';
 import Broadcast, { BroadcastProps } from './broadcast';
 import Collapse, { CollapseProps } from './collapse';
+import UserItem, { UserItemProps } from './userItem';
 export type {
   AvatarProps,
   ButtonProps,
@@ -35,6 +36,8 @@ export type {
   ScrollListProps,
   BroadcastProps,
   CollapseProps,
+  UserItemProps,
+  TooltipProps,
 };
 
 export {
@@ -53,4 +56,5 @@ export {
   ScrollList,
   Broadcast,
   Collapse,
+  UserItem,
 };

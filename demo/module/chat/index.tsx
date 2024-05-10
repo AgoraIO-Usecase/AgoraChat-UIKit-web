@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, FC } from 'react';
 import ReactDOM from 'react-dom/client';
 import TextMessage from '../../../module/textMessage';
-
 import List from '../../../component/list';
 import Header from '../../../module/header';
-import { ContactItem, ContactList } from '../../../module/contactList';
+import { ContactItem, ContactList, ContactDetail } from '../../../module/contactList';
+import GroupDetail from '../../../module/groupDetail';
 import { Search } from '../../../component/input/Search';
 import Chat from '../../../module/chat';
 import Icon from '../../../component/icon';
@@ -12,7 +12,8 @@ import AC from 'agora-chat';
 import { RootProvider } from '../../../module/store/rootContext';
 import rootStore from '../../../module/store/index';
 import { ConversationList, ConversationItem } from '../../../module/conversation';
-import Provider from '../../../module/store/Provider';
+// import Provider from '../../../module/store/Provider';
+import { Provider, UIKitProvider } from '../../../index';
 import { useClient } from '../../../module/hooks/useClient';
 import { getLinkPreview, getPreviewFromContent } from 'link-preview-js';
 import Button from '../../../component/button';
@@ -24,7 +25,7 @@ import { observer } from 'mobx-react-lite';
 import axios from 'axios';
 import { useConversationContext, useChatContext } from '../../../module';
 import { hexToHsla, generateColors } from '../../../module/utils/color';
-
+import UserSelect from '../../../module/userSelect';
 console.log('hexToHsla', hexToHsla('#FF0000'));
 console.log('hexToHsla', hexToHsla('#000000'));
 console.log('hexToHsla', hexToHsla('#ffffff'));
@@ -38,7 +39,7 @@ console.log('hexToHsla 1', generateColors(hexToHsla('#FF0000')));
 // } from 'chatuim2';
 // import 'chatuim2/style.css';
 window.rootStore = rootStore;
-const ChatApp = () => {
+const ChatApp: FC<any> = () => {
   const client = useClient();
   // useEffect(() => {
   //   client &&
@@ -115,10 +116,22 @@ const ChatApp = () => {
 
   let MsgList = <MessageList renderMessage={msg => TxtMsg(msg)}></MessageList>;
 
-  const [tab, setTab] = useState('contact');
+  const [tab, setTab] = useState('chat');
   const changeTab = (tab: string) => {
     setTab(tab);
   };
+
+  useEffect(() => {
+    console.log('*******', rootStore.addressStore.contacts);
+    rootStore.addressStore.setAppUserInfo({
+      ...rootStore.addressStore.appUsersInfo,
+      lxm: {
+        userId: 'lxm',
+        nickname: '自定义名称',
+        avatarurl: 'https://cdn4.iconfinder.com/data/icons/small-n-flat/24/cat-512.png',
+      },
+    });
+  }, [rootStore.addressStore.contacts.length]);
 
   useEffect(() => {
     console.log('变化了 showThreadPanel');
@@ -149,6 +162,19 @@ const ChatApp = () => {
       });
     };
   };
+
+  const [contactData, setContactData] = useState({ id: '', name: '', type: 'contact' });
+
+  // create group
+  const [userSelectVisible, setUserSelectVisible] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
+
+  const [groupSettingVisible, setGroupSettingVisible] = useState(false);
+  const [cvsItem, setCvsItem] = useState([]);
+  const showGroupSetting = () => {
+    setGroupSettingVisible(value => !value);
+    console.log('showGroupSetting');
+  };
   return (
     <>
       <div className="tab-box">
@@ -171,18 +197,54 @@ const ChatApp = () => {
       </div>
       <div
         style={{
-          width: '35%',
+          width: '350px',
           background: '#fff',
         }}
       >
         {tab == 'chat' && (
           <ConversationList
-            // itemProps={{
-            //   moreAction: {
-            //     visible: true,
-            //     actions: [{ content: 'DELETE' }],
-            //   },
-            // }}
+            presence={true}
+            showSearchList={false}
+            onSearch={value => {
+              rootStore.conversationStore.setSearchList([
+                {
+                  conversationId: 'zd1',
+                  chatType: 'singleChat',
+                },
+              ]);
+              return false;
+            }}
+            renderHeader={() => (
+              <Header
+                moreAction={{
+                  visible: true,
+                  icon: <Icon type="PLUS_IN_CIRCLE"></Icon>,
+                  actions: [
+                    {
+                      content: 'Create Group',
+                      icon: <Icon type="PLUS_IN_CIRCLE"></Icon>,
+                      onClick: () => {
+                        console.log('create group');
+                        setUserSelectVisible(true);
+                      },
+                    },
+                  ],
+                }}
+              ></Header>
+            )}
+            onItemClick={item => {
+              console.log('cvsItem', item);
+              setCvsItem(item);
+            }}
+            itemProps={{
+              moreAction: {
+                visible: true,
+                actions: [{ content: 'DELETE' }],
+              },
+              formatDateTime: (time: number) => {
+                return new Date(time).toLocaleString();
+              },
+            }}
             className="conversation"
             // renderItem={csv => (
             //   <ConversationItem
@@ -195,7 +257,33 @@ const ChatApp = () => {
           ></ConversationList>
         )}
 
-        {tab == 'contact' && <ContactList className="conversation"></ContactList>}
+        {tab == 'contact' && (
+          <ContactList
+            className="conversation"
+            menu={[
+              'contacts',
+              'groups',
+              'requests',
+              {
+                title: 'Block list',
+                data: [
+                  {
+                    remark: '张4',
+                    userId: 'zd1',
+                  },
+                  {
+                    groupname: '群1',
+                    groupid: '12',
+                  },
+                ],
+              },
+            ]}
+            onItemClick={data => {
+              console.log('data', data);
+              setContactData(data);
+            }}
+          ></ContactList>
+        )}
       </div>
       <div
         style={{
@@ -204,21 +292,62 @@ const ChatApp = () => {
           display: 'flex',
         }}
       >
-        <div style={{ flex: 1, borderLeft: '1px solid transparent', overflow: 'hidden' }}>
-          <Chat
-            messageListProps={{
-              renderUserProfile: () => {
-                return null;
-              },
-            }}
-            messageEditorProps={{
-              enabledTyping: true,
-            }}
-            rtcConfig={{
-              getRTCToken: getRTCToken,
-              getIdMap: () => {},
-            }}
-          ></Chat>
+        <div
+          style={{
+            display: 'flex',
+            flex: 1,
+            borderLeft: '1px solid transparent',
+            overflow: 'hidden',
+          }}
+        >
+          {tab == 'chat' && (
+            <>
+              <Chat
+                messageListProps={{
+                  // renderUserProfile: a => {
+                  //   return null;
+                  // },
+                  messageProps: {
+                    formatDateTime: (time: number) => {
+                      return new Date(time).toLocaleString();
+                    },
+                  },
+                }}
+                messageInputProps={{
+                  enabledTyping: true,
+                }}
+                headerProps={{
+                  moreAction: {
+                    visible: false,
+                    actions: [{ content: '' }],
+                  },
+                  suffixIcon: <Icon type="ELLIPSIS" onClick={showGroupSetting}></Icon>,
+                }}
+                rtcConfig={{
+                  getRTCToken: getRTCToken,
+                  getIdMap: () => {},
+                }}
+                renderRepliedMessage={message => {
+                  return <div>replied message {message.from}</div>;
+                }}
+              ></Chat>
+              {groupSettingVisible && (
+                <div style={{ width: '350px', borderLeft: '1px solid green' }}>
+                  <GroupDetail
+                    conversation={{ chatType: 'groupChat', conversationId: cvsItem.conversationId }}
+                  ></GroupDetail>
+                </div>
+              )}
+            </>
+          )}
+          {tab == 'contact' && (
+            <ContactDetail
+              data={contactData}
+              onMessageBtnClick={() => {
+                setTab('chat');
+              }}
+            ></ContactDetail>
+          )}
         </div>
         {thread.showThreadPanel && (
           <div
@@ -232,12 +361,32 @@ const ChatApp = () => {
             <Thread></Thread>
           </div>
         )}
+        {/* <div style={{ width: '350px', borderLeft: '1px solid green' }}>
+          <ContactInfo
+            conversation={{ chatType: 'groupChat', conversationId: contactData.id }}
+          ></ContactInfo>
+        </div> */}
       </div>
-      <div>
+      {/* <div>
         <Button onClick={getUrlPreviewInfo}>getUrlPreviewInfo</Button>
         <Button onClick={topConversation}>top 2808</Button>
         <br />
-      </div>
+      </div> */}
+      <UserSelect
+        onCancel={() => {
+          setUserSelectVisible(false);
+        }}
+        onOk={() => {
+          rootStore.addressStore.createGroup(selectedUsers.map(user => user.userId));
+          setUserSelectVisible(false);
+        }}
+        enableMultipleSelection
+        onUserSelect={(user, users) => {
+          setSelectedUsers(users);
+        }}
+        open={userSelectVisible}
+        okText="创建"
+      ></UserSelect>
     </>
   );
 };
@@ -257,19 +406,21 @@ ReactDOM.createRoot(document.getElementById('chatRoot') as Element).render(
     }}
   >
     <Provider
-      onError={err => {
-        console.log('回调出的err', err);
-      }}
       initConfig={{
-        appKey: '41117440#383391',
+        appKey: 'easemob#easeim',
         userId: 'zd2',
-        token:
-          '007eJxTYODenSsnJLu7VVFC+ZBo62GlF1v6uW+1zUp/v8en2nniAXUFhjTDlGRzc4uklJRkMxOzxBSLNCMzA0tzs+REoxQDQ9Pk9ENRqQ2BjAwRF7euZmRgZWAEQhBfhSHJwMwkMcXMQNfMyCRJ19AwNVnXItXQSNc0ycjEIsnA1CItyRIAB1snAA==',
+        password: '1',
+        useUserInfo: true,
+        // token:
+        //   '007eJxTYFBRW8PxsjzKTEt3t/q21aylFwrC37GaPK73k382686EjO8KDGmGKcnm5hZJKSnJZiZmiSkWaUZmBpbmZsmJRikGhqbJh06XpTYEMjIY6nO0MjKwMjACIYivwpBkYGaSmGJmoGtmZJKka2iYmqxrkWpopGuaZGRikWRgapGWZAkAHZsmnQ==',
         // appKey: 'easemob#easeim',
       }}
       theme={{
-        // primaryColor: '#33ffaa',
+        // primaryColor: 50, //'#33ffaa',
         mode: 'light',
+        bubbleShape: 'square',
+        avatarShape: 'square',
+        componentsShape: 'square',
       }}
       local={{
         fallbackLng: 'en',
@@ -283,40 +434,45 @@ ReactDOM.createRoot(document.getElementById('chatRoot') as Element).render(
         //   },
         // },
       }}
-      // features={{
-      //   conversationList: {
-      //     search: true,
-      //     item: {
-      //       moreAction: false,
-      //       deleteConversation: false,
-      //     },
-      //   },
-      //   chat: {
-      //     header: {
-      //       threadList: true,
-      //       moreAction: true,
-      //       clearMessage: true,
-      //       deleteConversation: false,
-      //       audioCall: false,
-      //     },
-      //     message: {
-      //       status: false,
-      //       reaction: false,
-      //       thread: true,
-      //       recall: true,
-      //       translate: false,
-      //       edit: false,
-      //     },
-      //     messageEditor: {
-      //       mention: false,
-      //       typing: false,
-      //       record: true,
-      //       emoji: true,
-      //       moreAction: true,
-      //       picture: true,
-      //     },
-      //   },
-      // }}
+      features={{
+        conversationList: {
+          search: true,
+          item: {
+            moreAction: true,
+            deleteConversation: true,
+            presence: false,
+          },
+        },
+        chat: {
+          header: {
+            threadList: false,
+            moreAction: true,
+            clearMessage: true,
+            deleteConversation: true,
+            audioCall: true,
+          },
+          message: {
+            status: true,
+            reaction: true,
+            thread: true,
+            recall: true,
+            translate: true,
+            edit: true,
+            report: false,
+            forward: false,
+          },
+          messageInput: {
+            mention: true,
+            typing: true,
+            record: true,
+            emoji: true,
+            moreAction: true,
+            picture: true,
+            video: true,
+            contactCard: false,
+          },
+        },
+      }}
     >
       <App></App>
     </Provider>

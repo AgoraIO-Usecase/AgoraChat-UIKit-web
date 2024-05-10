@@ -112,7 +112,6 @@ const ChatroomMessage = (props: ChatroomMessageProps) => {
         targetLanguage || navigator.language,
       )
       ?.then(() => {
-        console.log('message', message);
         // @ts-ignore
         const translatedMsg = message?.translations?.[0]?.text;
         setTextToShow(translatedMsg);
@@ -133,6 +132,8 @@ const ChatroomMessage = (props: ChatroomMessageProps) => {
       },
       // @ts-ignore
       message.mid || message.id,
+      false,
+      true,
     );
   };
   const muteMember = () => {
@@ -174,7 +175,7 @@ const ChatroomMessage = (props: ChatroomMessageProps) => {
             );
           } else if (item.content === 'MUTE') {
             return (
-              <li key={index} onClick={muteMember}>
+              <li key={isMuted ? index : -index} onClick={muteMember}>
                 <Icon
                   type={isMuted ? 'BELL' : 'BELL_SLASH'}
                   width={16}
@@ -229,9 +230,10 @@ const ChatroomMessage = (props: ChatroomMessageProps) => {
     }
     return (
       <div className={`${prefixCls}-gift`}>
-        <div>{giftData.giftName}</div>
+        {t('sent')}
+        <div>{t(giftData.giftName)}</div>
         <img src={giftData.giftIcon} alt="" className={`${prefixCls}-gift-img`} />
-        <div className={`${prefixCls}-gift-number`}>x1</div>
+        <div className={`${prefixCls}-gift-number`}>x{giftData.giftCount || 1}</div>
       </div>
     );
   };
@@ -260,9 +262,9 @@ const ChatroomMessage = (props: ChatroomMessageProps) => {
             {getTime((message as ChatSDK.TextMsgBody).time)}
           </div>
           <Avatar size={20} src={userInfo.avatarURL}>
-            {userInfo.nickName || message.from}
+            {userInfo.nickname || message.from}
           </Avatar>
-          <div className={`${prefixCls}-header-nick`}>{userInfo.nickName || message.from}</div>
+          <div className={`${prefixCls}-header-nick`}>{userInfo.nickname || message.from}</div>
         </div>
         {message.type == 'custom' && renderGift()}
         {message.type == 'txt' && renderText(textToShow)}

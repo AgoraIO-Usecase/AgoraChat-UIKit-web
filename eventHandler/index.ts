@@ -1,4 +1,5 @@
-import { AgoraChat } from 'agora-chat';
+// import { AgoraChat } from 'agora-chat';
+import { ChatSDK } from '../module/SDK';
 export type EventName =
   | 'joinChatRoom'
   | 'leaveChatRoom'
@@ -13,15 +14,44 @@ export type EventName =
   | 'createChatThread'
   | 'destroyChatThread'
   | 'leaveChatThread'
+  | 'setGroupMemberAttributes'
+  | 'muteChatRoomMember'
+  | 'getChatRoomMutelist'
+  | 'unmuteChatRoomMember'
+  | 'removeChatRoomMember'
+  | 'getSilentModeForConversations'
+  | 'setSilentModeForConversation'
+  | 'clearRemindTypeForConversation'
+  | 'getGroupInfo'
+  | 'modifyGroup'
+  | 'destroyGroup'
+  | 'leaveGroup'
+  | 'createGroup'
+  | 'inviteToGroup'
+  | 'removeGroupMembers'
+  | 'changeGroupOwner'
+  | 'pinConversation'
+  | 'getServerPinnedConversations'
+  | 'removeHistoryMessages'
+  | 'addReaction'
+  | 'deleteReaction'
+  | 'getReactionDetail'
+  | 'joinChatThread'
+  | 'getChatThreads'
+  | 'getChatThreadLastMessage'
+  | 'getAllContacts'
+  | 'getJoinedGroups'
   | 'open'
-  | 'onError';
+  | 'setContactRemark'
+  | 'addContact'
+  | 'deleteContact';
 
 export type EventHandlerData = {
   [key in EventName]?: {
     success?: () => void;
-    error?: (err: AgoraChat.ErrorEvent) => void;
+    error?: (err: ChatSDK.ErrorEvent) => void;
   };
-};
+} & { onError: (err: ChatSDK.ErrorEvent) => void };
 
 export class EventHandler {
   handlerData: { [key: string]: EventHandlerData } = {};
@@ -53,13 +83,13 @@ export class EventHandler {
     });
   }
 
-  dispatchError(eventName: EventName, error: AgoraChat.ErrorEvent) {
+  dispatchError(eventName: EventName, error: ChatSDK.ErrorEvent) {
     Object.keys(this.handlerData).forEach(key => {
       if (this.handlerData[key]?.[eventName] && this.handlerData[key][eventName]?.error) {
         this.handlerData[key][eventName]?.error?.(error);
-        this.handlerData[key]?.onError?.error?.(error);
-        console.error(error);
       }
+      this.handlerData[key]?.onError?.(error);
+      console.error(error);
     });
   }
 }

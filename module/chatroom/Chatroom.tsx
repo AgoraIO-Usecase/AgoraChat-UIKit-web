@@ -5,14 +5,14 @@ import { ConfigContext } from '../../component/config/index';
 import './style/style.scss';
 import Icon from '../../component/icon';
 import Header, { HeaderProps } from '../header';
-import MessageEditor, { MessageEditorProps } from '../messageEditor';
+import MessageInput, { MessageInputProps } from '../messageInput';
 import { MessageList, MsgListProps } from '../chat/MessageList';
 import { RootContext } from '../store/rootContext';
 import Empty from '../empty';
 import { useTranslation } from 'react-i18next';
 import { chatSDK, ChatSDK } from '../SDK';
 import ChatroomMessage from '../chatroomMessage';
-import { GiftKeyboard } from '../messageEditor/gift';
+import { GiftKeyboard } from '../messageInput/gift';
 import Broadcast, { BroadcastProps } from '../../component/broadcast';
 import { getUsersInfo } from '../utils/index';
 import Modal from '../../component/modal';
@@ -20,17 +20,18 @@ import Checkbox from '../../component/checkbox';
 import { ChatroomInfo } from '../store/AddressStore';
 import { TextMessageType } from 'chatuim2/types/module/types/messageType';
 import { eventHandler } from '../../eventHandler';
-const reportType = [
-  'Unwelcome commercial content or spam',
-  'Pornographic or explicit content',
-  'Child abuse',
-  'Hate speech or graphic violence',
-  'Promote terrorism',
-  'Harassment or bullying',
-  'Suicide or self harm',
-  'False information',
-  'Others',
-];
+
+export let reportType: Record<string, string> = {
+  tag1: 'Unwelcome commercial content',
+  tag2: 'Pornographic or explicit content',
+  tag3: 'Child abuse',
+  tag4: 'Hate speech or graphic violence',
+  tag5: 'Promote terrorism',
+  tag6: 'Harassment or bullying',
+  tag7: 'Suicide or self harm',
+  tag8: 'False information',
+  tag9: 'Others',
+};
 
 export interface ChatroomProps {
   prefix?: string;
@@ -44,12 +45,13 @@ export interface ChatroomProps {
     moreAction?: HeaderProps['moreAction'];
   };
   renderMessageList?: () => ReactNode; // 自定义渲染 MessageList
-  renderMessageEditor?: () => ReactNode; // 自定义渲染 MessageEditor
-  messageEditorProps?: MessageEditorProps;
+  renderMessageInput?: () => ReactNode; // 自定义渲染 MessageInput
+  messageInputProps?: MessageInputProps;
   messageListProps?: MsgListProps;
   renderBroadcast?: () => ReactNode;
   broadcastProps?: BroadcastProps;
   chatroomId: string;
+  reportType?: Record<string, string>; // 自定义举报内容 {'举报类型': "举报原因"}
 }
 
 const Chatroom = (props: ChatroomProps) => {
@@ -58,8 +60,8 @@ const Chatroom = (props: ChatroomProps) => {
     renderEmpty,
     renderHeader,
     headerProps,
-    renderMessageEditor,
-    messageEditorProps,
+    renderMessageInput,
+    messageInputProps,
     renderMessageList,
     messageListProps,
     renderBroadcast,
@@ -68,7 +70,11 @@ const Chatroom = (props: ChatroomProps) => {
     prefix,
     className,
     style,
+    reportType: reportTypeProps,
   } = props;
+  if (reportTypeProps) {
+    reportType = reportTypeProps;
+  }
   const context = useContext(RootContext);
   const { rootStore, features, theme } = context;
   const globalConfig = features?.chatroom;
@@ -91,7 +97,7 @@ const Chatroom = (props: ChatroomProps) => {
     const myInfo = rootStore.addressStore.appUsersInfo[rootStore.client.user] || {};
     const chatroom_uikit_userInfo = {
       userId: myInfo?.userId,
-      nickName: myInfo?.nickname,
+      nickname: myInfo?.nickname,
       avatarURL: myInfo?.avatarurl,
       gender: Number(myInfo?.gender),
       identify: myInfo?.ext?.identify,
@@ -176,8 +182,8 @@ const Chatroom = (props: ChatroomProps) => {
     };
   }, [chatroomId, rootStore.loginState]);
 
-  // config messageEditor
-  let messageEditorConfig: MessageEditorProps = {
+  // config messageInput
+  let messageInputConfig: MessageInputProps = {
     actions: [
       {
         name: 'TEXTAREA',
@@ -205,13 +211,13 @@ const Chatroom = (props: ChatroomProps) => {
       },
     ],
   };
-  if (globalConfig?.messageEditor) {
-    messageEditorConfig.actions = messageEditorConfig.actions?.filter(item => {
-      if (item.name == 'EMOJI' && globalConfig?.messageEditor?.emoji == false) {
+  if (globalConfig?.messageInput) {
+    messageInputConfig.actions = messageInputConfig.actions?.filter(item => {
+      if (item.name == 'EMOJI' && globalConfig?.messageInput?.emoji == false) {
         return false;
       }
 
-      if (item.name == 'GIFT' && globalConfig?.messageEditor?.gift == false) {
+      if (item.name == 'GIFT' && globalConfig?.messageInput?.gift == false) {
         return false;
       }
 
@@ -235,21 +241,21 @@ const Chatroom = (props: ChatroomProps) => {
   };
 
   const [reportOpen, setReportOpen] = useState(false);
-  const [checkedType, setCheckedType] = useState(-1);
-  const handleCheckChange = (type: number) => {
+  const [checkedType, setCheckedType] = useState('');
+  const handleCheckChange = (type: string) => {
     setCheckedType(type);
   };
   const handleReportMessage = () => {
     rootStore.client
       .reportMessage({
-        reportType: reportType[checkedType],
+        reportType: checkedType,
         reportReason: reportType[checkedType],
         messageId: reportMessageId,
       })
       .then(() => {
         eventHandler.dispatchSuccess('reportMessage');
         setReportOpen(false);
-        setCheckedType(-1);
+        setCheckedType('');
       })
       .catch(err => {
         eventHandler.dispatchError('reportMessage', err);
@@ -265,7 +271,7 @@ const Chatroom = (props: ChatroomProps) => {
         renderEmpty ? (
           renderEmpty()
         ) : (
-          <Empty text={t('noConversation')}></Empty>
+          <Empty text={t('Enter chatroom to start chatting')}></Empty>
         )
       ) : (
         <>
@@ -287,44 +293,53 @@ const Chatroom = (props: ChatroomProps) => {
             ></Header>
           )}
           <p></p>
-          {typeof renderBroadcast == 'function'
-            ? renderBroadcast()
-            : broadcast.length > 0 && (
-                <Broadcast
-                  loop={0}
-                  delay={1}
-                  play={true}
-                  onCycleComplete={handleBroadcastFinish}
-                  {...broadcastProps}
-                >
-                  <div>{(broadcast[0] as TextMessageType).msg || ''}</div>
-                </Broadcast>
-              )}
 
-          {renderMessageList ? (
-            renderMessageList()
+          <div style={{ position: 'relative', flex: '1', overflow: 'hidden', display: 'flex' }}>
+            {typeof renderBroadcast == 'function'
+              ? renderBroadcast()
+              : broadcast.length > 0 && (
+                  <Broadcast
+                    loop={0}
+                    delay={1}
+                    play={true}
+                    onCycleComplete={handleBroadcastFinish}
+                    style={{
+                      position: 'absolute',
+                      width: 'calc(100% - 24px)',
+                      zIndex: 9,
+                      margin: '12px',
+                    }}
+                    {...broadcastProps}
+                  >
+                    <div>{(broadcast[0] as TextMessageType)?.msg || ''}</div>
+                  </Broadcast>
+                )}
+            {renderMessageList ? (
+              renderMessageList()
+            ) : (
+              <MessageList
+                renderMessage={renderChatroomMessage}
+                conversation={{
+                  chatType: 'chatRoom',
+                  conversationId: chatroomId,
+                }}
+                {...messageListProps}
+              ></MessageList>
+            )}
+          </div>
+
+          {renderMessageInput ? (
+            renderMessageInput()
           ) : (
-            <MessageList
-              renderMessage={renderChatroomMessage}
+            <MessageInput
+              placeHolder={t("Let's Chat") as string}
               conversation={{
                 chatType: 'chatRoom',
                 conversationId: chatroomId,
               }}
-              {...messageListProps}
-            ></MessageList>
-          )}
-
-          {renderMessageEditor ? (
-            renderMessageEditor()
-          ) : (
-            <MessageEditor
-              conversation={{
-                chatType: 'chatRoom',
-                conversationId: chatroomId,
-              }}
-              {...messageEditorConfig}
-              {...messageEditorProps}
-            ></MessageEditor>
+              {...messageInputConfig}
+              {...messageInputProps}
+            ></MessageInput>
           )}
         </>
       )}
@@ -339,14 +354,14 @@ const Chatroom = (props: ChatroomProps) => {
         }}
       >
         <div>
-          {reportType.map((item, index) => {
+          {Object.keys(reportType).map((item, index) => {
             return (
               <div className="report-item" key={index}>
-                <div>{t(reportType[index])}</div>
+                <div>{t(reportType[item] as string)}</div>
                 <Checkbox
-                  checked={checkedType === index}
+                  checked={checkedType === item}
                   onChange={() => {
-                    handleCheckChange(index);
+                    handleCheckChange(item);
                   }}
                 ></Checkbox>
               </div>

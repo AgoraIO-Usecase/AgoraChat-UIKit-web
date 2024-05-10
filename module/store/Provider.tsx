@@ -8,7 +8,7 @@ import { useEventHandler } from '../hooks/chat';
 import { initReactI18next } from 'react-i18next';
 import i18n from 'i18next';
 import { resource } from '../../local/resource';
-import { hexToHsla, generateColors } from '../utils/color';
+import { hexToHsla, generateColors, isHueValue, isHexColor } from '../utils/color';
 import { eventHandler } from '../../eventHandler';
 export interface ProviderProps {
   initConfig: {
@@ -16,10 +16,17 @@ export interface ProviderProps {
     userId?: string;
     token?: string;
     password?: string;
+    translationTargetLanguage?: string;
+    useUserInfo?: boolean;
+    msyncUrl?: string;
+    restUrl?: string;
+    isHttpDNS?: boolean;
+    useReplacedMessageContents?: boolean;
+    deviceId?: string;
   };
   local?: {
     fallbackLng?: string;
-    lng: 'zh' | 'en';
+    lng?: string;
     resources?: {
       [key: string]: {
         translation: {
@@ -50,8 +57,10 @@ export interface ProviderProps {
         translate?: boolean;
         edit?: boolean;
         select?: boolean;
+        forward?: boolean;
+        report?: boolean;
       };
-      messageEditor?: {
+      messageInput?: {
         mention?: boolean;
         typing?: boolean;
         record?: boolean;
@@ -59,6 +68,8 @@ export interface ProviderProps {
         moreAction?: boolean;
         file?: boolean;
         picture?: boolean;
+        video?: boolean;
+        contactCard?: boolean;
       };
     };
     conversationList?: {
@@ -66,6 +77,9 @@ export interface ProviderProps {
       item?: {
         moreAction?: boolean;
         deleteConversation?: boolean;
+        pinConversation?: boolean;
+        muteConversation?: boolean;
+        presence?: boolean;
       };
     };
   };
@@ -75,24 +89,39 @@ export interface ProviderProps {
     };
   };
   theme?: {
-    primaryColor?: string;
+    primaryColor?: string | number;
     mode?: 'light' | 'dark';
+    avatarShape?: 'circle' | 'square';
+    bubbleShape?: 'ground' | 'square';
+    componentsShape?: 'ground' | 'square';
   };
 }
 const Provider: React.FC<ProviderProps> = props => {
   const { initConfig, local, features, reactionConfig, theme } = props;
-  const { appKey } = initConfig;
+  const {
+    appKey,
+    msyncUrl,
+    restUrl,
+    isHttpDNS = true,
+    useReplacedMessageContents,
+    deviceId,
+  } = initConfig;
   const client = useMemo(() => {
     return new chatSDK.connection({
       appKey: appKey,
       delivery: true,
+      url: msyncUrl,
+      apiUrl: restUrl,
+      isHttpDNS,
+      deviceId,
+      useReplacedMessageContents,
     });
   }, [appKey]);
 
   rootStore.setClient(client);
   rootStore.setInitConfig(initConfig);
   // console.log('Provider is run...');
-  useEventHandler();
+  useEventHandler(props);
   let localConfig: any = {
     fallbackLng: 'en',
     lng: 'en',
@@ -121,17 +150,29 @@ const Provider: React.FC<ProviderProps> = props => {
         .catch(err => {
           eventHandler.dispatchError('open', err);
         });
+    } else if (initConfig.userId && initConfig.password) {
+      client
+        .open({
+          user: initConfig.userId,
+          pwd: initConfig.password,
+        })
+        .then(() => {
+          eventHandler.dispatchSuccess('open');
+        })
+        .catch(err => {
+          eventHandler.dispatchError('open', err);
+        });
     }
   }, [initConfig.userId, initConfig.token]);
 
-  if (theme?.primaryColor) {
-    // rootStore.setTheme(theme);
-    const color = hexToHsla(theme.primaryColor);
+  // rootStore.setTheme(theme);
+  if (isHexColor(theme?.primaryColor as string)) {
+    const color = hexToHsla(theme?.primaryColor as string);
     if (color) {
       generateColors(color);
-    } else {
-      generateColors('hsla(203, 100%, 60%, 1)');
     }
+  } else if (isHueValue(theme?.primaryColor as number)) {
+    generateColors(`hsla(${theme?.primaryColor}, 100%, 60%, 1)`);
   } else {
     generateColors('hsla(203, 100%, 60%, 1)');
   }

@@ -8,13 +8,15 @@ import './style/style.scss';
 import { ChatSDK } from '../../SDK';
 import { useTranslation } from 'react-i18next';
 import Header from '../header';
-import MessageEditor, { MessageEditorProps } from '../messageEditor';
+import MessageInput, { MessageInputProps } from '../messageInput';
 import Icon from '../../component/icon';
 import Avatar from '../../component/avatar';
 import TextMessage from '../textMessage';
 import ImageMessage from '../imageMessage';
 import FileMessage from '../fileMessage';
 import AudioMessage from '../audioMessage';
+import VideoMessage from '../videoMessage';
+import UserCardMessage from '../userCardMessage';
 import CombinedMessage from '../combinedMessage';
 import { MessageList, MsgListProps } from '../chat/MessageList';
 import Input from '../../component/input';
@@ -33,22 +35,22 @@ export interface ThreadProps {
   prefix?: string;
   className?: string;
   style?: React.CSSProperties;
-  shape?: 'ground' | 'square'; // 气泡形状
-  direction?: 'ltr' | 'rtl';
-  message: ChatSDK.MessageBody;
+  // shape?: 'ground' | 'square'; // 气泡形状
+  // direction?: 'ltr' | 'rtl';
+  // message: ChatSDK.MessageBody;
   messageListProps?: MsgListProps;
   createThread?: boolean;
-  groupID: string;
-  threadID?: string;
-  originalMsg: ChatSDK.MessageBody;
-  messageEditorProps?: MessageEditorProps;
+  // groupID: string;
+  // threadID?: string;
+  // originalMsg: ChatSDK.MessageBody;
+  messageInputProps?: MessageInputProps;
 }
 
 const Thread = (props: ThreadProps) => {
   const context = useContext(RootContext);
   const { rootStore, features, theme } = context;
   const themeMode = theme?.mode || 'light';
-  const { prefix, className, messageListProps, messageEditorProps, style = {} } = props;
+  const { prefix, className, messageListProps, messageInputProps, style = {} } = props;
   const { getPrefixCls } = React.useContext(ConfigContext);
   const prefixCls = getPrefixCls('thread', prefix);
   const { t } = useTranslation();
@@ -133,6 +135,37 @@ const Thread = (props: ThreadProps) => {
             customAction={{ visible: false }}
           />
         );
+        break;
+      case 'video':
+        content = (
+          <VideoMessage
+            key={msg.id}
+            videoMessage={msg}
+            renderUserProfile={() => null}
+            thread={false}
+            type="secondly"
+            reaction={false}
+            direction="ltr"
+            customAction={{ visible: false }}
+          ></VideoMessage>
+        );
+        break;
+      case 'custom':
+        if (msg.customEvent == 'userCard') {
+          content = (
+            <UserCardMessage
+              renderUserProfile={() => null}
+              key={msg.id}
+              thread={false}
+              customMessage={msg}
+              type="secondly"
+              reaction={false}
+              direction="ltr"
+              customAction={{ visible: false }}
+              bubbleStyle={{ maxWidth: 'calc(100% - 48px)' }}
+            ></UserCardMessage>
+          );
+        }
         break;
       default:
         content = null;
@@ -292,6 +325,14 @@ const Thread = (props: ThreadProps) => {
         }
       });
     }
+
+    // clear replied message
+    rootStore.messageStore.setRepliedMessage(null);
+    // clear selected message
+    rootStore.messageStore.setSelectedMessage(conversation, {
+      selectable: false,
+      selectedMessage: [],
+    });
   }, [currentThread?.info?.id]);
 
   // close panel
@@ -301,6 +342,13 @@ const Thread = (props: ThreadProps) => {
     //   visible: false,
     //   creating: false,
     // });
+    // clear replied message
+    rootStore.messageStore.setRepliedMessage(null);
+    // clear selected message
+    rootStore.messageStore.setSelectedMessage(conversation, {
+      selectable: false,
+      selectedMessage: [],
+    });
     rootStore.threadStore.setThreadVisible(false);
   };
 
@@ -511,11 +559,16 @@ const Thread = (props: ThreadProps) => {
     const showMoreAction = role != 'member';
     const myId = rootStore.client.user;
     const membersDom = members.map(member => {
+      let name = rootStore.addressStore.appUsersInfo?.[member]?.nickname;
+      const avatarUrl = rootStore.addressStore.appUsersInfo?.[member]?.avatarurl;
+      // if (item.attributes?.nickName) {
+      //   name = item.attributes?.nickName;
+      // }
       return (
         <div className={`${prefixCls}-members-item`} key={member}>
           <div className={`${prefixCls}-members-item-name`}>
-            <Avatar>{member}</Avatar>
-            <div>{member}</div>
+            <Avatar src={avatarUrl}>{name}</Avatar>
+            <div>{name || member}</div>
           </div>
           {showMoreAction && myId != member && (
             <Tooltip title={menuNode(member)} trigger="click" placement="bottom">
@@ -540,11 +593,50 @@ const Thread = (props: ThreadProps) => {
     });
     setRenderMembers(filterMembers);
   };
+
+  // config message
+  let messageProps: MsgListProps['messageProps'] = {
+    customAction: {
+      visible: true,
+      icon: null,
+      actions: [
+        {
+          content: 'REPLY',
+          onClick: () => {},
+        },
+
+        {
+          content: 'TRANSLATE',
+          onClick: () => {},
+        },
+        {
+          content: 'Modify',
+          onClick: () => {},
+        },
+        {
+          content: 'SELECT',
+          onClick: () => {},
+        },
+        {
+          content: 'FORWARD',
+          onClick: () => {},
+        },
+      ],
+    },
+  };
   return (
     <div className={classString} style={{ ...style }}>
       <div ref={headerRef}>
         <Header
-          avatar={<Icon type="THREAD"></Icon>}
+          avatar={
+            <Icon
+              type="THREAD"
+              color={themeMode == 'dark' ? '#C8CDD0' : '#464E53'}
+              width={24}
+              height={24}
+              style={{ marginRight: '12px' }}
+            ></Icon>
+          }
           content={threadStore.currentThread.info?.name || t('aThread')}
           close
           onClickClose={handleClickClose}
@@ -552,16 +644,20 @@ const Thread = (props: ThreadProps) => {
         />
       </div>
       {threadStore.currentThread.creating ? renderCreateForm() : renderOriginalMsg()}
-      <MessageList {...messageListProps} isThread={true} conversation={conversation}></MessageList>
+      <MessageList
+        {...{ ...messageProps, ...messageListProps }}
+        isThread={true}
+        conversation={conversation}
+      ></MessageList>
       {showReply && <UnsentRepliedMsg type="summary"></UnsentRepliedMsg>}
-      <MessageEditor
+      <MessageInput
         disabled={threadStore.currentThread.creating && editorDisable}
         isChatThread={true}
-        enabledMenton={false}
+        enabledMention={false}
         // onSendMessage={handleSendMessage}
         onBeforeSendMessage={handleSendMessage}
         conversation={conversation}
-        {...messageEditorProps}
+        {...messageInputProps}
       />
 
       <Modal

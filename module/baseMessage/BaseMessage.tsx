@@ -17,12 +17,13 @@ import { getStore } from '../store';
 import Checkbox from '../../component/checkbox';
 import UserProfile from '../userProfile';
 import { observer } from 'mobx-react-lite';
-import { EmojiConfig } from '../messageEditor/emoji/Emoji';
+import { EmojiConfig } from '../messageInput/emoji/Emoji';
 import { RootContext } from '../store/rootContext';
 interface CustomAction {
   visible: boolean;
   icon?: ReactNode;
   actions?: {
+    visible?: boolean;
     icon?: ReactNode;
     content?: string;
     onClick?: (message: BaseMessageType) => void;
@@ -45,6 +46,7 @@ export interface BaseMessageProps {
   bubbleStyle?: React.CSSProperties;
   status?: MessageStatusProps['status'];
   avatar?: ReactNode;
+  avatarShape?: 'circle' | 'square';
   direction?: 'ltr' | 'rtl'; // 左侧布局/右侧布局
   prefix?: string;
   shape?: 'ground' | 'square'; // 气泡形状
@@ -66,11 +68,13 @@ export interface BaseMessageProps {
   onAddReactionEmoji?: (emojiString: string) => void;
   onDeleteReactionEmoji?: (emojiString: string) => void;
   onShowReactionUserList?: (emojiString: string) => void;
-  onRecallMessage?: () => void;
+  onRecallMessage?: (message: BaseMessageType) => void;
   onTranslateMessage?: () => void;
   onModifyMessage?: () => void;
   onSelectMessage?: () => void; // message select action handler
   onResendMessage?: () => void;
+  onForwardMessage?: (message: BaseMessageType) => void;
+  onReportMessage?: (message: BaseMessageType) => void;
   onMessageCheckChange?: (checked: boolean) => void;
   renderUserProfile?: (props: renderUserProfileProps) => React.ReactNode;
   onCreateThread?: () => void;
@@ -78,6 +82,7 @@ export interface BaseMessageProps {
   chatThreadOverview?: ChatSDK.ChatThreadOverview;
   onClickThreadTitle?: () => void;
   reactionConfig?: ReactionMessageProps['reactionConfig'];
+  formatDateTime?: (time: number) => string;
 }
 
 const msgSenderIsCurrentUser = (message: BaseMessageType) => {
@@ -118,6 +123,7 @@ let BaseMessage = (props: BaseMessageProps) => {
   const {
     message,
     avatar,
+    avatarShape = 'circle',
     direction = 'ltr',
     status = 'default',
     prefix: customizePrefixCls,
@@ -128,7 +134,7 @@ let BaseMessage = (props: BaseMessageProps) => {
     time,
     nickName,
     shape = 'ground',
-    arrow = false,
+    arrow,
     hasRepliedMsg = false,
     onReplyMessage,
     repliedMessage,
@@ -145,6 +151,8 @@ let BaseMessage = (props: BaseMessageProps) => {
     onModifyMessage,
     onSelectMessage,
     onResendMessage,
+    onForwardMessage,
+    onReportMessage,
     onMessageCheckChange,
     renderUserProfile,
     onCreateThread,
@@ -154,6 +162,7 @@ let BaseMessage = (props: BaseMessageProps) => {
     chatThreadOverview,
     onClickThreadTitle,
     reactionConfig,
+    formatDateTime,
   } = props;
   const { t } = useTranslation();
   const { getPrefixCls } = React.useContext(ConfigContext);
@@ -169,11 +178,27 @@ let BaseMessage = (props: BaseMessageProps) => {
   if (avatar) {
     avatarToShow = avatar;
   } else {
+    let shape = avatarShape;
+    if (theme?.avatarShape) {
+      shape = theme?.avatarShape;
+    }
     avatarToShow = (
-      <Avatar src={appUsersInfo?.[userId]?.avatarurl}>
+      <Avatar src={appUsersInfo?.[userId]?.avatarurl} shape={shape}>
         {appUsersInfo?.[userId]?.nickname || userId}
       </Avatar>
     );
+  }
+
+  let bubbleShape = shape;
+  let bubbleArrow = arrow;
+  if (theme?.bubbleShape) {
+    bubbleShape = theme?.bubbleShape;
+  }
+  if (bubbleShape == 'square' && typeof arrow == 'undefined') {
+    bubbleArrow = true;
+  }
+  if (message?.type == 'video' || message?.type == 'img') {
+    bubbleArrow = false;
   }
   const showRepliedMsg =
     typeof repliedMessage == 'object' && typeof repliedMessage.type == 'string';
@@ -184,9 +209,10 @@ let BaseMessage = (props: BaseMessageProps) => {
       [`${prefixCls}-right`]: direction == 'rtl',
       [`${prefixCls}-hasAvatar`]: !!avatar,
       [`${prefixCls}-${bubbleType}`]: !!bubbleType,
-      [`${prefixCls}-${shape}`]: !!shape,
-      [`${prefixCls}-arrow`]: !!arrow,
-      [`${prefixCls}-reply`]: showRepliedMsg && shape === 'ground',
+      [`${prefixCls}-${bubbleShape}`]: !!bubbleShape,
+      [`${prefixCls}-arrow`]: !!bubbleArrow,
+      [`${prefixCls}-reply`]: showRepliedMsg && bubbleShape === 'ground',
+      [`${prefixCls}-${themeMode}`]: !!themeMode,
     },
     className,
   );
@@ -199,13 +225,13 @@ let BaseMessage = (props: BaseMessageProps) => {
     onClickThreadTitle?.();
   };
   const threadNode = () => {
-    let { name, messageCount, lastMessage = {} } = chatThreadOverview!;
+    let { name, messageCount = 0, lastMessage = {} } = chatThreadOverview || {};
 
-    const { from, type, time } = lastMessage || {};
+    const { from, type, time } = lastMessage || ({} as any);
     let msgContent = '';
     switch (type) {
       case 'txt':
-        msgContent = lastMessage.msg;
+        msgContent = (lastMessage as any).msg;
         break;
       case 'img':
         msgContent = '[图片]';
@@ -260,7 +286,7 @@ let BaseMessage = (props: BaseMessageProps) => {
           )}
           <span>{(appUsersInfo[from]?.nickname || from) as unknown as string}</span>
           <span>{msgContent}</span>
-          <span>{getConversationTime(time)}</span>
+          <span>{formatDateTime?.(time) || getConversationTime(time)}</span>
         </div>
       </div>
     );
@@ -312,6 +338,14 @@ let BaseMessage = (props: BaseMessageProps) => {
           content: 'SELECT',
           onClick: () => {},
         },
+        {
+          content: 'FORWARD',
+          onClick: () => {},
+        },
+        {
+          content: 'REPORT',
+          onClick: () => {},
+        },
       ],
     };
   }
@@ -347,7 +381,7 @@ let BaseMessage = (props: BaseMessageProps) => {
     onDeleteMessage && onDeleteMessage();
   };
   const recallMessage = () => {
-    onRecallMessage && onRecallMessage();
+    onRecallMessage && onRecallMessage(message as BaseMessageType);
   };
   const translateMessage = () => {
     onTranslateMessage && onTranslateMessage();
@@ -364,34 +398,48 @@ let BaseMessage = (props: BaseMessageProps) => {
   const resendMessage = () => {
     onResendMessage && onResendMessage();
   };
+
+  const forwardMessage = () => {
+    onForwardMessage && onForwardMessage(message as BaseMessageType);
+  };
+
+  const reportMessage = () => {
+    onReportMessage && onReportMessage(message as BaseMessageType);
+  };
+
   let menuNode: ReactNode | undefined;
   if (moreAction?.visible) {
     menuNode = (
       <ul className={morePrefixCls}>
         {moreAction?.actions?.map((item, index) => {
-          if (item.content === 'DELETE') {
+          if (item.content === 'DELETE' && item.visible !== false) {
             return (
               <li
                 key={index}
                 onClick={deleteMessage}
                 className={themeMode == 'dark' ? 'cui-li-dark' : ''}
               >
-                <Icon type="DELETE" width={16} height={16} color="#5270AD"></Icon>
+                {item.icon ? item.icon : <Icon type="DELETE" width={16} height={16}></Icon>}
                 {t('delete')}
               </li>
             );
-          } else if (item.content === 'REPLY') {
+          } else if (item.content === 'REPLY' && item.visible !== false) {
             return (
               <li
                 key={index}
                 onClick={replyMessage}
                 className={themeMode == 'dark' ? 'cui-li-dark' : ''}
               >
-                <Icon type="ARROW_TURN_LEFT" width={16} height={16} color="#5270AD"></Icon>
+                {item.icon ? (
+                  item.icon
+                ) : (
+                  <Icon type="ARROW_TURN_LEFT" width={16} height={16}></Icon>
+                )}
+
                 {t('reply')}
               </li>
             );
-          } else if (item.content === 'UNSEND') {
+          } else if (item.content === 'UNSEND' && item.visible !== false) {
             return (
               isCurrentUser && (
                 <li
@@ -399,12 +447,13 @@ let BaseMessage = (props: BaseMessageProps) => {
                   onClick={recallMessage}
                   className={themeMode == 'dark' ? 'cui-li-dark' : ''}
                 >
-                  <Icon type="ARROW_BACK" width={16} height={16} color="#5270AD"></Icon>
+                  {item.icon ? item.icon : <Icon type="ARROW_BACK" width={16} height={16}></Icon>}
+
                   {t('unsend')}
                 </li>
               )
             );
-          } else if (item.content === 'TRANSLATE') {
+          } else if (item.content === 'TRANSLATE' && item.visible !== false) {
             return (
               message?.type === 'txt' && (
                 <li
@@ -412,12 +461,12 @@ let BaseMessage = (props: BaseMessageProps) => {
                   onClick={translateMessage}
                   className={themeMode == 'dark' ? 'cui-li-dark' : ''}
                 >
-                  <Icon type="TRANSLATION" width={16} height={16} color="#5270AD"></Icon>
+                  {item.icon ? item.icon : <Icon type="TRANSLATION" width={16} height={16}></Icon>}
                   {t('translate')}
                 </li>
               )
             );
-          } else if (item.content === 'Modify') {
+          } else if (item.content === 'Modify' && item.visible !== false) {
             return (
               (isCurrentUser || isOwner || isAdmin) &&
               message?.type === 'txt' && (
@@ -426,49 +475,90 @@ let BaseMessage = (props: BaseMessageProps) => {
                   onClick={modifyMessage}
                   className={themeMode == 'dark' ? 'cui-li-dark' : ''}
                 >
-                  <Icon type="MODIFY_MESSAGE" width={16} height={16} color="#5270AD"></Icon>
+                  {item.icon ? (
+                    item.icon
+                  ) : (
+                    <Icon type="MODIFY_MESSAGE" width={16} height={16}></Icon>
+                  )}
                   {t('modify')}
                 </li>
               )
             );
-          } else if (item.content === 'SELECT') {
+          } else if (item.content === 'SELECT' && item.visible !== false) {
             return (
               <li
                 key={index}
                 onClick={selectMessage}
                 className={themeMode == 'dark' ? 'cui-li-dark' : ''}
               >
-                <Icon type="SELECT" width={16} height={16} color="#5270AD"></Icon>
+                {item.icon ? item.icon : <Icon type="SELECT" width={16} height={16}></Icon>}
                 {t('select')}
               </li>
             );
-          } else if (item.content === 'RESEND') {
+          } else if (item.content === 'RESEND' && item.visible !== false) {
             return (
               <li
                 key={index}
                 onClick={resendMessage}
                 className={themeMode == 'dark' ? 'cui-li-dark' : ''}
               >
-                <Icon type="LOOP" width={16} height={16} color="#5270AD"></Icon>
+                {item.icon ? item.icon : <Icon type="LOOP" width={16} height={16}></Icon>}
                 {t('resend')}
               </li>
             );
+          } else if (item.content === 'FORWARD' && item.visible !== false) {
+            return (
+              <li
+                key={index}
+                onClick={forwardMessage}
+                className={themeMode == 'dark' ? 'cui-li-dark' : ''}
+              >
+                {item.icon ? (
+                  item.icon
+                ) : (
+                  <Icon type="ARROW_TURN_RIGHT" width={16} height={16}></Icon>
+                )}
+                {t('forward')}
+              </li>
+            );
+          } else if (item.content === 'REPORT' && item.visible !== false) {
+            return (
+              <li
+                key={index}
+                onClick={reportMessage}
+                className={themeMode == 'dark' ? 'cui-li-dark' : ''}
+              >
+                {item.icon ? item.icon : <Icon type="ENVELOPE" width={16} height={16}></Icon>}
+                {t('report')}
+              </li>
+            );
           }
-          return (
-            <li
-              className={themeMode == 'dark' ? 'cui-li-dark' : ''}
-              key={index}
-              onClick={() => {
-                item.onClick?.(message);
-              }}
-            >
-              {item.icon && item.icon}
-              {item.content}
-            </li>
-          );
+
+          if (item.visible !== false) {
+            return (
+              <li
+                className={themeMode == 'dark' ? 'cui-li-dark' : ''}
+                key={index}
+                onClick={() => {
+                  item.onClick?.(message as BaseMessageType);
+                }}
+              >
+                {item.icon && item.icon}
+                {item.content}
+              </li>
+            );
+          } else {
+            return null;
+          }
         })}
       </ul>
     );
+  }
+
+  // 音视频邀请消息去掉更多操作
+  let isRtcInviteMessage = false;
+  if (message?.type === 'txt' && message?.ext?.msgType === 'rtcCallWithAgora') {
+    isRtcInviteMessage = true;
   }
 
   const handleClickEmoji = (emoji: string) => {
@@ -531,36 +621,48 @@ let BaseMessage = (props: BaseMessageProps) => {
 
           <div className={`${prefixCls}-box`}>
             {showRepliedMsg ? (
-              <RepliedMsg message={repliedMessage} shape={shape} direction={direction}></RepliedMsg>
+              <RepliedMsg
+                message={repliedMessage as BaseMessageType}
+                shape={bubbleShape}
+                direction={direction}
+              ></RepliedMsg>
             ) : (
               <div className={`${prefixCls}-info`}>
-                <span className={`${prefixCls}-nickname`}>{msgSenderNickname}</span>
-                <span className={`${prefixCls}-time`}>{getConversationTime(time as number)}</span>
+                {message?.chatType !== 'singleChat' && !isCurrentUser && (
+                  <span className={`${prefixCls}-nickname`}>{msgSenderNickname}</span>
+                )}
               </div>
             )}
             <div className={`${prefixCls}-body`}>
               {contentNode}
 
-              {hoverStatus && !select ? (
+              {hoverStatus && !select && !isRtcInviteMessage ? (
                 <>
                   {moreAction.visible && (
-                    <Tooltip title={menuNode} trigger="click" placement="bottom">
+                    <Tooltip
+                      title={menuNode}
+                      trigger="click"
+                      placement={isCurrentUser ? 'bottomRight' : 'bottomLeft'}
+                    >
                       {moreAction.icon || (
                         <Icon
                           // color="#919BA1"
                           type="ELLIPSIS"
                           className={`${prefixCls}-body-action`}
                           height={20}
+                          width={20}
                         ></Icon>
                       )}
                     </Tooltip>
                   )}
                   {reaction && status != 'failed' && (
                     <EmojiKeyBoard
+                      // @ts-ignore
                       reactionConfig={reactionConfig}
                       onSelected={handleClickEmoji}
                       selectedList={selectedList}
                       onDelete={handleDeleteReactionEmoji}
+                      placement={isCurrentUser ? 'bottomRight' : 'bottomLeft'}
                     ></EmojiKeyBoard>
                   )}
                   {thread && !chatThreadOverview && status != 'failed' && (
@@ -569,11 +671,19 @@ let BaseMessage = (props: BaseMessageProps) => {
                       onClick={handleClickThreadIcon}
                       className={`${prefixCls}-body-action`}
                       height={20}
+                      width={20}
                     ></Icon>
                   )}
                 </>
               ) : (
-                messageStatus && <MessageStatus status={status} type="icon"></MessageStatus>
+                <div className={`${prefixCls}-time-and-status-box`}>
+                  {messageStatus && !isRtcInviteMessage && (
+                    <MessageStatus status={status} type="icon"></MessageStatus>
+                  )}
+                  <span className={`${prefixCls}-time`}>
+                    {formatDateTime?.(time as number) || getConversationTime(time as number)}
+                  </span>
+                </div>
               )}
             </div>
           </div>

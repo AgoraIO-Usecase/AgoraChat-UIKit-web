@@ -1,6 +1,7 @@
-import { makeAutoObservable, observable, action, makeObservable } from 'mobx';
+import { makeAutoObservable, observable, action, makeObservable, runInAction } from 'mobx';
 import { ChatSDK } from '../SDK';
-
+import { eventHandler } from '../../eventHandler';
+import { BaseMessageType } from '../baseMessage/BaseMessage';
 export interface ThreadData {
   [key: string]: {
     [key: string]: {
@@ -74,7 +75,7 @@ class ThreadStore {
     // @ts-ignore
     const orgMsgId = originalMessage?.mid || originalMessage?.id;
 
-    let foundThread: ChatSDK.ThreadChangeInfo = {} as ChatSDK.ThreadChangeInfo;
+    let foundThread: ChatSDK.ThreadChangeInfo = {} as any as ChatSDK.ThreadChangeInfo;
 
     if (operation != 'create') {
       this.threadList[parentId]?.forEach(item => {
@@ -112,18 +113,26 @@ class ThreadStore {
           });
         }
         chatThreadOverview = threadInfo;
-
+        chatThreadOverview.lastMessage = threadInfo.lastMessage
+          ? threadInfo.lastMessage
+          : //@ts-ignore
+            this.currentThread.originalMessage?.chatThreadOverview?.lastMessage;
         if (!foundThread) return;
         let newThread = {
           ...foundThread,
+          ...threadInfo,
           name: threadInfo.name,
         };
-        threadInfo.lastMessage ? (newThread.lastMessage = threadInfo.lastMessage) : null;
+        // if (threadInfo.lastMessage) {
+        //   newThread.lastMessage = threadInfo.lastMessage;
+        // } else {
+        //   newThread.lastMessage = foundThread.lastMessage;
+        // }
 
         this.threadList[parentId]?.splice(
-          this.threadList[parentId]?.indexOf(foundThread),
+          this.threadList[parentId]?.indexOf(foundThread as unknown as ChatSDK.ChatThreadDetail),
           1,
-          newThread,
+          newThread as unknown as ChatSDK.ChatThreadDetail,
         );
         break;
 
@@ -141,7 +150,10 @@ class ThreadStore {
           // const warnText = operation === 'userRemove' ? t('You have been removed from the thread') : t('The thread has been disbanded')
           this.setThreadVisible(false);
 
-          this.threadList[parentId]?.splice(this.threadList[parentId]?.indexOf(foundThread), 1);
+          this.threadList[parentId]?.splice(
+            this.threadList[parentId]?.indexOf(foundThread as unknown as ChatSDK.ChatThreadDetail),
+            1,
+          );
         }
 
         break;
@@ -151,7 +163,7 @@ class ThreadStore {
 
     // add chatThreadOverview into original message, or update chatThreadOverview
 
-    const message = this.rootStore.messageStore.message['groupChat'][parentId as string];
+    const message = this.rootStore.messageStore.message['groupChat'][parentId as string] || [];
 
     message.forEach((item: any) => {
       if (item.mid === messageId || item.id === messageId) {
@@ -183,13 +195,13 @@ class ThreadStore {
       .getChatThreadDetail({ chatThreadId: threadId })
       .then((res: any) => {
         // 找到原消息
-        const message = this.rootStore.messageStore.message['groupChat'][res.data.parentId];
+        const message = this.rootStore.messageStore.message['groupChat'][res.data.parentId] || [];
         const originalMessage = message.find(
           (item: any) => item.mid === res.data.messageId || item.id === res.data.messageId,
         );
         this.setCurrentThread({
           ...this.currentThread,
-          originalMessage: originalMessage,
+          originalMessage: originalMessage || {},
           info: {
             // ...currentThreadInfo,
             // // @ts-ignore
@@ -212,29 +224,30 @@ class ThreadStore {
       })
       .then((res: { data: { affiliations: string[] } }) => {
         const members = res.data.affiliations;
+        runInAction(() => {
+          if (!this.threadList[parentId]) {
+            this.threadList[parentId] = [
+              {
+                id: threadId,
+                parentId: parentId,
+                members,
+                name: '',
+                owner: '',
+                created: 0,
+                messageId: '',
+              },
+            ];
+          }
+          this.threadList[parentId]?.forEach(item => {
+            if (item.id === threadId) {
+              item.members = members;
+            }
+          });
 
-        if (!this.threadList[parentId]) {
-          this.threadList[parentId] = [
-            {
-              id: threadId,
-              parentId: parentId,
-              members,
-              name: '',
-              owner: '',
-              created: 0,
-              messageId: '',
-            },
-          ];
-        }
-        this.threadList[parentId]?.forEach(item => {
-          if (item.id === threadId) {
-            item.members = members;
+          if (this.currentThread.info?.id === threadId) {
+            this.currentThread.info.members = members;
           }
         });
-
-        if (this.currentThread.info?.id === threadId) {
-          this.currentThread.info.members = members;
-        }
         return members;
       });
   }
@@ -257,9 +270,15 @@ class ThreadStore {
     if (!chatThreadId) {
       throw new Error('no chatThreadId');
     }
-    return this.rootStore.client.joinChatThread({ chatThreadId }).then((res: any) => {
-      // this.getThreadMembers('', chatThreadId);
-    });
+    return this.rootStore.client
+      .joinChatThread({ chatThreadId })
+      .then((res: any) => {
+        // this.getThreadMembers('', chatThreadId);
+        eventHandler.dispatchSuccess('joinChatThread');
+      })
+      .catch((error: ChatSDK.ErrorEvent) => {
+        eventHandler.dispatchError('joinChatThread', error);
+      });
   }
 
   getGroupChatThreads(parentId: string, cursor?: string): Promise<string | null> {
@@ -274,34 +293,44 @@ class ThreadStore {
         pageSize: 20,
         cursor,
       })
-      .then((res: any) => {
-        const threads = res.entities;
+      .then((res: ChatSDK.AsyncResult<ChatSDK.ChatThreadDetail[]>) => {
+        const threads = res.entities || [];
         let list = this.threadList[parentId] || [];
         if (!cursor) {
           list = [];
         }
-        const chatThreadIds = threads.map((item: { id: any }) => {
+        const chatThreadIds = threads?.map((item: { id: any }) => {
           return item.id;
         });
+        eventHandler.dispatchSuccess('getChatThreads');
         return this.rootStore.client
           .getChatThreadLastMessage({
             chatThreadIds: chatThreadIds,
           })
-          .then(data => {
-            data.entities.forEach(item => {
-              let idx = threads.findIndex(thread => item.chatThreadId === thread.id);
-              item.lastMessage.chatType = 'groupChat';
+          .then((data: ChatSDK.AsyncResult<ChatSDK.ChatThreadLastMessage[]>) => {
+            data.entities?.forEach(item => {
+              let idx = threads?.findIndex(thread => item.chatThreadId === thread.id);
+              (item.lastMessage as BaseMessageType).chatType = 'groupChat';
+              // @ts-ignore
               threads[idx].lastMessage = item.lastMessage;
             });
 
-            this.threadList[parentId] = [...list, ...threads];
+            runInAction(() => {
+              this.threadList[parentId] = [...list, ...threads];
+            });
 
             if (threads.length < 20) {
               return null;
             }
-
+            eventHandler.dispatchSuccess('getChatThreadLastMessage');
             return res.properties.cursor;
+          })
+          .catch((error: ChatSDK.ErrorEvent) => {
+            eventHandler.dispatchError('getChatThreadLastMessage', error);
           });
+      })
+      .catch((error: ChatSDK.ErrorEvent) => {
+        eventHandler.dispatchError('getChatThreads', error);
       });
   }
   clear() {

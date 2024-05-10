@@ -34,6 +34,8 @@ import NoticeMessage from '../noticeMessage';
 import { BaseMessageProps } from '../baseMessage';
 import { useTranslation } from 'react-i18next';
 import Icon from '../../component/icon';
+import UserCardMessage from '../userCardMessage';
+import { CustomMessageType } from 'module/types/messageType';
 export interface MsgListProps {
   prefix?: string;
   className?: string;
@@ -43,10 +45,10 @@ export interface MsgListProps {
   renderUserProfile?: (props: renderUserProfileProps) => React.ReactNode;
   conversation?: CurrentConversation;
   messageProps?: BaseMessageProps;
+  onOpenThreadPanel?: (threadId: string) => void;
 }
 
 const MessageScrollList = ScrollList<ChatSDK.MessageBody | RecallMessage>();
-
 let MessageList: FC<MsgListProps> = props => {
   const rootStore = useContext(RootContext).rootStore;
   const { messageStore } = rootStore;
@@ -65,15 +67,21 @@ let MessageList: FC<MsgListProps> = props => {
   const { getPrefixCls } = React.useContext(ConfigContext);
   const prefixCls = getPrefixCls('messageList', customizePrefixCls);
   const classString = classNames(prefixCls, className);
-
+  const context = useContext(RootContext);
+  const { initConfig } = context;
+  const { useUserInfo } = initConfig;
   const msgContainerRef = useRef<HTMLDivElement>(null);
+  const memoProps = React.useMemo(() => {
+    return {
+      messageProps,
+    };
+  }, []);
 
   const currentCVS = conversation ? conversation : messageStore.currentCVS || {};
 
   const { loadMore, isLoading } = useHistoryMessages(currentCVS);
 
   let messageData = messageStore.message[currentCVS.chatType]?.[currentCVS.conversationId] || [];
-
   const renderMsg = (data: { index: number; style: React.CSSProperties }) => {
     if (renderMessage) {
       const element = renderMessage(messageData[data.index]);
@@ -129,16 +137,17 @@ let MessageList: FC<MsgListProps> = props => {
       return (
         <TextMessage
           key={messageData[data.index].id}
-          style={data.style}
+          // style={data.style}
           //@ts-ignore
           status={messageData[data.index].status}
           //@ts-ignore
           textMessage={messageData[data.index]}
           renderUserProfile={renderUserProfile}
           thread={isThread}
-          {...messageProps}
+          onOpenThreadPanel={props.onOpenThreadPanel || (() => {})}
+          {...memoProps.messageProps}
         >
-          {(messageData[data.index] as ChatSDK.TextMsgBody).msg}
+          {/* {(messageData[data.index] as ChatSDK.TextMsgBody).msg} */}
         </TextMessage>
       );
     } else if (messageData[data.index].type == 'combine') {
@@ -155,7 +164,34 @@ let MessageList: FC<MsgListProps> = props => {
           {...messageProps}
         ></CombinedMessage>
       );
-    } else if (messageData[data.index].type == 'video' || messageData[data.index].type == 'loc') {
+    } else if (messageData[data.index].type == 'video') {
+      return (
+        <VideoMessage
+          key={messageData[data.index].id}
+          //@ts-ignore
+          videoMessage={messageData[data.index]}
+          style={data.style}
+          renderUserProfile={renderUserProfile}
+          thread={isThread}
+          videoProps={{
+            onCanPlay: () => {
+              if (messageStore.unreadMessageCount <= 0) {
+                //@ts-ignore
+                if (
+                  //@ts-ignore
+                  listRef.current.scrollHeight - listRef.current.scrollTop - 10 <
+                  //@ts-ignore
+                  msgContainerRef.current?.clientHeight
+                ) {
+                  scrollToBottom();
+                }
+              }
+            },
+          }}
+          {...messageProps}
+        ></VideoMessage>
+      );
+    } else if (messageData[data.index].type == 'loc') {
       return (
         <RecalledMessage
           key={messageData[data.index].id}
@@ -168,14 +204,33 @@ let MessageList: FC<MsgListProps> = props => {
           {(messageData[data.index] as ChatSDK.TextMsgBody).msg}
         </RecalledMessage>
       );
+    } else if (
+      messageData[data.index].type == 'custom' &&
+      (messageData[data.index] as CustomMessageType).customEvent == 'userCard'
+    ) {
+      return (
+        <UserCardMessage
+          renderUserProfile={renderUserProfile}
+          style={data.style}
+          key={messageData[data.index].id}
+          thread={isThread}
+          customMessage={messageData[data.index] as any}
+          {...messageProps}
+        ></UserCardMessage>
+      );
     }
   };
-
-  let lastMsgId = messageData[messageData.length - 1]?.id || '';
+  let lastMessage = messageData[messageData.length - 1];
+  let lastMsgId = lastMessage?.id || '';
   // 每次发消息滚动到最新的一条
   const listRef = React.useRef<List>(null);
   useEffect(() => {
-    if (messageStore.holding) return;
+    if (
+      messageStore.holding &&
+      lastMessage?.from != '' &&
+      lastMessage?.from != rootStore.client.user
+    )
+      return;
     setTimeout(() => {
       (listRef?.current as any)?.scrollTo('bottom');
     }, 10);
@@ -186,7 +241,10 @@ let MessageList: FC<MsgListProps> = props => {
       (listRef?.current as any)?.scrollTo('bottom');
       if (currentCVS && currentCVS.chatType === 'groupChat') {
         if (!currentCVS.conversationId) return;
-        const { getGroupMemberList } = useGroupMembers(currentCVS.conversationId);
+        const { getGroupMemberList } = useGroupMembers(
+          currentCVS.conversationId,
+          useUserInfo ?? true,
+        );
         const { getGroupAdmins } = useGroupAdmins(currentCVS.conversationId);
         getGroupAdmins();
         getGroupMemberList?.();
@@ -206,7 +264,6 @@ let MessageList: FC<MsgListProps> = props => {
     // 滚动到顶加载更多
     let offsetBottom = scrollHeight - (scrollTop + offsetHeight);
     // scroll to bottom load data
-    // console.log(scrollTop, offsetHeight, offsetBottom);
     if (offsetBottom > 10) {
       !messageStore.holding && messageStore.setHoldingStatus(true);
     } else {
@@ -235,6 +292,7 @@ let MessageList: FC<MsgListProps> = props => {
           );
         }}
       ></MessageScrollList>
+      {/** 未读数大于0，并且当前的会话有未读消息时展示 */}
       {messageStore.unreadMessageCount > 0 && (
         <div className={`cui-unread-message-count`} onClick={scrollToBottom}>
           <Icon type="ARROW_DOWN_THICK" width={20} height={20}></Icon>

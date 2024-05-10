@@ -128,18 +128,24 @@ Import agora-chat-uikit into your code.
 
 ```javascript
 // App.js
-import React, { Component, useEffect } from 'react';
-import { UIKitProvider, Chat, ConversationList, useClient, rootStore } from 'agora-chat-uikit';
-import 'agora-chat-uikit/style.css';
+import React, { Component, useEffect } from "react";
+import {
+  Provider,
+  Chat,
+  ConversationList,
+  useClient,
+  rootStore,
+} from "agora-chat-uikit";
+import "agora-chat-uikit/style.css";
 
-const appKey = 'you app key'; // your appKey
-const user = ''; // your user ID
-const agoraToken = ''; // agora chat token
+const appKey = "you app key"; // your appKey
+const user = ""; // your user ID
+const agoraToken = ""; // agora chat token
 
 const conversation = {
-  chatType: 'singleChat', // 'singleChat' || 'groupChat'
-  conversationId: 'agora', // target user id or group id
-  name: 'Agora', // target user nickname or group name
+  chatType: "singleChat", // 'singleChat' || 'groupChat'
+  conversationId: "agora", // target user id or group id
+  name: "Agora", // target user nickname or group name
   lastMessage: {},
 };
 const ChatApp = () => {
@@ -162,18 +168,18 @@ const ChatApp = () => {
 class App extends Component {
   render() {
     return (
-      <UIKitProvider
+      <Provider
         initConfig={{
           appKey,
           userId: user,
           token: agoraToken,
         }}
-        onError={err => {
-          console.log('error: ', err);
+        onError={(err) => {
+          console.log("error: ", err);
         }}
       >
         <ChatApp />
-      </UIKitProvider>
+      </Provider>
     );
   }
 }
