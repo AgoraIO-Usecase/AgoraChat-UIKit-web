@@ -1,5 +1,7 @@
 @import '../color/color.scss';
 
+
+
 $theme: light;
 // The prefix to use on all css classes from Chat UI.
 $cui-prefix: cui;
@@ -154,7 +156,7 @@ $disabled-color-dark: rgba(255, 255, 255, 0.75);
 $btn-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
 
 $btn-text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
-$btn-font-weight: 40;
+$btn-font-weight: 500;
 $btn-border-width: $border-width-base;
 $btn-border-style: $border-style-base;
 $btn-border-radius-base: $border-radius-base;
@@ -168,7 +170,7 @@ $btn-default-bg: $component-background;
 $btn-default-border: $border-color-base;
 
 $btn-primary-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
-$btn-primary-color: #fff;
+$btn-primary-color: $gray-98;
 $btn-primary-bg: $blue-5;
 
 $btn-height-lg: $height-lg;
@@ -200,7 +202,7 @@ $avatar-size-sm: 24px;
 $avatar-font-size-base: 18px;
 $avatar-font-size-lg: 24px;
 $avatar-font-size-sm: 14px;
-$avatar-bg: $blue-5;
+$avatar-bg: $blue-6;
 $avatar-color: #fff;
 $avatar-border-radius: $border-radius-base;
 $avatar-group-overlapping: -8px;
@@ -272,7 +274,7 @@ $tooltip-bg: #fff;
 // Tooltip arrow width
 $tooltip-arrow-width: 8px * 1.414; // sqrt(2)
 // Tooltip distance with trigger
-$tooltip-distance: $tooltip-arrow-width - 1px + 4px;
+$tooltip-distance: 4px;
 // Tooltip arrow color
 $tooltip-arrow-color: $tooltip-bg;
 $tooltip-border-radius: $border-radius-base;

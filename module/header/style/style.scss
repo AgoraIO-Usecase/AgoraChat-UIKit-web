@@ -17,8 +17,7 @@ $header-prefix-cls: #{$cui-prefix}-header;
         &-box{
             display: flex;
             flex-direction: column;
-            margin-left: 12px;
-            margin-left: $margin-sm;
+            // margin-left: 12px;
         }
         &-text{
             white-space: nowrap;
@@ -26,6 +25,7 @@ $header-prefix-cls: #{$cui-prefix}-header;
             text-overflow: ellipsis;
             flex: 1;
             text-align: left;
+            @include Title(large)
         }
         &-sub{
             text-align: left;
@@ -50,6 +50,9 @@ $header-prefix-cls: #{$cui-prefix}-header;
             line-height: 36px;
             border-radius: 8px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         li:hover{
             background: #F1F2F3;

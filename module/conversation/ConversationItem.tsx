@@ -42,6 +42,7 @@ export interface ConversationItemProps {
       onClick?: () => void;
     }>;
   };
+  formatDateTime?: (time: number) => string;
 }
 
 let ConversationItem: FC<ConversationItemProps> = props => {
@@ -70,6 +71,7 @@ let ConversationItem: FC<ConversationItemProps> = props => {
         },
       ],
     },
+    formatDateTime,
     ...others
   } = props;
 
@@ -81,7 +83,9 @@ let ConversationItem: FC<ConversationItemProps> = props => {
   const context = useContext(RootContext);
   const { rootStore, theme } = context;
   const themeMode = theme?.mode || 'light';
-
+  if (theme?.avatarShape) {
+    avatarShape = theme?.avatarShape;
+  }
   const cvsStore = rootStore.conversationStore;
 
   const classString = classNames(
@@ -231,7 +235,11 @@ let ConversationItem: FC<ConversationItemProps> = props => {
       lastMsg = `/${t('video')}/`;
       break;
     case 'custom':
-      lastMsg = `/${t('custom')}/`;
+      if (data.lastMessage.customEvent == 'userCard') {
+        lastMsg = `/${t('contact')}/`;
+      } else {
+        lastMsg = `/${t('custom')}/`;
+      }
       break;
     // @ts-ignore
     case 'combine':
@@ -246,12 +254,16 @@ let ConversationItem: FC<ConversationItemProps> = props => {
       break;
   }
   if (data.chatType == 'groupChat') {
-    let msgFrom = data.lastMessage.from || '';
+    let msgFrom = data.lastMessage?.from || '';
     let from = msgFrom && msgFrom !== rootStore.client.context.userId ? `${msgFrom}: ` : '';
     const groupItem = getGroupItemFromGroupsById(data.conversationId);
     if (groupItem) {
       const memberIdx = getGroupMemberIndexByUserId(groupItem, msgFrom) ?? -1;
-      if (memberIdx > -1) {
+      // @ts-ignore
+      const ease_chat_uikit_user_info = data.lastMessage?.ext?.ease_chat_uikit_user_info;
+      if (ease_chat_uikit_user_info && ease_chat_uikit_user_info.nickname) {
+        from = `${ease_chat_uikit_user_info.nickname}: `;
+      } else if (memberIdx > -1) {
         let memberItem = groupItem?.members?.[memberIdx]!;
         from = `${getGroupMemberNickName(memberItem)}: `;
       }
@@ -276,7 +288,7 @@ let ConversationItem: FC<ConversationItemProps> = props => {
       )}
 
       <div className={`${prefixCls}-content`}>
-        <span className={`${prefixCls}-nickname`}>
+        <span className={`${prefixCls}-nickname ${data.silent ? 'has-silent' : ''}`}>
           {data.name || data.conversationId}
           {data.silent && (
             <Icon type="BELL_SLASH" className={`${prefixCls}-nickname-silent`}></Icon>
@@ -288,10 +300,19 @@ let ConversationItem: FC<ConversationItemProps> = props => {
         </span>
       </div>
       <div className={`${prefixCls}-info`}>
-        <span className={`${prefixCls}-time`}>{getConversationTime(data.lastMessage.time)}</span>
+        <span className={`${prefixCls}-time`}>
+          {formatDateTime?.(data.lastMessage?.time) || getConversationTime(data.lastMessage?.time)}
+        </span>
         {showMore ? (
-          <Tooltip title={menuNode} trigger="click" placement="bottom" arrow>
-            {moreAction.icon || <Icon type="ELLIPSIS" color="#33B1FF" height={20}></Icon>}
+          <Tooltip title={menuNode} trigger="click" placement="bottomRight">
+            {moreAction.icon || (
+              <Icon
+                type="ELLIPSIS"
+                color="#33B1FF"
+                height={20}
+                style={{ cursor: 'pointer' }}
+              ></Icon>
+            )}
           </Tooltip>
         ) : (
           <div

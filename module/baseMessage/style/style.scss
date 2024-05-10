@@ -41,7 +41,6 @@ $moreAction-prefix-cls: #{$cui-prefix}-moreAction;
 
         .#{$status-prefix-cls}-content {
             border-radius: $msg-bubble-border-radius-right;
-
             &::after {
                 border: $msg-bubble-arrow-border-size solid transparent;
                 border-left: $msg-bubble-arrow-border-size solid $msg-bubble-color-primary;
@@ -80,7 +79,6 @@ $moreAction-prefix-cls: #{$cui-prefix}-moreAction;
     &-left {
         .#{$status-prefix-cls}-content {
             border-radius: $msg-bubble-border-radius-left;
-
             &::before {
                 border: $msg-bubble-arrow-border-size solid transparent;
                 border-right: $msg-bubble-arrow-border-size solid $msg-bubble-color-secondly;
@@ -144,7 +142,7 @@ $moreAction-prefix-cls: #{$cui-prefix}-moreAction;
         display: flex;
         align-items: flex-end;
         gap: 8px;
-        margin: 0 8px;
+        margin: 0 12px;
 
         &-action {
             fill: $gray-6;
@@ -157,6 +155,8 @@ $moreAction-prefix-cls: #{$cui-prefix}-moreAction;
 
     &-content {
         // flex: 1;
+        display: flex;
+        flex-direction: column;
         max-width: calc(100% - 120px);
         // margin: $msg-base-content-margin;
         padding: $msg-base-content-padding;
@@ -221,6 +221,9 @@ $moreAction-prefix-cls: #{$cui-prefix}-moreAction;
         .#{$status-prefix-cls}-content {
             border-radius: $msg-bubble-square-border-radius;
         }
+        .#{$status-prefix-cls}-body{
+            margin: 0 17px;
+        }
     }
 
     &-info {
@@ -237,6 +240,10 @@ $moreAction-prefix-cls: #{$cui-prefix}-moreAction;
         color: $msg-nickname-font-color;
     }
 
+    &-time-and-status-box{
+        display: flex;
+        align-items: center;
+    }
     &-time {
         display: inline-block;
         // width: $msg-time-width;
@@ -291,6 +298,7 @@ $moreAction-prefix-cls: #{$cui-prefix}-moreAction;
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;
+                
             }
             // 当前元素下第二个div（child(2)）里面的span字号是12px
            
@@ -306,7 +314,7 @@ $moreAction-prefix-cls: #{$cui-prefix}-moreAction;
 
             }
 
-            &-icon{
+            &-icon svg{
                 fill: $gray-98;
             }
         }
@@ -323,13 +331,18 @@ $moreAction-prefix-cls: #{$cui-prefix}-moreAction;
             }
             &>span:nth-child(3){
                 // flex: none;
-                    /* flex: 1; */
+                flex: 1;
                 overflow: hidden;
                 /* flex-wrap: nowrap; */
                 /* display: flex; */
                 height: 16px;
-                text-overflow: ellipsis;
-                white-space: nowrap;
+                // 会把容器撑开
+                // text-overflow: ellipsis;
+                // white-space: nowrap;
+
+                display: -webkit-box;
+                -webkit-line-clamp: 1;
+                -webkit-box-orient: vertical;
             }
         }
         
@@ -346,7 +359,7 @@ $moreAction-prefix-cls: #{$cui-prefix}-moreAction;
                 border-top: 1px solid $special-8;
             }
             &-name{
-                &-icon{
+                &-icon svg{
                     fill: $special-5;
                 }
             }
@@ -357,6 +370,35 @@ $moreAction-prefix-cls: #{$cui-prefix}-moreAction;
             }
         }
     }
+    // dark mode primary style
+    &-dark.#{$status-prefix-cls}-secondly {
+            .#{$status-prefix-cls}-content {
+                background: $blue-2;
+                color: $msg-bubble-font-color-primary;
+
+                &::after {
+                    border-left: $msg-bubble-arrow-border-size solid $blue-2 !important;
+                }
+    
+                &::before {
+                    border-right: $msg-bubble-arrow-border-size solid $blue-2 !important;
+                }
+        }
+    }
+    &-dark.#{$status-prefix-cls}-primary {
+        .#{$status-prefix-cls}-content {
+            background: $blue-6;
+            color: $msg-bubble-font-color-secondly;
+
+            &::after {
+                border-left: $msg-bubble-arrow-border-size solid $blue-6 !important;
+            }
+
+            &::before {
+                border-right: $msg-bubble-arrow-border-size solid $blue-6 !important;
+            }
+    }
+}
 }
 
 .#{$moreAction-prefix-cls} {
@@ -378,7 +420,8 @@ $moreAction-prefix-cls: #{$cui-prefix}-moreAction;
         font-style: normal;
         font-weight: 500;
         line-height: 20px;
-
+        min-width: 188px;
+        text-align: left;
         >div{
             margin-right: 8px;
         }

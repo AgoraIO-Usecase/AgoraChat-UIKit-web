@@ -120,15 +120,17 @@
     @include button-variant-other($btn-ghost-bg, unset, $btn-ghost-bg);
     text-align: center;
     padding: 6px;
+    box-shadow: none!important;
+    border: none;
     &:hover,
     &:focus{
         background: $gray-95;
-        border: 1px solid transparent;
+        // border: 1px solid transparent;
     };
     &:active {
         text-decoration: none;
         background: $gray-9;
-        border: 1px solid transparent;
+        // border: 1px solid transparent;
     }
 }
 
@@ -158,7 +160,7 @@
             &:hover,
             &:focus,
             &:active {
-                @include button-color($gray-2, $gray-1, $gray-3);
+                @include button-color($gray-4, $gray-2, $gray-2);
                 text-shadow: none;
                 box-shadow: none;
             }
@@ -225,5 +227,32 @@
 
 @mixin btn-dark() {
     @include button-variant-primary($gray-95, $gray-1, $gray-4, $primary-color-active, dark);
+}
+
+@mixin btn-primary-dark(){
+    @include button-variant-primary($gray-95, $blue-6,$blue-6, $blue-7, dark);
+    &:hover,
+    &:focus {
+            @include button-color($gray-95, $blue-7, $blue-7)
+    }
+
+    &:active {
+        @include button-color($gray-98, $blue-5, $blue-5)
+    }
+    
+}
+
+@mixin btn-text-dark(){
+    @include button-variant-other($blue-6, unset, $btn-ghost-bg);
+    &:hover,
+    &:focus{
+        background: $blue-1;
+        // border: 1px solid transparent;
+    };
+    &:active {
+        text-decoration: none;
+        background: $blue-2;
+        // border: 1px solid transparent;
+    }
 }
 @import '~/common/style/index.scss';

@@ -27,7 +27,6 @@ const AudioMessage = (props: AudioMessageProps) => {
   const [isPlaying, setPlayStatus] = useState(false);
   const {
     audioMessage,
-    direction,
     style: customStyle,
     prefix: customizePrefixCls,
     className,
@@ -86,27 +85,32 @@ const AudioMessage = (props: AudioMessageProps) => {
       .catch(err => {
         // console.error('err', err);
       });
-    // const time = audioMessage!.body!.length * 1000;
-    // const time = file.duration * 1000;
-    // setTimeout(() => {
-    // 	setPlayStatus(false);
-    // }, time + 200);
+
+    // 消息是发给自己的单聊消息，回复read ack， 引用、转发的消息、已经是read状态的消息，不发read ack
+    if (
+      audioMessage.chatType == 'singleChat' &&
+      audioMessage.from != rootStore.client.context.userId &&
+      audioMessage.status != 'read' &&
+      !audioMessage.isChatThread &&
+      audioMessage.to == rootStore.client.context.userId
+    ) {
+      rootStore.messageStore.sendReadAck(audioMessage.id, audioMessage.from);
+    }
   };
   const handlePlayEnd = () => {
     setPlayStatus(false);
   };
 
-  const duration = length || file.duration;
+  const duration = Number.isInteger(length) ? length : file.duration || 0;
   const style = {
-    width: `calc(208px * ${duration / 15} + 40px)`,
-    maxWidth: '50vw',
+    width: `calc(${duration}% + 40px)`,
+    maxWidth: `calc(100% - 128px)`,
   };
   let { bySelf } = audioMessage;
   if (typeof bySelf == 'undefined') {
     bySelf = from == rootStore.client.context.userId;
   }
   const bubbleType = type ? type : bySelf ? 'primary' : 'secondly';
-
   const handleReplyMsg = () => {
     rootStore.messageStore.setRepliedMessage(audioMessage);
   };
@@ -189,12 +193,14 @@ const AudioMessage = (props: AudioMessageProps) => {
       // @ts-ignore
       audioMessage.mid || audioMessage.id,
       audioMessage.isChatThread,
+      true,
     );
   };
 
   let conversationId = getCvsIdFromMessage(audioMessage);
   const handleSelectMessage = () => {
     const selectable =
+      // @ts-ignore
       rootStore.messageStore.selectedMessage[audioMessage.chatType][conversationId]?.selectable;
     if (selectable) return; // has shown checkbox
 
@@ -215,10 +221,12 @@ const AudioMessage = (props: AudioMessageProps) => {
   };
 
   const select =
+    // @ts-ignore
     rootStore.messageStore.selectedMessage[audioMessage.chatType][conversationId]?.selectable;
 
   const handleMsgCheckChange = (checked: boolean) => {
     const checkedMessages =
+      // @ts-ignore
       rootStore.messageStore.selectedMessage[audioMessage.chatType][conversationId]
         ?.selectedMessage;
 
@@ -226,7 +234,7 @@ const AudioMessage = (props: AudioMessageProps) => {
     if (checked) {
       changedList.push(audioMessage);
     } else {
-      changedList = checkedMessages.filter(item => {
+      changedList = checkedMessages.filter((item: { id: string }) => {
         // @ts-ignore
         return !(item.id == audioMessage.id || item.mid == audioMessage.id);
       });
@@ -278,7 +286,7 @@ const AudioMessage = (props: AudioMessageProps) => {
   return (
     <>
       {onlyContent ? (
-        <div className={classString} onClick={playAudio} style={{ ...customStyle, ...style }}>
+        <div className={classString} onClick={playAudio} style={{ ...customStyle, width: '100%' }}>
           <AudioPlayer play={isPlaying} reverse={bySelf} size={20}></AudioPlayer>
           <span className={`${prefixCls}-duration`}>{duration + '"' || 0}</span>
           <audio
@@ -314,9 +322,10 @@ const AudioMessage = (props: AudioMessageProps) => {
           thread={_thread}
           chatThreadOverview={audioMessage.chatThreadOverview}
           onClickThreadTitle={handleClickThreadTitle}
+          bubbleStyle={style}
           {...others}
         >
-          <div className={classString} onClick={playAudio} style={{ ...customStyle, ...style }}>
+          <div className={classString} onClick={playAudio} style={{ ...customStyle }}>
             <AudioPlayer play={isPlaying} reverse={bySelf} size={20}></AudioPlayer>
             <span className={`${prefixCls}-duration`}>{duration + '"' || 0}</span>
             <audio

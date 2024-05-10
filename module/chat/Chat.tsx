@@ -1,4 +1,13 @@
-import React, { FC, useEffect, useRef, useState, useContext, ReactNode } from 'react';
+import React, {
+  FC,
+  useEffect,
+  useRef,
+  useState,
+  useContext,
+  ReactNode,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import { useSize } from 'ahooks';
@@ -10,7 +19,7 @@ import Badge from '../../component/badge';
 import Button from '../../component/button';
 import { Search } from '../../component/input/Search';
 import Header, { HeaderProps } from '../header';
-import MessageEditor, { MessageEditorProps } from '../messageEditor';
+import MessageInput, { MessageInputProps } from '../messageInput';
 import List from '../../component/list';
 import { MessageList, MsgListProps } from './MessageList';
 import { getStore } from '../store';
@@ -27,6 +36,26 @@ import ScrollList from '../../component/scrollList';
 import { ChatSDK } from 'module/SDK';
 import { getConversationTime, getCvsIdFromMessage, getMsgSenderNickname } from '../utils/index';
 import CallKit from 'chat-callkit';
+import { useContacts, useGroups, useUserInfo } from '../hooks/useAddress';
+import { BaseMessageType } from '../baseMessage/BaseMessage';
+import { reportType } from '../chatroom/Chatroom';
+import { eventHandler } from '../../eventHandler';
+import Modal from '../../component/modal';
+import Checkbox from '../../component/checkbox';
+export interface RtcRoomInfo {
+  callId: string;
+  calleeDevId?: string;
+  calleeIMName: string;
+  callerDevId?: string;
+  callerIMName: string;
+  channel: string;
+  confrName: string;
+  groupId: string;
+  groupName: string;
+  token?: string;
+  type: number;
+  joinedMembers: { agoraUid: number; imUserId: string }[];
+}
 export interface ChatProps {
   prefix?: string;
   className?: string;
@@ -39,16 +68,13 @@ export interface ChatProps {
     unreadCount?: number;
   }) => ReactNode; // 自定义渲染 Header
   renderMessageList?: () => ReactNode; // 自定义渲染 MessageList
-  renderMessageEditor?: () => ReactNode; // 自定义渲染 MessageEditor
+  renderMessageInput?: () => ReactNode; // 自定义渲染 MessageInput
   renderEmpty?: () => ReactNode; // 自定义渲染没有会话时的内容
+  renderRepliedMessage?: (repliedMessage: ChatSDK.MessageBody | null) => ReactNode; // 自定义渲染Input上面的被回复的消息
   // Header 的 props
-  headerProps?: {
-    avatar: ReactNode;
-    onAvatarClick?: () => void; // 点击 Header 中 头像的回调
-    moreAction?: HeaderProps['moreAction'];
-  };
+  headerProps?: HeaderProps;
   messageListProps?: MsgListProps;
-  messageEditorProps?: MessageEditorProps;
+  messageInputProps?: MessageInputProps;
 
   rtcConfig?: {
     appId: string;
@@ -56,8 +82,9 @@ export interface ChatProps {
     onInvite?: (data: {
       channel: string;
       conversation: CurrentConversation;
+      type: 'audio' | 'video';
     }) => Promise<[{ name: string; id: string; avatarurl?: string }]>;
-    onAddPerson?: (data: { channel: string }) => Promise<[{ member: string } | { owner: string }]>;
+    onAddPerson?: (data: RtcRoomInfo) => Promise<[{ id: string }]>;
     getIdMap?: (data: { userId: string; channel: string }) => Promise<{ [key: string]: string }>;
     onStateChange?: (data: { type: string; confr: any }) => void;
     getRTCToken?: (data: {
@@ -67,30 +94,42 @@ export interface ChatProps {
       agoraUid: string | number; // rtc user ID
       accessToken: string;
     }>;
+    groupAvatar?: string;
+    onRing?: (data: { channel: string }) => void;
   };
+  onOpenThread?: (data: { id: string }) => void;
+  onOpenThreadList?: () => void;
+  onVideoCall?: (data: { channel: string }) => void;
+  onAudioCall?: (data: { channel: string }) => void;
 }
 const getChatAvatarUrl = (cvs: CurrentConversation) => {
   if (cvs.chatType === 'singleChat') {
     return getStore().addressStore.appUsersInfo[cvs.conversationId]?.avatarurl;
-  } else {
-    return '';
+  } else if (cvs.chatType === 'groupChat') {
+    const ground = getStore().addressStore.groups.find(item => item.groupid === cvs.conversationId);
+    return ground?.avatarUrl;
   }
 };
 
-const Chat: FC<ChatProps> = props => {
+const Chat = forwardRef((props: ChatProps, ref) => {
   const {
     prefix: customizePrefixCls,
     className,
     renderHeader,
     renderMessageList,
-    renderMessageEditor,
+    renderMessageInput,
     renderEmpty,
     headerProps,
     messageListProps,
-    messageEditorProps,
+    messageInputProps,
     rtcConfig,
     style = {},
     threadModalStyle = {},
+    onOpenThread,
+    onOpenThreadList,
+    onAudioCall,
+    onVideoCall,
+    renderRepliedMessage,
   } = props;
   const { t } = useTranslation();
   const { getPrefixCls } = React.useContext(ConfigContext);
@@ -108,9 +147,10 @@ const Chat: FC<ChatProps> = props => {
     },
     className,
   );
-  const { appUsersInfo } = rootStore.addressStore;
+  const { appUsersInfo } = rootStore.addressStore || {};
   const globalConfig = features?.chat;
   const CVS = rootStore.conversationStore.currentCvs;
+  useContacts();
   const getRTCToken = rtcConfig?.getRTCToken;
   useEffect(() => {
     if (!rootStore.conversationStore.currentCvs.conversationId) {
@@ -136,7 +176,7 @@ const Chat: FC<ChatProps> = props => {
   }, [rootStore.conversationStore.currentCvs]);
 
   const repliedMsg = rootStore.messageStore.repliedMessage;
-  const replyCvsId = getCvsIdFromMessage(repliedMsg || {});
+  const replyCvsId = getCvsIdFromMessage((repliedMsg as BaseMessageType) || {});
   const showReply = repliedMsg && replyCvsId === CVS.conversationId;
 
   // --------- thread -----------
@@ -145,33 +185,37 @@ const Chat: FC<ChatProps> = props => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const headerRef = useRef(null);
   const showTheadList = () => {
+    onOpenThreadList?.();
     if (modalOpen) return;
     setModalOpen(true);
     rootStore.threadStore.getGroupChatThreads(CVS.conversationId)?.then(cursor => {
       setCursor(cursor);
     });
   };
-  const [cursor, setCursor] = useState<string | undefined>();
+  const [cursor, setCursor] = useState<string | undefined | null>();
   // containerRef?.current?.scrollHeight
   const threadScrollRef = useRef(null);
   const pagingGetThreadList = () => {
-    const height = threadScrollRef?.current?.scrollHeight;
     if (cursor === null) return;
-    rootStore.threadStore.getGroupChatThreads(CVS.conversationId, cursor)?.then((res: string) => {
+    rootStore.threadStore.getGroupChatThreads(CVS.conversationId, cursor)?.then(res => {
       setCursor(res);
       setTimeout(() => {
-        threadScrollRef?.current.scrollTo(threadList.length * 56);
+        // @ts-ignore
+        threadScrollRef?.current?.scrollTo?.(threadList.length * 56);
       }, 100);
     });
   };
 
   const threadList = rootStore.threadStore.threadList[CVS.conversationId] || [];
-  const openThread = item => {
+  const openThread = (item: { id: string }) => {
     // close thread list modal
     rootStore.threadStore.joinChatThread(item.id || '');
     setModalOpen(false);
     rootStore.threadStore.setThreadVisible(true);
     rootStore.threadStore.getChatThreadDetail(item.id);
+    if (onOpenThread) {
+      onOpenThread(item);
+    }
   };
   const ThreadScrollList = ScrollList<ChatSDK.ChatThreadOverview>();
 
@@ -184,8 +228,10 @@ const Chat: FC<ChatProps> = props => {
   const threadListContent = () => {
     const renderItem = (item: ChatSDK.ChatThreadOverview, index: number) => {
       let lastMsg = '';
+      // @ts-ignore
       switch (item.lastMessage?.type) {
         case 'txt':
+          // @ts-ignore
           lastMsg = item.lastMessage?.msg;
           break;
         case 'img':
@@ -207,6 +253,7 @@ const Chat: FC<ChatProps> = props => {
           lastMsg = `/${t('combine')}/`;
           break;
         default:
+          // @ts-ignore
           console.warn('unexpected message type:', item.lastMessage?.type);
           break;
       }
@@ -219,16 +266,19 @@ const Chat: FC<ChatProps> = props => {
           }}
         >
           <span className={`${prefixCls}-thread-item-name`}> {item.name}</span>
-          {item.lastMessage?.type && (
+          {(item.lastMessage as any)?.type && (
             <div className={`${prefixCls}-thread-item-msgBox`}>
               <Avatar size={12} src={appUsersInfo?.[item.lastMessage?.from]?.avatarurl}>
                 {appUsersInfo?.[item.lastMessage?.from]?.nickname || item.lastMessage?.from}
               </Avatar>
               <div className={`${prefixCls}-thread-item-msgBox-name`}>
-                {getMsgSenderNickname(item.lastMessage, item.parentId)}
+                {getMsgSenderNickname(
+                  item.lastMessage as unknown as BaseMessageType,
+                  item.parentId,
+                )}
               </div>
               <div>{lastMsg}</div>
-              <div>{getConversationTime(item.lastMessage?.time)}</div>
+              <div>{getConversationTime((item.lastMessage as any)?.time)}</div>
             </div>
           )}
         </div>
@@ -242,6 +292,7 @@ const Chat: FC<ChatProps> = props => {
         loadMoreItems={pagingGetThreadList}
         scrollDirection="down"
         paddingHeight={50}
+        // @ts-ignore
         data={renderThreadList}
         renderItem={renderItem}
       ></ThreadScrollList>
@@ -272,7 +323,7 @@ const Chat: FC<ChatProps> = props => {
           rootStore.messageStore.clearMessage(rootStore.conversationStore.currentCvs);
           rootStore.client.removeHistoryMessages({
             targetId: CVS.conversationId,
-            chatType: CVS.chatType,
+            chatType: CVS.chatType as 'singleChat' | 'groupChat',
             beforeTimeStamp: Date.now(),
           });
         },
@@ -284,7 +335,7 @@ const Chat: FC<ChatProps> = props => {
 
           rootStore.client.deleteConversation({
             channel: CVS.conversationId,
-            chatType: CVS.chatType,
+            chatType: CVS.chatType as 'singleChat' | 'groupChat',
             deleteRoam: true,
           });
         },
@@ -309,6 +360,11 @@ const Chat: FC<ChatProps> = props => {
       headerMoreAction.actions.pop();
     }
   }
+
+  const handleReport = (message: any) => {
+    setReportOpen(true);
+    setReportMessageId(message.mid || message.id);
+  };
 
   // config message
   let messageProps: MsgListProps['messageProps'] = {
@@ -340,8 +396,17 @@ const Chat: FC<ChatProps> = props => {
           content: 'SELECT',
           onClick: () => {},
         },
+        {
+          content: 'FORWARD',
+          onClick: () => {},
+        },
+        {
+          content: 'REPORT',
+          onClick: () => {},
+        },
       ],
     },
+    onReportMessage: handleReport,
   };
 
   if (globalConfig?.message) {
@@ -379,12 +444,18 @@ const Chat: FC<ChatProps> = props => {
       if (globalConfig?.message?.select == false && item.content == 'SELECT') {
         return false;
       }
+      if (globalConfig?.message?.forward == false && item.content == 'FORWARD') {
+        return false;
+      }
+      if (globalConfig?.message?.report == false && item.content == 'REPORT') {
+        return false;
+      }
       return true;
     });
   }
 
-  // config messageEditor
-  let messageEditorConfig: MessageEditorProps = {
+  // config messageInput
+  let messageInputConfig: MessageInputProps = {
     enabledTyping: true,
     enabledMention: true,
     actions: [
@@ -410,36 +481,48 @@ const Chat: FC<ChatProps> = props => {
         content: 'IMAGE',
       },
       {
+        content: 'VIDEO',
+      },
+      {
         content: 'FILE',
+      },
+      {
+        content: 'CARD',
       },
     ],
   };
-  if (globalConfig?.messageEditor) {
-    if (globalConfig?.messageEditor?.mention == false) {
-      messageEditorConfig.enabledMention = false;
+  if (globalConfig?.messageInput) {
+    if (globalConfig?.messageInput?.mention == false) {
+      messageInputConfig.enabledMention = false;
     }
-    if (globalConfig?.messageEditor?.typing == false) {
-      messageEditorConfig.enabledTyping = false;
+    if (globalConfig?.messageInput?.typing == false) {
+      messageInputConfig.enabledTyping = false;
     }
 
-    messageEditorConfig.actions = messageEditorConfig.actions?.filter(item => {
-      if (item.name == 'EMOJI' && globalConfig?.messageEditor?.emoji == false) {
+    messageInputConfig.actions = messageInputConfig.actions?.filter(item => {
+      if (item.name == 'EMOJI' && globalConfig?.messageInput?.emoji == false) {
         return false;
       }
-      if (item.name == 'MORE' && globalConfig?.messageEditor?.moreAction == false) {
+      if (item.name == 'MORE' && globalConfig?.messageInput?.moreAction == false) {
         return false;
       }
-      if (item.name == 'RECORDER' && globalConfig?.messageEditor?.record == false) {
+      if (item.name == 'RECORDER' && globalConfig?.messageInput?.record == false) {
         return false;
       }
 
       return true;
     });
-    messageEditorConfig.customActions = messageEditorConfig!.customActions?.filter(item => {
-      if (item.content == 'IMAGE' && globalConfig?.messageEditor?.picture == false) {
+    messageInputConfig.customActions = messageInputConfig!.customActions?.filter(item => {
+      if (item.content == 'IMAGE' && globalConfig?.messageInput?.picture == false) {
         return false;
       }
-      if (item.content == 'FILE' && globalConfig?.messageEditor?.file == false) {
+      if (item.content == 'FILE' && globalConfig?.messageInput?.file == false) {
+        return false;
+      }
+      if (item.content == 'VIDEO' && globalConfig?.messageInput?.video == false) {
+        return false;
+      }
+      if (item.content == 'CARD' && globalConfig?.messageInput?.contactCard == false) {
         return false;
       }
       return true;
@@ -452,6 +535,7 @@ const Chat: FC<ChatProps> = props => {
     // rtcConfig?.onAddPerson?.(conf);
     const members = await rtcConfig?.onAddPerson?.(conf);
     const rtcMembers = members?.map(item => {
+      // @ts-ignore
       return item.id;
     });
     let options = {
@@ -459,9 +543,9 @@ const Chat: FC<ChatProps> = props => {
       chatType: 'groupChat',
       to: rtcMembers,
       // agoraUid: agoraUid,
-      message: `Start a ${currentCall.callType == 2 ? 'video' : 'audio'} call`,
-      groupId: currentCall.groupId,
-      groupName: currentCall.groupName,
+      message: t(`Start a ${currentCall.callType == 2 ? 'video' : 'audio'} meeting`),
+      groupId: conf.groupId,
+      groupName: conf.groupName,
       accessToken: currentCall.accessToken,
       channel: currentCall.channel,
     };
@@ -477,28 +561,92 @@ const Chat: FC<ChatProps> = props => {
         // getIdMap
         if (!info.confr) return;
         try {
-          let idMap = await rtcConfig?.getIdMap?.({
-            userId: rootStore.client.user,
-            channel: info.confr.channel,
+          let idMap =
+            (await rtcConfig?.getIdMap?.({
+              userId: rootStore.client.user,
+              channel: info.confr.channel,
+            })) || {};
+
+          let membersId = Object.values(idMap);
+          let userInfo = {};
+          membersId.forEach(item => {
+            // @ts-ignore
+            userInfo[item] = {
+              nickname: rootStore.addressStore.appUsersInfo[item]?.nickname,
+              avatarUrl: rootStore.addressStore.appUsersInfo[item]?.avatarurl,
+            };
           });
           if (idMap && Object.keys(idMap).length > 0) {
             CallKit.setUserIdMap(idMap);
+            CallKit.setUserInfo(userInfo);
           }
         } catch (e) {
           console.error(e);
         }
         break;
+      case 'accept':
+        // let idMap =
+        //   (await rtcConfig?.getIdMap?.({
+        //     userId: rootStore.client.user,
+        //     channel: info.callInfo.channel,
+        //   })) || {};
+
+        // let membersId = Object.values(idMap);
+        // let userInfo = {};
+        // membersId.forEach(item => {
+        //   // @ts-ignore
+        //   userInfo[item] = {
+        //     nickname: rootStore.addressStore.appUsersInfo[item]?.nickname,
+        //     avatarUrl: rootStore.addressStore.appUsersInfo[item]?.avatarurl,
+        //   };
+        // });
+        // if (idMap && Object.keys(idMap).length > 0) {
+        //   console.log('有人加入时设置', idMap, userInfo);
+        //   CallKit.setUserIdMap(idMap);
+        //   CallKit.setUserInfo(userInfo);
+        // }
+        break;
       default:
         break;
     }
   };
-  const handleInvite = async (data: { channel: string }) => {
+  const handleInvite = async (data: { channel: string; type: number; callerIMName: string }) => {
     if (!getRTCToken) return console.error('need getRTCToken method to get token');
+    rtcConfig?.onRing?.(data);
     const { agoraUid, accessToken } = await getRTCToken({
       channel: data.channel,
       chatUserId: rootStore.client.user,
     });
+    // --- 单人音视频被邀请方接听页面显示对方信息 --
+    let idMap =
+      (await rtcConfig?.getIdMap?.({
+        userId: rootStore.client.user,
+        channel: data.channel,
+      })) || {};
 
+    let membersId = Object.values(idMap);
+    let userInfo: Record<string, any> = {};
+    membersId.forEach(item => {
+      // @ts-ignore
+      userInfo[item] = {
+        nickname: rootStore.addressStore.appUsersInfo[item]?.nickname,
+        avatarUrl: rootStore.addressStore.appUsersInfo[item]?.avatarurl,
+      };
+    });
+    userInfo[data.callerIMName] = {
+      nickname: rootStore.addressStore.appUsersInfo[data.callerIMName]?.nickname,
+      avatarUrl: rootStore.addressStore.appUsersInfo[data.callerIMName]?.avatarurl,
+    };
+    if (idMap && Object.keys(idMap).length > 0) {
+      CallKit.setUserIdMap(idMap);
+      CallKit.setUserInfo(userInfo);
+    }
+
+    setCurrentCall({
+      ...data,
+      accessToken,
+      callType: data.type,
+    });
     CallKit.answerCall(true, accessToken);
   };
 
@@ -509,8 +657,18 @@ const Chat: FC<ChatProps> = props => {
       channel: channel,
       chatUserId: rootStore.client.user,
     });
+
+    if (type == 'video') {
+      onVideoCall?.({
+        channel,
+      });
+    } else {
+      onAudioCall?.({
+        channel,
+      });
+    }
     if (CVS.chatType === 'groupChat') {
-      const members = await rtcConfig?.onInvite?.({ channel, conversation: CVS });
+      const members = await rtcConfig?.onInvite?.({ channel, conversation: CVS, type });
       const rtcMembers = members?.map(item => {
         return item.id;
       });
@@ -518,8 +676,8 @@ const Chat: FC<ChatProps> = props => {
         callType: type == 'video' ? 2 : 3,
         chatType: 'groupChat',
         to: rtcMembers,
-        // agoraUid: agoraUid,
-        message: `Start a ${type} call`,
+        agoraUid: agoraUid,
+        message: t(`Start a ${type} meeting`),
         groupId: CVS.conversationId,
         groupName: CVS.name || '',
         accessToken,
@@ -558,7 +716,7 @@ const Chat: FC<ChatProps> = props => {
       chatType: 'singleChat',
       to: CVS.conversationId,
       agoraUid,
-      message: `Start a ${type} call`,
+      message: t(`Start a ${type} call`),
       accessToken,
       channel,
     };
@@ -594,13 +752,20 @@ const Chat: FC<ChatProps> = props => {
     });
   };
 
+  useImperativeHandle(ref, () => ({
+    startVideoCall: () => {
+      startVideoCall('video');
+    },
+    startAudioCall: () => {
+      startVideoCall('audio');
+    },
+  }));
   useEffect(() => {
     if (!rtcConfig || !rtcConfig.appId) {
       return;
     }
-    // let appId = '15cb0d28b87b425ea613fc46f7c9f974';
     CallKit.init(rtcConfig.appId, rtcConfig?.agoraUid, rootStore.client);
-  }, []);
+  }, [rtcConfig?.appId, rtcConfig?.agoraUid]);
 
   // config rtc call
   let showAudioCall = true;
@@ -611,10 +776,43 @@ const Chat: FC<ChatProps> = props => {
   if (globalConfig?.header?.videoCall == false) {
     showVideoCall = false;
   }
+
+  // not display rtc when rtcConfig is not set
   if (!rtcConfig) {
     showVideoCall = false;
     showAudioCall = false;
   }
+
+  // chatbot not display rtc
+  if (CVS.conversationId?.indexOf('chatbot_') > -1) {
+    showVideoCall = false;
+    showAudioCall = false;
+  }
+
+  // --- report ---
+  const [reportMessageId, setReportMessageId] = useState('');
+  const [reportOpen, setReportOpen] = useState(false);
+  const [checkedType, setCheckedType] = useState('');
+  const handleCheckChange = (type: string) => {
+    setCheckedType(type);
+  };
+
+  const handleReportMessage = () => {
+    rootStore.client
+      .reportMessage({
+        reportType: checkedType,
+        reportReason: reportType[checkedType],
+        messageId: reportMessageId,
+      })
+      .then(() => {
+        eventHandler.dispatchSuccess('reportMessage');
+        setReportOpen(false);
+        setCheckedType('');
+      })
+      .catch(err => {
+        eventHandler.dispatchError('reportMessage', err);
+      });
+  };
 
   return (
     <div className={classString} style={{ ...style }}>
@@ -627,6 +825,7 @@ const Chat: FC<ChatProps> = props => {
       ) : (
         <>
           {renderHeader ? (
+            // @ts-ignore
             renderHeader(rootStore.conversationStore.currentCvs)
           ) : (
             <Header
@@ -635,17 +834,17 @@ const Chat: FC<ChatProps> = props => {
                 <div ref={headerRef}>
                   {CVS.chatType == 'groupChat' && showHeaderThreadListBtn && (
                     <Button onClick={showTheadList} type="text" shape="circle">
-                      <Icon type="THREAD"></Icon>
-                    </Button>
-                  )}
-                  {showVideoCall && (
-                    <Button onClick={() => startVideoCall('video')} type="text" shape="circle">
-                      <Icon type="CAMERA_ARROW"></Icon>
+                      <Icon type="THREAD" width={24} height={24}></Icon>
                     </Button>
                   )}
                   {showAudioCall && (
                     <Button onClick={() => startVideoCall('audio')} type="text" shape="circle">
-                      <Icon type="MIC"></Icon>
+                      <Icon type="PHONE_PICK" width={24} height={24}></Icon>
+                    </Button>
+                  )}
+                  {showVideoCall && (
+                    <Button onClick={() => startVideoCall('video')} type="text" shape="circle">
+                      <Icon type="VIDEO_CAMERA" width={24} height={24}></Icon>
                     </Button>
                   )}
                 </div>
@@ -661,9 +860,17 @@ const Chat: FC<ChatProps> = props => {
           {renderMessageList ? (
             renderMessageList()
           ) : (
-            <MessageList messageProps={messageProps} {...messageListProps}></MessageList>
+            <MessageList
+              {...messageListProps}
+              onOpenThreadPanel={id => {
+                onOpenThread?.({
+                  id: id,
+                });
+              }}
+              messageProps={{ ...messageProps, ...messageListProps?.messageProps }}
+            ></MessageList>
           )}
-          {messageEditorProps?.enabledTyping && (
+          {messageInputProps?.enabledTyping && (
             <Typing
               conversation={rootStore.conversationStore.currentCvs}
               onHide={() => {
@@ -672,12 +879,17 @@ const Chat: FC<ChatProps> = props => {
             ></Typing>
           )}
 
-          {showReply && <UnsentRepliedMsg type="summary"></UnsentRepliedMsg>}
+          {showReply &&
+            (renderRepliedMessage ? (
+              renderRepliedMessage(rootStore.messageStore.repliedMessage)
+            ) : (
+              <UnsentRepliedMsg type="summary"></UnsentRepliedMsg>
+            ))}
 
-          {renderMessageEditor ? (
-            renderMessageEditor()
+          {renderMessageInput ? (
+            renderMessageInput()
           ) : (
-            <MessageEditor {...messageEditorConfig} {...messageEditorProps}></MessageEditor>
+            <MessageInput {...messageInputConfig} {...messageInputProps}></MessageInput>
           )}
           {modalOpen && (
             <ThreadModal
@@ -703,10 +915,40 @@ const Chat: FC<ChatProps> = props => {
         onStateChange={handleCallStateChange}
         onInvite={handleInvite}
         contactAvatar={rootStore.addressStore.appUsersInfo[currentCall.targetId]?.avatarurl}
-        groupAvatar={<Avatar className="cui-callkit-groupAvatar">{CVS.name}</Avatar>}
+        groupAvatar={
+          <Avatar className="cui-callkit-groupAvatar" src={rtcConfig?.groupAvatar}>
+            {CVS.name}
+          </Avatar>
+        }
       ></CallKit>
+      <Modal
+        open={reportOpen}
+        title={t('report')}
+        okText={t('report')}
+        cancelText={t('cancel')}
+        onOk={handleReportMessage}
+        onCancel={() => {
+          setReportOpen(false);
+        }}
+      >
+        <div>
+          {Object.keys(reportType).map((item, index) => {
+            return (
+              <div className="report-item" key={index}>
+                <div>{t(reportType[item] as string)}</div>
+                <Checkbox
+                  checked={checkedType === item}
+                  onChange={() => {
+                    handleCheckChange(item);
+                  }}
+                ></Checkbox>
+              </div>
+            );
+          })}
+        </div>
+      </Modal>
     </div>
   );
-};
+});
 
 export default observer(Chat);

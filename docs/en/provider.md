@@ -127,5 +127,14 @@ ReactDOM.createRoot(document.getElementById('root') as Element).render(
         </td>
 	   <td style=font-size:10px>Global reaction emoticon configuration. If this parameter is also configured in the message component, the configuration in the message component shall prevail</td>
 	   </tr>
+       <tr>
+	   <td style=font-size:10px>
+       onError
+        </td>
+        <td style=font-size:10px>
+       ProviderProps['onError']
+        </td>
+	   <td style=font-size:10px>OnError event in SDK.</td>
+	   </tr>
        
 </table>

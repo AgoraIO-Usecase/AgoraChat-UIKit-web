@@ -12,6 +12,8 @@ import { getCvsIdFromMessage } from '../utils';
 import { observer } from 'mobx-react-lite';
 import { ChatSDK } from 'module/SDK';
 import { RootContext } from '../store/rootContext';
+import defaultImg from '../assets/img_xmark.png';
+import { use } from 'i18next';
 export interface ImageMessageProps extends BaseMessageProps {
   imageMessage: ImageMessageType; // 从SDK收到的文件消息
   prefix?: string;
@@ -26,18 +28,38 @@ export interface ImageMessageProps extends BaseMessageProps {
 let ImageMessage = (props: ImageMessageProps) => {
   const {
     imageMessage: message,
-    shape,
     style,
     onClickImage,
     renderUserProfile,
     thread,
     nickName,
     className,
+    shape,
+    prefix,
     ...others
   } = props;
   let type = props.type;
-  let { bySelf, from, reactions } = message;
-  const [previewImageUrl, setPreviewImageUrl] = useState(message?.file?.url || message.thumb);
+  let { bySelf, from, reactions, status } = message;
+  const { getPrefixCls } = React.useContext(ConfigContext);
+  const prefixCls = getPrefixCls('message-img', prefix);
+  const context = useContext(RootContext);
+  const { theme } = context;
+  let bubbleShape = shape;
+  if (theme?.bubbleShape) {
+    bubbleShape = theme?.bubbleShape;
+  }
+
+  const classString = classNames(
+    prefixCls,
+    {
+      [`${prefixCls}-${bubbleShape}`]: !!bubbleShape,
+    },
+    className,
+  );
+
+  const [previewImageUrl, setPreviewImageUrl] = useState(
+    message.url || message?.file?.url || message.thumb,
+  );
   const [previewVisible, setPreviewVisible] = useState(false);
 
   const canvasDataURL = (path: string, obj: { quality: number }, callback?: () => void) => {
@@ -82,18 +104,22 @@ let ImageMessage = (props: ImageMessageProps) => {
     canvasDataURL(url, { quality: 1 });
     onClickImage?.(url);
   };
+  let renderImgUrl = bySelf ? message.url || message?.file?.url : (message.thumb as string);
 
-  let renderImgUrl = bySelf ? message?.file?.url : (message.thumb as string);
-
-  const img = useRef(
-    <img
-      // width={75}
-      // height={75}
-      src={renderImgUrl}
-      alt={message.file?.filename}
-      onClick={() => handleClickImg(message.url || renderImgUrl)}
-    />,
-  );
+  const [imgUrl, setImgUrl] = useState(renderImgUrl);
+  // const img = useRef(
+  //   <img
+  //     // width={75}
+  //     // height={75}
+  //     onError={e => {
+  //       img.current.src = 'https://img.yzcdn.cn/vant/cat.jpeg';
+  //       setImgUrl('https://img.yzcdn.cn/vant/cat.jpeg');
+  //     }}
+  //     src={imgUrl}
+  //     alt={message.file?.filename}
+  //     onClick={() => handleClickImg(message.url || renderImgUrl)}
+  //   />,
+  // );
   if (typeof bySelf == 'undefined') {
     bySelf = message.from === rootStore.client.context.userId;
   }
@@ -180,13 +206,16 @@ let ImageMessage = (props: ImageMessageProps) => {
       // @ts-ignore
       message.mid || message.id,
       message.isChatThread,
+      true,
     );
   };
 
   let conversationId = getCvsIdFromMessage(message);
   const handleSelectMessage = () => {
     const selectable =
-      rootStore.messageStore.selectedMessage[message.chatType][conversationId]?.selectable;
+      rootStore.messageStore.selectedMessage[message.chatType as 'singleChat' | 'groupChat'][
+        conversationId
+      ]?.selectable;
     if (selectable) return; // has shown checkbox
 
     rootStore.messageStore.setSelectedMessage(
@@ -206,11 +235,15 @@ let ImageMessage = (props: ImageMessageProps) => {
   };
 
   const select =
-    rootStore.messageStore.selectedMessage[message.chatType][conversationId]?.selectable;
+    rootStore.messageStore.selectedMessage[message.chatType as 'singleChat' | 'groupChat'][
+      conversationId
+    ]?.selectable;
 
   const handleMsgCheckChange = (checked: boolean) => {
     const checkedMessages =
-      rootStore.messageStore.selectedMessage[message.chatType][conversationId]?.selectedMessage;
+      rootStore.messageStore.selectedMessage[message.chatType as 'singleChat' | 'groupChat'][
+        conversationId
+      ]?.selectedMessage;
 
     let changedList = checkedMessages;
     if (checked) {
@@ -269,12 +302,14 @@ let ImageMessage = (props: ImageMessageProps) => {
     type = bySelf ? 'primary' : 'secondly';
   }
 
-  const classSting = classNames('message-image-content', className);
+  // const classSting = classNames('message-image-content', className);
+  const imgRef = useRef<HTMLImageElement>(null);
   return (
     <div>
       <BaseMessage
         id={message.id}
         message={message}
+        time={message.time}
         bubbleType={type}
         direction={bySelf ? 'rtl' : 'ltr'}
         nickName={nickName}
@@ -294,11 +329,33 @@ let ImageMessage = (props: ImageMessageProps) => {
         thread={_thread}
         chatThreadOverview={message.chatThreadOverview}
         onClickThreadTitle={handleClickThreadTitle}
-        bubbleStyle={{ padding: '0' }}
+        bubbleStyle={{
+          padding: 0,
+          background: message.chatThreadOverview ? undefined : 'transparent',
+        }}
+        shape={shape}
+        status={status}
         {...others}
       >
-        <div className={classSting} style={style}>
-          {img.current}
+        <div className={classString} style={style}>
+          {/* {img.current} */}
+          <img
+            ref={imgRef}
+            // width={75}
+            // height={75}
+            onError={function () {
+              //@ts-ignore
+              setImgUrl(defaultImg);
+              if (imgRef.current) {
+                imgRef.current.style.padding = '22px 34px';
+                imgRef.current.style.border = '1px solid #e5e5e5';
+                imgRef.current.style.backgroundColor = '#E3E6E8';
+              }
+            }}
+            src={imgUrl}
+            alt={message.file?.filename}
+            onClick={() => handleClickImg(message.url || renderImgUrl)}
+          />
         </div>
       </BaseMessage>
       {previewVisible && (

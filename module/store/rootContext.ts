@@ -10,7 +10,13 @@ export interface RootConsumerProps {
 
 export interface ContextProps {
   rootStore: RootStore;
-  initConfig: { appKey: string; token?: string; userId?: string };
+  initConfig: {
+    appKey: string;
+    token?: string;
+    userId?: string;
+    translationTargetLanguage?: string;
+    useUserInfo?: boolean;
+  };
   client: ChatSDK.Connection;
   features?: {
     chat?: {
@@ -33,8 +39,10 @@ export interface ContextProps {
         translate?: boolean;
         edit?: boolean;
         select?: boolean;
+        forward?: boolean;
+        report?: boolean;
       };
-      messageEditor?: {
+      messageInput?: {
         mention?: boolean;
         typing?: boolean;
         record?: boolean;
@@ -42,6 +50,8 @@ export interface ContextProps {
         moreAction?: boolean;
         file?: boolean;
         picture?: boolean;
+        video?: boolean;
+        contactCard?: boolean;
       };
     };
     conversationList?: {
@@ -49,6 +59,9 @@ export interface ContextProps {
       item?: {
         moreAction?: boolean;
         deleteConversation?: boolean;
+        pinConversation?: boolean;
+        muteConversation?: boolean;
+        presence?: boolean;
       };
     };
     chatroom?: {
@@ -58,7 +71,7 @@ export interface ContextProps {
         translate?: boolean;
         report?: boolean;
       };
-      messageEditor?: {
+      messageInput?: {
         emoji?: boolean;
         gift?: boolean;
       };
@@ -74,8 +87,11 @@ export interface ContextProps {
     };
   };
   theme?: {
-    primaryColor?: string;
+    primaryColor?: string | number;
     mode?: 'dark' | 'light';
+    avatarShape?: 'circle' | 'square';
+    bubbleShape?: 'ground' | 'square';
+    componentsShape?: 'ground' | 'square';
   };
 }
 

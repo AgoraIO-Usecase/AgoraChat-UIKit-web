@@ -15,7 +15,6 @@ import {
 } from './repliedMessage';
 
 import Chat, { MessageList, ChatProps, MsgListProps } from './chat';
-import { ContactList } from './contactList';
 import {
   ConversationList,
   ConversationItem,
@@ -23,20 +22,33 @@ import {
   ConversationListProps,
   ConversationData,
 } from './conversation';
-import MessageEditor, {
-  MessageEditorProps,
+import MessageInput, {
+  MessageInputProps,
   MoreActionProps,
   RecorderProps,
   EmojiProps,
   SelectedControlsProps,
   SuggestListProps,
   TextareaProps,
-} from './messageEditor';
+} from './messageInput';
 
 import Header, { HeaderProps } from './header';
 import Empty, { EmptyProps } from './empty';
 import RecalledMessage, { RecalledMessageProps } from './recalledMessage';
 
+import {
+  ContactItem,
+  ContactList,
+  ContactDetail,
+  ContactListProps,
+  ContactDetailProps,
+} from './contactList';
+
+import UserSelect, { UserSelectProps } from './userSelect';
+
+import GroupDetail, { GroupDetailProps } from './groupDetail';
+import GroupMember, { GroupMemberProps } from './groupMember';
+import UserCardMessage, { UserCardMessageProps } from './userCardMessage';
 import rootStore, {
   RootStore,
   InitConfig,
@@ -96,7 +108,7 @@ export type {
   ConversationItemProps,
   ConversationListProps,
   ConversationData,
-  MessageEditorProps,
+  MessageInputProps,
   MoreActionProps,
   RecorderProps,
   EmojiProps,
@@ -130,8 +142,14 @@ export type {
   ContextProps,
   ThreadProps,
   UserProfileProps,
+  ContactListProps,
+  ContactDetailProps,
+  GroupDetailProps,
+  GroupMemberProps,
+  UserCardMessageProps,
+  UserSelectProps,
 };
-
+const UIKitProvider = Provider;
 export {
   AudioMessage,
   BaseMessage,
@@ -149,7 +167,7 @@ export {
   ContactList,
   ConversationList,
   ConversationItem,
-  MessageEditor,
+  MessageInput,
   Header,
   Empty,
   RecalledMessage,
@@ -158,6 +176,7 @@ export {
   RootProvider,
   RootConsumer,
   Provider,
+  UIKitProvider,
   Thread,
   UserProfile,
   useClient,
@@ -172,4 +191,10 @@ export {
   Chatroom,
   ChatroomMember,
   ChatroomMessage,
+  ContactItem,
+  ContactDetail,
+  GroupDetail,
+  GroupMember,
+  UserCardMessage,
+  UserSelect,
 };

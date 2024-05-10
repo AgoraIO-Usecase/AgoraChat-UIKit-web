@@ -7,12 +7,14 @@ import React, {
   ReactEventHandler,
   ReactNode,
   useRef,
+  forwardRef,
 } from 'react';
 import classNames from 'classnames';
 import { ConfigContext } from '../config/index';
 import './style/style.scss';
 import Icon from '../icon';
-
+import { RootContext } from '../../module/store/rootContext';
+import { o } from 'vitest/dist/index-2f5b6168';
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   prefix?: string;
   className?: string;
@@ -30,9 +32,11 @@ export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElem
   suffix?: ReactNode;
   prefixIcon?: ReactNode;
   suffixIcon?: ReactNode;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
-const Input: FC<InputProps> = props => {
+const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
   const {
     className,
     size,
@@ -42,27 +46,32 @@ const Input: FC<InputProps> = props => {
     prefix,
     onClear,
     placeholder,
-    shape = 'ground',
+    shape,
     close,
     suffixIcon,
     style = {},
+    onFocus,
+    onBlur,
+    ...otherProps
   } = props;
   const { getPrefixCls } = React.useContext(ConfigContext);
   const prefixCls = getPrefixCls('input', prefix);
-  const ref = useRef(null);
   const [inputValue, setInputValue] = useState(value);
   const [isFocus, setIsFocus] = useState(false);
   const [isClear, setIsClear] = useState(false);
-
+  const { theme } = React.useContext(RootContext);
+  const themeMode = theme?.mode;
+  const componentsShape = shape || theme?.componentsShape || 'ground';
   const classes = classNames(
     prefixCls,
     {
       [`${prefixCls}-${size}`]: size,
       [`${prefixCls}-required`]: required,
       [`${prefixCls}-disabled`]: props.disabled,
-      [`${prefixCls}-${shape}`]: shape,
+      [`${prefixCls}-${componentsShape}`]: componentsShape,
       [`${prefixCls}-error`]: required && !inputValue,
       [`${prefixCls}-suffixIcon`]: suffixIcon,
+      [`${prefixCls}-${themeMode}`]: !!themeMode,
     },
     className,
   );
@@ -90,10 +99,12 @@ const Input: FC<InputProps> = props => {
 
   const handleFocus = () => {
     setIsFocus(true);
+    onFocus?.();
   };
 
   const handleBlur = () => {
     setIsFocus(false);
+    onBlur?.();
   };
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,7 +127,7 @@ const Input: FC<InputProps> = props => {
     if (isClear) {
       return (
         <span className={`${prefixCls}-suffixIcon`}>
-          <Icon type="CLOSE" className={`${prefixCls}-clear`} onClick={handleClear} />
+          <Icon type="CLOSE_CIRCLE" className={`${prefixCls}-clear`} onClick={handleClear} />
         </span>
       );
     }
@@ -150,10 +161,11 @@ const Input: FC<InputProps> = props => {
         onInput={handleInput}
         className={`${prefixCls}-input`}
         type="text"
+        {...otherProps}
       />
       {renderSuffixIcon()}
     </div>
   );
-};
+});
 
 export default Input;

@@ -13,25 +13,33 @@ $user-prefix-cls: #{$cui-prefix}-userItem;
     margin: $cvs-item-margin;
     // width: 100%;
     flex: 1;
-    &-selected{
-        background-color: $cvs-item-selected-bg-color !important;
-        .#{$user-prefix-cls}-nickname{
-            color: $cvs-item-selected-name-color;
-        }
-    }
+    overflow: hidden;
     &:hover{
         background: $gray-98;
     }
     &:active{
         background-color: $gray-9;
     }
+    &-selected{
+        background-color: $cvs-item-selected-bg-color;
+        .#{$user-prefix-cls}-nickname{
+            color: $cvs-item-selected-name-color;
+        }
+        &:hover{
+            background: $cvs-item-selected-bg-color;
+        }
+        &:active{
+            background-color: $cvs-item-selected-bg-color;
+        }
+    }
+    
     &-content, &-info{
         display: flex;
         flex-direction: column;
         align-items: baseline;
     }
     &-content{
-        max-width: calc(100% - 136px);
+        // max-width: calc(100% - 136px);
         overflow: hidden;
         flex: 1;
     }
@@ -51,6 +59,9 @@ $user-prefix-cls: #{$cui-prefix}-userItem;
         overflow: hidden;
         font-weight: $cvs-item-name-font-weight;
         white-space: nowrap;
+        text-overflow: ellipsis;
+        width: calc(100% - 34px);
+        text-align: left;
     }
     &-message{
         margin-left: $cvs-item-message-margin-left;
@@ -79,6 +90,17 @@ $user-prefix-cls: #{$cui-prefix}-userItem;
     }
     .#{$user-prefix-cls}-nickname{
         color: $gray-98;
+    }
+    
+}
+
+.#{$user-prefix-cls}-dark.#{$user-prefix-cls}-selected{
+    background-color: $blue-2;
+    &:hover{
+        background: $blue-2;
+    }
+    &:active{
+        background-color: $blue-2;
     }
 }
 

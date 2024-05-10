@@ -27,7 +27,6 @@ const useAddressContext = () => {
       },
       (newValue, oldValue) => {
         // 监听 MobX 变化的代码逻辑
-        console.log('MobX 变化了 message', newValue, oldValue);
         setAppUsersInfoInner(newValue);
       },
     );
@@ -39,7 +38,6 @@ const useAddressContext = () => {
       },
       (newValue, oldValue) => {
         // 监听 MobX 变化的代码逻辑
-        console.log('MobX 变化了 message', newValue, oldValue);
         setGroupsInner(newValue);
       },
     );
@@ -50,8 +48,8 @@ const useAddressContext = () => {
     };
   }, []);
 
-  const getGroupMembers = (groupId: string) => {
-    const { getGroupMemberList } = useGroupMembers(groupId);
+  const getGroupMembers = (groupId: string, withUserInfo: boolean) => {
+    const { getGroupMemberList } = useGroupMembers(groupId, withUserInfo);
     return getGroupMemberList?.();
   };
   return {

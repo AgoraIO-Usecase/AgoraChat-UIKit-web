@@ -8,6 +8,7 @@ import { Tooltip } from '../../component/tooltip/Tooltip';
 import { useTranslation } from 'react-i18next';
 import { observer } from 'mobx-react-lite';
 import { RootContext } from '../../module/store/rootContext';
+import Checkbox from '../../component/checkbox';
 export interface UserInfoData {
   userId: string;
   nickname?: string;
@@ -27,11 +28,18 @@ export interface UserItemProps {
   style?: React.CSSProperties;
   data: UserInfoData;
   selected?: boolean;
+  checkable?: boolean;
+  closeable?: boolean;
+  onCheckboxChange?: (checked: boolean, data: UserInfoData) => void;
+  checked?: boolean;
+  disabled?: boolean;
+  onClose?: (data: UserInfoData) => void;
   // 右侧更多按钮配置
   moreAction?: {
     visible?: boolean;
     icon?: ReactNode;
     actions: Array<{
+      icon?: ReactNode;
       content: ReactNode;
       onClick?: (data: UserInfoData) => void;
     }>;
@@ -50,6 +58,12 @@ let UserItem: FC<UserItemProps> = props => {
     data,
     moreAction,
     selected,
+    checkable,
+    onCheckboxChange,
+    checked,
+    closeable,
+    onClose,
+    disabled,
     ...others
   } = props;
 
@@ -96,6 +110,7 @@ let UserItem: FC<UserItemProps> = props => {
                 item.onClick?.(data);
               }}
             >
+              {item.icon ? item.icon : null}
               {typeof item.content == 'string' ? t(item.content) : item.content}
             </li>
           );
@@ -104,6 +119,9 @@ let UserItem: FC<UserItemProps> = props => {
     );
   }
 
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onCheckboxChange?.(e.target.checked, data);
+  };
   return (
     <div
       className={classString}
@@ -126,11 +144,39 @@ let UserItem: FC<UserItemProps> = props => {
       </div>
       <div className={`${prefixCls}-info`}>
         {showMore && (
-          <Tooltip title={menuNode} trigger="click" placement="bottom" arrow>
-            {moreAction?.icon || <Icon type="ELLIPSIS" color="#33B1FF" height={20}></Icon>}
+          <Tooltip title={menuNode} trigger="click" placement="bottomRight">
+            {moreAction?.icon || (
+              <Icon
+                type="ELLIPSIS"
+                color="#33B1FF"
+                height={20}
+                style={{ cursor: 'pointer' }}
+              ></Icon>
+            )}
           </Tooltip>
         )}
       </div>
+      {checkable && (
+        <div>
+          <Checkbox
+            disabled={disabled}
+            checked={checked}
+            onChange={handleCheckboxChange}
+          ></Checkbox>
+        </div>
+      )}
+      {closeable && (
+        <div>
+          <Icon
+            width={24}
+            height={24}
+            type="CLOSE_CIRCLE"
+            onClick={() => {
+              onClose?.(data);
+            }}
+          ></Icon>
+        </div>
+      )}
     </div>
   );
 };

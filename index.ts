@@ -15,7 +15,7 @@ import {
   ContactList,
   ConversationList,
   ConversationItem,
-  MessageEditor,
+  MessageInput,
   Header,
   Empty,
   RecalledMessage,
@@ -38,8 +38,14 @@ import {
   Chatroom,
   ChatroomMember,
   ChatroomMessage,
+  ContactDetail,
+  ContactItem,
+  GroupDetail,
+  GroupMember,
+  UserCardMessage,
+  UserSelect,
 } from './module/index';
-
+const UIKitProvider = Provider;
 import {
   Avatar,
   Button,
@@ -55,10 +61,16 @@ import {
   Tooltip,
   ScrollList,
   Collapse,
+  UserItem,
 } from './component/entry';
 
 import { eventHandler, EventHandlerData, EventName } from './eventHandler';
 
+import { MessageInputProps } from './module/index';
+const MessageEditor = MessageInput;
+type MessageEditorProps = MessageInputProps;
+
+export type { MessageEditorProps };
 export {
   AudioMessage,
   BaseMessage,
@@ -76,6 +88,7 @@ export {
   ContactList,
   ConversationList,
   ConversationItem,
+  MessageInput,
   MessageEditor,
   Header,
   Empty,
@@ -104,6 +117,7 @@ export {
   List,
   Modal,
   Popover,
+  UIKitProvider,
   Switch,
   Tooltip,
   ScrollList,
@@ -114,6 +128,13 @@ export {
   ChatroomMember,
   ChatroomMessage,
   eventHandler,
+  ContactDetail,
+  ContactItem,
+  GroupDetail,
+  GroupMember,
+  UserCardMessage,
+  UserItem,
+  UserSelect,
 };
 
 export type {
@@ -134,6 +155,7 @@ export type {
   SwitchProps,
   ScrollListProps,
   CollapseProps,
+  UserItemProps,
 } from './component/entry';
 
 export type {
@@ -154,7 +176,7 @@ export type {
   ConversationItemProps,
   ConversationListProps,
   ConversationData,
-  MessageEditorProps,
+  MessageInputProps,
   MoreActionProps,
   RecorderProps,
   EmojiProps,
@@ -188,6 +210,12 @@ export type {
   ContextProps,
   ThreadProps,
   UserProfileProps,
+  ContactListProps,
+  ContactDetailProps,
+  GroupDetailProps,
+  GroupMemberProps,
+  UserCardMessageProps,
+  UserSelectProps,
 } from './module/index';
 
 export type { EventHandlerData, EventName };

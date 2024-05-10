@@ -7,12 +7,15 @@ import { ChatSDK } from '../SDK';
 import rootStore from '../store/index';
 import { useTranslation } from 'react-i18next';
 import { renderTxt } from '../textMessage/TextMessage';
-import { getCvsIdFromMessage } from '../utils';
+import { getCvsIdFromMessage, getMsgSenderNickname } from '../utils';
 import download from '../utils/download';
 import { ImagePreview } from '../imageMessage';
 import CombinedMessage, { CombinedMessageProps } from '../combinedMessage';
 import AudioMessage, { AudioMessageProps } from '../audioMessage';
 import RecalledMessage from '../recalledMessage';
+import UserCardMessage from '../userCardMessage';
+import { RootContext } from '../store/rootContext';
+import { BaseMessageType } from '../baseMessage/BaseMessage';
 const msgType = ['txt', 'file', 'img', 'audio', 'custom', 'video', 'recall'];
 export interface RepliedMsgProps {
   prefixCls?: string;
@@ -20,7 +23,7 @@ export interface RepliedMsgProps {
   style?: React.CSSProperties;
   shape?: 'ground' | 'square'; // 气泡形状
   direction?: 'ltr' | 'rtl';
-  message: ChatSDK.MessageBody;
+  message: BaseMessageType;
 }
 
 const RepliedMsg = (props: RepliedMsgProps) => {
@@ -39,10 +42,17 @@ const RepliedMsg = (props: RepliedMsgProps) => {
   const { t } = useTranslation();
   const prefixCls = getPrefixCls('reply-message', customizePrefixCls);
   const [hoverStatus, setHoverStatus] = useState(false);
+  const context = React.useContext(RootContext);
+  const { rootStore, theme } = context;
+  let bubbleShape = shape;
+  if (theme?.bubbleShape && !shape) {
+    bubbleShape = theme?.bubbleShape;
+  }
+
   const classString = classNames(
     prefixCls,
     {
-      [`${prefixCls}-${shape}`]: !!shape,
+      [`${prefixCls}-${bubbleShape}`]: !!bubbleShape,
       [`${prefixCls}-left`]: direction == 'ltr',
       [`${prefixCls}-right`]: direction == 'rtl',
     },
@@ -129,7 +139,9 @@ const RepliedMsg = (props: RepliedMsgProps) => {
     switch (msgQuote?.msgType) {
       case 'txt':
         content = (
-          <div className={`${prefixCls}-content-text`}>{renderTxt(msgQuote.msgPreview, '')}</div>
+          <div className={`${prefixCls}-content-text`}>
+            {renderTxt(msgQuote.msgPreview, '' as unknown as false)}
+          </div>
         );
         break;
       case 'file':
@@ -160,7 +172,7 @@ const RepliedMsg = (props: RepliedMsgProps) => {
           <AudioMessage
             type={'secondly'}
             className="cui-message-base-reply"
-            style={{ flexDirection: 'row' }}
+            // style={{ flexDirection: 'row' }}
             onlyContent={true}
             audioMessage={msg as AudioMessageProps['audioMessage']}
           ></AudioMessage>
@@ -190,6 +202,25 @@ const RepliedMsg = (props: RepliedMsgProps) => {
           </div>
         );
         break;
+      case 'video':
+        content = (
+          <div className={`${prefixCls}-content-text`}>
+            <div className={`${prefixCls}-summary-desc-img`}>
+              <video
+                onClick={() => {
+                  setImgVisible(true);
+                }}
+                height={75}
+                src={
+                  (repliedMsg as ChatSDK.VideoMsgBody).url ||
+                  (repliedMsg as ChatSDK.VideoMsgBody).file.url
+                }
+              ></video>
+            </div>
+          </div>
+        );
+        break;
+
       case 'combine':
         // content = (
         //   <div className={`${prefixCls}-content-text`}>
@@ -206,7 +237,6 @@ const RepliedMsg = (props: RepliedMsgProps) => {
           ></CombinedMessage>
         );
         break;
-      case 'video':
       case 'loc':
         content = (
           //@ts-ignore
@@ -216,6 +246,16 @@ const RepliedMsg = (props: RepliedMsgProps) => {
             onlyContent={true}
           ></RecalledMessage>
         );
+        break;
+      case 'custom':
+        if ((repliedMsg as ChatSDK.CustomMsgBody).customEvent === 'userCard') {
+          content = (
+            <div className={`${prefixCls}-content-text`}>
+              <Icon type="PERSON_SINGLE_FILL" color="#75828A" width={20} height={20}></Icon>
+              <span>Contact:</span> {(repliedMsg as ChatSDK.CustomMsgBody).customExts?.nickname}
+            </div>
+          );
+        }
         break;
       default:
         content = (
@@ -240,9 +280,16 @@ const RepliedMsg = (props: RepliedMsgProps) => {
     }, 1500);
   };
   const myUserId = rootStore.client.user;
-  const from = message.from === myUserId ? t('you') : message.from;
+  const from =
+    message.from === myUserId ? t('you') : getMsgSenderNickname(message as BaseMessageType);
+
   const to =
-    msgQuote?.msgSender === myUserId
+    (msgQuote?.msgSender === myUserId ||
+      msgQuote?.msgSender == rootStore.addressStore.appUsersInfo[myUserId]?.nickname) &&
+    message.from == myUserId
+      ? t('yourself')
+      : msgQuote?.msgSender === myUserId ||
+        msgQuote?.msgSender == rootStore.addressStore.appUsersInfo[myUserId]?.nickname
       ? t('you')
       : rootStore.addressStore.appUsersInfo?.[msgQuote?.msgSender as string]?.nickname ||
         msgQuote?.msgSender;
@@ -263,7 +310,14 @@ const RepliedMsg = (props: RepliedMsgProps) => {
         <span>{to}</span>
       </div>
       <div className={`${prefixCls}-box`}>
-        <div className={`${prefixCls}-content`}>{renderMsgContent()}</div>
+        <div
+          className={`${prefixCls}-content`}
+          style={{
+            width: repliedMsg?.type == 'audio' ? `calc(${repliedMsg.length || 0}% + 48px)` : 'auto',
+          }}
+        >
+          {renderMsgContent()}
+        </div>
         {hoverStatus && (
           <Icon
             className={`${prefixCls}-arrow`}

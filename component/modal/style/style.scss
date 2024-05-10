@@ -7,14 +7,17 @@ $dialog-prefix-cls: #{$cui-prefix}-modal;
 .#{$dialog-prefix-cls} {
     @include modal-mask();
     position: relative;
-    top: 100px;
+    // top: 100px;
     width: auto;
     max-width: calc(100vw - 32px);
     margin: 0 auto;
-    padding-bottom: 24px;
+    // padding-bottom: 24px;
 
     &-wrap {
         z-index: $zindex-modal;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
     
     &-title {
@@ -27,7 +30,7 @@ $dialog-prefix-cls: #{$cui-prefix}-modal;
     }
 
     &-content {
-        position: relative;
+        // position: relative;
         background-color: $modal-content-bg;
         background-clip: padding-box;
         border: 0;
@@ -55,7 +58,7 @@ $dialog-prefix-cls: #{$cui-prefix}-modal;
         transition: color 0.3s;
     
         &-x {
-          display: block;
+          display: flex;
           width: $modal-header-close-size;
           height: $modal-header-close-size;
           font-size: $font-size-lg;
@@ -64,6 +67,8 @@ $dialog-prefix-cls: #{$cui-prefix}-modal;
           text-align: center;
           text-transform: none;
           text-rendering: auto;
+          justify-content: center;
+          align-items: center;
         }
     
         &:focus,
@@ -105,6 +110,9 @@ $dialog-prefix-cls: #{$cui-prefix}-modal;
         .#{$cui-prefix}-btn+.#{$cui-prefix}-btn:not(.#{$cui-prefix}-dropdown-trigger) {
           margin-bottom: 0;
           margin-left: 8px;
+        }
+        .#{$cui-prefix}-button{
+          padding: 8px 20px;
         }
     }
     &-open {

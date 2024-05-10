@@ -1,11 +1,12 @@
-import React, { FC, useState, ReactNode } from 'react';
+import React, { FC, useContext, ReactNode } from 'react';
 import classNames from 'classnames';
 import { ConfigContext } from '../../component/config/index';
 import './style/style.scss';
 import Icon from '../../component/icon';
 import Avatar from '../../component/avatar';
-import Badge from '../../component/badge';
-import UserItem from '../../component/userItem';
+import UserItem, { UserInfoData } from '../../component/userItem';
+import rootStore from '../store/index';
+import { RootContext } from '../store/rootContext';
 export interface ContactItemProps {
   contactId: string;
   className?: string;
@@ -18,6 +19,11 @@ export interface ContactItemProps {
   style?: React.CSSProperties;
   isActive?: boolean;
   data: any;
+  selectedId?: string;
+  checkable?: boolean;
+  checkedUserList?: string[];
+  defaultCheckedList?: string[];
+  onCheckboxChange?: (checked: boolean, data: UserInfoData) => void;
 }
 
 const ContactItem: FC<ContactItemProps> = props => {
@@ -31,44 +37,65 @@ const ContactItem: FC<ContactItemProps> = props => {
     contactId,
     children,
     data,
+    selectedId,
+    checkable,
+    checkedUserList,
+    defaultCheckedList,
+    onCheckboxChange,
     ...others
   } = props;
   const { getPrefixCls } = React.useContext(ConfigContext);
   const prefixCls = getPrefixCls('contactItem', customizePrefixCls);
-  const classString = classNames(
-    prefixCls,
-    {
-      [`${prefixCls}-selected`]: !!isActive,
-    },
-    className,
-  );
-
-  const handleClick: React.MouseEventHandler<HTMLDivElement> = e => {
-    console.log(e);
+  const context = useContext(RootContext);
+  const { rootStore, theme, features } = context;
+  const themeMode = theme?.mode || 'light';
+  let aShape = theme?.avatarShape ? theme?.avatarShape : avatarShape;
+  const classString = classNames(prefixCls, className);
+  const { addressStore } = rootStore;
+  const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, contactId: string) => {
     onClick && onClick(e, contactId);
+  };
+
+  const tagClass = classNames(`${prefixCls}-tag`, {
+    [`${prefixCls}-${themeMode}`]: !!themeMode,
+  });
+
+  const handleCheckboxChange = (checked: boolean, data: UserInfoData) => {
+    onCheckboxChange && onCheckboxChange(checked, data);
   };
   return (
     <>
-      <div className="cui-contact-tag">{data.region}</div>
+      <div className={tagClass}>{data.region}</div>
       {data.brands?.map((item: any) => {
         return (
           <div
-            className={classString}
-            onClick={handleClick}
+            className={`${classString} ${
+              selectedId == item.brandId ? `${prefixCls}-selected` : ''
+            }`}
+            onClick={e => {
+              handleClick(e, item.brandId);
+            }}
             style={others.style}
             key={item.brandId}
           >
             <UserItem
+              avatarShape={aShape}
+              checked={
+                (checkedUserList && checkedUserList.includes(item.brandId)) ||
+                (defaultCheckedList && defaultCheckedList.includes(item.brandId))
+              }
+              disabled={defaultCheckedList && defaultCheckedList.includes(item.brandId)}
               nickname={item.name}
               data={{
                 userId: item.brandId,
                 nickname: item.name,
+                avatarUrl:
+                  item.avatarUrl || addressStore.appUsersInfo[item.brandId]?.avatarurl || '',
               }}
+              selected={selectedId == item.brandId}
+              checkable={checkable}
+              onCheckboxChange={handleCheckboxChange}
             ></UserItem>
-            {/* <Avatar size={avatarSize} shape={avatarShape}>
-              {item.brandId}
-            </Avatar>
-            <span className={`${prefixCls}-nickname`}>{item.brandId}</span> */}
           </div>
         );
       })}
