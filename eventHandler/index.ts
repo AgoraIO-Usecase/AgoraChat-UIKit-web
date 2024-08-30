@@ -44,7 +44,15 @@ export type EventName =
   | 'open'
   | 'setContactRemark'
   | 'addContact'
-  | 'deleteContact';
+  | 'deleteContact'
+  | 'getPinnedMessages'
+  | 'pinMessage'
+  | 'unpinMessage'
+  | 'jumpToPinnedMessage'
+  | 'addUsersToBlocklist'
+  | 'removeUserFromBlocklist'
+  | 'publishPresence'
+  | 'getBlockList';
 
 export type EventHandlerData = {
   [key in EventName]?: {

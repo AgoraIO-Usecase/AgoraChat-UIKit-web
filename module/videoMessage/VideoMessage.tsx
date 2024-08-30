@@ -13,11 +13,13 @@ import { ChatSDK } from '../SDK';
 import { getCvsIdFromMessage } from '../utils';
 import { observer } from 'mobx-react-lite';
 import { RootContext } from '../store/rootContext';
+import { usePinnedMessage } from '../hooks/usePinnedMessage';
 export interface VideoMessageProps extends BaseMessageProps {
   videoMessage: ChatSDK.VideoMsgBody & VideoMessageType; // 从SDK收到的视频消息
   prefix?: string;
   style?: React.CSSProperties;
   nickName?: string;
+  bubbleClass?: string;
   renderUserProfile?: (props: renderUserProfileProps) => React.ReactNode;
   type?: 'primary' | 'secondly';
   className?: string;
@@ -35,11 +37,17 @@ const VideoMessage = (props: VideoMessageProps) => {
     className,
     prefix,
     videoProps,
+    bubbleClass,
     ...baseMsgProps
   } = props;
 
   let { bySelf, from, reactions, status } = videoMessage;
-
+  const { pinMessage } = usePinnedMessage({
+    conversation: {
+      conversationId: getCvsIdFromMessage(videoMessage),
+      conversationType: videoMessage.chatType,
+    },
+  });
   const { getPrefixCls } = React.useContext(ConfigContext);
   const prefixCls = getPrefixCls('message-video', prefix);
   const context = useContext(RootContext);
@@ -65,7 +73,7 @@ const VideoMessage = (props: VideoMessageProps) => {
   };
 
   const handleDeleteMsg = () => {
-    let conversationId = getCvsIdFromMessage(videoMessage);
+    const conversationId = getCvsIdFromMessage(videoMessage);
 
     rootStore.messageStore.deleteMessage(
       {
@@ -77,8 +85,13 @@ const VideoMessage = (props: VideoMessageProps) => {
     );
   };
 
+  const handlePinMessage = () => {
+    //@ts-ignore
+    pinMessage(videoMessage.mid || videoMessage.id);
+  };
+
   const handleClickEmoji = (emojiString: string) => {
-    let conversationId = getCvsIdFromMessage(videoMessage);
+    const conversationId = getCvsIdFromMessage(videoMessage);
 
     rootStore.messageStore.addReaction(
       {
@@ -92,7 +105,7 @@ const VideoMessage = (props: VideoMessageProps) => {
   };
 
   const handleDeleteEmoji = (emojiString: string) => {
-    let conversationId = getCvsIdFromMessage(videoMessage);
+    const conversationId = getCvsIdFromMessage(videoMessage);
     rootStore.messageStore.deleteReaction(
       {
         chatType: videoMessage.chatType,
@@ -105,7 +118,7 @@ const VideoMessage = (props: VideoMessageProps) => {
   };
 
   const handleShowReactionUserList = (emojiString: string) => {
-    let conversationId = getCvsIdFromMessage(videoMessage);
+    const conversationId = getCvsIdFromMessage(videoMessage);
     reactions?.forEach(item => {
       if (item.reaction === emojiString) {
         if (item.count > 3 && item.userList.length <= 3) {
@@ -134,7 +147,7 @@ const VideoMessage = (props: VideoMessageProps) => {
   };
 
   const handleRecallMessage = () => {
-    let conversationId = getCvsIdFromMessage(videoMessage);
+    const conversationId = getCvsIdFromMessage(videoMessage);
     rootStore.messageStore.recallMessage(
       {
         chatType: videoMessage.chatType,
@@ -146,7 +159,7 @@ const VideoMessage = (props: VideoMessageProps) => {
       true,
     );
   };
-  let conversationId = getCvsIdFromMessage(videoMessage);
+  const conversationId = getCvsIdFromMessage(videoMessage);
   const handleSelectMessage = () => {
     const selectable =
       rootStore.messageStore.selectedMessage[videoMessage.chatType as 'singleChat' | 'groupChat'][
@@ -203,7 +216,7 @@ const VideoMessage = (props: VideoMessageProps) => {
   };
 
   // @ts-ignore
-  let _thread =
+  const _thread =
     // @ts-ignore
     videoMessage.chatType == 'groupChat' &&
     thread &&
@@ -251,11 +264,12 @@ const VideoMessage = (props: VideoMessageProps) => {
   return (
     <BaseMessage
       id={videoMessage.id}
+      className={bubbleClass}
       message={videoMessage}
       bubbleType={type}
       direction={bySelf ? 'rtl' : 'ltr'}
       shape={shape}
-      // shape="ground"
+      // shape="round"
       bubbleStyle={{
         padding: 0,
         background: videoMessage.chatThreadOverview ? undefined : 'transparent',
@@ -264,6 +278,7 @@ const VideoMessage = (props: VideoMessageProps) => {
       nickName={nickName}
       onReplyMessage={handleReplyMsg}
       onDeleteMessage={handleDeleteMsg}
+      onPinMessage={handlePinMessage}
       reactionData={reactions}
       onAddReactionEmoji={handleClickEmoji}
       onDeleteReactionEmoji={handleDeleteEmoji}
@@ -292,7 +307,11 @@ const VideoMessage = (props: VideoMessageProps) => {
           preload="metadata"
           onPlay={handlePlayVideo}
           poster={videoMessage.thumb}
-          src={videoMessage.url}
+          src={`${videoMessage.url}${
+            videoMessage?.url?.includes('?')
+              ? '&origin-file=true'
+              : '?em-redirect=true&origin-file=true'
+          }`}
           {...videoProps}
         ></video>
       </div>

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, ReactNode, useContext, useState } from 'react';
+import React, { ChangeEvent, ReactNode, useContext, useEffect, useState, useRef } from 'react';
 import classNames from 'classnames';
 import { ConfigContext } from '../../component/config/index';
 import MessageStatus, { MessageStatusProps } from '../messageStatus';
@@ -13,12 +13,13 @@ import { ChatSDK } from '../SDK';
 import { useTranslation } from 'react-i18next';
 import { EmojiKeyBoard } from '../reaction';
 import { ReactionMessage, ReactionData, ReactionMessageProps } from '../reaction';
-import { getStore } from '../store';
+import rootStore, { getStore } from '../store';
 import Checkbox from '../../component/checkbox';
 import UserProfile from '../userProfile';
 import { observer } from 'mobx-react-lite';
 import { EmojiConfig } from '../messageInput/emoji/Emoji';
 import { RootContext } from '../store/rootContext';
+import { use } from 'i18next';
 interface CustomAction {
   visible: boolean;
   icon?: ReactNode;
@@ -47,9 +48,11 @@ export interface BaseMessageProps {
   status?: MessageStatusProps['status'];
   avatar?: ReactNode;
   avatarShape?: 'circle' | 'square';
+  showAvatar?: boolean;
+  showMessageInfo?: boolean;
   direction?: 'ltr' | 'rtl'; // 左侧布局/右侧布局
   prefix?: string;
-  shape?: 'ground' | 'square'; // 气泡形状
+  shape?: 'round' | 'square'; // 气泡形状
   arrow?: boolean; // 气泡是否有箭头
   nickName?: string; // 昵称
   className?: string;
@@ -75,11 +78,13 @@ export interface BaseMessageProps {
   onResendMessage?: () => void;
   onForwardMessage?: (message: BaseMessageType) => void;
   onReportMessage?: (message: BaseMessageType) => void;
+  onPinMessage?: () => void;
   onMessageCheckChange?: (checked: boolean) => void;
   renderUserProfile?: (props: renderUserProfileProps) => React.ReactNode;
   onCreateThread?: () => void;
   thread?: boolean; // whether show thread
   chatThreadOverview?: ChatSDK.ChatThreadOverview;
+  showNicknamesForAllMessages?: boolean; //是否所有的消息都展示昵称，默认false, 自己发的消息不展示昵称，单聊消息不展示昵称，群聊其他人的消息展示昵称
   onClickThreadTitle?: () => void;
   reactionConfig?: ReactionMessageProps['reactionConfig'];
   formatDateTime?: (time: number) => string;
@@ -124,6 +129,8 @@ let BaseMessage = (props: BaseMessageProps) => {
     message,
     avatar,
     avatarShape = 'circle',
+    showAvatar = true,
+    showMessageInfo = true,
     direction = 'ltr',
     status = 'default',
     prefix: customizePrefixCls,
@@ -133,7 +140,7 @@ let BaseMessage = (props: BaseMessageProps) => {
     bubbleStyle,
     time,
     nickName,
-    shape = 'ground',
+    shape = 'round',
     arrow,
     hasRepliedMsg = false,
     onReplyMessage,
@@ -153,12 +160,14 @@ let BaseMessage = (props: BaseMessageProps) => {
     onResendMessage,
     onForwardMessage,
     onReportMessage,
+    onPinMessage,
     onMessageCheckChange,
     renderUserProfile,
     onCreateThread,
     select = false,
     thread = true,
     messageStatus = true,
+    showNicknamesForAllMessages = false,
     chatThreadOverview,
     onClickThreadTitle,
     reactionConfig,
@@ -183,7 +192,7 @@ let BaseMessage = (props: BaseMessageProps) => {
       shape = theme?.avatarShape;
     }
     avatarToShow = (
-      <Avatar src={appUsersInfo?.[userId]?.avatarurl} shape={shape}>
+      <Avatar src={appUsersInfo?.[userId]?.avatarurl} shape={shape} size={24}>
         {appUsersInfo?.[userId]?.nickname || userId}
       </Avatar>
     );
@@ -211,7 +220,7 @@ let BaseMessage = (props: BaseMessageProps) => {
       [`${prefixCls}-${bubbleType}`]: !!bubbleType,
       [`${prefixCls}-${bubbleShape}`]: !!bubbleShape,
       [`${prefixCls}-arrow`]: !!bubbleArrow,
-      [`${prefixCls}-reply`]: showRepliedMsg && bubbleShape === 'ground',
+      [`${prefixCls}-reply`]: showRepliedMsg && bubbleShape === 'round',
       [`${prefixCls}-${themeMode}`]: !!themeMode,
     },
     className,
@@ -225,7 +234,7 @@ let BaseMessage = (props: BaseMessageProps) => {
     onClickThreadTitle?.();
   };
   const threadNode = () => {
-    let { name, messageCount = 0, lastMessage = {} } = chatThreadOverview || {};
+    const { name, messageCount = 0, lastMessage = {} } = chatThreadOverview || {};
 
     const { from, type, time } = lastMessage || ({} as any);
     let msgContent = '';
@@ -300,13 +309,19 @@ let BaseMessage = (props: BaseMessageProps) => {
   ) : (
     cloneElement(props.children, oriProps => ({
       style: {
-        margin: '0 8px 0 12px',
+        width: '100%',
         ...oriProps.style,
       },
     }))
   );
 
   let moreAction: CustomAction = { visible: false };
+
+  useEffect(() => {
+    if (!hoverStatus) {
+      setMessageActionsOpen(false);
+    }
+  }, [hoverStatus]);
   if (customAction) {
     moreAction = customAction;
   } else {
@@ -344,6 +359,10 @@ let BaseMessage = (props: BaseMessageProps) => {
         },
         {
           content: 'REPORT',
+          onClick: () => {},
+        },
+        {
+          content: 'PIN',
           onClick: () => {},
         },
       ],
@@ -405,6 +424,11 @@ let BaseMessage = (props: BaseMessageProps) => {
 
   const reportMessage = () => {
     onReportMessage && onReportMessage(message as BaseMessageType);
+  };
+
+  const pinMessage = () => {
+    setMessageActionsOpen(false);
+    onPinMessage && onPinMessage();
   };
 
   let menuNode: ReactNode | undefined;
@@ -532,6 +556,19 @@ let BaseMessage = (props: BaseMessageProps) => {
                 {t('report')}
               </li>
             );
+          } else if (item.content === 'PIN') {
+            return (
+              !message?.chatThread && (
+                <li
+                  key={index}
+                  onClick={pinMessage}
+                  className={themeMode == 'dark' ? 'cui-li-dark' : ''}
+                >
+                  <Icon type="PIN" width={16} height={16}></Icon>
+                  {t('Pin')}
+                </li>
+              )
+            );
           }
 
           if (item.visible !== false) {
@@ -592,54 +629,83 @@ let BaseMessage = (props: BaseMessageProps) => {
   const handleClickThreadIcon = () => {
     onCreateThread?.();
   };
+
+  const [messageActionsOpen, setMessageActionsOpen] = useState(false);
+  const checkboxRef = useRef(null);
   return (
     <div>
       <div className="thread-container">
         {select && (
-          <Checkbox shape={shape} className="checkbox" onChange={handleCheckboxChange}></Checkbox>
+          <Checkbox
+            ref={checkboxRef}
+            shape={shape}
+            className="checkbox"
+            onChange={handleCheckboxChange}
+          ></Checkbox>
         )}
         <div
           id={id}
+          // onClick={e => {
+          //   checkboxRef.current?.click?.();
+          // }}
           className={classString}
-          style={{ ...style }}
+          style={{ ...style, paddingLeft: select ? '38px' : '' }}
           onMouseOver={() => setHoverStatus(true)}
           onMouseLeave={() => {
             setHoverStatus(false);
           }}
         >
-          {renderUserProfile && !CustomProfile ? (
-            <>{avatarToShow}</>
-          ) : (
-            <Tooltip
-              title={CustomProfile || <UserProfile userId={message?.from || ''} />}
-              trigger="click"
-              placement="topLeft"
-            >
-              {avatarToShow}
-            </Tooltip>
-          )}
+          <>
+            {showAvatar ? (
+              renderUserProfile && !CustomProfile ? (
+                <>{avatarToShow}</>
+              ) : (
+                <Tooltip
+                  title={CustomProfile || <UserProfile userId={message?.from || ''} />}
+                  trigger="click"
+                  placement="topLeft"
+                >
+                  {avatarToShow}
+                </Tooltip>
+              )
+            ) : (
+              <></>
+            )}
+          </>
 
           <div className={`${prefixCls}-box`}>
-            {showRepliedMsg ? (
-              <RepliedMsg
-                message={repliedMessage as BaseMessageType}
-                shape={bubbleShape}
-                direction={direction}
-              ></RepliedMsg>
-            ) : (
-              <div className={`${prefixCls}-info`}>
-                {message?.chatType !== 'singleChat' && !isCurrentUser && (
-                  <span className={`${prefixCls}-nickname`}>{msgSenderNickname}</span>
-                )}
-              </div>
-            )}
+            <>
+              {showMessageInfo ? (
+                showRepliedMsg ? (
+                  <RepliedMsg
+                    message={repliedMessage as BaseMessageType}
+                    shape={bubbleShape}
+                    direction={direction}
+                  ></RepliedMsg>
+                ) : (
+                  <div className={`${prefixCls}-info`}>
+                    {((message?.chatType !== 'singleChat' && !isCurrentUser) ||
+                      showNicknamesForAllMessages) && (
+                      <span className={`${prefixCls}-nickname`}>{msgSenderNickname}</span>
+                    )}
+                  </div>
+                )
+              ) : (
+                <></>
+              )}
+            </>
+
             <div className={`${prefixCls}-body`}>
               {contentNode}
 
-              {hoverStatus && !select && !isRtcInviteMessage ? (
+              {hoverStatus && moreAction.visible && !select && !isRtcInviteMessage ? (
                 <>
                   {moreAction.visible && (
                     <Tooltip
+                      open={messageActionsOpen}
+                      onOpenChange={value => {
+                        setMessageActionsOpen(value);
+                      }}
                       title={menuNode}
                       trigger="click"
                       placement={isCurrentUser ? 'bottomRight' : 'bottomLeft'}
@@ -675,7 +741,7 @@ let BaseMessage = (props: BaseMessageProps) => {
                     ></Icon>
                   )}
                 </>
-              ) : (
+              ) : showMessageInfo ? (
                 <div className={`${prefixCls}-time-and-status-box`}>
                   {messageStatus && !isRtcInviteMessage && (
                     <MessageStatus status={status} type="icon"></MessageStatus>
@@ -684,6 +750,8 @@ let BaseMessage = (props: BaseMessageProps) => {
                     {formatDateTime?.(time as number) || getConversationTime(time as number)}
                   </span>
                 </div>
+              ) : (
+                <></>
               )}
             </div>
           </div>
@@ -697,6 +765,7 @@ let BaseMessage = (props: BaseMessageProps) => {
           onClick={handleClickEmoji}
           onDelete={handleDeleteReactionEmoji}
           onShowUserList={handleShowReactionUserList}
+          style={{ padding: bubbleArrow ? '0 64px' : '0 60px' }}
         />
       )}
     </div>

@@ -18,14 +18,12 @@ $dialog-prefix-cls: #{$cui-prefix}-modal;
         display: flex;
         justify-content: center;
         align-items: center;
+        text-align: left;
     }
     
     &-title {
         margin: 0;
-        // color: $modal-heading-color;
-        font-weight: 500;
-        font-size: $modal-header-title-font-size;
-        line-height: $modal-header-title-line-height;
+        @include Title(large, inherit);
         word-wrap: break-word;
     }
 
@@ -39,6 +37,9 @@ $dialog-prefix-cls: #{$cui-prefix}-modal;
         pointer-events: auto;
         height: 100%;
         overflow: auto;
+    }
+    &-content-round{
+      border-radius: 16px;
     }
 
     &-close {

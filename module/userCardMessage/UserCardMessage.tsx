@@ -15,6 +15,7 @@ import { ChatSDK } from 'module/SDK';
 import { RootContext } from '../store/rootContext';
 import Button from '../../component/button';
 import { useTranslation } from 'react-i18next';
+import { usePinnedMessage } from '../hooks/usePinnedMessage';
 export interface UserCardMessageProps extends BaseMessageProps {
   customMessage: CustomMessageType; // 从SDK收到的文件消息
   prefix?: string;
@@ -22,6 +23,7 @@ export interface UserCardMessageProps extends BaseMessageProps {
   className?: string;
   type?: 'primary' | 'secondly';
   onClick?: (url: string) => void;
+  bubbleClass?: string;
   nickName?: string;
   renderUserProfile?: (props: renderUserProfileProps) => React.ReactNode;
   onUserIdCopied?: (userId: string) => void;
@@ -35,6 +37,7 @@ const UserCardMessage = (props: UserCardMessageProps) => {
     prefix,
     className,
     style,
+    bubbleClass,
     thread,
     onUserIdCopied,
     ...others
@@ -47,6 +50,12 @@ const UserCardMessage = (props: UserCardMessageProps) => {
   const { t } = useTranslation();
   const userInfo = message.customExts;
   const { nickname, uid: userId, avatar } = userInfo;
+  const { pinMessage } = usePinnedMessage({
+    conversation: {
+      conversationId: getCvsIdFromMessage(message),
+      conversationType: message.chatType,
+    },
+  });
 
   if (typeof bySelf == 'undefined') {
     bySelf = from === rootStore.client.context.userId;
@@ -68,7 +77,7 @@ const UserCardMessage = (props: UserCardMessageProps) => {
     rootStore.messageStore.setRepliedMessage(message);
   };
   const handleDeleteMsg = () => {
-    let conversationId = getCvsIdFromMessage(message);
+    const conversationId = getCvsIdFromMessage(message);
 
     rootStore.messageStore.deleteMessage(
       {
@@ -79,8 +88,12 @@ const UserCardMessage = (props: UserCardMessageProps) => {
       message.mid || message.id,
     );
   };
+  const handlePinMessage = () => {
+    //@ts-ignore
+    pinMessage(message.mid || message.id);
+  };
   const handleClickEmoji = (emojiString: string) => {
-    let conversationId = getCvsIdFromMessage(message);
+    const conversationId = getCvsIdFromMessage(message);
 
     rootStore.messageStore.addReaction(
       {
@@ -93,7 +106,7 @@ const UserCardMessage = (props: UserCardMessageProps) => {
     );
   };
   const handleDeleteEmoji = (emojiString: string) => {
-    let conversationId = getCvsIdFromMessage(message);
+    const conversationId = getCvsIdFromMessage(message);
     rootStore.messageStore.deleteReaction(
       {
         chatType: message.chatType,
@@ -105,7 +118,7 @@ const UserCardMessage = (props: UserCardMessageProps) => {
     );
   };
   const handleShowReactionUserList = (emojiString: string) => {
-    let conversationId = getCvsIdFromMessage(message);
+    const conversationId = getCvsIdFromMessage(message);
     reactions?.forEach(item => {
       if (item.reaction === emojiString) {
         if (item.count > 3 && item.userList.length <= 3) {
@@ -133,7 +146,7 @@ const UserCardMessage = (props: UserCardMessageProps) => {
     });
   };
   const handleRecallMessage = () => {
-    let conversationId = getCvsIdFromMessage(message);
+    const conversationId = getCvsIdFromMessage(message);
     rootStore.messageStore.recallMessage(
       {
         chatType: message.chatType,
@@ -147,7 +160,7 @@ const UserCardMessage = (props: UserCardMessageProps) => {
   };
 
   const handleSelectMessage = () => {
-    let conversationId = getCvsIdFromMessage(message);
+    const conversationId = getCvsIdFromMessage(message);
     const selectable =
       rootStore.messageStore.selectedMessage[message.chatType as 'singleChat' | 'groupChat'][
         conversationId
@@ -169,7 +182,7 @@ const UserCardMessage = (props: UserCardMessageProps) => {
     rootStore.messageStore.sendMessage(message);
   };
 
-  let conversationId = getCvsIdFromMessage(message);
+  const conversationId = getCvsIdFromMessage(message);
   const select =
     rootStore.messageStore.selectedMessage[message.chatType as 'singleChat' | 'groupChat'][
       conversationId
@@ -210,7 +223,7 @@ const UserCardMessage = (props: UserCardMessageProps) => {
     rootStore.threadStore.setThreadVisible(true);
   };
   // @ts-ignore
-  let _thread =
+  const _thread =
     // @ts-ignore
     message.chatType == 'groupChat' &&
     thread &&
@@ -231,7 +244,7 @@ const UserCardMessage = (props: UserCardMessageProps) => {
     rootStore.threadStore.getChatThreadDetail(message?.chatThreadOverview?.id || '');
   };
   const handleCopy = () => {
-    var textArea = document.createElement('textarea');
+    const textArea = document.createElement('textarea');
     textArea.value = userId;
     // 添加到 DOM 元素中，方便调用 select 方法
     document.body.appendChild(textArea);
@@ -247,7 +260,7 @@ const UserCardMessage = (props: UserCardMessageProps) => {
   // add contact
   const addContact = () => {
     setDisabled(true);
-    addressStore.acceptContactInvite(userId);
+    addressStore.addContact(userId);
   };
 
   // start message
@@ -271,6 +284,8 @@ const UserCardMessage = (props: UserCardMessageProps) => {
       conversationId: userId,
       name: nickname,
     });
+
+    setModalVisible(false);
   };
 
   const isContact = addressStore.contacts.some(item => item.userId === userId);
@@ -281,12 +296,14 @@ const UserCardMessage = (props: UserCardMessageProps) => {
       <BaseMessage
         time={message.time}
         id={message.id}
+        className={bubbleClass}
         message={message}
         bubbleType={type}
         direction={bySelf ? 'rtl' : 'ltr'}
         nickName={nickName}
         onReplyMessage={handleReplyMsg}
         onDeleteMessage={handleDeleteMsg}
+        onPinMessage={handlePinMessage}
         reactionData={reactions}
         onAddReactionEmoji={handleClickEmoji}
         onDeleteReactionEmoji={handleDeleteEmoji}

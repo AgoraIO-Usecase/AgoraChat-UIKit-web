@@ -50,6 +50,7 @@ import { ReactComponent as AddFriend } from '../svgs/icons/person_add_fill.svg';
 import { ReactComponent as PersonDoubleFill } from '../svgs/icons/person_double_fill.svg';
 import { ReactComponent as PersonSingleFill } from '../svgs/icons/person_single_fill.svg';
 import { ReactComponent as Thread } from '../svgs/icons/hashtag_in_bubble.svg';
+import { ReactComponent as ThreadFill } from '../svgs/icons/hashtag_in_bubble_fill.svg';
 import { ReactComponent as Envelope } from '../svgs/icons/envelope.svg';
 import { ReactComponent as MemberGroup } from '../svgs/all.svg';
 import { ReactComponent as Loop } from '../svgs/icons/arrow_round.svg';
@@ -98,6 +99,12 @@ import { ReactComponent as PlusInCircleFill } from '../svgs/icons/plus_in_circle
 import { ReactComponent as Check } from '../svgs/icons/check.svg';
 import { ReactComponent as Check2 } from '../svgs/icons/check_2.svg';
 import { ReactComponent as CandleInCircle } from '../svgs/icons/candle_in_circle.svg';
+import { ReactComponent as Pin } from '../svgs/icons/pinned.svg';
+import { ReactComponent as Unpin } from '../svgs/icons/unpin.svg';
+import { ReactComponent as ArrowTo } from '../svgs/icons/arrowto.svg';
+import { ReactComponent as Lock } from '../svgs/icons/lock.svg';
+import { ReactComponent as CircleNDot } from '../svgs/icons/circle_n_dot.svg';
+import { ReactComponent as PersonSlashFill } from '../svgs/icons/person_slash_fill.svg';
 export interface IconProps {
   children?: ReactNode;
   className?: string;
@@ -242,6 +249,8 @@ const getIconNode = (type: keyof typeof ICON_TYPES): ReactNode => {
     case 'THREAD':
       return <Thread></Thread>;
       break;
+    case 'HASHTAG_IN_BUBBLE_FILL':
+      return <ThreadFill></ThreadFill>;
     case 'ENVELOPE':
       return <Envelope></Envelope>;
       break;
@@ -386,6 +395,23 @@ const getIconNode = (type: keyof typeof ICON_TYPES): ReactNode => {
       break;
     case 'PERSON_ADD_FILL':
       return <PERSON_ADD_FILL></PERSON_ADD_FILL>;
+      break;
+    case 'PIN':
+      return <Pin></Pin>;
+      break;
+    case 'UNPIN':
+      return <Unpin></Unpin>;
+      break;
+    case 'ARROW_TO':
+      return <ArrowTo></ArrowTo>;
+    case 'LOCK':
+      return <Lock></Lock>;
+      break;
+    case 'CIRCLE_N_DOT':
+      return <CircleNDot></CircleNDot>;
+      break;
+    case 'PERSON_SLASH_FILL':
+      return <PersonSlashFill></PersonSlashFill>;
       break;
     default:
       return '';

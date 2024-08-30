@@ -10,6 +10,7 @@ import rootStore from '../store/index';
 import { observer } from 'mobx-react-lite';
 import { getCvsIdFromMessage } from '../utils';
 import { chatSDK, ChatSDK } from '../SDK';
+import { usePinnedMessage } from '../hooks/usePinnedMessage';
 import { RootContext } from '../store/rootContext';
 
 export interface AudioMessageProps extends Omit<BaseMessageProps, 'bubbleType'> {
@@ -18,6 +19,7 @@ export interface AudioMessageProps extends Omit<BaseMessageProps, 'bubbleType'> 
   style?: React.CSSProperties;
   className?: string;
   nickName?: string;
+  bubbleClass?: string;
   type?: 'primary' | 'secondly';
   renderUserProfile?: (props: renderUserProfileProps) => React.ReactNode;
   onlyContent?: boolean;
@@ -35,6 +37,7 @@ const AudioMessage = (props: AudioMessageProps) => {
     nickName,
     thread,
     onlyContent = false,
+    bubbleClass,
     ...others
   } = props;
 
@@ -52,23 +55,42 @@ const AudioMessage = (props: AudioMessageProps) => {
   // const duration = body.length
   const { getPrefixCls } = React.useContext(ConfigContext);
   const prefixCls = getPrefixCls('message-audio', customizePrefixCls);
+  const context = React.useContext(RootContext);
+  const { theme } = context;
+  const themeMode = theme?.mode;
+
+  let { bySelf } = audioMessage;
+  if (typeof bySelf == 'undefined') {
+    bySelf = from == rootStore.client.context.userId;
+  }
+  const bubbleType = type ? type : bySelf ? 'primary' : 'secondly';
+
+  const { pinMessage } = usePinnedMessage({
+    conversation: {
+      conversationId: getCvsIdFromMessage(audioMessage),
+      conversationType: audioMessage.chatType,
+    },
+  });
   const classString = classNames(
     prefixCls,
     {
-      [`${prefixCls}-${type}`]: !!type,
+      [`${prefixCls}-${bubbleType}`]: !!bubbleType,
+      [`${prefixCls}-${themeMode}`]: !!themeMode,
     },
     className,
   );
 
   const [sourceUrl, setUrl] = useState('');
   useEffect(() => {
-    let options = {
+    if (!audioMessage.url) return;
+    const options = {
       url: audioMessage.url as string,
       headers: {
         Accept: 'audio/mp3',
       },
       onFileDownloadComplete: function (response: any) {
-        let objectUrl = chatSDK.utils.parseDownloadResponse.call(rootStore.client, response);
+        const objectUrl = chatSDK.utils.parseDownloadResponse.call(rootStore.client, response);
+        console.log('下载文件成功', objectUrl);
         setUrl(objectUrl);
       },
       onFileDownloadError: function () {},
@@ -77,14 +99,11 @@ const AudioMessage = (props: AudioMessageProps) => {
   }, [audioMessage.url]);
   const playAudio = () => {
     setPlayStatus(true);
-    (audioRef as unknown as React.MutableRefObject<HTMLAudioElement>).current
-      .play()
-      .then(res => {
-        // console.log(res);
-      })
-      .catch(err => {
-        // console.error('err', err);
-      });
+    console.log('audioRef', audioRef.current);
+    (audioRef as unknown as React.MutableRefObject<HTMLAudioElement>).current.play().catch(err => {
+      console.error('err', err);
+      setPlayStatus(false);
+    });
 
     // 消息是发给自己的单聊消息，回复read ack， 引用、转发的消息、已经是read状态的消息，不发read ack
     if (
@@ -106,17 +125,13 @@ const AudioMessage = (props: AudioMessageProps) => {
     width: `calc(${duration}% + 40px)`,
     maxWidth: `calc(100% - 128px)`,
   };
-  let { bySelf } = audioMessage;
-  if (typeof bySelf == 'undefined') {
-    bySelf = from == rootStore.client.context.userId;
-  }
-  const bubbleType = type ? type : bySelf ? 'primary' : 'secondly';
+
   const handleReplyMsg = () => {
     rootStore.messageStore.setRepliedMessage(audioMessage);
   };
 
   const handleDeleteMsg = () => {
-    let conversationId = getCvsIdFromMessage(audioMessage);
+    const conversationId = getCvsIdFromMessage(audioMessage);
     rootStore.messageStore.deleteMessage(
       {
         chatType: audioMessage.chatType,
@@ -127,8 +142,13 @@ const AudioMessage = (props: AudioMessageProps) => {
     );
   };
 
+  const handlePinMessage = () => {
+    //@ts-ignore
+    pinMessage(audioMessage.mid || audioMessage.id);
+  };
+
   const handleClickEmoji = (emojiString: string) => {
-    let conversationId = getCvsIdFromMessage(audioMessage);
+    const conversationId = getCvsIdFromMessage(audioMessage);
 
     rootStore.messageStore.addReaction(
       {
@@ -142,7 +162,7 @@ const AudioMessage = (props: AudioMessageProps) => {
   };
 
   const handleDeleteEmoji = (emojiString: string) => {
-    let conversationId = getCvsIdFromMessage(audioMessage);
+    const conversationId = getCvsIdFromMessage(audioMessage);
     rootStore.messageStore.deleteReaction(
       {
         chatType: audioMessage.chatType,
@@ -155,7 +175,7 @@ const AudioMessage = (props: AudioMessageProps) => {
   };
 
   const handleShowReactionUserList = (emojiString: string) => {
-    let conversationId = getCvsIdFromMessage(audioMessage);
+    const conversationId = getCvsIdFromMessage(audioMessage);
     reactions?.forEach(item => {
       if (item.reaction === emojiString) {
         if (item.count > 3 && item.userList.length <= 3) {
@@ -184,7 +204,7 @@ const AudioMessage = (props: AudioMessageProps) => {
   };
 
   const handleRecallMessage = () => {
-    let conversationId = getCvsIdFromMessage(audioMessage);
+    const conversationId = getCvsIdFromMessage(audioMessage);
     rootStore.messageStore.recallMessage(
       {
         chatType: audioMessage.chatType,
@@ -197,7 +217,7 @@ const AudioMessage = (props: AudioMessageProps) => {
     );
   };
 
-  let conversationId = getCvsIdFromMessage(audioMessage);
+  const conversationId = getCvsIdFromMessage(audioMessage);
   const handleSelectMessage = () => {
     const selectable =
       // @ts-ignore
@@ -252,7 +272,7 @@ const AudioMessage = (props: AudioMessageProps) => {
   };
 
   // @ts-ignore
-  let _thread =
+  const _thread =
     // @ts-ignore
     audioMessage.chatType == 'groupChat' &&
     thread &&
@@ -290,7 +310,7 @@ const AudioMessage = (props: AudioMessageProps) => {
           <AudioPlayer play={isPlaying} reverse={bySelf} size={20}></AudioPlayer>
           <span className={`${prefixCls}-duration`}>{duration + '"' || 0}</span>
           <audio
-            src={typeof file.url == 'string' ? file.url : sourceUrl}
+            src={sourceUrl}
             ref={audioRef}
             onEnded={handlePlayEnd}
             onError={handlePlayEnd}
@@ -300,6 +320,7 @@ const AudioMessage = (props: AudioMessageProps) => {
       ) : (
         <BaseMessage
           id={audioMessage.id}
+          className={bubbleClass}
           direction={bySelf ? 'rtl' : 'ltr'}
           message={audioMessage}
           time={messageTime}
@@ -308,6 +329,7 @@ const AudioMessage = (props: AudioMessageProps) => {
           bubbleType={bubbleType}
           onReplyMessage={handleReplyMsg}
           onDeleteMessage={handleDeleteMsg}
+          onPinMessage={handlePinMessage}
           reactionData={reactions}
           onAddReactionEmoji={handleClickEmoji}
           onDeleteReactionEmoji={handleDeleteEmoji}
@@ -329,7 +351,8 @@ const AudioMessage = (props: AudioMessageProps) => {
             <AudioPlayer play={isPlaying} reverse={bySelf} size={20}></AudioPlayer>
             <span className={`${prefixCls}-duration`}>{duration + '"' || 0}</span>
             <audio
-              src={typeof file.url == 'string' ? file.url : sourceUrl}
+              // src={typeof file.url == 'string' ? file.url : sourceUrl}
+              src={sourceUrl ?? file.url}
               ref={audioRef}
               onEnded={handlePlayEnd}
               onError={handlePlayEnd}

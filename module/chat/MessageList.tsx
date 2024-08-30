@@ -25,7 +25,6 @@ import { RootContext } from '../store/rootContext';
 import { ChatSDK } from '../SDK';
 import { cloneElement } from '../../component/_utils/reactNode';
 import { useHistoryMessages } from '../hooks/useHistoryMsg';
-import type { RecallMessage } from '../store/MessageStore';
 import RecalledMessage from '../recalledMessage';
 import CombinedMessage from '../combinedMessage';
 import { renderUserProfileProps } from '../baseMessage';
@@ -36,19 +35,21 @@ import { useTranslation } from 'react-i18next';
 import Icon from '../../component/icon';
 import UserCardMessage from '../userCardMessage';
 import { CustomMessageType } from 'module/types/messageType';
+import { NoticeMessageBody } from '../noticeMessage/NoticeMessage';
 export interface MsgListProps {
   prefix?: string;
   className?: string;
   style?: React.CSSProperties;
   isThread?: boolean;
-  renderMessage?: (message: ChatSDK.MessageBody | RecallMessage) => ReactNode;
+  renderMessage?: (message: ChatSDK.MessageBody | NoticeMessageBody) => ReactNode;
   renderUserProfile?: (props: renderUserProfileProps) => React.ReactNode;
   conversation?: CurrentConversation;
   messageProps?: BaseMessageProps;
   onOpenThreadPanel?: (threadId: string) => void;
 }
 
-const MessageScrollList = ScrollList<ChatSDK.MessageBody | RecallMessage>();
+const MessageScrollList = ScrollList<ChatSDK.MessageBody | NoticeMessageBody>();
+
 let MessageList: FC<MsgListProps> = props => {
   const rootStore = useContext(RootContext).rootStore;
   const { messageStore } = rootStore;
@@ -81,7 +82,7 @@ let MessageList: FC<MsgListProps> = props => {
 
   const { loadMore, isLoading } = useHistoryMessages(currentCVS);
 
-  let messageData = messageStore.message[currentCVS.chatType]?.[currentCVS.conversationId] || [];
+  const messageData = messageStore.message[currentCVS.chatType]?.[currentCVS.conversationId] || [];
   const renderMsg = (data: { index: number; style: React.CSSProperties }) => {
     if (renderMessage) {
       const element = renderMessage(messageData[data.index]);
@@ -114,6 +115,22 @@ let MessageList: FC<MsgListProps> = props => {
           style={data.style}
           renderUserProfile={renderUserProfile}
           thread={isThread}
+          imgProps={{
+            onLoad: () => {
+              if (messageStore.unreadMessageCount <= 0) {
+                // 加载更多消息时保持当前位置，不要加载到图片又回到底部
+                //@ts-ignore
+                if (
+                  //@ts-ignore
+                  listRef.current.scrollHeight - listRef.current.scrollTop - 10 <
+                  //@ts-ignore
+                  msgContainerRef.current?.clientHeight
+                ) {
+                  scrollToBottom();
+                }
+              }
+            },
+          }}
           {...messageProps}
         ></ImageMessage>
       );
@@ -129,9 +146,12 @@ let MessageList: FC<MsgListProps> = props => {
           {...messageProps}
         ></FileMessage>
       );
-    } else if (messageData[data.index].type == 'recall') {
+    } else if (
+      messageData[data.index].type == 'notice' ||
+      messageData[data.index].type == 'recall'
+    ) {
       return (
-        <NoticeMessage noticeMessage={messageData[data.index] as RecallMessage}></NoticeMessage>
+        <NoticeMessage noticeMessage={messageData[data.index] as NoticeMessageBody}></NoticeMessage>
       );
     } else if (messageData[data.index].type == 'txt') {
       return (
@@ -174,7 +194,7 @@ let MessageList: FC<MsgListProps> = props => {
           renderUserProfile={renderUserProfile}
           thread={isThread}
           videoProps={{
-            onCanPlay: () => {
+            onLoadedMetadata: () => {
               if (messageStore.unreadMessageCount <= 0) {
                 //@ts-ignore
                 if (
@@ -220,21 +240,26 @@ let MessageList: FC<MsgListProps> = props => {
       );
     }
   };
-  let lastMessage = messageData[messageData.length - 1];
-  let lastMsgId = lastMessage?.id || '';
+  const lastMessage = messageData[messageData.length - 1];
+  const lastMsgId = lastMessage?.id || '';
   // 每次发消息滚动到最新的一条
   const listRef = React.useRef<List>(null);
   useEffect(() => {
-    if (
-      messageStore.holding &&
-      lastMessage?.from != '' &&
-      lastMessage?.from != rootStore.client.user
-    )
+    // lastMessage?.type === 'notice' ||
+    if (lastMessage?.type === 'recall') {
       return;
+    }
+    const from = (lastMessage as ChatSDK.MessageBody)?.from;
+    if (lastMessage?.type != 'notice') {
+      if (messageStore.holding && from != '' && from != rootStore.client.user) {
+        return;
+      }
+    }
+
     setTimeout(() => {
       (listRef?.current as any)?.scrollTo('bottom');
     }, 10);
-  }, [lastMsgId]);
+  }, [lastMsgId, (lastMessage as any)?.reactions]);
 
   useEffect(() => {
     if (!isThread) {
@@ -256,13 +281,13 @@ let MessageList: FC<MsgListProps> = props => {
   //   currentCVS.conversationId
   // ]?.unreadCount;
   const handleScroll = (event: Event) => {
-    let scrollHeight = (event.target as HTMLElement)?.scrollHeight;
+    const scrollHeight = (event.target as HTMLElement)?.scrollHeight;
     //滚动高度
-    let scrollTop = (event.target as HTMLElement).scrollTop;
+    const scrollTop = (event.target as HTMLElement).scrollTop;
     //列表内容实际高度
-    let offsetHeight = (event.target as HTMLElement).offsetHeight;
+    const offsetHeight = (event.target as HTMLElement).offsetHeight;
     // 滚动到顶加载更多
-    let offsetBottom = scrollHeight - (scrollTop + offsetHeight);
+    const offsetBottom = scrollHeight - (scrollTop + offsetHeight);
     // scroll to bottom load data
     if (offsetBottom > 10) {
       !messageStore.holding && messageStore.setHoldingStatus(true);

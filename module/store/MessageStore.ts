@@ -9,6 +9,7 @@ import { AT_ALL } from '../messageInput/suggestList/SuggestList';
 import { TextMessageType } from 'chatuim2/types/module/types/messageType';
 import { eventHandler } from '../../eventHandler';
 import { BaseMessageType } from '../baseMessage/BaseMessage';
+import { NoticeMessageBody } from '../noticeMessage/NoticeMessage';
 import {
   getGroupMemberIndexByUserId,
   getGroupItemFromGroupsById,
@@ -16,16 +17,13 @@ import {
   getMsgSenderNickname,
 } from '../utils/index';
 
-export interface RecallMessage {
-  type: 'recall';
-  [key: string]: any;
-}
+import { resetCache } from '../hooks/useHistoryMsg';
 
 export interface Message {
-  singleChat: { [key: string]: (ChatSDK.MessageBody | RecallMessage)[] };
-  groupChat: { [key: string]: (ChatSDK.MessageBody | RecallMessage)[] };
-  chatRoom: { [key: string]: (ChatSDK.MessageBody | RecallMessage)[] };
-  byId: { [key: string]: ChatSDK.MessageBody | RecallMessage };
+  singleChat: { [key: string]: (ChatSDK.MessageBody | NoticeMessageBody)[] };
+  groupChat: { [key: string]: (ChatSDK.MessageBody | NoticeMessageBody)[] };
+  chatRoom: { [key: string]: (ChatSDK.MessageBody | NoticeMessageBody)[] };
+  byId: { [key: string]: ChatSDK.MessageBody | NoticeMessageBody };
   broadcast: ChatSDK.MessageBody[];
 }
 
@@ -33,13 +31,13 @@ export interface SelectedMessage {
   singleChat: {
     [key: string]: {
       selectable: boolean;
-      selectedMessage: (ChatSDK.MessageBody | RecallMessage)[];
+      selectedMessage: (ChatSDK.MessageBody | NoticeMessageBody)[];
     };
   };
   groupChat: {
     [key: string]: {
       selectable: boolean;
-      selectedMessage: (ChatSDK.MessageBody | RecallMessage)[];
+      selectedMessage: (ChatSDK.MessageBody | NoticeMessageBody)[];
     };
   };
 }
@@ -156,7 +154,7 @@ class MessageStore {
       message.type != 'delivery' &&
       message.type != 'channel'
     ) {
-      let ext = message.ext || {};
+      const ext = message.ext || {};
       let msgPreview = '';
       switch (this.repliedMessage.type) {
         case 'txt':
@@ -219,7 +217,7 @@ class MessageStore {
           const memberIdx =
             getGroupMemberIndexByUserId(groupItem, this.rootStore.client.user) ?? -1;
           if (memberIdx > -1) {
-            let memberItem = groupItem?.members?.[memberIdx]!;
+            const memberItem = groupItem?.members?.[memberIdx] || { userId: '', role: 'member' };
             myInfo.nickname = getGroupMemberNickName(memberItem);
           }
         }
@@ -297,6 +295,9 @@ class MessageStore {
           msg.combineLevel = level + 1;
         }
         if ((message as ChatSDK.ImgMsgBody).url) {
+          if (message.type === 'video') {
+            (msg as ChatSDK.VideoMsgBody).thumb = (message as ChatSDK.VideoMsgBody).thumb;
+          }
           (msg as ChatSDK.ImgMsgBody).url = (message as ChatSDK.ImgMsgBody).url;
           if (msg && (msg as ChatSDK.ImgMsgBody).file) {
             // @ts-ignore
@@ -311,7 +312,14 @@ class MessageStore {
           // @ts-ignore
           this.message.byId[message.id].mid = data.serverMsgId;
           // @ts-ignore
-          const i = this.message[chatType][to].indexOf(this.message.byId[message.id]);
+          // const i = this.message[chatType][to].indexOf(this.message.byId[message.id]);
+          // console.log('i--->', i, message);
+          // @ts-ignore
+          const i = this.message[chatType][to]?.findIndex(item => {
+            if (item.id === data.serverMsgId || message.id === item.id) {
+              return true;
+            }
+          });
           // @ts-ignore
           this.message[chatType][to].splice(i, 1, msg);
           // this.message[chatType][to][i] = msg;
@@ -383,7 +391,15 @@ class MessageStore {
       // @ts-ignore
       this.message[message.chatType][conversationId] = [message];
     } else {
-      // @ts-ignore
+      const MAX_LENGTH = this.rootStore.initConfig.maxMessages || 200;
+      if (this.message[message.chatType][conversationId].length > MAX_LENGTH) {
+        this.message[message.chatType][conversationId].splice(
+          0,
+          this.message[message.chatType][conversationId].length - MAX_LENGTH,
+        );
+        // this.message[message.chatType][conversationId].shift();
+        resetCache(message.chatType, conversationId);
+      }
       this.message[message.chatType][conversationId].push(message);
     }
     // 是当前会话的消息，并且是holding状态， unreadMessageCount +1
@@ -393,6 +409,10 @@ class MessageStore {
 
     // @ts-ignore
     if (message.isChatThread || message.chatThread) {
+      return;
+    }
+
+    if (message.type === 'cmd') {
       return;
     }
     // @ts-ignore
@@ -471,7 +491,7 @@ class MessageStore {
     this.rootStore.conversationStore.topConversation({ ...cvs });
     // show at tag
     if (!isCurrentCvs && message.type === 'txt') {
-      let mentionList = message?.ext?.em_at_list;
+      const mentionList = message?.ext?.em_at_list;
       if (mentionList && message.from !== this.rootStore.client.user) {
         if (mentionList === AT_ALL || mentionList.includes(this.rootStore.client.user)) {
           this.rootStore.conversationStore.setAtType(
@@ -484,7 +504,7 @@ class MessageStore {
     }
   }
 
-  modifyMessage(id: string, message: ChatSDK.MessageBody | RecallMessage) {
+  modifyMessage(id: string, message: ChatSDK.MessageBody | NoticeMessageBody) {
     this.message.byId[id] = message;
   }
 
@@ -500,12 +520,12 @@ class MessageStore {
   updateMessageStatus(msgId: string, status: string) {
     setTimeout(() => {
       runInAction(() => {
-        let msg = this.message.byId[msgId];
+        const msg = this.message.byId[msgId];
         if (!msg) {
           // ack message
           return; // console.error('not found message:', msgId);
         }
-        let conversationId = getCvsIdFromMessage(msg as BaseMessageType);
+        const conversationId = getCvsIdFromMessage(msg as BaseMessageType);
         // @ts-ignore
         this.message.byId[msgId].status = status;
         // @ts-ignore
@@ -556,7 +576,7 @@ class MessageStore {
       msgIds = [messageId];
     }
 
-    let localMsgIds: string[] = [];
+    const localMsgIds: string[] = [];
     msgIds = msgIds.filter(id => {
       if (id.length < 13) {
         localMsgIds.push(id);
@@ -590,7 +610,7 @@ class MessageStore {
       .then(() => {
         // console.log('删服务器');
         _deleteMessage(msgIds);
-        let conversation: Conversation = this.rootStore.conversationStore.getConversation(
+        const conversation: Conversation = this.rootStore.conversationStore.getConversation(
           // @ts-ignore
           cvs.chatType,
           cvs.conversationId,
@@ -634,12 +654,14 @@ class MessageStore {
     const msgIndex = getMessageIndex(messages, messageId);
     if (!recallMySelfMsg) {
       if (msgIndex > -1) {
-        messages[msgIndex].type = 'recall';
-        //@ts-ignore
-        messages[msgIndex].ext = {};
-        runInAction(() => {
-          this.message[cvs.chatType][cvs.conversationId] = messages;
+        const time = Date.now();
+        const noticeMessage = new NoticeMessageBody({
+          time,
+          type: 'recall',
+          noticeType: 'recall',
+          ext: { ...messages[msgIndex] },
         });
+        messages[msgIndex] = noticeMessage;
       }
       if (!conversation) return;
       //@ts-ignore
@@ -647,7 +669,12 @@ class MessageStore {
       if (conversation.unreadCount > 0) {
         conversation.unreadCount -= 1;
       }
-
+      // remove pinned message when recall message
+      this.rootStore.pinnedMessagesStore.deletePinnedMessage(
+        conversation.chatType,
+        conversation.conversationId,
+        messageId,
+      );
       this.rootStore.conversationStore.modifyConversation(conversation);
       return;
     }
@@ -664,18 +691,24 @@ class MessageStore {
         const messages = getMessages(cvs);
         const msgIndex = getMessageIndex(messages, messageId);
         if (msgIndex > -1) {
-          runInAction(() => {
-            let msg = { ...messages[msgIndex] };
-            msg.type = 'recall';
-            //@ts-ignore
-            msg.ext = {};
-            messages[msgIndex] = msg;
-            this.message[cvs.chatType][cvs.conversationId] = messages;
+          const time = Date.now();
+          const noticeMessage = new NoticeMessageBody({
+            time,
+            type: 'recall',
+            noticeType: 'recall',
+            ext: { ...messages[msgIndex] },
           });
+          messages[msgIndex] = noticeMessage;
           if (!conversation) return;
           // @ts-ignore
           conversation.lastMessage = messages[msgIndex];
           this.rootStore.conversationStore.modifyConversation(conversation);
+          // remove pinned message when recall message
+          this.rootStore.pinnedMessagesStore.deletePinnedMessage(
+            conversation.chatType,
+            conversation.conversationId,
+            messageId,
+          );
           eventHandler.dispatchSuccess('recallMessage');
         }
       })
@@ -792,7 +825,7 @@ class MessageStore {
         (message as BaseMessageType).reactions = reactions;
       } else {
         filterActs.forEach(item => {
-          let reaction = getReactionByEmoji(message, item.reaction);
+          const reaction = getReactionByEmoji(message, item.reaction);
           if (reaction) {
             reaction.count = item.count;
             reaction.userList = item.userList;
@@ -853,7 +886,7 @@ class MessageStore {
     const messageIndex = getMessageIndex(messages, messageId);
     return new Promise((res, rej) => {
       if (messageIndex > -1) {
-        let currentMsg = messages[messageIndex];
+        const currentMsg = messages[messageIndex];
         if (currentMsg.type !== 'txt') {
           rej(false);
           return console.warn('message type is not txt');
@@ -881,7 +914,11 @@ class MessageStore {
     });
   }
 
-  modifyLocalMessage(messageId: string, msg: ChatSDK.TextMsgBody, isReceivedModify?: boolean) {
+  modifyLocalMessage(
+    messageId: string,
+    msg: ChatSDK.ModifiedEventMessage,
+    isReceivedModify?: boolean,
+  ) {
     if (msg.chatType !== 'chatRoom') {
       let cvsId = '';
       if (isReceivedModify) {
@@ -889,17 +926,24 @@ class MessageStore {
       } else {
         cvsId = msg.to;
       }
+      this.rootStore.pinnedMessagesStore.modifyPinnedMessage(msg.chatType, cvsId, msg);
       const msgIndex = this.message[msg.chatType][cvsId].findIndex(
         //@ts-ignore
         msgItem => msgItem.id === messageId || msgItem.mid === messageId,
       );
       if (msgIndex > -1) {
-        let msgItem = this.message[msg.chatType][cvsId][msgIndex];
-        if (msgItem.type === 'txt') {
+        const msgItem = this.message[msg.chatType][cvsId][msgIndex];
+        if (msg.type === 'txt' && msgItem.type === 'txt') {
           msgItem.msg = msg.msg;
           msgItem.modifiedInfo = msg.modifiedInfo;
           // delete translations when message was edited
           msgItem.translations = undefined;
+        }
+        if (msg.type === 'custom' && msgItem.type === 'custom') {
+          msgItem.customEvent = msg.customEvent;
+          msgItem.modifiedInfo = msg.modifiedInfo;
+          msgItem.customExts = msg.customExts;
+          msgItem.ext = msg.ext;
         }
       }
     }
@@ -928,7 +972,7 @@ class MessageStore {
     cvs: CurrentConversation,
     selectedData: {
       selectable: boolean;
-      selectedMessage: (ChatSDK.MessageBody | RecallMessage)[];
+      selectedMessage: (ChatSDK.MessageBody | NoticeMessageBody)[];
     },
   ) {
     this.selectedMessage[cvs.chatType as 'singleChat' | 'groupChat'][cvs.conversationId] =
@@ -945,14 +989,19 @@ class MessageStore {
     const option = {
       chatType: cvs.chatType,
       to: cvs.conversationId,
-      type: 'cmd' as 'cmd',
+      type: 'cmd' as const,
       isChatThread: false,
       action: 'TypingBegin',
     };
     const msg = chatSDK.message.create(option);
-    this.rootStore.client.send(msg).then(() => {
-      // console.log('send cmd success');
-    });
+    this.rootStore.client
+      .send(msg)
+      .then(() => {
+        // console.log('send cmd success');
+      })
+      .catch((err: ChatSDK.ErrorEvent) => {
+        eventHandler.dispatchError('sendMessage', err);
+      });
   }
 
   setHoldingStatus(status: boolean) {

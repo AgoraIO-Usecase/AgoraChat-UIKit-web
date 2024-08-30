@@ -16,6 +16,7 @@ export interface ContextProps {
     userId?: string;
     translationTargetLanguage?: string;
     useUserInfo?: boolean;
+    maxMessages?: number;
   };
   client: ChatSDK.Connection;
   features?: {
@@ -27,6 +28,7 @@ export interface ContextProps {
         deleteConversation?: boolean;
         audioCall?: boolean;
         videoCall?: boolean;
+        pinMessage?: boolean;
       };
       message?: {
         status?: boolean;
@@ -41,6 +43,7 @@ export interface ContextProps {
         select?: boolean;
         forward?: boolean;
         report?: boolean;
+        pin?: boolean;
       };
       messageInput?: {
         mention?: boolean;
@@ -90,8 +93,11 @@ export interface ContextProps {
     primaryColor?: string | number;
     mode?: 'dark' | 'light';
     avatarShape?: 'circle' | 'square';
-    bubbleShape?: 'ground' | 'square';
-    componentsShape?: 'ground' | 'square';
+    bubbleShape?: 'round' | 'square';
+    componentsShape?: 'round' | 'square';
+  };
+  presenceMap?: {
+    [key: string]: string | HTMLImageElement;
   };
 }
 
@@ -101,6 +107,7 @@ export const RootContext = React.createContext<ContextProps>({
   client: {} as ChatSDK.Connection,
   reactionConfig: { map: {} },
   theme: {},
+  presenceMap: {},
 });
 
 export const RootConsumer = RootContext.Consumer;

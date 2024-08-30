@@ -21,7 +21,7 @@ export interface RepliedMsgProps {
   prefixCls?: string;
   className?: string;
   style?: React.CSSProperties;
-  shape?: 'ground' | 'square'; // 气泡形状
+  shape?: 'round' | 'square'; // 气泡形状
   direction?: 'ltr' | 'rtl';
   message: BaseMessageType;
 }
@@ -48,13 +48,14 @@ const RepliedMsg = (props: RepliedMsgProps) => {
   if (theme?.bubbleShape && !shape) {
     bubbleShape = theme?.bubbleShape;
   }
-
+  const themeMode = theme?.mode || 'light';
   const classString = classNames(
     prefixCls,
     {
       [`${prefixCls}-${bubbleShape}`]: !!bubbleShape,
       [`${prefixCls}-left`]: direction == 'ltr',
       [`${prefixCls}-right`]: direction == 'rtl',
+      [`${prefixCls}-${themeMode}`]: !!themeMode,
     },
     className,
   );
@@ -117,7 +118,7 @@ const RepliedMsg = (props: RepliedMsgProps) => {
   };
 
   // 渲染引用消息的内容
-  let renderMsgContent = () => {
+  const renderMsgContent = () => {
     let content: ReactNode;
     if (!repliedMsg) {
       return (content = (
@@ -126,7 +127,7 @@ const RepliedMsg = (props: RepliedMsgProps) => {
     }
     // @ts-ignore
     if (repliedMsg.type === 'recall') {
-      let msg = t('messageNotFound');
+      const msg = t('messageNotFound');
       // @ts-ignore
       // if (repliedMsg.bySelf) {
       //   msg = t('you') + t('unsentAMessage');
@@ -166,17 +167,20 @@ const RepliedMsg = (props: RepliedMsgProps) => {
         //     {(repliedMsg as ChatSDK.AudioMsgBody).length}"
         //   </div>
         // );
-        const bySelf = rootStore.client.user == message.from;
-        let msg = { ...repliedMsg, bySelf: bySelf };
-        content = (
-          <AudioMessage
-            type={'secondly'}
-            className="cui-message-base-reply"
-            // style={{ flexDirection: 'row' }}
-            onlyContent={true}
-            audioMessage={msg as AudioMessageProps['audioMessage']}
-          ></AudioMessage>
-        );
+        (() => {
+          const bySelf = rootStore.client.user == message.from;
+          const msg = { ...repliedMsg, bySelf: bySelf };
+          content = (
+            <AudioMessage
+              type={'secondly'}
+              className="cui-message-base-reply"
+              // style={{ flexDirection: 'row' }}
+              onlyContent={true}
+              audioMessage={msg as AudioMessageProps['audioMessage']}
+            ></AudioMessage>
+          );
+        })();
+
         break;
       case 'img':
         content = (
@@ -322,7 +326,6 @@ const RepliedMsg = (props: RepliedMsgProps) => {
           <Icon
             className={`${prefixCls}-arrow`}
             type="ARROW_UP_THICK"
-            color="#464E53"
             height={18}
             width={18}
             onClick={scrollToMsg}

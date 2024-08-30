@@ -60,7 +60,7 @@ const GroupDetail: FC<GroupDetailProps> = (props: GroupDetailProps) => {
   const { rootStore, theme, features, initConfig } = context;
   const { addressStore } = rootStore;
   const themeMode = theme?.mode || 'light';
-  const componentsShape = theme?.componentsShape || 'ground';
+  const componentsShape = theme?.componentsShape || 'round';
   const { t } = useTranslation();
   const classString = classNames(
     prefixCls,
@@ -103,9 +103,9 @@ const GroupDetail: FC<GroupDetailProps> = (props: GroupDetailProps) => {
   const isOwner = owner == rootStore.client.user;
   const groupMembers = groupData?.members;
   const myInfo = groupMembers?.filter(item => item.userId === rootStore.client.user)[0];
-  var avatarUrl = groupData?.avatarUrl;
+  const avatarUrl = groupData?.avatarUrl;
   const handleCopy = () => {
-    var textArea = document.createElement('textarea');
+    const textArea = document.createElement('textarea');
     textArea.value = conversation.conversationId;
     // 添加到 DOM 元素中，方便调用 select 方法
     document.body.appendChild(textArea);
@@ -265,7 +265,7 @@ const GroupDetail: FC<GroupDetailProps> = (props: GroupDetailProps) => {
             >
               <span>{t('groupMembers')}</span>
               <div>
-                {infoData?.affiliations_count}
+                {groupMembers?.length ?? infoData?.affiliations_count}
                 <Icon type="ARROW_RIGHT" width={24} height={24}></Icon>
               </div>
             </div>
@@ -524,5 +524,5 @@ const GroupDetail: FC<GroupDetailProps> = (props: GroupDetailProps) => {
     </>
   );
 };
-
+GroupDetail.displayName = 'GroupDetail';
 export default observer(GroupDetail);

@@ -54,12 +54,14 @@ let MoreAction = (props: MoreActionProps) => {
     icon
   ) : (
     <span className={`${prefixCls}-iconBox`} style={{ ...style }} title={t('more') as string}>
-      <Icon
-        type="PLUS_CIRCLE"
-        width={24}
-        height={24}
-        // onClick={handleClickIcon}
-      ></Icon>
+      <Button type="text" shape="circle">
+        <Icon
+          type="PLUS_CIRCLE"
+          width={24}
+          height={24}
+          // onClick={handleClickIcon}
+        ></Icon>
+      </Button>
     </span>
   );
 
@@ -93,7 +95,7 @@ let MoreAction = (props: MoreActionProps) => {
     };
 
     const option = {
-      type: 'custom' as 'custom',
+      type: 'custom' as const,
       customEvent,
       customExts,
       to: currentCVS.conversationId,
@@ -115,20 +117,20 @@ let MoreAction = (props: MoreActionProps) => {
     }
   };
   const sendVideo = () => {
-    console.log('发送视频');
     videoEl.current?.focus();
     videoEl.current?.click();
   };
+
   const defaultActions = [
     {
-      content: 'image',
+      content: 'IMAGE',
       title: t('image'),
       onClick: sendImage,
       icon: null,
     },
-    { content: 'video', title: t('video'), onClick: sendVideo, icon: null },
-    { content: 'file', title: t('file'), onClick: sendFile, icon: null },
-    { content: 'card', title: t('card'), onClick: sendCard, icon: null },
+    { content: 'VIDEO', title: t('video'), onClick: sendVideo, icon: null },
+    { content: 'FILE', title: t('file'), onClick: sendFile, icon: null },
+    { content: 'CARD', title: t('card'), onClick: sendCard, icon: null },
   ];
   let actions = [];
   if (customActions) {
@@ -214,7 +216,7 @@ let MoreAction = (props: MoreActionProps) => {
   );
   const currentCVS = conversation ? conversation : messageStore.currentCVS;
   const handleImageChange: React.ChangeEventHandler<HTMLInputElement> = e => {
-    let file = chatSDK.utils.getFileUrl(e.target);
+    const file = chatSDK.utils.getFileUrl(e.target);
     if (!file.filename) {
       return false;
     }
@@ -230,7 +232,7 @@ let MoreAction = (props: MoreActionProps) => {
       file: file,
       isChatThread,
       onFileUploadComplete: data => {
-        let sendMsg = messageStore.message.byId[imageMessage.id];
+        const sendMsg = messageStore.message.byId[imageMessage.id];
         (sendMsg as any).thumb = data.thumb;
         (sendMsg as any).url = data.url;
         messageStore.modifyMessage(imageMessage.id, sendMsg);
@@ -254,7 +256,7 @@ let MoreAction = (props: MoreActionProps) => {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'file' | 'video') => {
-    let file = chatSDK.utils.getFileUrl(e.target);
+    const file = chatSDK.utils.getFileUrl(e.target);
     if (!file.filename) {
       return false;
     }
@@ -272,6 +274,11 @@ let MoreAction = (props: MoreActionProps) => {
       file_length: file.data.size,
       url: file.url,
       isChatThread,
+      onFileUploadComplete(data) {
+        if (type === 'video') {
+          (fileMessage as ChatSDK.VideoMsgBody).thumb = data.thumb;
+        }
+      },
     } as ChatSDK.CreateFileMsgParameters;
     const fileMessage = chatSDK.message.create(option);
 
@@ -375,11 +382,10 @@ let MoreAction = (props: MoreActionProps) => {
             enableMultipleSelection={false}
             open={cardModalVisible}
             onUserSelect={(user, users) => {
-              console.log('onUserSelect', user, users);
               setSelectedUsers(users);
             }}
-            onOk={users => {
-              console.log('onOk', users);
+            onConfirm={users => {
+              // console.log('onOk', users);
             }}
           />
         </div>

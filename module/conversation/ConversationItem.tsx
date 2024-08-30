@@ -33,6 +33,7 @@ export interface ConversationItemProps {
   badgeColor?: string; // 未读数气泡颜色
   isActive?: boolean; // 是否被选中
   data: ConversationData[0];
+  renderMessageContent?: (msg: BaseMessageType) => ReactNode | undefined;
   // 右侧更多按钮配置
   moreAction?: {
     visible?: boolean;
@@ -72,6 +73,7 @@ let ConversationItem: FC<ConversationItemProps> = props => {
       ],
     },
     formatDateTime,
+    renderMessageContent,
     ...others
   } = props;
 
@@ -99,7 +101,7 @@ let ConversationItem: FC<ConversationItemProps> = props => {
   );
 
   const AtTag = (props: { type?: AT_TYPE }) => {
-    let { type = 'NONE' } = props;
+    const { type = 'NONE' } = props;
     if (type === 'NONE') return <></>;
     return (
       <div className={`${prefixCls}-at-tag`}>{type === 'ALL' ? t('atAllTag') : t('atTag')}</div>
@@ -213,7 +215,8 @@ let ConversationItem: FC<ConversationItemProps> = props => {
     );
   }
 
-  let lastMsg: ReactNode[] | ReactNode = '';
+  let lastMsg: ReactNode | ReactNode[] = '';
+
   switch (data.lastMessage?.type) {
     case 'txt':
       if (data.lastMessage?.msg == 'the combine message') {
@@ -253,8 +256,9 @@ let ConversationItem: FC<ConversationItemProps> = props => {
       console.warn('unexpected message type:', data.lastMessage?.type);
       break;
   }
+  lastMsg = renderMessageContent?.(data.lastMessage as BaseMessageType) ?? lastMsg;
   if (data.chatType == 'groupChat') {
-    let msgFrom = data.lastMessage?.from || '';
+    const msgFrom = data.lastMessage?.from || '';
     let from = msgFrom && msgFrom !== rootStore.client.context.userId ? `${msgFrom}: ` : '';
     const groupItem = getGroupItemFromGroupsById(data.conversationId);
     if (groupItem) {
@@ -264,11 +268,15 @@ let ConversationItem: FC<ConversationItemProps> = props => {
       if (ease_chat_uikit_user_info && ease_chat_uikit_user_info.nickname) {
         from = `${ease_chat_uikit_user_info.nickname}: `;
       } else if (memberIdx > -1) {
-        let memberItem = groupItem?.members?.[memberIdx]!;
+        const memberItem = groupItem?.members?.[memberIdx] || ({} as any);
         from = `${getGroupMemberNickName(memberItem)}: `;
       }
     }
-    lastMsg = [from, ...Array.from(lastMsg)];
+    if (Array.isArray(lastMsg)) {
+      lastMsg = [from, ...Array.from(lastMsg)];
+    } else {
+      lastMsg = [from, lastMsg];
+    }
   }
 
   return (
@@ -282,7 +290,8 @@ let ConversationItem: FC<ConversationItemProps> = props => {
       {avatar ? (
         avatar
       ) : (
-        <Avatar src={data.avatarUrl} isOnline={data.isOnline} size={avatarSize} shape={avatarShape}>
+        // 在会话列表不显示在线状态 isOnline={data.isOnline}
+        <Avatar src={data.avatarUrl} size={avatarSize} shape={avatarShape}>
           {data.name || data.conversationId}
         </Avatar>
       )}
@@ -324,7 +333,11 @@ let ConversationItem: FC<ConversationItemProps> = props => {
             <Badge
               dot={data.silent}
               count={data.unreadCount || 0}
-              color={badgeColor || 'var(--cui-primary-color)'}
+              color={
+                badgeColor || themeMode === 'dark'
+                  ? 'var(--cui-primary-color6)'
+                  : 'var(--cui-primary-color5)'
+              }
             ></Badge>
           </div>
         )}

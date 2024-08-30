@@ -24,22 +24,24 @@ import { observer } from 'mobx-react-lite';
 import { CurrentConversation } from '../store/ConversationStore';
 import Modal from '../../component/modal';
 import Tooltip from '../../component/tooltip';
-import ThreadModal from './ThreadModal';
+import ThreadModal from './ThreadListExpandableIcon';
 import Button from '../../component/button';
 import { UnsentRepliedMsg } from '../repliedMessage/UnsentRepliedMsg';
 // import rootStore from '../store/index';
 import { getMsgSenderNickname } from '../utils/index';
 import { RootContext } from '../store/rootContext';
 import { eventHandler } from '../../eventHandler';
+import ThreadMemberList from './ThreadMemberList';
+import { set } from 'mobx';
 export interface ThreadProps {
   prefix?: string;
   className?: string;
   style?: React.CSSProperties;
-  // shape?: 'ground' | 'square'; // 气泡形状
+  // shape?: 'round' | 'square'; // 气泡形状
   // direction?: 'ltr' | 'rtl';
   // message: ChatSDK.MessageBody;
   messageListProps?: MsgListProps;
-  createThread?: boolean;
+  // createThread?: boolean;
   // groupID: string;
   // threadID?: string;
   // originalMsg: ChatSDK.MessageBody;
@@ -335,6 +337,15 @@ const Thread = (props: ThreadProps) => {
     });
   }, [currentThread?.info?.id]);
 
+  useEffect(() => {
+    if (conversation.conversationId) {
+      rootStore.messageStore.setSelectedMessage(conversation, {
+        selectable: false,
+        selectedMessage: [],
+      });
+    }
+  }, [rootStore.conversationStore.currentCvs]);
+
   // close panel
   const handleClickClose = () => {
     // rootStore.threadStore.setCurrentThread({
@@ -372,9 +383,9 @@ const Thread = (props: ThreadProps) => {
   const handleDisbandThread = () => {
     setModalData({
       open: true,
-      title: t('disbandThread'),
-      content: t('are you sure you want to disband this thread'),
-      okText: t('disband'),
+      title: t('destroyThread'),
+      content: t('are you sure you want to destroy this thread'),
+      okText: t('destroy'),
       cancelText: t('cancel'),
       onOk: () => {
         rootStore.client
@@ -462,51 +473,39 @@ const Thread = (props: ThreadProps) => {
     });
   };
 
-  // thread modal title name
-  const [modalName, setModalName] = useState<string>(`${t('thread')} ${t('members')}`);
-
-  // 获取thread members
   const handleGetThreadMembers = () => {
     setPanelOpen(true);
-    threadStore
-      .getThreadMembers(
-        threadStore.currentThread.info?.parentId || '',
-        threadStore.currentThread.info?.id || '',
-      )
-      .then((data: any) => {
-        setModalData({
-          ...modalData,
-          open: false,
-        });
-        setModalName(`${t('thread')} ${t('members')}(${data.length})`);
-      });
+    setModalData({
+      ...modalData,
+      open: false,
+    });
   };
 
   const threadMoreAction = {
-    visible: true,
+    visible: !threadStore.currentThread.creating,
     actions: [
       {
-        content: `${t('thread')} ${t('members')}`,
+        content: `${t('threadMembers')}`,
         onClick: () => {
           handleGetThreadMembers();
         },
       },
       {
         visible: role != 'member',
-        content: `${t('modify')} ${t('thread')}`,
+        content: `${t('modifyThread')}`,
         onClick: () => {
           handleEditThreadName();
         },
       },
       {
-        content: `${t('leave')} ${t('thread')}`,
+        content: `${t('leaveThread')}`,
         onClick: () => {
           handleLeaveThread();
         },
       },
       {
         visible: role == 'admin' || role == 'owner',
-        content: `${t('disband')} ${t('thread')}`,
+        content: `${t('destroyThread')}`,
         onClick: () => {
           handleDisbandThread();
         },
@@ -516,86 +515,8 @@ const Thread = (props: ThreadProps) => {
   const headerRef = useRef(null);
   const [panelOpen, setPanelOpen] = useState(false);
 
-  const actions: any[] = [
-    {
-      content: t('remove'),
-      onClick: (item: string) => {
-        threadStore.removeChatThreadMember(
-          threadStore.currentThread.info?.parentId || '',
-          threadStore.currentThread.info?.id || '',
-          item,
-        );
-      },
-    },
-  ];
-
-  const [renderMembers, setRenderMembers] = useState<string[]>([]);
-  useEffect(() => {
-    if (threadStore.currentThread.info?.members) {
-      setRenderMembers(threadStore.currentThread.info?.members);
-    }
-  }, [threadStore.currentThread.info?.members]);
-
-  //render thread member list
-  const membersContent = () => {
-    const members = renderMembers || [];
-    const menuNode = (member: string) => (
-      <ul className={`${getPrefixCls('header')}-more`}>
-        {actions.map((item, index) => {
-          return (
-            <li
-              key={index}
-              onClick={() => {
-                item.onClick?.(member);
-              }}
-            >
-              {item.content}
-            </li>
-          );
-        })}
-      </ul>
-    );
-    // 控制是否显示更多操作的开关
-    const showMoreAction = role != 'member';
-    const myId = rootStore.client.user;
-    const membersDom = members.map(member => {
-      let name = rootStore.addressStore.appUsersInfo?.[member]?.nickname;
-      const avatarUrl = rootStore.addressStore.appUsersInfo?.[member]?.avatarurl;
-      // if (item.attributes?.nickName) {
-      //   name = item.attributes?.nickName;
-      // }
-      return (
-        <div className={`${prefixCls}-members-item`} key={member}>
-          <div className={`${prefixCls}-members-item-name`}>
-            <Avatar src={avatarUrl}>{name}</Avatar>
-            <div>{name || member}</div>
-          </div>
-          {showMoreAction && myId != member && (
-            <Tooltip title={menuNode(member)} trigger="click" placement="bottom">
-              {
-                <Button type="text" shape="circle">
-                  <Icon type="ELLIPSIS"></Icon>
-                </Button>
-              }
-            </Tooltip>
-          )}
-        </div>
-      );
-    });
-    return membersDom;
-  };
-
-  const handleSearchMember = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const members = threadStore.currentThread.info?.members || [];
-    const filterMembers = members.filter(member => {
-      return member.includes(value);
-    });
-    setRenderMembers(filterMembers);
-  };
-
   // config message
-  let messageProps: MsgListProps['messageProps'] = {
+  const messageProps: MsgListProps['messageProps'] = {
     customAction: {
       visible: true,
       icon: null,
@@ -676,21 +597,15 @@ const Thread = (props: ThreadProps) => {
         <div className={`${prefixCls}-detail`}>{modalData.content}</div>
       </Modal>
 
-      <ThreadModal
-        headerContent={modalName}
-        open={panelOpen}
-        anchorEl={headerRef.current}
-        onClose={() => {
-          setPanelOpen(false);
-        }}
-        onSearch={handleSearchMember}
-        onClear={() => {
-          setRenderMembers(threadStore.currentThread.info?.members || []);
-        }}
-        style={{ width: '360px' }}
-      >
-        <div className={`${prefixCls}-members-box`}>{membersContent()}</div>
-      </ThreadModal>
+      {panelOpen && (
+        <div className={`${prefixCls}-members-box`}>
+          <ThreadMemberList
+            onClose={() => {
+              setPanelOpen(false);
+            }}
+          ></ThreadMemberList>
+        </div>
+      )}
     </div>
   );
 };

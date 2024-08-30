@@ -1,13 +1,12 @@
 import { ChatType } from '../types/messageType';
 import { ChatSDK } from '../SDK';
 import rootStore, { getStore } from '../store/index';
-import type { RecallMessage } from '../store/MessageStore';
 import { GroupItem, MemberItem } from '../store/AddressStore';
 import { emoji } from '../messageInput/emoji/emojiConfig';
 import { AppUserInfo } from '../store/AddressStore';
 import { CurrentConversation } from '../store/ConversationStore';
 import type { BaseMessageType } from '../baseMessage/BaseMessage';
-import { f } from 'vitest/dist/index-2f5b6168';
+import { NoticeMessageBody } from '../noticeMessage/NoticeMessage';
 
 export function getConversationTime(time: number) {
   if (!time) return '';
@@ -49,16 +48,19 @@ export function parseChannel(channelId: string): {
   };
 }
 
-export function getCvsIdFromMessage(message: BaseMessageType | RecallMessage) {
+export function getCvsIdFromMessage(message: BaseMessageType | NoticeMessageBody) {
   let conversationId = '';
-  if (message.chatType == 'groupChat' || message.chatType == 'chatRoom') {
-    conversationId = message.to;
-  } else if (message.from == rootStore.client.user) {
-    // self message
-    conversationId = message.to;
-  } else {
-    // target message
-    conversationId = message.from || '';
+  if (message?.type !== 'notice' && message?.type !== 'recall') {
+    message = message as BaseMessageType;
+    if (message.chatType == 'groupChat' || message.chatType == 'chatRoom') {
+      conversationId = message.to;
+    } else if (message.from == rootStore.client.user) {
+      // self message
+      conversationId = message.to;
+    } else {
+      // target message
+      conversationId = message.from || '';
+    }
   }
   return conversationId;
 }
@@ -99,10 +101,10 @@ export const renderHtml = (txt: string): string => {
 
 export function getUsersInfo(props: { userIdList: string[]; withPresence?: boolean }) {
   const { userIdList, withPresence = true } = props;
-  let { client, addressStore, conversationStore } = getStore();
+  const { client, addressStore, conversationStore } = getStore();
   if (!client.context) return Promise.reject('client is not initialized');
   const findIndex = userIdList.indexOf(client.user);
-  let subList = [...userIdList];
+  const subList = [...userIdList];
   const result = {};
   if (findIndex > -1) {
     subList.splice(findIndex, 1);
@@ -158,7 +160,7 @@ export function getUsersInfo(props: { userIdList: string[]; withPresence?: boole
                 });
                 conversationStore.setOnlineStatus(res.data?.result as ChatSDK.SubscribePresence[]);
                 const list = addressStore.appUsersInfo;
-                addressStore.setAppUserInfo(Object.assign({}, list, reUserInfo));
+                addressStore.setAppUserInfo(Object.assign({}, reUserInfo, list));
                 resolve(Object.assign({}, result, reUserInfo));
               })
               .catch(e => {
@@ -166,7 +168,8 @@ export function getUsersInfo(props: { userIdList: string[]; withPresence?: boole
               });
           } else {
             const list = addressStore.appUsersInfo;
-            addressStore.setAppUserInfo(Object.assign({}, list, reUserInfo));
+            // 如果 appUserInfo 里已经有了 就不更新，（否则使用消息里携带的信息更细的appUserInfo，如果没有设置用户属性，在这里会清掉appUserInfo的信息）
+            addressStore.setAppUserInfo(Object.assign({}, reUserInfo, list));
             resolve(Object.assign({}, result, reUserInfo));
           }
         })
@@ -211,7 +214,7 @@ export function getMessages(cvs: CurrentConversation) {
 }
 
 export function getMessageIndex(
-  messages: (ChatSDK.MessageBody | RecallMessage)[],
+  messages: (ChatSDK.MessageBody | NoticeMessageBody)[],
   messageId: string,
 ) {
   if (!messages) return -1;
@@ -219,28 +222,41 @@ export function getMessageIndex(
   return messages.findIndex(msg => msg.id === messageId || msg.mid === messageId);
 }
 
-export function getReactionByEmoji(message: ChatSDK.MessageBody | RecallMessage, emoji: string) {
+export function getReactionByEmoji(
+  message: ChatSDK.MessageBody | NoticeMessageBody,
+  emoji: string,
+) {
   // @ts-ignore
   return message.reactions?.find(reaction => reaction.reaction === emoji);
 }
 
 export const getMsgSenderNickname = (msg: BaseMessageType, parentId?: string) => {
   let { chatType, from = '', to, chatThread } = msg;
-  let id = parentId || chatThread?.parentId;
+  const id = parentId || chatThread?.parentId;
   if (id) {
     to = id;
   }
-  const { appUsersInfo } = getStore().addressStore;
+  const { appUsersInfo, contacts } = getStore().addressStore;
   if (chatType === 'groupChat') {
-    let group = getGroupItemFromGroupsById(to);
-    let memberIndex = (group && getGroupMemberIndexByUserId(group, from)) ?? -1;
+    const group = getGroupItemFromGroupsById(to);
+
+    const contactData = contacts.find((contact: any) => {
+      return contact.userId === from;
+    });
+
+    if (contactData && contactData.remark) {
+      return contactData.remark;
+    }
+
+    const memberIndex = (group && getGroupMemberIndexByUserId(group, from)) ?? -1;
     if (memberIndex > -1) {
-      let memberItem = group?.members?.[memberIndex];
+      const memberItem = group?.members?.[memberIndex];
       if (memberItem) {
         return getGroupMemberNickName(memberItem) || appUsersInfo?.[from]?.nickname || from;
       }
       return appUsersInfo?.[from]?.nickname || from;
     }
+
     return appUsersInfo?.[from]?.nickname || from;
   } else {
     return appUsersInfo?.[from]?.nickname || from;
@@ -253,16 +269,19 @@ export function sortByPinned(a: any, b: any) {
   } else if (!a.isPinned && b.isPinned) {
     return 1; // b排在a前面
   } else if ((!a.isPinned && !b.isPinned) || (a.isPinned && b.isPinned)) {
-    return a.lastMessage.time > b.lastMessage.time ? -1 : 1; // 保持原有顺序
+    if (!a.lastMessage?.time) {
+      return 0;
+    }
+    return a.lastMessage?.time > b.lastMessage?.time ? -1 : 1; // 保持原有顺序
   } else {
     return 0; // 保持原有顺序
   }
 }
 
 export function checkCharacter(character: string) {
-  var pattern = /[\u4E00-\u9FA5]/; // 中文字符的unicode范围
-  var isChinese = pattern.test(character);
-  var isLetter = /^[a-zA-Z]$/.test(character);
+  const pattern = /[\u4E00-\u9FA5]/; // 中文字符的unicode范围
+  const isChinese = pattern.test(character);
+  const isLetter = /^[a-zA-Z]$/.test(character);
 
   if (isChinese) {
     return 'zh';

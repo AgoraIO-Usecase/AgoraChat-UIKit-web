@@ -22,6 +22,7 @@ import Textarea from '../messageInput/textarea';
 import { ForwardRefProps } from '../messageInput/textarea/Textarea';
 import { observer } from 'mobx-react-lite';
 import { RootContext } from '../store/rootContext';
+import { usePinnedMessage } from '../hooks/usePinnedMessage';
 export interface TextMessageProps extends BaseMessageProps {
   textMessage: TextMessageType;
   // color?: string; // 字体颜色
@@ -40,6 +41,7 @@ export interface TextMessageProps extends BaseMessageProps {
   showTranslation?: boolean; // 是否展示翻译后的消息
   onlyContent?: boolean;
   onOpenThreadPanel?: (threadId: string) => void;
+  showEditedTag?: boolean;
 }
 
 export const renderTxt = (txt: string | undefined | null, parseUrl: boolean = true) => {
@@ -47,7 +49,7 @@ export const renderTxt = (txt: string | undefined | null, parseUrl: boolean = tr
   if (txt === undefined || txt === null) {
     return [];
   }
-  let rnTxt: React.ReactNode[] = [];
+  const rnTxt: React.ReactNode[] = [];
   let match;
 
   const regex =
@@ -82,8 +84,14 @@ export const renderTxt = (txt: string | undefined | null, parseUrl: boolean = tr
   if (parseUrl) {
     rnTxt.forEach((text, index) => {
       if (urlRegex.test(text!.toString())) {
-        let replacedText = reactStringReplace(text?.toString() || '', urlRegex, (match, i) => (
-          <a key={match + i} target="_blank" href={match} className="message-text-url-link">
+        const replacedText = reactStringReplace(text?.toString() || '', urlRegex, (match, i) => (
+          <a
+            key={match + i}
+            target="_blank"
+            rel="noopener noreferrer"
+            href={match}
+            className="message-text-url-link"
+          >
             {match}
           </a>
         ));
@@ -149,6 +157,7 @@ const TextMessage = (props: TextMessageProps) => {
     showTranslation = true,
     onlyContent = false,
     onOpenThreadPanel,
+    showEditedTag = true,
     ...others
   } = props;
   if (!textMessage.chatType) return null;
@@ -157,7 +166,7 @@ const TextMessage = (props: TextMessageProps) => {
   const { t } = useTranslation();
   const [urlData, setUrlData] = useState<any>(null);
   const [isFetching, setFetching] = useState(false);
-  let conversationId = getCvsIdFromMessage(textMessage);
+  const conversationId = getCvsIdFromMessage(textMessage);
   let { bySelf, time, from, msg, reactions } = textMessage;
   const classString = classNames(prefixCls, className);
   const textareaRef = useRef<ForwardRefProps>(null);
@@ -166,6 +175,12 @@ const TextMessage = (props: TextMessageProps) => {
   const { translationTargetLanguage } = initConfig;
   const targetLng = targetLanguage || translationTargetLanguage || 'en';
   const [modifyMessageVisible, setModifyMessageVisible] = useState<boolean>(false);
+  const { pinMessage } = usePinnedMessage({
+    conversation: {
+      conversationId: conversationId,
+      conversationType: textMessage.chatType,
+    },
+  });
   const [text, setText] = useState<string>('');
   let urlTxtClass = '';
   if (urlData?.images?.length > 0) {
@@ -227,7 +242,7 @@ const TextMessage = (props: TextMessageProps) => {
   };
 
   const handleDeleteMsg = () => {
-    let conversationId = getCvsIdFromMessage(textMessage);
+    const conversationId = getCvsIdFromMessage(textMessage);
     rootStore.messageStore.deleteMessage(
       {
         chatType: textMessage.chatType,
@@ -238,13 +253,18 @@ const TextMessage = (props: TextMessageProps) => {
     );
   };
 
+  const handlePinMessage = () => {
+    //@ts-ignore
+    pinMessage(textMessage.mid || textMessage.id);
+  };
+
   let repliedMsg: undefined | ChatSDK.MessageBody;
   if (textMessage.ext?.msgQuote) {
     repliedMsg = textMessage;
   }
 
   const handleClickEmoji = (emojiString: string) => {
-    let conversationId = getCvsIdFromMessage(textMessage);
+    const conversationId = getCvsIdFromMessage(textMessage);
     rootStore.messageStore.addReaction(
       {
         chatType: textMessage.chatType,
@@ -257,7 +277,7 @@ const TextMessage = (props: TextMessageProps) => {
   };
 
   const handleDeleteEmoji = (emojiString: string) => {
-    let conversationId = getCvsIdFromMessage(textMessage);
+    const conversationId = getCvsIdFromMessage(textMessage);
     rootStore.messageStore.deleteReaction(
       {
         chatType: textMessage.chatType,
@@ -270,7 +290,7 @@ const TextMessage = (props: TextMessageProps) => {
   };
 
   const handleShowReactionUserList = (emojiString: string) => {
-    let conversationId = getCvsIdFromMessage(textMessage);
+    const conversationId = getCvsIdFromMessage(textMessage);
     reactions?.forEach(item => {
       if (item.reaction === emojiString) {
         if (item.count > 3 && item.userList.length <= 3) {
@@ -299,7 +319,7 @@ const TextMessage = (props: TextMessageProps) => {
   };
 
   const handleRecallMessage = () => {
-    let conversationId = getCvsIdFromMessage(textMessage);
+    const conversationId = getCvsIdFromMessage(textMessage);
     rootStore.messageStore.recallMessage(
       {
         chatType: textMessage.chatType,
@@ -325,7 +345,7 @@ const TextMessage = (props: TextMessageProps) => {
       return;
     }
     setTransStatus('translating');
-    let conversationId = getCvsIdFromMessage(textMessage);
+    const conversationId = getCvsIdFromMessage(textMessage);
     rootStore.messageStore
       .translateMessage(
         {
@@ -346,7 +366,7 @@ const TextMessage = (props: TextMessageProps) => {
   };
 
   const handleSelectMessage = () => {
-    let conversationId = getCvsIdFromMessage(textMessage);
+    const conversationId = getCvsIdFromMessage(textMessage);
     const selectable =
       rootStore.messageStore.selectedMessage[textMessage.chatType as 'singleChat' | 'groupChat'][
         conversationId
@@ -412,7 +432,7 @@ const TextMessage = (props: TextMessageProps) => {
   const confirmModifyMessage = () => {
     setModifyMessageVisible(false);
     const currentCVS = rootStore.conversationStore.currentCvs;
-    let msg = convertToMessage(textareaRef?.current?.divRef?.current?.innerHTML || '').trim();
+    const msg = convertToMessage(textareaRef?.current?.divRef?.current?.innerHTML || '').trim();
     const { isChatThread, to, chatThread } = textMessage as ChatSDK.TextMsgBody;
     const isThread = !!(isChatThread || chatThread);
     const message = chatSDK.message.create({
@@ -449,7 +469,7 @@ const TextMessage = (props: TextMessageProps) => {
   };
 
   // @ts-ignore
-  let _thread =
+  const _thread =
     // @ts-ignore
     textMessage.chatType == 'groupChat' &&
     thread &&
@@ -469,37 +489,40 @@ const TextMessage = (props: TextMessageProps) => {
     rootStore.threadStore.getChatThreadDetail(textMessage?.chatThreadOverview?.id || '');
     onOpenThreadPanel?.(textMessage.chatThreadOverview?.id || '');
   };
-
+  const [currentIndex, setCurrentIndex] = useState(0);
   useEffect(() => {
     if ((textMessage as any).printed != false) {
       return;
     }
     const msgArr = renderTxt(msg, true);
     const message = (msgArr.length > 1 ? msgArr : msgArr[0] || '') as string[] | string;
-    let currentIndex = 0;
+    if (currentIndex >= message.length - 1) {
+      return;
+    }
     const typingInterval = setInterval(() => {
       setText(prevMessage => prevMessage + message?.[currentIndex]);
-      currentIndex++;
+      setCurrentIndex(prevIndex => prevIndex + 1);
       if (currentIndex >= message.length - 1) {
         clearInterval(typingInterval);
         // @ts-ignore
         textMessage.printed = true;
       }
-    }, 50);
+    }, 30);
 
     return () => {
       clearInterval(typingInterval);
     };
-  }, [msg]);
+  }, [msg, currentIndex]);
   return (
     <>
       {onlyContent ? (
-        <div>
+        <div className={urlData?.title || urlData?.description ? `${prefixCls}-url-container` : ''}>
           <span className={classString}>{renderTxt(msg, true)}</span>
-          {!!(urlData?.title || urlData?.description) && (
+          {(urlData?.title || urlData?.description) && (
             <UrlMessage {...urlData} isLoading={isFetching}></UrlMessage>
           )}
-          {textMessage?.modifiedInfo ? (
+
+          {showEditedTag && textMessage?.modifiedInfo ? (
             <div className={`${classString}-edit-tag`}>{t('edited')}</div>
           ) : (
             ''
@@ -536,6 +559,7 @@ const TextMessage = (props: TextMessageProps) => {
             className={bubbleClassName}
             onReplyMessage={handleReplyMsg}
             onDeleteMessage={handleDeleteMsg}
+            onPinMessage={handlePinMessage}
             repliedMessage={repliedMsg}
             reactionData={reactions}
             onAddReactionEmoji={handleClickEmoji}
@@ -555,14 +579,16 @@ const TextMessage = (props: TextMessageProps) => {
             onClickThreadTitle={handleClickThreadTitle}
             {...others}
           >
-            <div>
+            <div
+              className={urlData?.title || urlData?.description ? `${prefixCls}-url-container` : ''}
+            >
               <span className={classString} style={{ ...style }}>
                 {(textMessage as any).printed == false ? text : renderTxt(msg, true)}
               </span>
-              {!!(urlData?.title || urlData?.description) && (
+              {(urlData?.title || urlData?.description) && (
                 <UrlMessage {...urlData} isLoading={isFetching}></UrlMessage>
               )}
-              {textMessage?.modifiedInfo ? (
+              {showEditedTag && textMessage?.modifiedInfo ? (
                 <div className={`${classString}-edit-tag`}>{t('edited')}</div>
               ) : (
                 ''

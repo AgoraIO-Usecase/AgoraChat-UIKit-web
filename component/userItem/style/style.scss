@@ -80,6 +80,10 @@ $user-prefix-cls: #{$cui-prefix}-userItem;
     }
 }
 
+.#{$user-prefix-cls}-square{
+    // border-radius: 0;
+}
+
 .#{$user-prefix-cls}-dark{
     &:hover{
         background: $gray-2;
@@ -131,7 +135,7 @@ $user-prefix-cls: #{$cui-prefix}-userItem;
     }
 }
 
-.cui-moreAction-dark{
+.cui-moreAction.cui-moreAction-dark{
     li:hover{
         /* color_neutral/95 */
         background-color: $gray-2;

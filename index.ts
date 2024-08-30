@@ -35,6 +35,7 @@ import {
   useThreadContext,
   Thread,
   UserProfile,
+  Blocklist,
   Chatroom,
   ChatroomMember,
   ChatroomMessage,
@@ -44,6 +45,8 @@ import {
   GroupMember,
   UserCardMessage,
   UserSelect,
+  usePinnedMessage,
+  PinnedMessage,
 } from './module/index';
 const UIKitProvider = Provider;
 import {
@@ -92,6 +95,7 @@ export {
   MessageEditor,
   Header,
   Empty,
+  PinnedMessage,
   RecalledMessage,
   rootStore,
   RootContext,
@@ -107,6 +111,7 @@ export {
   useChatContext,
   useAddressContext,
   useThreadContext,
+  usePinnedMessage,
   Avatar,
   Button,
   Input,
@@ -124,6 +129,7 @@ export {
   Collapse,
   Thread,
   UserProfile,
+  Blocklist,
   Chatroom,
   ChatroomMember,
   ChatroomMessage,
@@ -189,7 +195,6 @@ export type {
   RootStore,
   InitConfig,
   MessageStore,
-  RecallMessage,
   Message,
   SelectedMessage,
   Typing,
@@ -210,12 +215,14 @@ export type {
   ContextProps,
   ThreadProps,
   UserProfileProps,
+  BlocklistProps,
   ContactListProps,
   ContactDetailProps,
   GroupDetailProps,
   GroupMemberProps,
   UserCardMessageProps,
   UserSelectProps,
+  PinnedMessageProps,
 } from './module/index';
 
 export type { EventHandlerData, EventName };

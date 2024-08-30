@@ -17,7 +17,7 @@ $tooltip-arrow-offset-horizontal: 13px; // 16 - 3px
     display: block;
     width: auto;
     // width: intrinsic;
-    max-width: $tooltip-max-width;
+    // max-width: $tooltip-max-width;
     visibility: visible;
 
     &-content {
@@ -51,7 +51,11 @@ $tooltip-arrow-offset-horizontal: 13px; // 16 - 3px
     &-placement-leftBottom {
         padding-right: $tooltip-distance;
     }
-
+    &-round{
+        .#{$tooltip-prefix-cls}-inner{
+            border-radius: 16px;
+        }
+    }
     // Wrapper for the tooltip content
     &-inner {
         min-width: 30px;

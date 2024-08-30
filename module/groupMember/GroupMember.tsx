@@ -88,7 +88,7 @@ const GroupMember: FC<GroupMemberProps> = props => {
   const privateChat = (userId: string) => {
     const result = onPrivateChat?.(userId);
     if (result == false) return;
-    let name = addressStore.appUsersInfo?.[userId]?.nickname;
+    const name = addressStore.appUsersInfo?.[userId]?.nickname;
     conversationStore.addConversation({
       chatType: 'singleChat',
       conversationId: userId,
@@ -129,6 +129,7 @@ const GroupMember: FC<GroupMemberProps> = props => {
       ...addMemberData,
       open: false,
     });
+    setSelectedUsers([]);
   };
   const deleteGroupMember = () => {
     const users = groupMembers.map((item: any) => {
@@ -213,7 +214,7 @@ const GroupMember: FC<GroupMemberProps> = props => {
   // 给groupMember 加上 isInContact属性
   const renderData =
     groupMembers?.map((item: any) => {
-      let renderItem = { ...item };
+      const renderItem = { ...item };
       renderItem.isInContact = addressStore.contacts.some((contact: any) => {
         return contact.userId === item.userId;
       });
@@ -280,6 +281,7 @@ const GroupMember: FC<GroupMemberProps> = props => {
           }
           return (
             <UserItem
+              avatarSize={40}
               avatarShape={theme?.avatarShape}
               key={item.userId}
               data={{ userId: item.userId, nickname: name, avatarUrl: avatarUrl }}
@@ -314,7 +316,7 @@ const GroupMember: FC<GroupMemberProps> = props => {
                               height={18}
                             ></Icon>
                           ),
-                          content: item.isInContact ? t('privateChat') : t('addGroupMembers'),
+                          content: item.isInContact ? t('privateChat') : t('addContact'),
                           onClick: () => {
                             item.isInContact ? privateChat(item.userId) : addContact(item.userId);
                           },
@@ -344,6 +346,7 @@ const GroupMember: FC<GroupMemberProps> = props => {
             ...addMemberData,
             open: false,
           });
+          setSelectedUsers([]);
         }}
         selectedPanelFooter={
           <div>
@@ -365,6 +368,7 @@ const GroupMember: FC<GroupMemberProps> = props => {
                   ...addMemberData,
                   open: false,
                 });
+                setSelectedUsers([]);
               }}
             >
               {t('cancelBtn')}

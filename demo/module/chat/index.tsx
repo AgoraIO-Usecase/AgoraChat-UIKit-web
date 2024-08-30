@@ -1,3 +1,4 @@
+// 开发用demo
 import React, { useEffect, useState, FC } from 'react';
 import ReactDOM from 'react-dom/client';
 import TextMessage from '../../../module/textMessage';
@@ -15,65 +16,60 @@ import { ConversationList, ConversationItem } from '../../../module/conversation
 // import Provider from '../../../module/store/Provider';
 import { Provider, UIKitProvider } from '../../../index';
 import { useClient } from '../../../module/hooks/useClient';
-import { getLinkPreview, getPreviewFromContent } from 'link-preview-js';
 import Button from '../../../component/button';
 import Avatar from '../../../component/avatar';
 import { MessageList } from '../../../module/chat/MessageList';
 import Thread from '../../../module/thread';
+import PinnedMessage from '../../../module/pinnedMessage';
 import './index.css';
 import { observer } from 'mobx-react-lite';
 import axios from 'axios';
 import { useConversationContext, useChatContext } from '../../../module';
-import { hexToHsla, generateColors } from '../../../module/utils/color';
 import UserSelect from '../../../module/userSelect';
-console.log('hexToHsla', hexToHsla('#FF0000'));
-console.log('hexToHsla', hexToHsla('#000000'));
-console.log('hexToHsla', hexToHsla('#ffffff'));
-console.log('hexToHsla 1', generateColors(hexToHsla('#FF0000')));
-// import {
-// 	Chat,
-// 	rootStore,
-// 	ConversationList,
-// 	Provider,
-// 	useClient,
-// } from 'chatuim2';
-// import 'chatuim2/style.css';
+import { usePinnedMessage } from '../../../module/hooks/usePinnedMessage';
+
+// 调试用
 window.rootStore = rootStore;
+
+// get url query params
+const getQueryParams = () => {
+  const search = window.location.search;
+  const params = new URLSearchParams(search);
+  return {
+    userId: params.get('userId'),
+    password: params.get('password'),
+    appKey: params.get('appKey'),
+  };
+};
+
+const PinnedMessageComp = observer(() => {
+  const { visible } = usePinnedMessage();
+  return (
+    visible && (
+      <div
+        style={{
+          width: '350px',
+          borderLeft: '1px solid #eee',
+          overflow: 'hidden',
+          background: '#fff',
+        }}
+      >
+        <PinnedMessage />
+      </div>
+    )
+  );
+});
+
 const ChatApp: FC<any> = () => {
   const client = useClient();
-  // useEffect(() => {
-  //   client &&
-  //     client
-  //       .open({
-  //         user: 'zd3',
-  //         // pwd: '272808',
-  //         accessToken:
-  //           'YWMtgwTHNZPxQviWaqMIJTHfFyhYwv00w0hrtpGKy_Jc3V2J3LcwYk0R7J9BM4gepb6yAwMAAAGLCXYIsQABTnFcluGlL4BdlKN4Qdf0EQThNgjgWh4vB9JhWxj-X18Ucg==',
-  //       })
-  //       .then(res => {
-  //         console.log('获取token成功', res, rootStore.client);
-  //       });
-  // }, [client]);
 
-  const getUrlPreviewInfo = () => {
-    getLinkPreview(
-      'https://api-ref.agora.io/en/chat-sdk/ios/1.x/interface_agora_chat_client.html#a3e0c211f850af4dfe61c0581f3b7aea7',
-    )
-      .then(data => console.log(123, data))
-      .catch(e => {
-        console.log(22, e);
-      });
-  };
-  // console.log('rootStore', rootStore.conversationStore.currentCvs);
-
-  let {
+  const {
     topConversation: topConversationInner,
     currentConversation,
     conversationList,
     setCurrentConversation,
   } = useConversationContext();
-
-  let { messages } = useChatContext();
+  const { messages } = useChatContext();
   console.log(11111, messages);
   const topConversation = () => {
     setCurrentConversation({
@@ -93,13 +89,13 @@ const ChatApp: FC<any> = () => {
 
   const thread = rootStore.threadStore;
 
-  let TxtMsg = msg => (
+  const TxtMsg = msg => (
     <TextMessage
       bubbleType="secondly"
       bubbleStyle={{ background: 'hsl(135.79deg 88.79% 36.46%)' }}
       shape="square"
       arrow={false}
-      avatar={<Avatar style={{ background: 'pink' }}>zhangdong</Avatar>}
+      avatar={<Avatar style={{ background: 'pink' }}>zd</Avatar>}
       textMessage={{
         msg: msg.msg || 'hello',
         type: 'txt',
@@ -114,7 +110,7 @@ const ChatApp: FC<any> = () => {
     ></TextMessage>
   );
 
-  let MsgList = <MessageList renderMessage={msg => TxtMsg(msg)}></MessageList>;
+  const MsgList = <MessageList renderMessage={msg => TxtMsg(msg)}></MessageList>;
 
   const [tab, setTab] = useState('chat');
   const changeTab = (tab: string) => {
@@ -122,7 +118,6 @@ const ChatApp: FC<any> = () => {
   };
 
   useEffect(() => {
-    console.log('*******', rootStore.addressStore.contacts);
     rootStore.addressStore.setAppUserInfo({
       ...rootStore.addressStore.appUsersInfo,
       lxm: {
@@ -133,9 +128,7 @@ const ChatApp: FC<any> = () => {
     });
   }, [rootStore.addressStore.contacts.length]);
 
-  useEffect(() => {
-    console.log('变化了 showThreadPanel');
-  }, [thread.showThreadPanel]);
+  useEffect(() => {}, [thread.showThreadPanel]);
 
   const getRTCToken = data => {
     const { channel, chatUserId } = data;
@@ -164,7 +157,7 @@ const ChatApp: FC<any> = () => {
   };
 
   const [contactData, setContactData] = useState({ id: '', name: '', type: 'contact' });
-
+  const currentCvs = rootStore.conversationStore.currentCvs;
   // create group
   const [userSelectVisible, setUserSelectVisible] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
@@ -237,12 +230,16 @@ const ChatApp: FC<any> = () => {
               setCvsItem(item);
             }}
             itemProps={{
-              moreAction: {
-                visible: true,
-                actions: [{ content: 'DELETE' }],
-              },
+              // moreAction: {
+              //   visible: true,
+              //   actions: [{ content: 'DELETE' }],
+              // },
               formatDateTime: (time: number) => {
                 return new Date(time).toLocaleString();
+              },
+              renderMessageContent: (msg: any) => {
+                console.log('msg', msg);
+                return null;
               },
             }}
             className="conversation"
@@ -321,15 +318,22 @@ const ChatApp: FC<any> = () => {
                     visible: false,
                     actions: [{ content: '' }],
                   },
-                  suffixIcon: <Icon type="ELLIPSIS" onClick={showGroupSetting}></Icon>,
+                  // suffixIcon: (
+                  //   <div>
+                  //     {currentCvs.chatType !== 'singleChat' && (
+                  //       <Icon type="PIN" onClick={show}></Icon>
+                  //     )}
+                  //     <Icon type="ELLIPSIS" onClick={showGroupSetting}></Icon>
+                  //   </div>
+                  // ),
                 }}
                 rtcConfig={{
                   getRTCToken: getRTCToken,
                   getIdMap: () => {},
                 }}
-                renderRepliedMessage={message => {
-                  return <div>replied message {message.from}</div>;
-                }}
+                // renderRepliedMessage={message => {
+                //   return <div>replied message {message.from}</div>;
+                // }}
               ></Chat>
               {groupSettingVisible && (
                 <div style={{ width: '350px', borderLeft: '1px solid green' }}>
@@ -361,6 +365,8 @@ const ChatApp: FC<any> = () => {
             <Thread></Thread>
           </div>
         )}
+        <PinnedMessageComp />
+
         {/* <div style={{ width: '350px', borderLeft: '1px solid green' }}>
           <ContactInfo
             conversation={{ chatType: 'groupChat', conversationId: contactData.id }}
@@ -393,6 +399,8 @@ const ChatApp: FC<any> = () => {
 
 const App = ChatApp;
 
+const { appKey, userId, password } = getQueryParams();
+console.log('query-params', appKey, userId, password);
 ReactDOM.createRoot(document.getElementById('chatRoot') as Element).render(
   <div
     className="container"
@@ -407,24 +415,22 @@ ReactDOM.createRoot(document.getElementById('chatRoot') as Element).render(
   >
     <Provider
       initConfig={{
-        appKey: 'easemob#easeim',
-        userId: 'zd2',
-        password: '1',
+        appKey: appKey || 'easemob#easeim',
+        userId: userId || 'sttest',
+        password: password || '123',
         useUserInfo: true,
-        // token:
-        //   '007eJxTYFBRW8PxsjzKTEt3t/q21aylFwrC37GaPK73k382686EjO8KDGmGKcnm5hZJKSnJZiZmiSkWaUZmBpbmZsmJRikGhqbJh06XpTYEMjIY6nO0MjKwMjACIYivwpBkYGaSmGJmoGtmZJKka2iYmqxrkWpopGuaZGRikWRgapGWZAkAHZsmnQ==',
-        // appKey: 'easemob#easeim',
+        maxMessages: 100,
       }}
       theme={{
         // primaryColor: 50, //'#33ffaa',
-        mode: 'light',
-        bubbleShape: 'square',
-        avatarShape: 'square',
-        componentsShape: 'square',
+        mode: 'dark',
+        bubbleShape: 'round',
+        avatarShape: 'circle',
+        componentsShape: 'round',
       }}
       local={{
         fallbackLng: 'en',
-        lng: 'en',
+        lng: 'zh',
         // resources: {
         //   en: {
         //     translation: {
@@ -440,16 +446,17 @@ ReactDOM.createRoot(document.getElementById('chatRoot') as Element).render(
           item: {
             moreAction: true,
             deleteConversation: true,
-            presence: false,
+            presence: true,
           },
         },
         chat: {
           header: {
-            threadList: false,
+            threadList: true,
             moreAction: true,
             clearMessage: true,
             deleteConversation: true,
             audioCall: true,
+            pinMessage: true,
           },
           message: {
             status: true,
@@ -458,8 +465,9 @@ ReactDOM.createRoot(document.getElementById('chatRoot') as Element).render(
             recall: true,
             translate: true,
             edit: true,
-            report: false,
+            report: true,
             forward: false,
+            pin: true,
           },
           messageInput: {
             mention: true,
@@ -469,7 +477,7 @@ ReactDOM.createRoot(document.getElementById('chatRoot') as Element).render(
             moreAction: true,
             picture: true,
             video: true,
-            contactCard: false,
+            contactCard: true,
           },
         },
       }}

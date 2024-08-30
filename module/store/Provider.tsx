@@ -10,6 +10,14 @@ import i18n from 'i18next';
 import { resource } from '../../local/resource';
 import { hexToHsla, generateColors, isHueValue, isHexColor } from '../utils/color';
 import { eventHandler } from '../../eventHandler';
+
+import Online from '../assets/presence/Online2.png';
+import Offline from '../assets/presence/Offline2.png';
+import Away from '../assets/presence/leave2.png';
+import Busy from '../assets/presence/Busy2.png';
+import DoNotDisturb from '../assets/presence/Do_not_Disturb2.png';
+import Custom from '../assets/presence/custom2.png';
+
 export interface ProviderProps {
   initConfig: {
     appKey: string;
@@ -23,6 +31,7 @@ export interface ProviderProps {
     isHttpDNS?: boolean;
     useReplacedMessageContents?: boolean;
     deviceId?: string;
+    maxMessages?: number; // 单个会话显示最大消息数，超出后会自动清除，默认200，清除的消息可通过拉取更多消息获取
   };
   local?: {
     fallbackLng?: string;
@@ -45,6 +54,7 @@ export interface ProviderProps {
         deleteConversation?: boolean;
         audioCall?: boolean;
         videoCall?: boolean;
+        pinMessage?: boolean;
       };
       message?: {
         status?: boolean;
@@ -59,6 +69,7 @@ export interface ProviderProps {
         select?: boolean;
         forward?: boolean;
         report?: boolean;
+        pin?: boolean;
       };
       messageInput?: {
         mention?: boolean;
@@ -92,12 +103,15 @@ export interface ProviderProps {
     primaryColor?: string | number;
     mode?: 'light' | 'dark';
     avatarShape?: 'circle' | 'square';
-    bubbleShape?: 'ground' | 'square';
-    componentsShape?: 'ground' | 'square';
+    bubbleShape?: 'round' | 'square';
+    componentsShape?: 'round' | 'square';
+  };
+  presenceMap?: {
+    [key: string]: string | HTMLImageElement;
   };
 }
 const Provider: React.FC<ProviderProps> = props => {
-  const { initConfig, local, features, reactionConfig, theme } = props;
+  const { initConfig, local, features, reactionConfig, theme, presenceMap } = props;
   const {
     appKey,
     msyncUrl,
@@ -141,7 +155,7 @@ const Provider: React.FC<ProviderProps> = props => {
     if (initConfig.userId && initConfig.token) {
       client
         .open({
-          user: initConfig.userId,
+          user: initConfig.userId.toLowerCase(),
           agoraToken: initConfig.token,
         })
         .then(() => {
@@ -177,6 +191,15 @@ const Provider: React.FC<ProviderProps> = props => {
     generateColors('hsla(203, 100%, 60%, 1)');
   }
 
+  const defaultPresenceMap = {
+    Online,
+    Offline,
+    Away,
+    Busy,
+    'Do Not Disturb': DoNotDisturb,
+    Custom,
+  };
+
   return (
     <RootProvider
       value={{
@@ -186,6 +209,7 @@ const Provider: React.FC<ProviderProps> = props => {
         client,
         reactionConfig,
         theme,
+        presenceMap: presenceMap || defaultPresenceMap,
       }}
     >
       {props.children}

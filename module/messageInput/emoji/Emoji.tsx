@@ -29,6 +29,7 @@ export interface EmojiProps {
   onDelete?: (emojiString: string) => void;
   emojiConfig?: EmojiConfig;
   placement?: TooltipProps['placement'];
+  closeAfterClick?: boolean;
 }
 
 const Emoji = (props: EmojiProps) => {
@@ -45,6 +46,7 @@ const Emoji = (props: EmojiProps) => {
     prefix,
     emojiContainerStyle = {},
     placement = 'bottom',
+    closeAfterClick = true,
   } = props;
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
@@ -101,7 +103,7 @@ const Emoji = (props: EmojiProps) => {
     e.preventDefault();
     const selectedEmoji =
       (e.target as HTMLImageElement).alt || ((e.target as any).children[0] as HTMLImageElement).alt;
-    // setOpen(false);
+    setOpen(false);
     if (selectedList && selectedList.length > 0 && selectedList.includes(selectedEmoji)) {
       return onDelete && onDelete(selectedEmoji);
     }
@@ -110,6 +112,7 @@ const Emoji = (props: EmojiProps) => {
 
   const handleClickIcon = (e: React.MouseEvent<Element, MouseEvent>) => {
     onClick && onClick(e);
+    setOpen(true);
   };
   const titleNode = (
     <div className={classString} onClick={handleEmojiClick}>
@@ -117,30 +120,54 @@ const Emoji = (props: EmojiProps) => {
     </div>
   );
   const iconNode = icon ? (
-    icon
+    <div
+      onClick={handleClickIcon}
+      style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+    >
+      {icon}
+    </div>
   ) : (
     <span className={`${prefixCls}-iconBox`} style={{ ...style }} title={t('emoji') as string}>
-      <Icon
-        type="FACE"
-        width={24}
-        height={24}
-        onClick={handleClickIcon}
-        // onClick={() => setOpen(true)}
-      ></Icon>
+      <Button type="text" shape="circle">
+        <Icon
+          type="FACE"
+          width={24}
+          height={24}
+          onClick={handleClickIcon}
+          // onClick={() => setOpen(true)}
+        ></Icon>
+      </Button>
     </span>
   );
-  return (
-    <Tooltip
-      title={titleNode}
-      trigger={trigger}
-      arrowPointAtCenter={false}
-      arrow={false}
-      placement={placement}
-      // open={isOpen}
-    >
-      {iconNode}
-    </Tooltip>
-  );
-};
 
+  if (closeAfterClick == false) {
+    return (
+      <Tooltip
+        title={titleNode}
+        trigger={trigger}
+        arrowPointAtCenter={false}
+        arrow={false}
+        placement={placement}
+      >
+        {iconNode}
+      </Tooltip>
+    );
+  } else {
+    return (
+      <Tooltip
+        title={titleNode}
+        trigger={trigger}
+        arrowPointAtCenter={false}
+        arrow={false}
+        placement={placement}
+        onOpenChange={() => {
+          setOpen(!isOpen);
+        }}
+        open={isOpen}
+      >
+        {iconNode}
+      </Tooltip>
+    );
+  }
+};
 export { Emoji };

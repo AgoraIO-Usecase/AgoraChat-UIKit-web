@@ -12,12 +12,14 @@ import { getCvsIdFromMessage } from '../utils';
 import { observer } from 'mobx-react-lite';
 import { ChatSDK } from '../SDK';
 import { RootContext } from '../store/rootContext';
+import { usePinnedMessage } from '../hooks/usePinnedMessage';
 export interface FileMessageProps extends BaseMessageProps {
   fileMessage: FileMessageType; // 从SDK收到的文件消息
   iconType?: IconProps['type'];
   prefix?: string;
   className?: string;
   style?: React.CSSProperties;
+  bubbleClass?: string;
   nickName?: string;
   type?: 'primary' | 'secondly';
   renderUserProfile?: (props: renderUserProfileProps) => React.ReactNode;
@@ -26,6 +28,7 @@ export interface FileMessageProps extends BaseMessageProps {
 const FileMessage = (props: FileMessageProps) => {
   let {
     iconType = 'DOC',
+    bubbleClass,
     fileMessage,
     shape,
     prefix: customizePrefixCls,
@@ -42,6 +45,16 @@ const FileMessage = (props: FileMessageProps) => {
   const { getPrefixCls } = React.useContext(ConfigContext);
   const prefixCls = getPrefixCls('message-file', customizePrefixCls);
   let { bySelf } = fileMessage;
+  const conversationId = getCvsIdFromMessage(fileMessage);
+  const context = useContext(RootContext);
+  const { rootStore, theme } = context;
+  const themeMode = theme?.mode || 'light';
+  const { pinMessage } = usePinnedMessage({
+    conversation: {
+      conversationId: conversationId,
+      conversationType: fileMessage.chatType,
+    },
+  });
   if (typeof bySelf == 'undefined') {
     bySelf = fileMessage.from === rootStore.client.context.userId;
   }
@@ -53,6 +66,7 @@ const FileMessage = (props: FileMessageProps) => {
     prefixCls,
     {
       [`${prefixCls}-${type}`]: !!type,
+      [`${prefixCls}-${themeMode}`]: !!themeMode,
     },
     className,
   );
@@ -86,7 +100,7 @@ const FileMessage = (props: FileMessageProps) => {
   };
 
   const handleDeleteMsg = () => {
-    let conversationId = getCvsIdFromMessage(fileMessage);
+    const conversationId = getCvsIdFromMessage(fileMessage);
 
     rootStore.messageStore.deleteMessage(
       {
@@ -98,8 +112,13 @@ const FileMessage = (props: FileMessageProps) => {
     );
   };
 
+  const handlePinMessage = () => {
+    //@ts-ignore
+    pinMessage(fileMessage.mid || fileMessage.id);
+  };
+
   const handleClickEmoji = (emojiString: string) => {
-    let conversationId = getCvsIdFromMessage(fileMessage);
+    const conversationId = getCvsIdFromMessage(fileMessage);
 
     rootStore.messageStore.addReaction(
       {
@@ -113,7 +132,7 @@ const FileMessage = (props: FileMessageProps) => {
   };
 
   const handleDeleteEmoji = (emojiString: string) => {
-    let conversationId = getCvsIdFromMessage(fileMessage);
+    const conversationId = getCvsIdFromMessage(fileMessage);
     rootStore.messageStore.deleteReaction(
       {
         chatType: fileMessage.chatType,
@@ -126,7 +145,7 @@ const FileMessage = (props: FileMessageProps) => {
   };
 
   const handleShowReactionUserList = (emojiString: string) => {
-    let conversationId = getCvsIdFromMessage(fileMessage);
+    const conversationId = getCvsIdFromMessage(fileMessage);
     reactions?.forEach(item => {
       if (item.reaction === emojiString) {
         if (item.count > 3 && item.userList.length <= 3) {
@@ -155,7 +174,7 @@ const FileMessage = (props: FileMessageProps) => {
   };
 
   const handleRecallMessage = () => {
-    let conversationId = getCvsIdFromMessage(fileMessage);
+    const conversationId = getCvsIdFromMessage(fileMessage);
     rootStore.messageStore.recallMessage(
       {
         chatType: fileMessage.chatType,
@@ -168,7 +187,6 @@ const FileMessage = (props: FileMessageProps) => {
     );
   };
 
-  let conversationId = getCvsIdFromMessage(fileMessage);
   const handleSelectMessage = () => {
     const selectable =
       rootStore.messageStore.selectedMessage[fileMessage.chatType as 'singleChat' | 'groupChat'][
@@ -225,7 +243,7 @@ const FileMessage = (props: FileMessageProps) => {
   };
 
   // @ts-ignore
-  let _thread =
+  const _thread =
     // @ts-ignore
     fileMessage.chatType == 'groupChat' &&
     thread &&
@@ -260,6 +278,7 @@ const FileMessage = (props: FileMessageProps) => {
   return (
     <BaseMessage
       id={fileMessage.id}
+      className={bubbleClass}
       message={fileMessage}
       bubbleType={type}
       direction={bySelf ? 'rtl' : 'ltr'}
@@ -268,6 +287,7 @@ const FileMessage = (props: FileMessageProps) => {
       nickName={nickName}
       onReplyMessage={handleReplyMsg}
       onDeleteMessage={handleDeleteMsg}
+      onPinMessage={handlePinMessage}
       reactionData={reactions}
       onAddReactionEmoji={handleClickEmoji}
       onDeleteReactionEmoji={handleDeleteEmoji}
