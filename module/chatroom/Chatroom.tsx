@@ -183,7 +183,7 @@ const Chatroom = (props: ChatroomProps) => {
   }, [chatroomId, rootStore.loginState]);
 
   // config messageInput
-  let messageInputConfig: MessageInputProps = {
+  const messageInputConfig: MessageInputProps = {
     actions: [
       {
         name: 'TEXTAREA',
@@ -356,13 +356,21 @@ const Chatroom = (props: ChatroomProps) => {
         <div>
           {Object.keys(reportType).map((item, index) => {
             return (
-              <div className="report-item" key={index}>
+              <div
+                className={classNames('report-item', {
+                  'report-item-dark': themeMode == 'dark',
+                })}
+                key={index}
+                onClick={() => {
+                  handleCheckChange(item);
+                }}
+              >
                 <div>{t(reportType[item] as string)}</div>
                 <Checkbox
                   checked={checkedType === item}
-                  onChange={() => {
-                    handleCheckChange(item);
-                  }}
+                  // onChange={() => {
+                  //   handleCheckChange(item);
+                  // }}
                 ></Checkbox>
               </div>
             );
