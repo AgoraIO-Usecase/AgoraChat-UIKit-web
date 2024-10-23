@@ -21,6 +21,7 @@ import {
   getMsgSenderNickname,
 } from '../utils/index';
 import type { BaseMessageType } from '../baseMessage/BaseMessage';
+import Ripple from '../../component/ripple/Ripple';
 export interface ConversationItemProps {
   className?: string;
   prefix?: string;
@@ -34,6 +35,7 @@ export interface ConversationItemProps {
   isActive?: boolean; // 是否被选中
   data: ConversationData[0];
   renderMessageContent?: (msg: BaseMessageType) => ReactNode | undefined;
+  ripple?: boolean;
   // 右侧更多按钮配置
   moreAction?: {
     visible?: boolean;
@@ -74,6 +76,7 @@ let ConversationItem: FC<ConversationItemProps> = props => {
     },
     formatDateTime,
     renderMessageContent,
+    ripple,
     ...others
   } = props;
 
@@ -88,6 +91,7 @@ let ConversationItem: FC<ConversationItemProps> = props => {
   if (theme?.avatarShape) {
     avatarShape = theme?.avatarShape;
   }
+  const themeRipple = theme?.ripple;
   const cvsStore = rootStore.conversationStore;
 
   const classString = classNames(
@@ -285,7 +289,7 @@ let ConversationItem: FC<ConversationItemProps> = props => {
       lastMsg = [from, lastMsg];
     }
   }
-
+  const rippleProp = ripple === undefined ? themeRipple : ripple;
   return (
     <div
       className={classString}
@@ -349,6 +353,7 @@ let ConversationItem: FC<ConversationItemProps> = props => {
           </div>
         )}
       </div>
+      {rippleProp && <Ripple></Ripple>}
     </div>
   );
 };

@@ -27,10 +27,10 @@ const TestButton = () => {
             </div>
 
             <div className="white">
-              <Button size={'large'} type="default" className="button">
+              <Button size={'large'} type="default" className="button" ripple>
                 default
               </Button>
-              <Button size={'large'} type="primary" className="button">
+              <Button size={'large'} type="primary" className="button" ripple>
                 primary
               </Button>
               <Button size={'large'} type="primary" disabled className="button">

@@ -106,6 +106,7 @@ export interface ProviderProps {
     avatarShape?: 'circle' | 'square';
     bubbleShape?: 'round' | 'square';
     componentsShape?: 'round' | 'square';
+    ripple?: boolean;
   };
   presenceMap?: {
     [key: string]: string | HTMLImageElement;
