@@ -84,6 +84,7 @@ let ConversationItem: FC<ConversationItemProps> = props => {
   const { getPrefixCls } = React.useContext(ConfigContext);
   const prefixCls = getPrefixCls('conversationItem', customizePrefixCls);
   const [showMore, setShowMore] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [active, setActive] = useState(isActive);
   const context = useContext(RootContext);
   const { rootStore, theme } = context;
@@ -121,7 +122,9 @@ let ConversationItem: FC<ConversationItemProps> = props => {
     moreAction.visible && setShowMore(true);
   };
   const handleMouseLeave = () => {
-    setShowMore(false);
+    if (!isPopoverOpen) {
+      setShowMore(false);
+    }
   };
 
   const deleteCvs: MouseEventHandler<HTMLLIElement> = async e => {
@@ -148,6 +151,7 @@ let ConversationItem: FC<ConversationItemProps> = props => {
       .catch(err => {
         eventHandler.dispatchError('deleteConversation', err);
       });
+    setIsPopoverOpen(false);
   };
 
   const pinCvs = () => {
@@ -156,6 +160,7 @@ let ConversationItem: FC<ConversationItemProps> = props => {
       data.conversationId,
       !data.isPinned,
     );
+    setIsPopoverOpen(false);
   };
 
   const setSilent = () => {
@@ -170,6 +175,7 @@ let ConversationItem: FC<ConversationItemProps> = props => {
         conversationId: data.conversationId,
       });
     }
+    setIsPopoverOpen(false);
   };
 
   const morePrefixCls = getPrefixCls('moreAction', customizePrefixCls);
@@ -324,13 +330,22 @@ let ConversationItem: FC<ConversationItemProps> = props => {
           {formatDateTime?.(data.lastMessage?.time) || getConversationTime(data.lastMessage?.time)}
         </span>
         {showMore ? (
-          <Tooltip title={menuNode} trigger="click" placement="bottomRight">
+          <Tooltip
+            title={menuNode}
+            trigger="click"
+            placement="bottomRight"
+            open={isPopoverOpen}
+            onOpenChange={value => {
+              setIsPopoverOpen(value);
+              setShowMore(value);
+            }}
+          >
             {moreAction.icon || (
               <Icon
                 type="ELLIPSIS"
                 color="#33B1FF"
                 height={20}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: 'pointer', zIndex: 10 }}
               ></Icon>
             )}
           </Tooltip>

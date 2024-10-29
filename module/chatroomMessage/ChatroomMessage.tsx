@@ -41,6 +41,7 @@ const ChatroomMessage = (props: ChatroomMessageProps) => {
   const classString = classNames(prefixCls, className);
   const { t } = useTranslation();
   const [hoverStatus, setHoverStatus] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const context = useContext(RootContext);
   const { theme } = context;
   const themeMode = theme?.mode;
@@ -123,6 +124,7 @@ const ChatroomMessage = (props: ChatroomMessageProps) => {
         // setTransStatus('translationFailed');
         // setBtnText('retry');
       });
+    setIsPopoverOpen(false);
   };
   const recallMessage = () => {
     rootStore.messageStore.recallMessage(
@@ -135,6 +137,7 @@ const ChatroomMessage = (props: ChatroomMessageProps) => {
       false,
       true,
     );
+    setIsPopoverOpen(false);
   };
   const muteMember = () => {
     if (isMuted) {
@@ -142,10 +145,12 @@ const ChatroomMessage = (props: ChatroomMessageProps) => {
       return;
     }
     rootStore.addressStore.muteChatRoomMember(message.to, message.from as string);
+    setIsPopoverOpen(false);
   };
 
   const reportMessage = () => {
     onReport?.(message);
+    setIsPopoverOpen(false);
   };
 
   const morePrefixCls = getPrefixCls('moreAction', customizePrefixCls);
@@ -253,7 +258,9 @@ const ChatroomMessage = (props: ChatroomMessageProps) => {
       className={classString}
       onMouseOver={() => setHoverStatus(true)}
       onMouseLeave={() => {
-        setHoverStatus(false);
+        if (!isPopoverOpen) {
+          setHoverStatus(false);
+        }
       }}
     >
       <div className={`${prefixCls}-container`}>
@@ -270,7 +277,17 @@ const ChatroomMessage = (props: ChatroomMessageProps) => {
         {message.type == 'txt' && renderText(textToShow)}
       </div>
       {hoverStatus && message.type == 'txt' && (
-        <Tooltip title={menuNode} trigger="click" placement="bottom" align={{ offset: [5] }}>
+        <Tooltip
+          title={menuNode}
+          trigger="click"
+          placement="bottom"
+          align={{ offset: [5] }}
+          open={isPopoverOpen}
+          onOpenChange={open => {
+            setIsPopoverOpen(open);
+            setHoverStatus(open);
+          }}
+        >
           <Icon
             type="ELLIPSIS"
             color="#33B1FF"

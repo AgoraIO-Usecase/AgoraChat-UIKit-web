@@ -10,6 +10,7 @@ import { observer } from 'mobx-react-lite';
 import { RootContext } from '../../module/store/rootContext';
 import Checkbox from '../../component/checkbox';
 import Ripple from '../../component/ripple/Ripple';
+import { set } from 'mobx';
 export interface UserInfoData {
   userId: string;
   nickname?: string;
@@ -78,6 +79,7 @@ let UserItem: FC<UserItemProps> = props => {
   const themeRipple = theme?.ripple;
   const prefixCls = getPrefixCls('userItem', customizePrefixCls);
   const [showMore, setShowMore] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const classString = classNames(
     prefixCls,
@@ -97,7 +99,9 @@ let UserItem: FC<UserItemProps> = props => {
     moreAction?.visible && setShowMore(true);
   };
   const handleMouseLeave = () => {
-    setShowMore(false);
+    if (!isPopoverOpen) {
+      setShowMore(false);
+    }
   };
 
   const morePrefixCls = getPrefixCls('moreAction', customizePrefixCls);
@@ -114,6 +118,7 @@ let UserItem: FC<UserItemProps> = props => {
               key={index}
               onClick={() => {
                 item.onClick?.(data);
+                setIsPopoverOpen(false);
               }}
             >
               {item.icon ? item.icon : null}
@@ -151,13 +156,22 @@ let UserItem: FC<UserItemProps> = props => {
       </div>
       <div className={`${prefixCls}-info`}>
         {showMore && (
-          <Tooltip title={menuNode} trigger="click" placement="bottomRight">
+          <Tooltip
+            title={menuNode}
+            trigger="click"
+            placement="bottomRight"
+            open={isPopoverOpen}
+            onOpenChange={open => {
+              setIsPopoverOpen(open);
+              setShowMore(open);
+            }}
+          >
             {moreAction?.icon || (
               <Icon
                 type="ELLIPSIS"
                 color="#33B1FF"
                 height={20}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: 'pointer', zIndex: 10 }}
               ></Icon>
             )}
           </Tooltip>
