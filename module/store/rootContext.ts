@@ -17,6 +17,8 @@ export interface ContextProps {
     translationTargetLanguage?: string;
     useUserInfo?: boolean;
     maxMessages?: number;
+    isFixedDeviceId?: boolean;
+    useOwnUploadFun?: boolean;
   };
   client: ChatSDK.Connection;
   features?: {
