@@ -234,7 +234,7 @@ const ChatContainer = () => {
 
   // Implement the sending of a custom message
   const sendCustomMessage = () => {
-    const customMsg = EasemobChat.message.create({
+    const customMsg = ChatSDK.message.create({
       type: 'custom',
       to: 'targetId', // The user ID of the peer user for one-to-one chat or the current group ID for group chat.
       chatType: 'singleChat',
