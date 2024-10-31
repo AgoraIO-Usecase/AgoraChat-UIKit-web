@@ -496,7 +496,7 @@ const TextMessage = (props: TextMessageProps) => {
     }
     const msgArr = renderTxt(msg, true);
     const message = (msgArr.length > 1 ? msgArr : msgArr[0] || '') as string[] | string;
-    if (currentIndex >= message.length - 1) {
+    if (currentIndex >= message.length) {
       return;
     }
     const typingInterval = setInterval(() => {
