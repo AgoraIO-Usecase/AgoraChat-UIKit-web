@@ -119,7 +119,6 @@ const ImageMessage = (props: ImageMessageProps) => {
     ? message.url || message?.file?.url
     : (message.thumb as string) || message.url;
 
-  console.log('--->', renderImgUrl, message);
   const [imgUrl, setImgUrl] = useState(renderImgUrl);
   // const img = useRef(
   //   <img
