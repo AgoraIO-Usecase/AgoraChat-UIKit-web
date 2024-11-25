@@ -70,7 +70,7 @@ export interface ChatProps {
   renderRepliedMessage?: (repliedMessage: ChatSDK.MessageBody | null) => ReactNode; // 自定义渲染Input上面的被回复的消息
   // Header 的 props
   headerProps?: Omit<HeaderProps, 'suffixIcon'> & {
-    suffixIcon: ('PIN' | 'THREAD' | 'AUDIO' | 'VIDEO' | ReactNode)[];
+    suffixIcon?: ('PIN' | 'THREAD' | 'AUDIO' | 'VIDEO' | ReactNode)[];
   };
   messageListProps?: MsgListProps;
   messageInputProps?: MessageInputProps;

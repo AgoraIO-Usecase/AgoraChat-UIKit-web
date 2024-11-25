@@ -93,12 +93,14 @@ const Conversations: FC<ConversationListProps> = props => {
 
   const handleItemClick = (cvs: ConversationData[0], index: number) => () => {
     setActiveCvsId(cvs.conversationId);
-    cvsStore.setCurrentCvs({
-      chatType: cvs.chatType,
-      conversationId: cvs.conversationId,
-      name: cvs.name,
-      unreadCount: 0,
-    });
+    if (cvsStore.currentCvs.conversationId !== cvs.conversationId) {
+      cvsStore.setCurrentCvs({
+        chatType: cvs.chatType,
+        conversationId: cvs.conversationId,
+        name: cvs.name,
+        unreadCount: 0,
+      });
+    }
     onItemClick?.(cvs);
   };
 
