@@ -239,7 +239,7 @@ const PinnedMessage = (props: PinnedMessageProps) => {
   };
 
   const scrollToMsg = (messageId: string) => {
-    const localMsg = rootStore.messageStore.message.byId[messageId];
+    const localMsg = rootStore.messageStore.message.byId.get(messageId);
     if (localMsg) messageId = localMsg.id;
     const anchorElement = document.getElementById(messageId);
     if (!anchorElement) {
