@@ -71,7 +71,7 @@ export const renderTxt = (txt: string | undefined | null, parseUrl: boolean = tr
           width={20}
           height={20}
           style={{
-            verticalAlign: 'middle',
+            verticalAlign: 'text-top',
           }}
         />,
       );
@@ -496,7 +496,7 @@ const TextMessage = (props: TextMessageProps) => {
     }
     const msgArr = renderTxt(msg, true);
     const message = (msgArr.length > 1 ? msgArr : msgArr[0] || '') as string[] | string;
-    if (currentIndex >= message.length - 1) {
+    if (currentIndex >= message.length) {
       return;
     }
     const typingInterval = setInterval(() => {
@@ -638,4 +638,6 @@ const TextMessage = (props: TextMessageProps) => {
   );
 };
 
-export default memo(observer(TextMessage));
+const TextMessageOut = memo(observer(TextMessage));
+TextMessageOut.displayName = 'TextMessage';
+export default TextMessageOut;
