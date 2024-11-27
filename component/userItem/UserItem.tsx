@@ -169,7 +169,9 @@ let UserItem: FC<UserItemProps> = props => {
             {moreAction?.icon || (
               <Icon
                 type="ELLIPSIS"
-                color="#33B1FF"
+                color={
+                  themeMode === 'dark' ? 'var(--cui-primary-color6)' : 'var(--cui-primary-color5)'
+                }
                 height={20}
                 style={{ cursor: 'pointer', zIndex: 10 }}
               ></Icon>
