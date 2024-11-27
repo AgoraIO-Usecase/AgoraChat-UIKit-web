@@ -111,11 +111,8 @@ cd my-app
 ```
 
 ```
-<<<<<<< HEAD
-The project directory.
-=======
+
 The project directory:
->>>>>>> agora/dev
 
 ├── package.json
 ├── public # The static directory of Webpack.
@@ -176,11 +173,7 @@ const ChatApp = () => {
       client
         .open({
           user,
-<<<<<<< HEAD
-          agoraToken,
-=======
           accessToken,
->>>>>>> agora/dev
         })
         .then(res => {
           console.log('get token success', res);
@@ -648,12 +641,6 @@ $font-size-lg: $font-size-base + 2px;
 $font-size-sm: 12px;
 $text-color: fade($black, 85%);
 ```
-
-<<<<<<< HEAD
-All variables can be viewed here ''
-=======
-All variables can be viewed here:
->>>>>>> agora/dev
 
 1. Use webpack for variable coverage:
 
