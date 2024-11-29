@@ -90,7 +90,6 @@ const AudioMessage = (props: AudioMessageProps) => {
       },
       onFileDownloadComplete: function (response: any) {
         const objectUrl = chatSDK.utils.parseDownloadResponse.call(rootStore.client, response);
-        console.log('下载文件成功', objectUrl);
         setUrl(objectUrl);
       },
       onFileDownloadError: function () {},
