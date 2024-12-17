@@ -3,7 +3,7 @@ import BaseMessage, { BaseMessageProps } from './baseMessage';
 import FileMessage, { FileMessageProps } from './fileMessage';
 import ImageMessage, { ImageMessageProps, ImagePreviewProps } from './imageMessage';
 import NoticeMessage, { NoticeMessageProps } from './noticeMessage';
-import TextMessage, { TextMessageProps } from './textMessage';
+import { TextMessage, TextMessageProps } from './textMessage';
 import VideoMessage, { VideoMessageProps } from './videoMessage';
 import MessageStatus, { MessageStatusProps } from './messageStatus';
 import CombinedMessage, { CombinedMessageProps } from './combinedMessage';

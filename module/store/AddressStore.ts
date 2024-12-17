@@ -994,5 +994,5 @@ class AddressStore {
     this.blockList = [];
   }
 }
-
 export default AddressStore;
+export { AddressStore };

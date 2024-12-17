@@ -141,7 +141,7 @@ const REGEX_VALID_URL = new RegExp(
   'i',
 );
 
-const TextMessage = (props: TextMessageProps) => {
+let TextMessage = (props: TextMessageProps) => {
   let {
     prefix: customizePrefixCls,
     textMessage,
@@ -638,6 +638,8 @@ const TextMessage = (props: TextMessageProps) => {
   );
 };
 
-const TextMessageOut = memo(observer(TextMessage));
-TextMessageOut.displayName = 'TextMessage';
-export default TextMessageOut;
+TextMessage = memo(observer(TextMessage)) as (props: TextMessageProps) => JSX.Element;
+
+export { TextMessage };
+// TextMessageOut.displayName = 'TextMessage';
+// export default TextMessageOut;

@@ -8,7 +8,7 @@ import { ConfigContext } from '../../component/config/index';
 import './style/style.scss';
 import Icon from '../../component/icon';
 import Modal from '../../component/modal';
-import TextMessage from '../textMessage';
+import { TextMessage } from '../textMessage';
 import ImageMessage from '../imageMessage';
 import FileMessage from '../fileMessage';
 import AudioMessage from '../audioMessage';

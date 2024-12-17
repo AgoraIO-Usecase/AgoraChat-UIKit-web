@@ -16,7 +16,7 @@ import './style/style.scss';
 import List from '../../component/list';
 import ScrollList from '../../component/scrollList';
 import { useGroupMembers, useGroupAdmins } from '../hooks/useAddress';
-import TextMessage from '../textMessage';
+import { TextMessage } from '../textMessage';
 import AudioMessage from '../audioMessage';
 import FileMessage from '../fileMessage';
 import ImageMessage, { ImagePreview } from '../imageMessage';

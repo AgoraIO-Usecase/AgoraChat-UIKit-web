@@ -10,8 +10,9 @@ import { RootContext } from '../../module/store/rootContext';
 import { Tooltip } from '../tooltip/Tooltip';
 export interface AvatarProps {
   size?: 'large' | 'small' | 'default' | number;
-  shape?: 'circle' | 'square';
-  src?: React.ReactNode;
+  /** Whether to show red dot without number */
+  shape?: 'circle' | 'square' /** 形状 */;
+  src?: string;
   icon?: React.ReactNode;
   style?: React.CSSProperties;
   prefixCls?: string;
