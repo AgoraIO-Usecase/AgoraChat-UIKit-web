@@ -1,7 +1,7 @@
 // 开发用demo
 import React, { useEffect, useState, FC } from 'react';
 import ReactDOM from 'react-dom/client';
-import TextMessage from '../../../module/textMessage';
+import { TextMessage } from '../../../module/textMessage';
 import List from '../../../component/list';
 import Header from '../../../module/header';
 import { ContactItem, ContactList, ContactDetail } from '../../../module/contactList';

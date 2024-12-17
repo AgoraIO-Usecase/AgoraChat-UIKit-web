@@ -82,9 +82,9 @@ export interface ChatProps {
       channel: string;
       conversation: CurrentConversation;
       type: 'audio' | 'video';
-    }) => Promise<[{ name: string; id: string; avatarurl?: string }]>; // 邀请人加入音视频通话, 需要返回一个promise 包含被邀请人信息， id 为环信用户 ID，name 为用户昵称
-    onAddPerson?: (data: RtcRoomInfo) => Promise<[{ id: string }]>; // 群聊音视频过程中邀请其他人加入音视频通话, 需要返回一个promise 包含被邀请人信息， id 为环信用户 ID
-    getIdMap?: (data: { userId: string; channel: string }) => Promise<{ [key: string]: string }>; // 获取 rtc 用户 ID 和环信用户 ID 的映射 返回 {[rtcUserId]: chatUserId}
+    }) => Promise<[{ name: string; id: string; avatarurl?: string }]>; // 群租中邀请人加入音视频通话, 需要返回一个promise 包含被邀请人信息， id 为Chat用户 ID，name 为用户昵称
+    onAddPerson?: (data: RtcRoomInfo) => Promise<[{ id: string }]>; // 群聊音视频过程中邀请其他人加入音视频通话, 需要返回一个promise 包含被邀请人信息， id 为Chat用户 ID
+    getIdMap?: (data: { userId: string; channel: string }) => Promise<{ [key: string]: string }>; // 获取 rtc 用户 ID 和Chat用户 ID 的映射 返回 {[rtcUserId]: chatUserId}
     onStateChange?: (data: { type: string; confr: any }) => void; // 音视频通话状态变化
     getRTCToken?: (data: {
       channel: number | string;
@@ -110,7 +110,7 @@ const getChatAvatarUrl = (cvs: CurrentConversation) => {
   }
 };
 
-const Chat = forwardRef((props: ChatProps, ref) => {
+let Chat = forwardRef((props: ChatProps, ref) => {
   const {
     prefix: customizePrefixCls,
     className,
@@ -939,6 +939,8 @@ const Chat = forwardRef((props: ChatProps, ref) => {
   );
 });
 
-Chat.displayName = 'Chat';
+Chat = observer(Chat) as React.ForwardRefExoticComponent<ChatProps & React.RefAttributes<unknown>>;
 
-export default observer(Chat);
+Chat.displayName = 'Chat';
+export { Chat };
+// export default observer(Chat);

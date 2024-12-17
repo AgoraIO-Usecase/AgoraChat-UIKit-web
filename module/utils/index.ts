@@ -110,7 +110,9 @@ export function getUsersInfo(props: { userIdList: string[]; withPresence?: boole
     subList.splice(findIndex, 1);
   }
   if (subList.length > 0 && withPresence) {
-    client.subscribePresence({ usernames: subList, expiry: 2592000 });
+    client.subscribePresence({ usernames: subList, expiry: 2592000 }).catch(err => {
+      console.warn('subscribePresence failed', err);
+    });
   }
 
   return new Promise((resolve, reject) => {

@@ -18,10 +18,10 @@ export interface AudioMessageProps extends Omit<BaseMessageProps, 'bubbleType'> 
   prefix?: string;
   style?: React.CSSProperties;
   className?: string;
-  nickName?: string;
+  // nickName?: string;
   bubbleClass?: string;
   type?: 'primary' | 'secondly';
-  renderUserProfile?: (props: renderUserProfileProps) => React.ReactNode;
+  // renderUserProfile?: (props: renderUserProfileProps) => React.ReactNode;
   onlyContent?: boolean;
 }
 
@@ -33,8 +33,8 @@ const AudioMessage = (props: AudioMessageProps) => {
     prefix: customizePrefixCls,
     className,
     type,
-    renderUserProfile,
-    nickName,
+    // renderUserProfile,
+    // nickName,
     thread,
     onlyContent = false,
     bubbleClass,
@@ -90,7 +90,6 @@ const AudioMessage = (props: AudioMessageProps) => {
       },
       onFileDownloadComplete: function (response: any) {
         const objectUrl = chatSDK.utils.parseDownloadResponse.call(rootStore.client, response);
-        console.log('下载文件成功', objectUrl);
         setUrl(objectUrl);
       },
       onFileDownloadError: function () {},
@@ -324,7 +323,7 @@ const AudioMessage = (props: AudioMessageProps) => {
           direction={bySelf ? 'rtl' : 'ltr'}
           message={audioMessage}
           time={messageTime}
-          nickName={nickName}
+          // nickName={nickName}
           status={status}
           bubbleType={bubbleType}
           onReplyMessage={handleReplyMsg}
@@ -339,7 +338,7 @@ const AudioMessage = (props: AudioMessageProps) => {
           onResendMessage={handleResendMessage}
           select={select}
           onMessageCheckChange={handleMsgCheckChange}
-          renderUserProfile={renderUserProfile}
+          // renderUserProfile={renderUserProfile}
           onCreateThread={handleCreateThread}
           thread={_thread}
           chatThreadOverview={audioMessage.chatThreadOverview}

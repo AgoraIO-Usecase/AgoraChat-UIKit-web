@@ -29,7 +29,7 @@ export interface UserCardMessageProps extends BaseMessageProps {
   onUserIdCopied?: (userId: string) => void;
 }
 
-const UserCardMessage = (props: UserCardMessageProps) => {
+let UserCardMessage = (props: UserCardMessageProps) => {
   const {
     customMessage: message,
     renderUserProfile,
@@ -387,6 +387,7 @@ const UserCardMessage = (props: UserCardMessageProps) => {
     </div>
   );
 };
-const UserCardMessageOut = observer(UserCardMessage);
-UserCardMessageOut.displayName = 'UserCardMessage';
-export default UserCardMessageOut;
+UserCardMessage = observer(UserCardMessage);
+// UserCardMessageOut.displayName = 'UserCardMessage';
+// export default UserCardMessageOut;
+export { UserCardMessage };

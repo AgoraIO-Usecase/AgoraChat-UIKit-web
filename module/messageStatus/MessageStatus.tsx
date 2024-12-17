@@ -15,6 +15,7 @@ export interface MessageStatusProps {
   type?: 'icon' | 'text';
   prefixCls?: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const MessageStatus = (props: MessageStatusProps) => {
@@ -23,7 +24,13 @@ const MessageStatus = (props: MessageStatusProps) => {
   const { theme } = context;
   const themeMode = theme?.mode || 'light';
   let statusNode: ReactNode;
-  const { status = 'default', type = 'icon', prefixCls: customizePrefixCls, className } = props;
+  const {
+    status = 'default',
+    type = 'icon',
+    prefixCls: customizePrefixCls,
+    className,
+    style,
+  } = props;
   const prefixCls = getPrefixCls('message-status', customizePrefixCls);
 
   const classString = classNames(
@@ -74,7 +81,11 @@ const MessageStatus = (props: MessageStatusProps) => {
       statusNode = null;
       break;
   }
-  return <span className={classString}>{statusNode}</span>;
+  return (
+    <span className={classString} style={style}>
+      {statusNode}
+    </span>
+  );
 };
 
 export { MessageStatus };

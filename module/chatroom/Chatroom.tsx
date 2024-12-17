@@ -57,7 +57,7 @@ export interface ChatroomProps {
   reportType?: Record<string, string>; // 自定义举报内容 {'举报类型': "举报原因"}
 }
 
-const Chatroom = (props: ChatroomProps) => {
+let Chatroom = (props: ChatroomProps) => {
   const { t } = useTranslation();
   const {
     renderEmpty,
@@ -437,4 +437,5 @@ const Chatroom = (props: ChatroomProps) => {
   );
 };
 
-export default observer(Chatroom);
+Chatroom = observer(Chatroom);
+export { Chatroom };
