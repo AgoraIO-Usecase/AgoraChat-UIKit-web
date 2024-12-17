@@ -20,7 +20,7 @@
     "storybook:zh": "UIKIT_LANG=zh storybook dev -p 6006",
     "build-storybook": "npm run build-storybook:zh",
     "build-storybook:en": "UIKIT_LANG=en storybook build",
-    "build-storybook:zh": "UIKIT_LANG=zh storybook dev -p 6006",
+    "build-storybook:zh": "UIKIT_LANG=zh storybook build",
     "coverage": "vitest run --coverage",
     "fix-memory-limit": "cross-env LIMIT=4096 increase-memory-limit",
     "prepare": "husky",
