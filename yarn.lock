@@ -3122,6 +3122,11 @@
   resolved "https://registry.npmjs.org/@storybook/manager-api/-/manager-api-8.4.5.tgz#ce586cc5961297272f7228446161015464c65067"
   integrity sha512-t39JaMy3UX4StbUH/tIDcaflBDxTcyIq853wQtBMhVL3e1+Dw3MIiiG/5bw79HU4R7kSmPVLXIIbV3FmXkq7KQ==
 
+"@storybook/manager-api@^8.4.6":
+  version "8.4.7"
+  resolved "https://registry.npmjs.org/@storybook/manager-api/-/manager-api-8.4.7.tgz#4e13debf645c9300d7d6d49195e720d0c7ecd261"
+  integrity sha512-ELqemTviCxAsZ5tqUz39sDmQkvhVAvAgiplYy9Uf15kO0SP2+HKsCMzlrm2ue2FfkUNyqbDayCPPCB0Cdn/mpQ==
+
 "@storybook/preview-api@8.4.5":
   version "8.4.5"
   resolved "https://registry.npmjs.org/@storybook/preview-api/-/preview-api-8.4.5.tgz#f8c046575c68062eda1de9494e7118571d20c72a"
@@ -4103,15 +4108,15 @@ address@^1.0.1, address@^1.1.2:
   resolved "https://registry.npmmirror.com/address/-/address-1.2.1.tgz"
   integrity sha512-B+6bi5D34+fDYENiH5qOlA0cV2rAGKuWZ9LeyUUehbXy8e0VS9e498yO0Jeeh+iM+6KbfudHTFjXw2MmJD4QRA==
 
+agora-chat@1.3.1:
+  version "1.3.1"
+  resolved "https://registry.npmjs.org/agora-chat/-/agora-chat-1.3.1.tgz#b0b6476076b1ed7e1f088905f31792d021e68db5"
+  integrity sha512-562eGv1NY5F3j0FrXRpqabAFfaTIt45svRcBRkldYp1JtfkXx8a6BgP2sIJwPKiqe6pU2wuk4yiE4d92iVECBg==
+
 agora-chat@^1.0.5:
   version "1.2.1"
   resolved "https://registry.npmjs.org/agora-chat/-/agora-chat-1.2.1.tgz"
   integrity sha512-cK+1Gl8lKLAqxqhluyQAtp7UqXBjyrks0cLxhENuhbem03xgfqsN1KGOIyCkw/YYWJk3orpR1bRNbETFeTDh7g==
-
-agora-chat@^1.2.2-beta4:
-  version "1.2.2-beta4"
-  resolved "https://registry.npmjs.org/agora-chat/-/agora-chat-1.2.2-beta4.tgz"
-  integrity sha512-0fo3Zfxnp+1N7/CoT5jERdSEmtvPL1Bi3yPjaDNTB+ijX4l8dS7Ey7/wPjCNFqUmhdjv2qMoT9sGTomfCrWtwg==
 
 agora-rtc-sdk-ng@^4.16.0:
   version "4.18.3"
@@ -4475,12 +4480,12 @@ axios@^0.27.2:
     follow-redirects "^1.14.9"
     form-data "^4.0.0"
 
-axios@^1.5.0:
-  version "1.5.0"
-  resolved "https://registry.npmjs.org/axios/-/axios-1.5.0.tgz"
-  integrity sha512-D4DdjDo5CY50Qms0qGQTTw6Q44jl7zRwY7bthds06pUGfChBCTcQs+N743eFWGEd6pRTMd6A+I87aWyFV5wiZQ==
+axios@^1.7.9:
+  version "1.7.9"
+  resolved "https://registry.npmjs.org/axios/-/axios-1.7.9.tgz#d7d071380c132a24accda1b2cfc1535b79ec650a"
+  integrity sha512-LhLcE7Hbiryz8oMDdDptSrWowmB4Bl6RCt6sIJKpRB4XtVf0iEgewX3au/pJqm+Py1kCASkb/FFKjxQaLtxJvw==
   dependencies:
-    follow-redirects "^1.15.0"
+    follow-redirects "^1.15.6"
     form-data "^4.0.0"
     proxy-from-env "^1.1.0"
 
@@ -6736,10 +6741,15 @@ flow-parser@0.*:
   resolved "https://registry.npmmirror.com/flow-parser/-/flow-parser-0.192.0.tgz"
   integrity sha512-FLyei0ikf4ab9xlg+05WNmdpOODiH9XVBuw7iI9OZyjIo+cX2L2OUPTovjbWLYLlI41oGTcprbKdB/f9XwBnKw==
 
-follow-redirects@^1.0.0, follow-redirects@^1.14.9, follow-redirects@^1.15.0:
+follow-redirects@^1.0.0, follow-redirects@^1.14.9:
   version "1.15.2"
   resolved "https://registry.npmmirror.com/follow-redirects/-/follow-redirects-1.15.2.tgz"
   integrity sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==
+
+follow-redirects@^1.15.6:
+  version "1.15.9"
+  resolved "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.9.tgz#a604fa10e443bf98ca94228d9eebcc2e8a2c8ee1"
+  integrity sha512-gew4GsXizNgdoRyqmyfMHyAmXsZDk6mHkSxZFCzW9gwlbtOW44CDtYavM+y+72qD/Vq2l550kMF52DT8fOLJqQ==
 
 for-each@^0.3.3:
   version "0.3.3"
