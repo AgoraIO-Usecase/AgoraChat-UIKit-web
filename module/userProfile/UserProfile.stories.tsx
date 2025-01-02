@@ -2,7 +2,6 @@ import React from 'react';
 import { StoryFn, Meta } from '@storybook/react';
 import Provider from '../store/Provider';
 import UserProfile from './index';
-import { rootStore } from 'chatuim2';
 
 const lang = import.meta.env.VITE_CUSTOM_VAR as 'en' | 'zh';
 const description = {

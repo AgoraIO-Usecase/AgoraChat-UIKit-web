@@ -6,7 +6,7 @@ import type { ReactionData } from '../reaction/ReactionMessage';
 import { getCvsIdFromMessage, getMessages, getMessageIndex, getReactionByEmoji } from '../utils';
 import { RootStore } from './index';
 import { AT_ALL } from '../messageInput/suggestList/SuggestList';
-import { TextMessageType } from 'chatuim2/types/module/types/messageType';
+import type { TextMessageType } from '../types/messageType';
 import { eventHandler } from '../../eventHandler';
 import { BaseMessageType } from '../baseMessage/BaseMessage';
 import { NoticeMessageBody } from '../noticeMessage/NoticeMessage';
@@ -18,7 +18,7 @@ import {
 } from '../utils/index';
 
 import { resetCache } from '../hooks/useHistoryMsg';
-
+let debounceTimer: any = null;
 export interface Message {
   singleChat: { [key: string]: (ChatSDK.MessageBody | NoticeMessageBody)[] };
   groupChat: { [key: string]: (ChatSDK.MessageBody | NoticeMessageBody)[] };
@@ -126,7 +126,7 @@ class MessageStore {
     const MAX_LENGTH = this.rootStore.initConfig.maxMessages || 200;
     if (this.message.byId.size >= MAX_LENGTH) {
       // 删除最早添加的键值
-      const firstKey = this.message.byId.keys().next().value;
+      const firstKey = this.message.byId.keys().next().value || '';
       this.message.byId.delete(firstKey);
     }
     this.message.byId.set(key, value);
@@ -372,14 +372,20 @@ class MessageStore {
 
   receiveMessage(message: BaseMessageType) {
     const curCvs = this.rootStore.conversationStore.currentCvs;
+    const conversationId = getCvsIdFromMessage(message);
     //@ts-ignore
     if (
       curCvs &&
       curCvs.chatType === message.chatType &&
-      curCvs.conversationId === message.from &&
+      curCvs.conversationId === conversationId &&
       message.chatType != 'chatRoom'
     ) {
-      this.sendChannelAck(curCvs);
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+      debounceTimer = setTimeout(() => {
+        this.sendChannelAck(curCvs);
+      }, 1000);
     }
     const isChatbot = message.from?.includes?.('chatbot_');
     if (isChatbot) {
@@ -394,7 +400,7 @@ class MessageStore {
       // @ts-ignore
       message.bySelf = true;
     }
-    const conversationId = getCvsIdFromMessage(message);
+
     // @ts-ignore
     if (message.broadcast) {
       this.message.broadcast.push(message);
