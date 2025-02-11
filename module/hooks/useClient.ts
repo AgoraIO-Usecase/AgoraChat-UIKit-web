@@ -1,18 +1,12 @@
-import {
-	useCallback,
-	useEffect,
-	MutableRefObject,
-	useContext,
-	useState,
-} from 'react';
-import AC from 'agora-chat';
-import { RootContext } from '../store/rootContext';
+import { useEffect, useState } from 'react';
+import rootStore from '../store';
 const useClient = () => {
-	const rootStore = useContext(RootContext).rootStore;
+  let [client, setClient] = useState<any>(rootStore.client);
 
-	let [client, setClient] = useState<any>(rootStore.client);
-	console.log('生成 client');
-	return rootStore.client;
+  useEffect(() => {
+    setClient(rootStore.client);
+  }, [rootStore.client]);
+  return client;
 };
 
 export { useClient };

@@ -1,26 +1,45 @@
-import React, { ReactNode, useState, useRef, useEffect } from 'react';
+import React, { ReactNode, useState, useRef, useEffect, useContext } from 'react';
 import classNames from 'classnames';
 import Emoji from './emoji';
 import Recorder from './recorder';
 import Textarea from './textarea';
 import './style/style.scss';
 import { emoji } from './emoji/emojiConfig';
-import MoreAction from './moreAction';
-
+import MoreAction, { MoreActionProps } from './moreAction';
+import rootStore from '../store/index';
+import SelectedControls from './selectedControls';
+import { observer } from 'mobx-react-lite';
+import { ConfigContext } from '../../component/config/index';
+import { ChatSDK } from '../SDK';
+import { CurrentConversation } from '../store/ConversationStore';
+import { GiftKeyboard } from './gift/GiftKeyboard';
+import { RootContext } from '../store/rootContext';
 export type Actions = {
   name: string;
   visible: boolean;
   icon?: ReactNode;
+  onClick?: () => void;
 }[];
 
 export interface MessageEditorProps {
+  prefix?: string;
   actions?: Actions;
+  customActions?: MoreActionProps['customActions'];
+  enabledTyping?: boolean; // 是否启用正在输入
   onSend?: (message: any) => void; // 消息发送的回调
   className?: string; // wrap 的 class
+  style?: React.CSSProperties; // wrap 的 style
   showSendButton?: boolean; // 是否展示发送按钮
   sendButtonIcon?: ReactNode; // 发送按钮的 icon
   row?: number; //input 行数
   placeHolder?: string; // input placeHolder
+  disabled?: boolean; // 是否禁用
+  isChatThread?: boolean; // 是否是子区聊天
+  enabledMention?: boolean; // 是否开启@功能
+  onSendMessage?: (message: ChatSDK.MessageBody) => void;
+  conversation?: CurrentConversation;
+  // 加一个发送消息前的回调，这个回调返回promise，如果返回的promise resolve了，就发送消息，如果reject了，就不发送消息
+  onBeforeSendMessage?: (message: ChatSDK.MessageBody) => Promise<CurrentConversation | void>;
 }
 
 function converToMessage(e: string) {
@@ -73,9 +92,13 @@ const defaultActions: Actions = [
 
 const MessageEditor = (props: MessageEditorProps) => {
   const [isShowTextarea, setTextareaShow] = useState(true);
-  const [isShowRecorder, setShowRecorder] = useState(false);
+  const [isShowRecorder, setShowRecorder] = useState(true);
+  const [isShowSelect, setIsShowSelect] = useState(false);
   const [editorNode, setEditorNode] = useState<null | React.ReactFragment>(null);
   const textareaRef = useRef(null);
+  const context = useContext(RootContext);
+  const { rootStore, theme } = context;
+  const themeMode = theme?.mode || 'light';
 
   const insertCustomHtml = (t: string, e: keyof typeof emoji.map) => {
     if (!textareaRef.current) return;
@@ -95,11 +118,8 @@ const MessageEditor = (props: MessageEditorProps) => {
           (a.draggable = !1),
           (a.className = 'message-text-emoji'),
           a.setAttribute('title', e.replace('[', '').replace(']', '')),
-          n.deleteContents(),
-          n.insertNode(a),
-          n.collapse(false),
-          s.removeAllRanges(),
-          s.addRange(n);
+          a.setAttribute('style', 'vertical-align: middle');
+        n.deleteContents(), n.insertNode(a), n.collapse(false), s.removeAllRanges(), s.addRange(n);
       }
     } else if ('selection' in document) {
       i.focus(),
@@ -142,57 +162,158 @@ const MessageEditor = (props: MessageEditorProps) => {
 
     // setInputHaveValue(false);
   };
-
-  const { actions = defaultActions, placeHolder } = props;
+  const {
+    actions = defaultActions,
+    placeHolder,
+    disabled,
+    className,
+    prefix,
+    isChatThread,
+    onSendMessage,
+    conversation,
+    onBeforeSendMessage,
+    enabledTyping,
+    customActions,
+    style = {},
+  } = props;
 
   useEffect(() => {
-    let node = actions.map((item, index) => {
-      if (item.name === 'RECORDER' && item.visible) {
-        setShowRecorder(true);
-        return null;
-      }
-      if (item.name === 'TEXTAREA' && item.visible) {
-        return (
-          <Textarea
-            key={item.name}
-            ref={textareaRef}
-            hasSendButton
-            placeholder={placeHolder}
-          ></Textarea>
-        );
-      } else if (item.name === 'EMOJI' && item.visible) {
-        return (
-          <Emoji
-            key={item.name}
-            onSelected={handleSelectEmoji}
-            onClick={handleClickEmojiIcon}
-          ></Emoji>
-        );
-      } else if (item.name === 'MORE' && item.visible) {
-        return <MoreAction key={item.name}></MoreAction>;
-      } else {
-        return (
-          <span key={item.name} className="icon-container">
-            {item.icon}
-          </span>
-        );
-      }
+    const result = actions?.find(item => {
+      return item.name === 'RECORDER';
     });
-    setEditorNode(node);
+    if (result) {
+      setShowRecorder(true);
+    } else {
+      setShowRecorder(false);
+    }
   }, []);
+  const currentCvs = conversation ? conversation : rootStore.conversationStore.currentCvs || {};
+  useEffect(() => {
+    if (!textareaRef.current) return;
+    // @ts-ignore
+    textareaRef.current.divRef.current.innerHTML = '';
+    // @ts-ignore
+    textareaRef.current.setTextareaValue('');
+  }, [currentCvs.conversationId]);
+
+  useEffect(() => {
+    if (
+      rootStore.messageStore.selectedMessage[currentCvs.chatType]?.[currentCvs.conversationId]
+        ?.selectable
+    ) {
+      setIsShowSelect(true);
+      setTextareaShow(false);
+      setShowRecorder(false);
+    } else {
+      setIsShowSelect(false);
+      setTextareaShow(true);
+      const result = actions?.find(item => {
+        return item.name === 'RECORDER';
+      });
+      if (result) {
+        setShowRecorder(true);
+      }
+    }
+  }, [
+    rootStore.messageStore.selectedMessage[currentCvs.chatType]?.[currentCvs.conversationId]
+      ?.selectable,
+  ]);
+  const { getPrefixCls } = React.useContext(ConfigContext);
+  const prefixCls = getPrefixCls('message-editor', prefix);
+  const classString = classNames(
+    prefixCls,
+    {
+      [`${prefixCls}-disabled`]: disabled,
+      [`${prefixCls}-${themeMode}`]: !!themeMode,
+    },
+    className,
+  );
+
+  const handleSendCombineMessage = (message: any) => {
+    onSendMessage && onSendMessage(message);
+  };
   return (
-    <div className="editor-container">
+    <div className={classString} style={{ ...style }}>
       {isShowRecorder && (
         <Recorder
+          isChatThread={isChatThread}
+          onBeforeSendMessage={onBeforeSendMessage}
+          conversation={conversation}
           onShow={() => setTextareaShow(false)}
           onHide={() => setTextareaShow(true)}
           onSend={() => setTextareaShow(true)}
         ></Recorder>
       )}
 
-      {isShowTextarea && <>{editorNode}</>}
+      {isShowTextarea && (
+        <>
+          {actions.map((item, index) => {
+            if (item.name === 'RECORDER' && item.visible) {
+              // setShowRecorder(true);
+              return null;
+            }
+            if (item.name === 'TEXTAREA' && item.visible) {
+              return (
+                <Textarea
+                  enabledTyping={enabledTyping}
+                  isChatThread={isChatThread}
+                  key={item.name}
+                  ref={textareaRef}
+                  hasSendButton
+                  placeholder={placeHolder}
+                  onSendMessage={onSendMessage}
+                  conversation={conversation}
+                  enabledMention={props.enabledMention}
+                  onBeforeSendMessage={onBeforeSendMessage}
+                ></Textarea>
+              );
+            } else if (item.name === 'EMOJI' && item.visible) {
+              return (
+                <Emoji
+                  key={item.name}
+                  onSelected={handleSelectEmoji}
+                  onClick={handleClickEmojiIcon}
+                ></Emoji>
+              );
+            } else if (item.name === 'MORE' && item.visible) {
+              return (
+                <MoreAction
+                  key={item.name}
+                  isChatThread={isChatThread}
+                  onBeforeSendMessage={onBeforeSendMessage}
+                  customActions={customActions}
+                ></MoreAction>
+              );
+            } else if (item.name === 'GIFT' && item.visible) {
+              return <GiftKeyboard key={item.name} conversation={conversation} />;
+            } else {
+              return (
+                <span
+                  key={item.name}
+                  className="icon-container"
+                  onClick={() => {
+                    item?.onClick?.();
+                  }}
+                >
+                  {item.icon}
+                </span>
+              );
+            }
+          })}
+        </>
+      )}
+      {isShowSelect && (
+        <SelectedControls
+          onSendMessage={handleSendCombineMessage}
+          conversation={conversation}
+          onHide={() => {
+            setTextareaShow(true);
+            setIsShowSelect(false);
+          }}
+        ></SelectedControls>
+      )}
     </div>
   );
 };
 MessageEditor.defaultActions = defaultActions;
-export { MessageEditor };
+export default observer(MessageEditor);

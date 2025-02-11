@@ -1,5 +1,9 @@
 @import '~/common/style/index.scss';
 $status-prefix-cls: #{$cui-prefix}-message-base;
+$audio-prefix-cls: #{$cui-prefix}-message-audio;
+$reply-msg-prefix-cls: #{$cui-prefix}-reply-message;
+$text-msg-prefix-cls: #{$cui-prefix}-message-text;
+$moreAction-prefix-cls: #{$cui-prefix}-moreAction;
 
 .#{$status-prefix-cls} {
     width: 100%;
@@ -12,42 +16,34 @@ $status-prefix-cls: #{$cui-prefix}-message-base;
     // margin: $msg-base-margin;
     box-sizing: border-box;
     padding: $msg-base-padding;
-    &-arrow{
-        &.#{$status-prefix-cls}-left{
-            .#{$status-prefix-cls}-content{
-                &::before{
+
+    &-arrow {
+        &.#{$status-prefix-cls}-left {
+            .#{$status-prefix-cls}-content {
+                &::before {
                     content: " ";
                 }
             }
         }
-        &.#{$status-prefix-cls}-right{
-            .#{$status-prefix-cls}-content{
-                &::after{
+
+        &.#{$status-prefix-cls}-right {
+            .#{$status-prefix-cls}-content {
+                &::after {
                     content: " ";
                 }
             }
         }
     }
 
-    &-left{
-        direction: ltr;
-        .#{$status-prefix-cls}-content{
-            border-radius: $msg-bubble-border-radius-left;
-            &::before{
-                border: $msg-bubble-arrow-border-size solid transparent;
-                border-right: $msg-bubble-arrow-border-size solid $msg-bubble-color-secondly;
-                position: absolute;
-                pointer-events: none;
-                left: $msg-bubble-arrow-left;
-                bottom: $msg-bubble-arrow-bottom;
-            }
-        }
-    }
-    &-right{
-        direction: rtl;
-        .#{$status-prefix-cls}-content{
+
+
+    &-right {
+        flex-direction: row-reverse;
+
+        .#{$status-prefix-cls}-content {
             border-radius: $msg-bubble-border-radius-right;
-            &::after{
+
+            &::after {
                 border: $msg-bubble-arrow-border-size solid transparent;
                 border-left: $msg-bubble-arrow-border-size solid $msg-bubble-color-primary;
                 position: absolute;
@@ -56,19 +52,118 @@ $status-prefix-cls: #{$cui-prefix}-message-base;
                 right: $msg-bubble-arrow-right;
             }
         }
+
+        .#{$status-prefix-cls}-body {
+            flex-direction: row-reverse;
+        }
+
+        .#{$status-prefix-cls}-info {
+            flex-direction: row-reverse;
+        }
+
+        .#{$audio-prefix-cls} {
+            flex-direction: row-reverse;
+        }
+
+        .#{$reply-msg-prefix-cls} {
+            align-items: flex-end;
+        }
+
+        .#{$reply-msg-prefix-cls}-box {
+            flex-direction: row-reverse;
+        }
+
+        .#{$text-msg-prefix-cls}-edit-tag {
+            color: $special-3;
+        }
     }
-    &-box{
+
+    &-left {
+        .#{$status-prefix-cls}-content {
+            border-radius: $msg-bubble-border-radius-left;
+
+            &::before {
+                border: $msg-bubble-arrow-border-size solid transparent;
+                border-right: $msg-bubble-arrow-border-size solid $msg-bubble-color-secondly;
+                position: absolute;
+                pointer-events: none;
+                left: $msg-bubble-arrow-left;
+                bottom: $msg-bubble-arrow-bottom;
+            }
+        }
+
+        .#{$text-msg-prefix-cls}-edit-tag {
+            color: $special-5;
+        }
+
+        .#{$status-prefix-cls}-body {
+            flex-direction: row;
+        }
+
+        .#{$status-prefix-cls}-info {
+            flex-direction: row;
+        }
+
+        .#{$audio-prefix-cls} {
+            flex-direction: row;
+        }
+
+        .#{$reply-msg-prefix-cls} {
+            align-items: flex-start;
+        }
+
+        .#{$reply-msg-prefix-cls}-box {
+            flex-direction: row;
+        }
+
+        .#{$text-msg-prefix-cls}-edit-tag {
+            color: $special-5;
+        }
+    }
+
+    &-reply {
+        &.#{$status-prefix-cls}-right {
+            .#{$status-prefix-cls}-content {
+                border-radius: $msg-bubble-border-radius-right-reply;
+            }
+        }
+
+        &.#{$status-prefix-cls}-left {
+            .#{$status-prefix-cls}-content {
+                border-radius: $msg-bubble-border-radius-left-reply;
+            }
+        }
+    }
+
+    &-box {
         max-width: 100%;
         overflow: hidden;
+        width: 100%;
     }
-    &-body{
+
+    &-body {
         flex-grow: 0;
         display: flex;
         align-items: flex-end;
+        gap: 8px;
+        margin: 0 12px;
+
+        &-action {
+            fill: $gray-6;
+
+            &:hover {
+                fill: $blue-5;
+                cursor: pointer;
+            }
+        }
     }
-    &-content{
+
+    &-content {
         // flex: 1;
-        margin: $msg-base-content-margin;
+        display: flex;
+        flex-direction: column;
+        max-width: calc(100% - 80px);
+        // margin: $msg-base-content-margin;
         padding: $msg-base-content-padding;
         gap: 10px;
         min-height: $msg-base-content-minheight;
@@ -80,31 +175,45 @@ $status-prefix-cls: #{$cui-prefix}-message-base;
     }
 
     &-primary {
-        .#{$status-prefix-cls}-content{
+        .#{$status-prefix-cls}-content {
             background: $msg-bubble-color-primary;
             color: $msg-bubble-font-color-primary;
-            &::before{
+
+            &::before {
                 border-right: $msg-bubble-arrow-border-size solid $msg-bubble-color-primary;
             }
         }
-    }
-    &-secondly {
-        .#{$status-prefix-cls}-content{
-            background: $msg-bubble-color-secondly;
-            color: $msg-bubble-font-color-secondly;
-            &::after{
-                border-left: $msg-bubble-arrow-border-size solid $msg-bubble-color-secondly!important;
-            }
-            &::before{
-                border-right: $msg-bubble-arrow-border-size solid $msg-bubble-color-secondly!important;
-            }
+
+        .#{$status-prefix-cls}-info {
+            margin-right: $msg-info-margin-left;
         }
     }
+
+    &-secondly {
+        .#{$status-prefix-cls}-content {
+            background: $msg-bubble-color-secondly;
+            color: $gray-1;
+
+            &::after {
+                border-left: $msg-bubble-arrow-border-size solid $msg-bubble-color-secondly !important;
+            }
+
+            &::before {
+                border-right: $msg-bubble-arrow-border-size solid $msg-bubble-color-secondly !important;
+            }
+        }
+
+        .#{$status-prefix-cls}-info {
+            margin-left: $msg-info-margin-left;
+        }
+    }
+
     &-none {
-        .#{$status-prefix-cls}-content{
+        .#{$status-prefix-cls}-content {
             background: $msg-bubble-none-bg;
             color: $msg-bubble-none-color;
-            &::before{
+
+            &::before {
                 border: none;
                 content: "";
                 position: absolute;
@@ -114,16 +223,22 @@ $status-prefix-cls: #{$cui-prefix}-message-base;
             }
         }
     }
-    &-square{
-        .#{$status-prefix-cls}-content{
+
+    &-square {
+        .#{$status-prefix-cls}-content {
             border-radius: $msg-bubble-square-border-radius;
         }
+        .#{$status-prefix-cls}-body{
+            margin: 0 17px;
+        }
     }
-    &-info{
+
+    &-info {
         margin-left: $msg-info-margin-left;
         display: flex;
     }
-    &-nickname{
+
+    &-nickname {
         display: inline-block;
         height: $msg-nickname-height;
         font-weight: $msg-nickname-font-weight;
@@ -131,14 +246,282 @@ $status-prefix-cls: #{$cui-prefix}-message-base;
         line-height: $msg-nickname-height;
         color: $msg-nickname-font-color;
     }
-    &-time{
+
+    &-time-and-status-box{
+        display: flex;
+        align-items: center;
+    }
+    &-time {
         display: inline-block;
-        width: $msg-time-width;
+        // width: $msg-time-width;
         height: $msg-time-height;
         margin: $msg-time-margin;
         font-weight: $msg-time-font-weight;
         font-size: $msg-time-font-size;
         line-height: $msg-time-height;
         color: $msg-time-font-color;
+    }
+
+    &-thread {
+        display: flex;
+        direction: ltr;
+        flex-direction: column;
+        gap: 4px;
+
+        &>div {
+            display: flex;
+            align-items: center;
+            max-width: 100%;
+            overflow: hidden;
+            color: $gray-98;
+            &>div {
+                display: flex;
+                align-items: center;
+                
+            }
+        }
+
+        &-line {
+            border-top: 1px solid $blue-8;
+            width: 100%;
+            margin-bottom: 4px;
+        }
+
+        &-name {
+            justify-content: space-between;
+            // 只有一行， 超出显示省略号
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            cursor: pointer;
+
+            &>div {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                overflow: hidden;
+            }
+
+            // 第一个div里面的span字号是14px
+            &>div>span {
+                font-size: 14px;
+                line-height: 20px;
+                font-weight: 500;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                
+            }
+
+            // 当前元素下第二个div（child(2)）里面的span字号是12px
+
+            &>div:nth-child(2)>span {
+                font-size: 12px;
+                line-height: 16px;
+                margin-left: 4px;
+            }
+
+            // 这个元素固定在最右面
+            &>div:nth-child(2) {
+                flex: none;
+
+            }
+
+            &-icon svg {
+                fill: $gray-98;
+            }
+        }
+
+        &-message {
+            gap: 4px;
+            margin-bottom: 4px;
+
+            &>span {
+                font-size: 12px;
+                line-height: 16px;
+                color: $blue-9;
+            }
+
+            &>span:nth-child(1) {
+                font-weight: 500;
+            }
+
+            &>span:nth-child(3) {
+                // flex: none;
+                flex: 1;
+                overflow: hidden;
+                /* flex-wrap: nowrap; */
+                /* display: flex; */
+                height: 16px;
+                // 会把容器撑开
+                // text-overflow: ellipsis;
+                // white-space: nowrap;
+
+                display: -webkit-box;
+                -webkit-line-clamp: 1;
+                -webkit-box-orient: vertical;
+            }
+        }
+
+    }
+
+    &-secondly {
+        .#{$status-prefix-cls}-thread {
+            &>div {
+                color: $special-5;
+                
+            }
+
+            &-line {
+                border-top: 1px solid $special-8;
+            }
+
+            &-name {
+                &-icon svg {
+                    fill: $special-5;
+                }
+            }
+
+            &-message {
+                &>span {
+                    color: $gray-5;
+                }
+            }
+        }
+    }
+    // dark mode primary style
+    &-dark.#{$status-prefix-cls}-secondly {
+            .#{$status-prefix-cls}-content {
+                background: $blue-2;
+                color: $msg-bubble-font-color-primary;
+
+                &::after {
+                    border-left: $msg-bubble-arrow-border-size solid $blue-2 !important;
+                }
+    
+                &::before {
+                    border-right: $msg-bubble-arrow-border-size solid $blue-2 !important;
+                }
+        }
+
+        .#{$status-prefix-cls}-thread{
+            &-name{
+                color: $gray-98;
+                svg{
+                    fill: $gray-98;
+                }
+            }
+            &-message{
+                &>span{
+                    color: $gray-7;
+                }
+            }
+        }
+    }
+    &-dark.#{$status-prefix-cls}-left.#{$status-prefix-cls}-none{
+        div:first-of-type{
+            color: $msg-bubble-font-color-primary;
+
+            &::after {
+                border-left: $msg-bubble-arrow-border-size solid $blue-2 !important;
+            }
+
+            &::before {
+                border-right: $msg-bubble-arrow-border-size solid $blue-2 !important;
+            }
+        }
+    }
+    
+    &-dark.#{$status-prefix-cls}-primary {
+        .#{$status-prefix-cls}-content {
+            background: $blue-6;
+            color: $gray-1;
+
+            &::after {
+                border-left: $msg-bubble-arrow-border-size solid $blue-6 !important;
+            }
+
+            &::before {
+                border-right: $msg-bubble-arrow-border-size solid $blue-6 !important;
+            }
+        }
+        .#{$status-prefix-cls}-thread{
+            &-name{
+                color: $gray-2;
+                svg{
+                    fill: $gray-2;
+                }
+            }
+            &-message{
+                &>span{
+                    color: $gray-3;
+                }
+            }
+            // &>div{
+            //     &>div{
+            //         color: $gray-2;
+            //         svg{
+            //             fill: $gray-2;
+            //         }
+            //     }
+            // }
+        }
+    }
+}
+
+.#{$moreAction-prefix-cls} {
+    padding: 0;
+    margin: 0;
+    display: grid;
+
+    li {
+        display: inline-block;
+        list-style: none;
+        height: 36px;
+        border-radius: 8px;
+        padding: 0 $padding-xs;
+        cursor: pointer;
+        display: flex;
+        justify-content: left;
+        align-items: center;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 20px;
+        min-width: 188px;
+        text-align: left;
+        >div{
+            margin-right: 8px;
+        }
+    }
+
+    li:hover {
+        /* color_neutral/95 */
+        background-color: $gray-95;
+    }
+
+    .cui-li-dark:hover {
+        background: $gray-2;
+    }
+}
+
+.thread-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    .cui-checkbox-wrapper{
+        position: absolute;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        /* background: red; */
+        z-index: 999;
+        width: 100%;
+        
+    }
+    .checkbox {
+        position: relative;
+        left: 8px;
+        width: 100%;
     }
 }

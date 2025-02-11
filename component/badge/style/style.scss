@@ -7,10 +7,9 @@ $number-prefix-cls: #{$cui-prefix}-scroll-number;
     position: relative;
     display: inline-block;
     line-height: 1;
-
     &-count {
         z-index: $zindex-badge;
-        min-width: $badge-height;
+        // min-width: $badge-height;
         height: $badge-height;
         padding: 0 6px;
         color: $badge-text-color;
@@ -21,7 +20,7 @@ $number-prefix-cls: #{$cui-prefix}-scroll-number;
         text-align: center;
         background: $badge-color;
         border-radius: calc($badge-height / 2);
-        box-shadow: 0 0 0 1px $shadow-color-inverse;
+        // box-shadow: 0 0 0 1px $shadow-color-inverse;
         overflow: hidden;
         a,
         a:hover {
@@ -49,7 +48,7 @@ $number-prefix-cls: #{$cui-prefix}-scroll-number;
         height: $badge-dot-size;
         background: $highlight-color;
         border-radius: 100%;
-        box-shadow: 0 0 0 1px $shadow-color-inverse;
+        // box-shadow: 0 0 0 1px $shadow-color-inverse;
     }
 
     &-dot.#{$number-prefix-cls} {
@@ -110,7 +109,12 @@ $number-prefix-cls: #{$cui-prefix}-scroll-number;
       }
 
 }
-
+.#{$number-prefix-cls}{
+  &-only{
+    width: 8px;
+    display: inline-block;
+  }
+}
 @keyframes cuiZoomBadgeIn {
     0% {
       transform: scale(0) translate(50%, -50%);

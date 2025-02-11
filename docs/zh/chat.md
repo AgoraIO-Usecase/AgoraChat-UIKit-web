@@ -2,8 +2,8 @@
 
 Chat 组件提供了以下功能:
 
-- 发送和接收消息, 包括文本，表情，图片，语音，文件，合并类型的消息。
-- 对消息进行表情回复，引用，撤回，删除，翻译，创建子区的操作。
+- 发送和接收消息, 包括文本，表情，图片，语音，视频，文件，名片，合并类型的消息。
+- 对消息进行表情回复，引用，撤回，删除，翻译，编辑的操作。
 - 清除本地消息。
 - 删除会话。
 - 拉历史消息。
@@ -11,13 +11,13 @@ Chat 组件提供了以下功能:
 ## 使用示例
 
 ```jsx
-import React from "react";
-import { Chat } from "agora-chat-uikit";
-import "agora-chat-uikit/style.css";
+import React from 'react';
+import { Chat } from 'easemob-chat-uikit';
+import 'easemob-chat-uikit/style.css';
 
 const ChatContainer = () => {
   return (
-    <div style={{ width: "70%", height: "100%" }}>
+    <div style={{ width: '70%', height: '100%' }}>
       <Chat />
     </div>
   );
@@ -37,34 +37,32 @@ const ChatContainer = () => {
 - 通过使用 `TextMessage` 的 props 来自定义文本消息。
 
 ```jsx
-import React from "react";
-import { Chat, MessageList, TextMessage } from "agora-chat-uikit";
-import "agora-chat-uikit/style.css";
+import React from 'react';
+import { Chat, MessageList, TextMessage } from 'agora-chat-uikit';
+import 'agora-chat-uikit/style.css';
 
 const ChatContainer = () => {
-  const renderTxtMsg = (msg) => {
+  const renderTxtMsg = msg => {
     return (
       <TextMessage
-        bubbleStyle={{ background: "hsl(135.79deg 88.79% 36.46%)" }}
+        bubbleStyle={{ background: 'hsl(135.79deg 88.79% 36.46%)' }}
         shape="square"
         status={msg.status}
-        avatar={<Avatar style={{ background: "pink" }}>A</Avatar>}
+        avatar={<Avatar style={{ background: 'pink' }}>A</Avatar>}
         textMessage={msg}
       ></TextMessage>
     );
   };
 
-  const renderMessage = (msg) => {
-    if (msg.type === "txt") {
+  const renderMessage = msg => {
+    if (msg.type === 'txt') {
       return renderTxtMsg(msg);
     }
   };
 
   return (
-    <div style={{ width: "70%", height: "100%" }}>
-      <Chat
-        renderMessageList={() => <MessageList renderMessage={renderMessage} />}
-      />
+    <div style={{ width: '70%', height: '100%' }}>
+      <Chat renderMessageList={() => <MessageList renderMessage={renderMessage} />} />
     </div>
   );
 };
@@ -72,39 +70,115 @@ const ChatContainer = () => {
 
 <div align=center> <img src="../image/buble2.png" width = "400" height = "450" /></div>
 
-### 在消息编辑器中添加一个自定义图标
+### 修改消息日期时间格式
+
+通过消息组件的 formatDateTime 方法来设置显示的格式
+
+```jsx
+<Chat
+  messageListProps={{
+    messageProps: {
+      formatDateTime: (time: number) => {
+        // 自定义显示日期和时间
+        return new Date(time).toLocaleString();
+      },
+    },
+  }}
+/>
+```
+
+### 设置显示哪些消息的更多操作
+
+通过设置 messageProps 的 customAction 属性设置显示哪些操作按钮
+
+```jsx
+<Chat
+  messageListProps={{
+    messageProps: {
+      visible: true,
+      icon: null,
+      actions: [
+        {
+          // 展示单条转发
+          content: 'FORWARD',
+        },
+        {
+          // 展示消息引用
+          content: 'REPLY',
+        },
+        {
+          // 展示消息撤回
+          content: 'UNSEND',
+        },
+        {
+          // 展示消息编辑
+          content: 'Modify',
+        },
+        {
+          // 展示消息多选
+          content: 'SELECT',
+        },
+        {
+          // 展示消息固定
+          content: 'PIN',
+        },
+        {
+          // 展示消息翻译
+          content: 'TRANSLATE',
+        },
+        {
+          // 展示消息举报
+          content: 'REPORT',
+        },
+        {
+          // 展示消息删除
+          content: 'DELETE',
+        },
+        {
+          content: '自定义按钮',
+          // 自定义icon
+          icon: <Icon type="STAR"/>
+          onClick: () => {},
+        },
+      ],
+    },
+  }}
+/>
+```
+
+### 在消息输入框中添加一个自定义图标
 
 给消息编辑器添加一个自定义图标来实现指定的功能:
 
-1. 使用 `renderMessageEditor` 方法来自定义渲染消息编辑器。
-2. 使用 `actions` 来自定义 `MessageEditor` 组件。
+1. 使用 `renderMessageInput` 方法来自定义渲染消息编辑器。
+2. 使用 `actions` 来自定义 `MessageInput` 组件。
 
 ```jsx
-import React from "react";
-import { Chat, Icon, MessageEditor } from "agora-chat-uikit";
-import "agora-chat-uikit/style.css";
+import React from 'react';
+import { Chat, Icon, MessageInput } from 'easemob-chat-uikit';
+import 'easemob-chat-uikit/style.css';
 
 const ChatContainer = () => {
-  // Add an icon to the message editor
+  // Add an icon to the message input
   const CustomIcon = {
     visible: true,
-    name: "CUSTOM",
+    name: 'CUSTOM',
     icon: (
       <Icon
         type="DOC"
         onClick={() => {
-          console.log("click custom icon");
+          console.log('click custom icon');
         }}
       ></Icon>
     ),
   };
 
-  const actions = [...MessageEditor.defaultActions];
+  const actions = [...MessageInput.defaultActions];
   // Insert a custom icon after textarea
   actions.splice(2, 0, CustomIcon);
   return (
-    <div style={{ width: "70%", height: "100%" }}>
-      <Chat renderMessageEditor={() => <MessageEditor actions={actions} />} />
+    <div style={{ width: '70%', height: '100%' }}>
+      <Chat renderMessageInput={() => <MessageInput actions={actions} />} />
     </div>
   );
 };
@@ -122,20 +196,13 @@ const ChatContainer = () => {
 为了保证消息展示在当前会话中，消息中的 `to` 字段必须是对方的 userID，或者群组的 ID。
 
 ```jsx
-import React from "react";
-import {
-  Chat,
-  MessageList,
-  TextMessage,
-  rootStore,
-  MessageEditor,
-  Icon,
-} from "agora-chat-uikit";
-import "agora-chat-uikit/style.css";
+import React from 'react';
+import { Chat, MessageList, TextMessage, rootStore, MessageInput, Icon } from 'easemob-chat-uikit';
+import 'easemob-chat-uikit/style.css';
 
 const ChatContainer = () => {
   // Display custom messages
-  const renderCustomMsg = (msg) => {
+  const renderCustomMsg = msg => {
     return (
       <div>
         <h1>Business Card </h1>
@@ -143,8 +210,8 @@ const ChatContainer = () => {
       </div>
     );
   };
-  const renderMessage = (msg) => {
-    if (msg.type === "custom") {
+  const renderMessage = msg => {
+    if (msg.type === 'custom') {
       return renderCustomMsg(msg);
     }
   };
@@ -152,7 +219,7 @@ const ChatContainer = () => {
   // Add an icon to the message editor
   const CustomIcon = {
     visible: true,
-    name: "CUSTOM",
+    name: 'CUSTOM',
     icon: (
       <Icon
         type="DOC"
@@ -162,29 +229,29 @@ const ChatContainer = () => {
       ></Icon>
     ),
   };
-  const actions = [...MessageEditor.defaultActions];
+  const actions = [...MessageInput.defaultActions];
   actions.splice(2, 0, CustomIcon);
 
   // Implement the sending of a custom message
   const sendCustomMessage = () => {
-    const customMsg = AgoraChat.message.create({
-      type: "custom",
-      to: "targetId", // The user ID of the peer user for one-to-one chat or the current group ID for group chat.
-      chatType: "singleChat",
-      customEvent: "CARD",
+    const customMsg = ChatSDK.message.create({
+      type: 'custom',
+      to: 'targetId', // The user ID of the peer user for one-to-one chat or the current group ID for group chat.
+      chatType: 'singleChat',
+      customEvent: 'CARD',
       customExts: {
-        id: "userId3",
+        id: 'userId3',
       },
     });
     rootStore.messageStore.sendMessage(customMsg).then(() => {
-      console.log("send success");
+      console.log('send success');
     });
   };
   return (
-    <div style={{ width: "70%", height: "100%" }}>
+    <div style={{ width: '70%', height: '100%' }}>
       <Chat
         renderMessageList={() => <MessageList renderMessage={renderMessage} />}
-        renderMessageEditor={() => <MessageEditor actions={actions} />}
+        renderMessageInput={() => <MessageInput actions={actions} />}
       />
     </div>
   );
@@ -192,6 +259,57 @@ const ChatContainer = () => {
 ```
 
 <div align=center> <img src="../image/custom-msg.png" width = "400" height = "450" /></div>
+
+### 配置输入框功能
+
+```jsx
+import React from 'react';
+import { Chat, Icon, MessageInput } from 'easemob-chat-uikit';
+import 'easemob-chat-uikit/style.css';
+
+const ChatContainer = () => {
+  return (
+    <div style={{ width: '70%', height: '100%' }}>
+      <Chat
+        renderMessageInput={() => (
+          <MessageInput
+            actions={[
+              {
+                // 发送语音功能
+                name: 'RECORDER',
+                visible: true,
+              },
+              {
+                // 消息输入框
+                name: 'TEXTAREA',
+                visible: true,
+              },
+              {
+                // 表情
+                name: 'EMOJI',
+                visible: true,
+              },
+              {
+                // 更多操作
+                name: 'MORE',
+                visible: true,
+              },
+            ]}
+            enabledTyping={true} // 是否启用正在输入功能
+            showSendButton={true} // 是否展示发送按钮
+            sendButtonIcon={<Icon type="AIR_PLANE" />} // 发送按钮 Icon
+            row={1} // Input 行数
+            placeHolder="请输入内容" // 默认占位符
+            enabledMention={true} // 是否开启@功能
+            onSendMessage={message => {}} //发送消息的回调
+            onBeforeSendMessage={message => {}} // 消息发送前回调，这个回调返回promise，如果返回的promise resolve了，就发送消息，如果reject了，就不发送消息
+          />
+        )}
+      />
+    </div>
+  );
+};
+```
 
 ### 修改主题
 
@@ -236,9 +354,9 @@ $msg-time-width: 106px;
 
 <table>
 <tr>
-        <td>Props</td>
-        <td>Type</td>
-        <td>Description</td>
+        <td>参数</td>
+        <td>类型</td>
+        <td>描述</td>
     </tr>
  <tr>
       <td style=font-size:10px>
@@ -248,47 +366,47 @@ $msg-time-width: 106px;
 	String
 	  </td>
 	  <td style=font-size:10px>
-	  Component CSS class name
+	  组件的类名
 	  </td>
 	  <tr>
 	    <td style=font-size:10px>prefix</td>
         <td style=font-size:10px>String</td>
-		<td style=font-size:10px>The prefix of the CSS class name</td>
+		<td style=font-size:10px>CSS 类名前缀</td>
 	  </tr>
 	  <tr>
 	    <td style=font-size:10px>headerProps</td>
         <td style=font-size:10px>HeaderProps</td>
-		<td style=font-size:10px>props for Header</td>
+		<td style=font-size:10px>Header 组件的参数</td>
 	  </tr>
 	  <tr>
 	    <td style=font-size:10px>messageListProps</td>
         <td style=font-size:10px>MsgListProps</td>
-		<td style=font-size:10px>Props for the MessageList component</td>
+		<td style=font-size:10px>MessageList 组件的参数</td>
 	  </tr>
 	  <tr>
-	    <td style=font-size:10px>messageEditorProps</td>
-        <td style=font-size:10px> MessageEditorProps</td>
-		<td style=font-size:10px>Props for the MessageEditor component</td>
+	    <td style=font-size:10px>messageInputProps</td>
+        <td style=font-size:10px> MessageInputProps</td>
+		<td style=font-size:10px>MessageInput 组件的参数</td>
 	  </tr>
 	  <tr>
 	    <td style=font-size:10px>renderHeader</td>
         <td style=font-size:10px>(cvs: CurrentCvs) => React.ReactNode</td>
-		<td style=font-size:10px>Renders the custom Header component</td>  
+		<td style=font-size:10px>自定义渲染 Header 组件的方法</td>  
 	  </tr>
 	   <tr>
 	    <td style=font-size:10px>renderMessageList</td>
         <td style=font-size:10px>() => ReactNode; </td>
-		<td style=font-size:10px>Renders the custom message list component</td>
+		<td style=font-size:10px>自定义渲染 MessageList 组件的方法</td>
 	  </tr>
 	  <tr>
-	    <td style=font-size:10px>renderMessageEditor </td>
+	    <td style=font-size:10px>renderMessageInput </td>
          <td style=font-size:10px>() => ReactNode; </td>
-		<td style=font-size:10px>Renders the custom message sender component</td>
+		<td style=font-size:10px>自定义渲染 MessageInput 组件的方法</td>
 	  </tr>
 	  <tr>
 	    <td style=font-size:10px>renderEmpty</td>
         <td style=font-size:10px>() => ReactNode; </td>
-		<td style=font-size:10px>Renders the custom empty page without a conversation</td>  
+		<td style=font-size:10px>自定义渲染空内容组件的方法</td>  
 	  </tr>
    </tr>
 </table>

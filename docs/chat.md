@@ -5,13 +5,13 @@ The Chat component is used to send and receive messages, including text messages
 ## usage example
 
 ```jsx
-import React from "react";
-import { Chat } from "agora-chat-uikit";
-import "agora-chat-uikit/style.css";
+import React from 'react';
+import { Chat } from 'agora-chat-uikit';
+import 'agora-chat-uikit/style.css';
 
 const ChatContainer = () => {
   return (
-    <div style={{ width: "70%", height: "100%" }}>
+    <div style={{ width: '70%', height: '100%' }}>
       <Chat />
     </div>
   );
@@ -25,34 +25,32 @@ const ChatContainer = () => {
 Taking text messages as an example, customize the rendering message list through the `renderMessageList` method, customize rendering messages using the `renderMessage` method, customize text messages through the props of the TextMessage component.
 
 ```jsx
-import React from "react";
-import { Chat, MessageList, TextMessage } from "agora-chat-uikit";
-import "agora-chat-uikit/style.css";
+import React from 'react';
+import { Chat, MessageList, TextMessage } from 'agora-chat-uikit';
+import 'agora-chat-uikit/style.css';
 
 const ChatContainer = () => {
-  const renderTxtMsg = (msg) => {
+  const renderTxtMsg = msg => {
     return (
       <TextMessage
-        bubbleStyle={{ background: "hsl(135.79deg 88.79% 36.46%)" }}
+        bubbleStyle={{ background: 'hsl(135.79deg 88.79% 36.46%)' }}
         shape="square"
         status={msg.status}
-        avatar={<Avatar style={{ background: "pink" }}>A</Avatar>}
+        avatar={<Avatar style={{ background: 'pink' }}>A</Avatar>}
         textMessage={msg}
       ></TextMessage>
     );
   };
 
-  const renderMessage = (msg) => {
-    if (msg.type === "txt") {
+  const renderMessage = msg => {
+    if (msg.type === 'txt') {
       return renderTxtMsg(msg);
     }
   };
 
   return (
-    <div style={{ width: "70%", height: "100%" }}>
-      <Chat
-        renderMessageList={() => <MessageList renderMessage={renderMessage} />}
-      />
+    <div style={{ width: '70%', height: '100%' }}>
+      <Chat renderMessageList={() => <MessageList renderMessage={renderMessage} />} />
     </div>
   );
 };
@@ -63,20 +61,20 @@ const ChatContainer = () => {
 Example how to insert a custom icon after textarea to implement custom functionality. Using the `renderMessageEditor` method to render custom message editor component, and customize `MessageEditor` with `actions` props.
 
 ```jsx
-import React from "react";
-import { Chat, Icon, MessageEditor } from "agora-chat-uikit";
-import "agora-chat-uikit/style.css";
+import React from 'react';
+import { Chat, Icon, MessageEditor } from 'agora-chat-uikit';
+import 'agora-chat-uikit/style.css';
 
 const ChatContainer = () => {
   // add an icon to the message editor
   const CustomIcon = {
     visible: true,
-    name: "CUSTOM",
+    name: 'CUSTOM',
     icon: (
       <Icon
         type="DOC"
         onClick={() => {
-          console.log("click custom icon");
+          console.log('click custom icon');
         }}
       ></Icon>
     ),
@@ -86,7 +84,7 @@ const ChatContainer = () => {
   // Insert after textarea
   actions.splice(2, 0, CustomIcon);
   return (
-    <div style={{ width: "70%", height: "100%" }}>
+    <div style={{ width: '70%', height: '100%' }}>
       <Chat renderMessageEditor={() => <MessageEditor actions={actions} />} />
     </div>
   );
@@ -98,20 +96,13 @@ const ChatContainer = () => {
 Using the `sendMessage` method in `messageStore` to send custom messages, use `renderMessage` to display custom messages. (Please ensure that the 'to' of the 'message' is the current conversation in order for the message to be displayed)
 
 ```jsx
-import React from "react";
-import {
-  Chat,
-  MessageList,
-  TextMessage,
-  rootStore,
-  MessageEditor,
-  Icon,
-} from "agora-chat-uikit";
-import "agora-chat-uikit/style.css";
+import React from 'react';
+import { Chat, MessageList, TextMessage, rootStore, MessageEditor, Icon } from 'agora-chat-uikit';
+import 'agora-chat-uikit/style.css';
 
 const ChatContainer = () => {
   // Display custom messages
-  const renderCustomMsg = (msg) => {
+  const renderCustomMsg = msg => {
     return (
       <div>
         <h1>Business Card </h1>
@@ -119,8 +110,8 @@ const ChatContainer = () => {
       </div>
     );
   };
-  const renderMessage = (msg) => {
-    if (msg.type === "custom") {
+  const renderMessage = msg => {
+    if (msg.type === 'custom') {
       return renderCustomMsg(msg);
     }
   };
@@ -128,7 +119,7 @@ const ChatContainer = () => {
   // add an icon to the message editor
   const CustomIcon = {
     visible: true,
-    name: "CUSTOM",
+    name: 'CUSTOM',
     icon: (
       <Icon
         type="DOC"
@@ -144,20 +135,20 @@ const ChatContainer = () => {
   // Implement Sending Custom Messages
   const sendCustomMessage = () => {
     const customMsg = AgoraChat.message.create({
-      type: "custom",
-      to: "targetId", // Need to be the user ID of the current conversation
-      chatType: "singleChat",
-      customEvent: "CARD",
+      type: 'custom',
+      to: 'targetId', // Need to be the user ID of the current conversation
+      chatType: 'singleChat',
+      customEvent: 'CARD',
       customExts: {
-        id: "userId3",
+        id: 'userId3',
       },
     });
     rootStore.messageStore.sendMessage(customMsg).then(() => {
-      console.log("send success");
+      console.log('send success');
     });
   };
   return (
-    <div style={{ width: "70%", height: "100%" }}>
+    <div style={{ width: '70%', height: '100%' }}>
       <Chat
         renderMessageList={() => <MessageList renderMessage={renderMessage} />}
         renderMessageEditor={() => <MessageEditor actions={actions} />}

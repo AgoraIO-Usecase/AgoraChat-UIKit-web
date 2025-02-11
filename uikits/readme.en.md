@@ -237,8 +237,3 @@ If you have any problems or suggestions regarding the sample projects, feel free
 The sample projects are under the MIT license.
 
 ## (It's not a final document, uikit is still under development)
-
-## 1.0 VS 2.0
-
-1. 提供了更多的组件
-2.

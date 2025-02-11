@@ -22,7 +22,7 @@ const App = () => {
 
 The UIKit style is developed using the SCSS framework and defines a series of global style variables, including but not limited to global styles (primary color, background color, rounded corners, borders, and font size).
 
-You can find all the defined variables [here](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-web/blob/main/common/style/themes/default.scss).
+You can find all the defined variables [here](https://github.com/easemob/Easemob-UIKit-web/blob/dev/common/style/themes/default.scss).
 
 This page describes how to modify the theme.
 

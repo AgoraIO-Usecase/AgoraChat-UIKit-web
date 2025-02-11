@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import './style/style.scss';
 import { tuple } from '../_utils/type';
 import warning from '../_utils/warning';
@@ -6,19 +6,28 @@ import { composeRef } from '../_utils/ref';
 
 import classNames from 'classnames';
 import { ConfigContext } from '../config/index';
+import { RootContext } from '../../module/store/rootContext';
+import { Tooltip } from '../tooltip/Tooltip';
 export interface AvatarProps {
   size?: 'large' | 'small' | 'default' | number;
-  shape?: 'circle' | 'square';
-  src?: React.ReactNode;
+  /** Whether to show red dot without number */
+  shape?: 'circle' | 'square' /** 形状 */;
+  src?: string;
   icon?: React.ReactNode;
   style?: React.CSSProperties;
   prefixCls?: string;
   className?: string;
   children?: React.ReactNode;
   alt?: string;
+  isOnline?: boolean;
   draggable?: boolean;
   crossOrigin?: '' | 'anonymous' | 'use-credentials';
   srcSet?: string;
+  presence?: {
+    visible: boolean;
+    text?: string;
+    icon?: HTMLImageElement | string;
+  };
   onClick?: (e?: React.MouseEvent<HTMLElement>) => void;
   /* callback when img load error */
   /* return false to prevent Avatar show default fallback behavior, then you can do fallback by your self */
@@ -35,7 +44,9 @@ export const InternalAvatar = (props: any, ref: any) => {
   const { getPrefixCls } = React.useContext(ConfigContext);
 
   React.useEffect(() => {
-    setIsImgExist(true);
+    if (props.src !== '') {
+      setIsImgExist(true);
+    }
   }, [props.src]);
 
   const handleImgLoadError = () => {
@@ -58,10 +69,16 @@ export const InternalAvatar = (props: any, ref: any) => {
     draggable,
     crossOrigin,
     srcSet,
+    isOnline,
+    presence,
     ...others
   } = props;
 
   const prefixCls = getPrefixCls('avatar', customizePrefixCls);
+  const wrapCls = getPrefixCls('avatar-wrap', customizePrefixCls);
+  const presenceCls = getPrefixCls('presence-tag', customizePrefixCls);
+  const { theme } = useContext(RootContext);
+  const themeMode = theme?.mode;
   const sizeCls = classNames({
     [`${prefixCls}-lg`]: customSize === 'large',
     [`${prefixCls}-sm`]: customSize === 'small',
@@ -73,8 +90,9 @@ export const InternalAvatar = (props: any, ref: any) => {
     sizeCls,
     {
       [`${prefixCls}-${shape}`]: !!shape,
-      [`${prefixCls}-image`]: hasImageElement || (src && isImgExist),
+      [`${prefixCls}-hasImage`]: typeof src === 'string' && isImgExist && src !== '',
       [`${prefixCls}-icon`]: !!icon,
+      [`${prefixCls}-${themeMode}`]: !!themeMode,
     },
     className,
   );
@@ -85,27 +103,35 @@ export const InternalAvatar = (props: any, ref: any) => {
           width: customSize,
           height: customSize,
           lineHeight: `${customSize}px`,
-          fontSize: icon ? customSize / 2 : 18,
+          fontSize: customSize / 2 - 4,
         }
       : {};
 
   let childrenToRender: React.ReactNode;
 
-  if (typeof src === 'string' && isImgExist) {
+  if (typeof src === 'string' && isImgExist && src !== '') {
     childrenToRender = (
-      <img
-        src={src}
-        draggable={draggable}
-        srcSet={srcSet}
-        onError={handleImgLoadError}
-        alt={alt}
-        crossOrigin={crossOrigin}
-      />
+      <div className={`${prefixCls}-image`}>
+        <img
+          src={src}
+          draggable={draggable}
+          srcSet={srcSet}
+          onError={handleImgLoadError}
+          alt={alt}
+          crossOrigin={crossOrigin}
+        />
+      </div>
     );
   } else if (hasImageElement) {
     childrenToRender = src;
   } else if (icon) {
     childrenToRender = icon;
+  } else if (typeof children == 'string') {
+    childrenToRender = (
+      <span className={`${prefixCls}-string`} ref={avatarChildrenRef}>
+        {customSize < 20 ? children.slice(0, 1) : children.slice(0, 2)}
+      </span>
+    );
   } else {
     childrenToRender = (
       <span className={`${prefixCls}-string`} ref={avatarChildrenRef}>
@@ -113,19 +139,81 @@ export const InternalAvatar = (props: any, ref: any) => {
       </span>
     );
   }
+  // status 定义三种尺寸 large >= 100, 100 > default  > 40, small <= 40, 对应 status 28, 16, 12
+  let presenceSize: 'large' | 'default' | 'small' = 'default';
+  if (typeof customSize === 'number') {
+    if (customSize >= 100) {
+      presenceSize = 'large';
+    } else if (customSize <= 40) {
+      presenceSize = 'small';
+    } else {
+      presenceSize = 'default';
+    }
+  } else if (customSize === 'large') {
+    presenceSize = 'large';
+  } else if (customSize === 'small') {
+    presenceSize = 'small';
+  }
 
+  const PresenceSize = {
+    large: 28,
+    default: 16,
+    small: 12,
+  };
+
+  const presenceStyle: React.CSSProperties =
+    shape === 'circle'
+      ? {
+          width: PresenceSize[presenceSize],
+          height: PresenceSize[presenceSize],
+          padding: presenceSize === 'large' ? 4 : 2,
+          right: `calc(14.65% - ${PresenceSize[presenceSize] / 2}px)`,
+          bottom: `calc(14.65% - ${PresenceSize[presenceSize] / 2}px)`,
+        }
+      : {
+          width: PresenceSize[presenceSize],
+          height: PresenceSize[presenceSize],
+          padding: presenceSize === 'large' ? 4 : 2,
+          right: presenceSize === 'large' ? -4 : -2,
+          bottom: presenceSize === 'large' ? -4 : -2,
+        };
   return (
-    <span
-      {...others}
-      style={{ ...sizeStyle, ...others.style }}
+    <div
       className={classString}
       ref={avatarNodeMergeRef}
+      {...others}
+      style={{ ...sizeStyle, ...others.style }}
     >
       {childrenToRender}
-    </span>
+      {isOnline && (
+        <div className={`${presenceCls}-wrap`}>
+          <div className={presenceCls}></div>
+        </div>
+      )}
+      {presence?.visible && (
+        <Tooltip
+          title={
+            presence.text ? (
+              <div className={`${prefixCls}-presence-text`}>{presence.text}</div>
+            ) : null
+          }
+          placement="bottom"
+        >
+          <div className={`${prefixCls}-presence-wrap`} style={presenceStyle}>
+            {React.isValidElement(presence.icon) ? (
+              presence.icon
+            ) : (
+              <img alt={presence.text} src={presence.icon} />
+            )}
+          </div>
+        </Tooltip>
+      )}
+    </div>
   );
 };
 
 const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(InternalAvatar);
+
+Avatar.displayName = 'Avatar';
 
 export default Avatar;

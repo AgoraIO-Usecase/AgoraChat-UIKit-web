@@ -1,58 +1,63 @@
-import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom/client";
+import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom/client';
 
-import {
-  Header,
-  Provider,
-  Chat,
-  ConversationList,
-  ConversationItem,
-  useClient,
-  rootStore,
-  Button,
-  Avatar,
-  Icon,
-  MessageList,
-  MessageEditor,
-  TextMessage,
-  CurrentConversation,
-  useChatContext,
-  useConversationContext,
-} from "chatuim2";
-import "chatuim2/style.css";
-
-import "./index.css";
-import AgoraChat from "agora-chat";
-import { appKey, userId, token } from "../config";
+import Header from '../../module/header';
+import { Search } from '../../component/input/Search';
+import Chat from '../../module/chat';
+import { RootProvider } from '../../module/store/rootContext';
+import rootStore from '../../module/store/index';
+import { ConversationList, ConversationItem } from '../../module/conversation';
+import Provider from '../../module/store/Provider';
+import { useClient } from '../../module/hooks/useClient';
+import Button from '../../component/button';
+import Avatar from '../../component/avatar';
+import Icon from '../../component/icon';
+import { MessageList } from '../../module/chat/MessageList';
+import MessageEditor from '../../module/messageInput';
+import TextMessage from '../../module/textMessage';
+import './index.css';
+import { useSDK } from '../../module/hooks/useSDK';
 
 const ChatApp = () => {
-  const { setCurrentConversation } = useConversationContext();
-  const { sendMessage } = useChatContext();
+  const client = useClient();
+  const { ChatSDK } = useSDK();
+  useEffect(() => {
+    client &&
+      client
+        .open({
+          user: '13681272809',
+          pwd: '272809',
+        })
+        .then(res => {
+          console.log('获取token成功', res, rootStore.client);
+        });
+  }, [client]);
+
   // create a conversation
   const setCurrentCvs = () => {
-    setCurrentConversation({
-      chatType: "singleChat",
-      conversationId: "jim",
-      name: "Jim",
+    rootStore.conversationStore.setCurrentCvs({
+      chatType: 'singleChat',
+      conversationId: '13681272808',
+      lastMessage: {},
     });
   };
 
   // render custom text message
-  const renderTxtMsg = (msg) => {
+  const renderTxtMsg = msg => {
     return (
       <TextMessage
-        bubbleStyle={{ background: "hsl(135.79deg 88.79% 36.46%)" }}
+        bubbleStyle={{ background: 'hsl(135.79deg 88.79% 36.46%)' }}
         shape="square"
         status={msg.status}
-        avatar={<Avatar style={{ background: "pink" }}>A</Avatar>}
+        avatar={<Avatar style={{ background: 'pink' }}>A</Avatar>}
         textMessage={msg}
       ></TextMessage>
     );
   };
-  const renderMessage = (msg) => {
-    if (msg.type === "txt") {
+  const renderMessage = msg => {
+    if (msg.type === 'txt') {
       return renderTxtMsg(msg);
-    } else if (msg.type === "custom") {
+    } else if (msg.type === 'custom') {
       return renderCustomMsg(msg);
     }
   };
@@ -60,13 +65,13 @@ const ChatApp = () => {
   // add an icon to the message editor
   const CustomIcon = {
     visible: true,
-    name: "CUSTOM",
+    name: 'CUSTOM',
     icon: (
       <Icon
         type="DOC"
         onClick={() => {
           sendCustomMessage();
-          console.log("click custom icon");
+          console.log('click custom icon');
         }}
       ></Icon>
     ),
@@ -75,21 +80,21 @@ const ChatApp = () => {
   // Implement Sending Custom Messages
 
   const sendCustomMessage = () => {
-    const customMsg = AgoraChat.message.create({
-      type: "custom",
-      to: "jim", // Need to be the user ID of the current conversation
-      chatType: "singleChat",
-      customEvent: "CARD",
+    const customMsg = ChatSDK.message.create({
+      type: 'custom',
+      to: '13681272808', // Need to be the user ID of the current conversation
+      chatType: 'singleChat',
+      customEvent: 'CARD',
       customExts: {
-        id: "userId3",
+        id: 'userId3',
       },
     });
-    sendMessage(customMsg).then(() => {
-      console.log("send success");
+    rootStore.messageStore.sendMessage(customMsg).then(() => {
+      console.log('send success');
     });
   };
 
-  const renderCustomMsg = (msg) => {
+  const renderCustomMsg = msg => {
     return (
       <div>
         <h1>Business Card </h1>
@@ -101,12 +106,10 @@ const ChatApp = () => {
   actions.splice(2, 0, CustomIcon);
   return (
     <>
-      <div style={{ width: "65%", borderLeft: "1px solid transparent" }}>
+      <div style={{ width: '65%', borderLeft: '1px solid transparent' }}>
         <Chat
-          renderMessageList={() => (
-            <MessageList renderMessage={renderMessage} />
-          )}
-          renderMessageEditor={() => <MessageEditor actions={actions} />}
+          renderMessageList={() => <MessageList renderMessage={renderMessage} />}
+          renderMessageInput={() => <MessageEditor actions={actions} />}
         ></Chat>
       </div>
       <Button onClick={setCurrentCvs}>setCurrentCvs</Button>
@@ -114,16 +117,14 @@ const ChatApp = () => {
   );
 };
 
-ReactDOM.createRoot(document.getElementById("chatRoot") as Element).render(
+ReactDOM.createRoot(document.getElementById('chatRoot') as Element).render(
   <div className="container">
     <Provider
       initConfig={{
-        appKey,
-        userId,
-        token,
+        appKey: 'easemob#easeim',
       }}
     >
       <ChatApp></ChatApp>
     </Provider>
-  </div>
+  </div>,
 );

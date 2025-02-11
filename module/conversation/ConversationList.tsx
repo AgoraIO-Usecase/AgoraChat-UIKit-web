@@ -3,33 +3,20 @@ import classNames from 'classnames';
 import { ConfigContext } from '../../component/config/index';
 import './style/style.scss';
 import Icon from '../../component/icon';
-import Avatar from '../../component/avatar';
-import Badge from '../../component/badge';
-import Button from '../../component/button';
 import { ConversationItem as CVSItem, ConversationItemProps } from './ConversationItem';
 import { Search } from '../../component/input/Search';
 import Header, { HeaderProps } from '../header';
-import { useConversation } from '../hooks/useConversation';
+import { useConversations } from '../hooks/useConversation';
 import { useGroups, useUserInfo } from '../hooks/useAddress';
 import { observer } from 'mobx-react-lite';
 import { RootContext } from '../store/rootContext';
-import { parseChannel } from '../utils';
-
 import { useTranslation } from 'react-i18next';
+import ScrollList from '../../component/scrollList';
+import { getUsersInfo } from '../utils/index';
+import { AT_TYPE, Conversation } from '../store/ConversationStore';
+import Modal from '../../component/modal';
 
-export type ConversationData = Array<{
-  chatType: 'singleChat' | 'groupChat';
-  conversationId: string;
-  name?: string; // 昵称/群组名称
-  unreadCount: number; // 会话未读数
-  lastMessage: {
-    type: 'txt' | 'img' | 'audio' | 'video' | 'file' | 'custom';
-    msg?: string;
-    time: number;
-    chatType: 'singleChat' | 'groupChat';
-    from: string;
-  }; // 会话最后一条消息
-}>;
+export type ConversationData = Array<Conversation>;
 
 export type ServerCvs = Array<{
   channel_id: string;
@@ -42,16 +29,20 @@ export interface ConversationListProps {
   className?: string;
   style?: React.CSSProperties;
   // data?: ConversationData;
-  onItemClick?: (data: ConversationData[0]) => void; // 点击会话事件
+  onItemClick?: (data: Conversation) => void; // 点击会话事件
   onSearch?: (e: React.ChangeEvent<HTMLInputElement>) => boolean; // search 组件 change 事件，默认根据 会话 Id和name搜索， 如果返回 false， 会阻止默认行为
   renderHeader?: () => React.ReactNode; // 自定义渲染 header
   renderSearch?: () => React.ReactNode; // 自定义渲染 search
-  renderItem?: (cvs: ConversationData[0], index: number) => React.ReactNode; // 自定义渲染 item
+  renderItem?: (cvs: Conversation, index: number) => React.ReactNode; // 自定义渲染 item
   headerProps?: HeaderProps;
-  itemProps?: ConversationItemProps;
+  itemProps?: Partial<ConversationItemProps>; //Omit<ConversationItemProps, 'data'>;
+  presence?: boolean; // 是否显示在线状态
+  showSearchList?: boolean; // 是否显示搜索列表, 当使用renderHeader时，可以用这个参数来控制是否显示搜索列表
 }
 
-let Conversations: FC<ConversationListProps> = props => {
+const ConversationScrollList = ScrollList<Conversation>();
+
+const Conversations: FC<ConversationListProps> = props => {
   const {
     prefix: customizePrefixCls,
     className,
@@ -63,28 +54,53 @@ let Conversations: FC<ConversationListProps> = props => {
     headerProps = {},
     itemProps = {},
     style = {},
+    presence,
+    showSearchList,
   } = props;
   const { getPrefixCls } = React.useContext(ConfigContext);
   const prefixCls = getPrefixCls('conversationList', customizePrefixCls);
-  const [activeKey, setActiveKey] = useState<number>();
-  const classString = classNames(prefixCls, className);
+  const [activeCvsId, setActiveCvsId] = useState<string>();
+
+  const { getJoinedGroupList } = useGroups();
 
   const [isSearch, setIsSearch] = useState(false);
   const [renderData, setRenderData] = useState<ConversationData>([]);
   const [initRenderData, setInitRenderData] = useState<ConversationData>([]);
-  const rootStore = useContext(RootContext).rootStore;
+  const context = useContext(RootContext);
+  const { rootStore, features, theme, initConfig } = context;
+  const { useUserInfo: useUserInfoConfig } = initConfig;
+  const themeMode = theme?.mode || 'light';
+  const classString = classNames(
+    prefixCls,
+    {
+      [`${prefixCls}-${themeMode}`]: !!themeMode,
+    },
+    className,
+  );
   const cvsStore = rootStore.conversationStore;
+  const { appUsersInfo, contacts } = rootStore.addressStore;
+  const { t } = useTranslation();
+  const { getConversationList, hasConversationNext } = useConversations();
+  const globalConfig = features?.conversationList || {};
+
+  const withPresence = presence || globalConfig?.item?.presence != false;
+  if (useUserInfoConfig) {
+    useUserInfo('conversation', withPresence);
+  }
+
+  const groupData = rootStore.addressStore.groups;
+  // 获取加入群组，把群组名放在 conversationList
 
   const handleItemClick = (cvs: ConversationData[0], index: number) => () => {
-    setActiveKey(index);
-    console.log('handleItemClick', index);
-    cvsStore.setCurrentCvs({
-      chatType: cvs.chatType,
-      conversationId: cvs.conversationId,
-      name: cvs.name,
-      unreadCount: 0,
-    });
-
+    setActiveCvsId(cvs.conversationId);
+    if (cvsStore.currentCvs.conversationId !== cvs.conversationId) {
+      cvsStore.setCurrentCvs({
+        chatType: cvs.chatType,
+        conversationId: cvs.conversationId,
+        name: cvs.name,
+        unreadCount: 0,
+      });
+    }
     onItemClick?.(cvs);
   };
 
@@ -93,80 +109,69 @@ let Conversations: FC<ConversationListProps> = props => {
       !cvsStore.currentCvs ||
       (cvsStore.currentCvs && Object.keys(cvsStore.currentCvs).length == 0)
     ) {
-      setActiveKey(99999);
+      setActiveCvsId('-1');
+    } else {
+      setActiveCvsId(cvsStore.currentCvs.conversationId);
     }
   }, [cvsStore.currentCvs]);
 
-  const content = renderData.map((cvs, index) => {
-    console.log('activeKey', activeKey);
-    // TODO: 复制renderItem的内容， 把isActive onClick的实现加进去，否则用户需要自己实现这些
-    return renderItem ? (
-      renderItem(cvs, index)
-    ) : (
-      <CVSItem
-        {...itemProps}
-        data={cvs}
-        key={cvs.conversationId}
-        isActive={index === activeKey}
-        onClick={handleItemClick(cvs, index)}
-      ></CVSItem>
-    );
-  });
-
-  const cvsData = useConversation();
-
-  const groupData = useGroups();
-  const userInfo = useUserInfo();
-
   useEffect(() => {
-    rootStore.addressStore.setGroups(groupData);
-  }, [groupData]);
-
-  let iniRenderData: any[] = [];
-  // 获取加入群组，把群组名放在 conversationList
-  useEffect(() => {
-    if (isSearch) {
+    if (isSearch || showSearchList) {
       // @ts-ignore
       setRenderData(cvsStore.searchList);
     } else {
       const renderData = cvsStore.conversationList.map(item => {
-        let renderItem = { ...item };
+        const renderItem = { ...item };
         if (item.chatType == 'groupChat') {
           groupData.forEach(group => {
             if (item.conversationId == group.groupid) {
               renderItem.name = renderItem.name || group.groupname;
+              renderItem.avatarUrl = group.avatarUrl;
             }
           });
         } else if (item.chatType == 'singleChat') {
-          renderItem.name = renderItem.name || userInfo?.[item.conversationId as string]?.nickname;
+          renderItem.name =
+            renderItem.name || appUsersInfo?.[item.conversationId as string]?.nickname;
+          renderItem.avatarUrl = appUsersInfo?.[item.conversationId as string]?.avatarurl;
+          // renderItem.isOnline = appUsersInfo?.[item.conversationId as string]?.isOnline;
+          // 如果contacts里包含这个联系人，并且有remark 则 name = remark
+          const contact = contacts?.find(contact => {
+            return contact.userId == item.conversationId;
+          });
+          if (contact?.remark) {
+            renderItem.name = contact.remark;
+          }
         }
         return renderItem;
       });
+
       // @ts-ignore
       setRenderData(renderData);
       // @ts-ignore
       setInitRenderData(renderData);
     }
-  }, [cvsStore.conversationList, cvsStore.searchList, groupData, userInfo]);
+  }, [cvsStore.conversationList, cvsStore.searchList, groupData.length, appUsersInfo, contacts]);
 
-  // 获取会话列表数据，格式化后setConversation
   useEffect(() => {
-    const conversation = cvsData.map(cvs => {
-      const { chatType, conversationId } = parseChannel(cvs.channel_id);
-      return {
-        chatType,
-        conversationId,
-        unreadCount: cvs.unread_num,
-        lastMessage: cvs.lastMessage,
-      };
+    cvsStore.conversationList?.forEach(cvs => {
+      if (!cvs.name && cvs.chatType == 'groupChat' && rootStore.addressStore.groups.length > 0) {
+        const result = rootStore.addressStore.groups.find(item => {
+          return item.groupid === cvs.conversationId;
+        });
+        if (!result) {
+          cvsStore.updateConversationName(cvs.chatType, cvs.conversationId);
+        }
+      }
     });
-    rootStore.conversationStore.setConversation(conversation);
-  }, [cvsData]);
+  }, [cvsStore.conversationList?.length]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const returnValue = onSearch?.(e);
-    if (returnValue === false) return;
+    if (returnValue === false) {
+      setIsSearch(value.length > 0 ? true : false);
+      return;
+    }
     const searchList = initRenderData.filter(cvs => {
       if (cvs.conversationId.includes(value) || cvs.name?.includes(value)) {
         return true;
@@ -179,7 +184,73 @@ let Conversations: FC<ConversationListProps> = props => {
     cvsStore.setSearchList(searchList);
   };
 
-  const { t } = useTranslation();
+  const [deleteCvsModalOpen, setDeleteCvsModalOpen] = useState(false);
+  // 保存resolve, reject，用于modal的确定和取消
+  const [deleteCvsPromise, setDeleteCvsPromise] = useState<{
+    resolve: (value: boolean) => void;
+    reject: () => void;
+  }>();
+
+  useEffect(() => {
+    if (rootStore.loginState) {
+      getConversationList().then(() => {
+        if (globalConfig?.item?.pinConversation != false) {
+          rootStore.conversationStore.getServerPinnedConversations();
+        }
+      });
+      getJoinedGroupList();
+      if (useUserInfoConfig) {
+        getUsersInfo({
+          userIdList: [rootStore.client.user],
+        }).catch(e => {
+          console.warn('getUsersInfo error', e);
+        });
+      }
+    }
+  }, [rootStore.loginState]);
+
+  let itemMoreAction: ConversationItemProps['moreAction'];
+  if (globalConfig?.item?.moreAction) {
+    itemMoreAction = {
+      visible: true,
+      actions: [],
+    };
+    if (globalConfig?.item?.deleteConversation != false) {
+      itemMoreAction.actions.push({
+        content: 'DELETE',
+        onClick: data => {
+          setDeleteCvsModalOpen(true);
+          const p: Promise<boolean> = new Promise((res, rej) => {
+            setDeleteCvsPromise({
+              resolve: res,
+              reject: rej,
+            });
+          });
+          return p;
+        },
+      });
+    }
+    if (globalConfig?.item?.pinConversation != false) {
+      itemMoreAction.actions.push({
+        content: 'PIN',
+      });
+    }
+    if (globalConfig?.item?.muteConversation != false) {
+      itemMoreAction.actions.push({
+        content: 'SILENT',
+      });
+    }
+  }
+  if (globalConfig?.item?.moreAction == false) {
+    itemMoreAction = {
+      visible: false,
+      actions: [],
+    };
+  }
+  let showSearch = true;
+  if (globalConfig.search == false) {
+    showSearch = false;
+  }
   return (
     <div className={classString} style={style}>
       {renderHeader ? (
@@ -188,20 +259,56 @@ let Conversations: FC<ConversationListProps> = props => {
         <Header
           {...headerProps}
           back={headerProps.back || false}
-          content={headerProps.content || t('module.conversationTitle')}
-          icon={headerProps.icon || <Icon type="PLUS_CIRCLE" height={24} width={24} />}
+          content={headerProps.content || t('conversationTitle')}
+          icon={headerProps.icon || <Icon type="PLUS_IN_CIRCLE" height={24} width={24} />}
         ></Header>
       )}
 
-      {renderSearch ? (
-        renderSearch()
-      ) : (
-        <div className={`${prefixCls}-search`}>
-          <Search onChange={handleSearch}></Search>
-        </div>
-      )}
+      {renderSearch
+        ? renderSearch()
+        : showSearch && (
+            <div className={`${prefixCls}-search`}>
+              <Search onChange={handleSearch}></Search>
+            </div>
+          )}
+      <ConversationScrollList
+        // style={{ height: 'calc(100% - 110px)' }}
+        hasMore={hasConversationNext}
+        data={renderData}
+        scrollDirection="down"
+        loading={false}
+        loadMoreItems={getConversationList}
+        renderItem={(cvs, index) => {
+          return renderItem ? (
+            renderItem(cvs, index)
+          ) : (
+            <CVSItem
+              moreAction={itemMoreAction}
+              {...itemProps}
+              data={cvs}
+              key={cvs.conversationId}
+              isActive={cvs.conversationId === activeCvsId}
+              onClick={handleItemClick(cvs, index)}
+            ></CVSItem>
+          );
+        }}
+      ></ConversationScrollList>
 
-      {content}
+      <Modal
+        open={deleteCvsModalOpen}
+        title={t('deleteConversation')}
+        onCancel={() => {
+          deleteCvsPromise?.resolve?.(false);
+          setDeleteCvsModalOpen(false);
+        }}
+        onOk={() => {
+          deleteCvsPromise?.resolve?.(true);
+          setDeleteCvsPromise(undefined);
+          setDeleteCvsModalOpen(false);
+        }}
+      >
+        <div>{`${t('Delete this conversation')}?`}</div>
+      </Modal>
     </div>
   );
 };

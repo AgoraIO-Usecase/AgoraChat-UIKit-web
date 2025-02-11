@@ -15,10 +15,12 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": "."
+    "baseUrl": ".",
+    "downlevelIteration": true,
+    "types": ["vite/client"]
     // "paths": {
     //   "~": ["/"]
     // }
   },
-  "include": ["component", "module"]
+  "include": ["component", "module", "eventHandler", "demo"]
 }

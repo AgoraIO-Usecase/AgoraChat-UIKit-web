@@ -5,9 +5,42 @@ $chat-prefix-cls: #{$cui-prefix}-chat;
 .#{$chat-prefix-cls}{
     height: 100%;
     display: flex;
+    flex: 1;
     flex-direction: column;
     background-color: $chat-bg;
+    overflow: hidden;
     &-messageList{
         flex: 1;
+    }
+
+    &-dark{
+        background-color: $gray-1;
+        color: $gray-98;
+    }
+}
+.cui-callkit-groupAvatar{
+    width: 64px;
+    height: 64px;
+    line-height: 64px;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+// report
+.report-title{
+    height: 28px;
+    @include Label(medium, $gray-5);
+    &-dark{
+        color: $gray-6;
+    }
+}
+.report-item{
+    height: 54px;
+    cursor: pointer;
+    @include Title(medium, $gray-1);
+    &-dark{
+        color: $gray-98;
     }
 }

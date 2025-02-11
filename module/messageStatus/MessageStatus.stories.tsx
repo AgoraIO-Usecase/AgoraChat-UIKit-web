@@ -1,21 +1,82 @@
 import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { StoryFn, Meta } from '@storybook/react';
 
 import MessageStatus from './index';
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
+const lang = import.meta.env.VITE_CUSTOM_VAR as 'en' | 'zh';
+
+const description = {
+  en: {
+    style: 'css style',
+    prefixCls: 'prefixCls',
+    className: 'className',
+    status: 'status',
+    type: 'type',
+  },
+  zh: {
+    style: '样式',
+    prefixCls: '前缀',
+    className: '类名',
+    status: '状态',
+    type: '类型',
+  },
+};
+
 export default {
   title: 'Module/MessageStatus',
   component: MessageStatus,
-  // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
-  argTypes: {},
-} as ComponentMeta<typeof MessageStatus>;
+  argTypes: {
+    prefixCls: {
+      control: 'text',
+      description: description[lang].prefixCls,
+    },
+    className: {
+      control: 'text',
+      description: description[lang].className,
+    },
+    style: {
+      control: 'object',
+      description: description[lang].style,
+    },
+    status: {
+      control: 'select',
+      options: ['received', 'read', 'unread', 'sent', 'failed', 'sending', 'default'],
+      description: description[lang].status,
+    },
+    type: {
+      control: 'select',
+      options: ['icon', 'text'],
+      description: description[lang].type,
+    },
+  },
+} as Meta<typeof MessageStatus>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof MessageStatus> = args => <MessageStatus {...args} />;
+export const sending = {
+  args: {
+    status: 'sending',
+  },
+};
 
-export const Primary = Template.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-Primary.args = {
-  status: 'received',
+export const sent = {
+  args: {
+    status: 'sent',
+  },
+};
+
+export const received = {
+  args: {
+    status: 'received',
+  },
+};
+
+export const read = {
+  args: {
+    status: 'read',
+  },
+};
+
+export const failed = {
+  args: {
+    status: 'failed',
+  },
 };

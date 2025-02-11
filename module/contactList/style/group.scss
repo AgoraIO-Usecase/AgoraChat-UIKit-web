@@ -1,7 +1,7 @@
 $contact-prefix-cls: #{$cui-prefix}-contactGroup;
 
 .#{$contact-prefix-cls}{
-    padding-top: 2px;
+    padding-top: 8px;
     &-title{
         display: flex;
         justify-content: space-between;
@@ -13,7 +13,8 @@ $contact-prefix-cls: #{$cui-prefix}-contactGroup;
         border-radius: 8px;
         align-items: center;
         padding: 0 14px;
-
+        user-select: none;
+        cursor: pointer;
         div:nth-child(2){
             display: flex;
             align-items: center;
@@ -24,13 +25,39 @@ $contact-prefix-cls: #{$cui-prefix}-contactGroup;
             }
 
         }
+
+        &-count{
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 16px; /* 133.333% */
+
+            &-unread{
+                border-radius: 8px;
+                background-color: $blue-5;
+                color: $gray-98;
+                width: 16px;
+                height: 16px;
+                font-weight: 400;
+                text-align: center;
+            }
+        }
     }
 
 
     &-children{
         overflow: hidden;
         transition: height .3s ease;
-        height: 0;
         box-sizing: border-box;
+        &-hide{
+            height: 0;
+        }
     }
+
+    &-dark{
+        .#{$contact-prefix-cls}-title{
+            background-color: $gray-2;
+            color: $gray-98;
+        }
+    }
+
 }

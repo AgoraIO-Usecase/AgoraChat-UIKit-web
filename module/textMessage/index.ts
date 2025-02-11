@@ -1,3 +1,4 @@
 import { TextMessage } from './TextMessage';
-
-export default TextMessage;
+export type { TextMessageProps } from './TextMessage';
+export { TextMessage };
+// export default TextMessage;

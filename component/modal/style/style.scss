@@ -7,27 +7,28 @@ $dialog-prefix-cls: #{$cui-prefix}-modal;
 .#{$dialog-prefix-cls} {
     @include modal-mask();
     position: relative;
-    top: 100px;
+    // top: 100px;
     width: auto;
     max-width: calc(100vw - 32px);
     margin: 0 auto;
-    padding-bottom: 24px;
+    // padding-bottom: 24px;
 
     &-wrap {
         z-index: $zindex-modal;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: left;
     }
-
+    
     &-title {
         margin: 0;
-        color: $modal-heading-color;
-        font-weight: 500;
-        font-size: $modal-header-title-font-size;
-        line-height: $modal-header-title-line-height;
+        @include Title(large, inherit);
         word-wrap: break-word;
     }
 
     &-content {
-        position: relative;
+        // position: relative;
         background-color: $modal-content-bg;
         background-clip: padding-box;
         border: 0;
@@ -36,6 +37,9 @@ $dialog-prefix-cls: #{$cui-prefix}-modal;
         pointer-events: auto;
         height: 100%;
         overflow: auto;
+    }
+    &-content-round{
+      border-radius: 16px;
     }
 
     &-close {
@@ -55,7 +59,7 @@ $dialog-prefix-cls: #{$cui-prefix}-modal;
         transition: color 0.3s;
     
         &-x {
-          display: block;
+          display: flex;
           width: $modal-header-close-size;
           height: $modal-header-close-size;
           font-size: $font-size-lg;
@@ -64,6 +68,8 @@ $dialog-prefix-cls: #{$cui-prefix}-modal;
           text-align: center;
           text-transform: none;
           text-rendering: auto;
+          justify-content: center;
+          align-items: center;
         }
     
         &:focus,
@@ -75,7 +81,7 @@ $dialog-prefix-cls: #{$cui-prefix}-modal;
 
     &-header {
         padding: $modal-header-padding;
-        color: $text-color;
+        color: $gray-2;
         background: $modal-header-bg;
         border-bottom: $modal-header-border-width $modal-header-border-style
           $modal-header-border-color-split;
@@ -87,6 +93,7 @@ $dialog-prefix-cls: #{$cui-prefix}-modal;
         font-size: $font-size-base;
         line-height: $line-height-base;
         word-wrap: break-word;
+        color: $gray-2;
     }
 
     &-footer {
@@ -104,6 +111,9 @@ $dialog-prefix-cls: #{$cui-prefix}-modal;
         .#{$cui-prefix}-btn+.#{$cui-prefix}-btn:not(.#{$cui-prefix}-dropdown-trigger) {
           margin-bottom: 0;
           margin-left: 8px;
+        }
+        .#{$cui-prefix}-button{
+          padding: 8px 20px;
         }
     }
     &-open {
@@ -140,4 +150,21 @@ $dialog-prefix-cls: #{$cui-prefix}-modal;
         flex: 1;
       }
     }
+}
+
+.#{$dialog-prefix-cls}-content-dark{
+  background-color: $gray-1;
+  color: $gray-98;
+
+  .#{$dialog-prefix-cls}-header{
+    background-color: $gray-1;
+    color: $gray-98;
+    border-bottom: 1px solid $gray-2;
+  }
+  .#{$dialog-prefix-cls}-body{
+    color: $gray-98;
+  }
+  .#{$dialog-prefix-cls}-footer{
+    border-top: 1px solid $gray-2;
+  }
 }

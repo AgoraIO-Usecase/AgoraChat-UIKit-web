@@ -1,98 +1,254 @@
-import { useCallback, useEffect, MutableRefObject, useContext, useState } from 'react';
-import AC, { AgoraChat } from 'agora-chat';
+import { useCallback, useEffect, useContext, useState } from 'react';
 import { RootContext } from '../store/rootContext';
-import type { ServerCvs } from '../conversation/ConversationList';
+import { getStore } from '../store/index';
+import { getGroupItemFromGroupsById } from '../../module/utils';
+import { getUsersInfo } from '../utils';
+import { ChatSDK } from 'module/SDK';
+import { eventHandler } from '../../eventHandler';
 const useContacts = () => {
   const rootStore = useContext(RootContext).rootStore;
 
   const { client, addressStore } = rootStore;
 
-  let [contacts, setContacts] = useState<Array<{ userId: string; nickname: string }>>([]);
+  const [contacts, setContacts] = useState<Array<{ userId: string; nickname: string }>>(
+    rootStore.addressStore.contacts,
+  );
+
   useEffect(() => {
+    if (rootStore.addressStore.contacts?.length > 0) {
+      return;
+    }
     rootStore.loginState &&
       client
-        .getContacts()
-        .then(res => {
-          console.log('联系人列表', res);
-          const contacts = res.data?.map(userId => ({
-            userId: userId,
+        .getAllContacts()
+        .then((res: ChatSDK.AsyncResult<ChatSDK.ContactItem[]>) => {
+          const contacts = res.data?.map(userItem => ({
+            userId: userItem.userId,
             nickname: '',
+            remark: userItem.remark,
           }));
           setContacts(contacts || []);
+          addressStore.setContacts(contacts);
+          eventHandler.dispatchSuccess('getAllContacts');
         })
         .catch(err => {
-          console.log('获取联系人列表失败', err);
+          console.warn('get contacts failed', err);
+          eventHandler.dispatchError('getAllContacts', err);
         });
   }, [rootStore.loginState]);
   return contacts;
 };
 
-export interface GroupData {
-  //   disabled: 'true' | 'false';
-  groupid: string;
-  groupname: string;
-}
-
-const useUserInfo = (userIds?: string[]) => {
+const useUserInfo = (
+  userList: 'conversation' | 'contacts' | 'blocklist',
+  withPresence?: boolean,
+) => {
   const rootStore = useContext(RootContext).rootStore;
-  const { client, addressStore } = rootStore;
-
-  let [userInfo, setUserInfo] = useState<{
-    [key: string]: AgoraChat.UpdateOwnUserInfoParams;
-  }>();
-
   useEffect(() => {
-    let userIdsToGet = userIds;
+    if (!rootStore.loginState) return;
+    const keys = Object.keys(rootStore.addressStore.appUsersInfo);
+    const cvsUserIds = rootStore.conversationStore.conversationList
+      .filter(item => item.chatType === 'singleChat' && !keys.includes(item.conversationId))
+      .map(cvs => cvs.conversationId);
+    const contactsUserIds = rootStore.addressStore.contacts
+      .filter(item => {
+        return !keys.includes(item.userId);
+      })
+      .map(item => item.userId);
+    const blockListUserIds = rootStore.addressStore.blockList.filter(item => !keys.includes(item));
 
-    const cvsUserIds: string[] = [];
-    rootStore.conversationStore.conversationList.forEach(item => {
-      if (item.chatType === 'singleChat') {
-        cvsUserIds.push(item.conversationId);
-      }
-    });
-    if (!userIdsToGet) {
-      userIdsToGet = cvsUserIds;
+    if (userList === 'blocklist') {
+      getUsersInfo({
+        userIdList: blockListUserIds,
+        withPresence: false,
+      }).catch(err => {
+        console.warn('get getUsersInfo failed', err);
+      });
+      return;
     }
-    console.log('pppp', {
-      userId: userIdsToGet,
-      properties: 'nickname',
+    getUsersInfo({
+      userIdList: userList == 'conversation' ? cvsUserIds : contactsUserIds,
+      withPresence,
+    }).catch(err => {
+      console.warn('get getUsersInfo failed', err);
     });
-    if (userIdsToGet.length == 0) return;
-    rootStore.loginState &&
-      client
-        .fetchUserInfoById(userIdsToGet, 'nickname')
-        .then(res => {
-          console.log('获取用户属性', res);
-          setUserInfo(res.data || {});
-        })
-        .catch(err => {
-          console.log('获取群组列表失败', err);
-        });
-  }, [rootStore.loginState, rootStore.conversationStore.conversationList.length]);
-  return userInfo;
+  }, [
+    rootStore.conversationStore.conversationList.length,
+    rootStore.addressStore.contacts.length,
+    rootStore.addressStore.blockList.length,
+    rootStore.loginState,
+  ]);
 };
 
 const useGroups = () => {
-  const rootStore = useContext(RootContext).rootStore;
-  const { client, addressStore } = rootStore;
+  const pageSize = 200;
+  let pageNum = 1;
+  const { client, addressStore } = getStore();
+  const hasNext = addressStore.hasGroupsNext;
 
-  let [groups, setGroups] = useState<Array<GroupData>>([]);
-  useEffect(() => {
-    rootStore.loginState &&
-      client
-        .getJoinedGroups({
-          pageNum: 1,
-          pageSize: 500,
-        })
-        .then(res => {
-          console.log('群组列表', res);
-          setGroups(res.data || []);
-        })
-        .catch(err => {
-          console.log('获取群组列表失败', err);
-        });
-  }, [rootStore.loginState, rootStore.conversationStore.conversationList.length]);
-  return groups;
+  const getJoinedGroupList = () => {
+    if (!hasNext) return;
+    client
+      .getJoinedGroups({
+        pageNum: pageNum,
+        pageSize,
+      })
+      .then(res => {
+        res?.data && addressStore.setGroups(res.data as any);
+        if ((res.data?.length || 0) === pageSize) {
+          pageNum++;
+          getJoinedGroupList();
+        } else {
+          addressStore.setHasGroupsNext(false);
+        }
+        eventHandler.dispatchSuccess('getJoinedGroups');
+      })
+      .catch(error => {
+        eventHandler.dispatchError('getJoinedGroups', error);
+      });
+  };
+
+  return {
+    getJoinedGroupList,
+  };
 };
 
-export { useContacts, useGroups, useUserInfo };
+const useGroupMembers = (groupId: string, withUserInfo: boolean) => {
+  if (!groupId) return {};
+  const pageSize = 20;
+  let pageNum = 1;
+  const { client, addressStore } = getStore();
+  const groupItem = getGroupItemFromGroupsById(groupId);
+  let hasNext = groupItem?.hasMembersNext;
+  if (hasNext === undefined) hasNext = true;
+
+  const getGroupMemberList = () => {
+    if (!hasNext) return;
+    return client
+      .listGroupMembers({
+        groupId,
+        pageNum: pageNum,
+        pageSize,
+      })
+      .then(res => {
+        res?.data && addressStore.setGroupMembers(groupId, res.data);
+        let userIds =
+          res.data?.map(item => {
+            // @ts-ignore
+            return item.owner || item.member;
+          }) || [];
+
+        userIds.length && useGroupMembersAttributes(groupId, userIds).getMemberAttributes();
+        if (withUserInfo == true) {
+          // appUsersInfo 里面有的用户信息不再去获取
+          const keys = Object.keys(addressStore.appUsersInfo);
+          userIds = userIds.filter(item => !keys.includes(item));
+          getUsersInfo({
+            userIdList: userIds,
+            withPresence: false,
+          }).catch(err => {
+            console.warn('get getUsersInfo failed', err);
+          });
+        }
+
+        if ((res.data?.length || 0) === pageSize) {
+          pageNum++;
+          getGroupMemberList();
+        } else {
+          addressStore.setGroupItemHasMembersNext(groupId, false);
+        }
+      });
+  };
+
+  return {
+    getGroupMemberList,
+  };
+};
+
+const useGroupMembersAttributes = (
+  groupId: string,
+  userIds: string[],
+  attributesKeys?: string[],
+) => {
+  const { client, addressStore } = getStore();
+
+  const getMemberAttributes = () => {
+    let groupUserIds = [];
+    if (userIds.length > 10) {
+      // 如果用户数量大于10，分组，每组10个userId去调用getMemberAttributes
+      for (let i = 0; i < userIds.length; i += 10) {
+        groupUserIds.push(userIds.slice(i, i + 10));
+      }
+    } else {
+      groupUserIds = [userIds];
+    }
+
+    groupUserIds.forEach(item => {
+      client
+        .getGroupMembersAttributes({
+          groupId,
+          userIds: item,
+          keys: attributesKeys,
+        })
+        .then(res => {
+          if (res.data) {
+            Object.keys(res.data).forEach(key => {
+              res?.data && addressStore.setGroupMemberAttributes(groupId, key, res.data[key]);
+            });
+          }
+        });
+    });
+    // client
+    //   .getGroupMembersAttributes({
+    //     groupId,
+    //     userIds,
+    //     keys: attributesKeys,
+    //   })
+    //   .then(res => {
+    //     if (res.data) {
+    //       Object.keys(res.data).forEach(key => {
+    //         res?.data && addressStore.setGroupMemberAttributes(groupId, key, res.data[key]);
+    //       });
+    //     }
+    //   });
+  };
+
+  return {
+    getMemberAttributes,
+  };
+};
+
+const useGroupAdmins = (groupId: string) => {
+  const { client, addressStore } = getStore();
+  const groupItem = getGroupItemFromGroupsById(groupId);
+  const getGroupAdmins = () => {
+    if (!groupItem?.admins) {
+      client
+        .getGroupAdmin({
+          groupId,
+        })
+        .then(res => {
+          addressStore.setGroupAdmins(groupId, res.data || []);
+          addressStore.setGroupMembers(
+            groupId,
+            (res.data || []).map(item => {
+              return {
+                member: item,
+              };
+            }),
+          );
+        });
+    }
+  };
+
+  return { getGroupAdmins };
+};
+
+export {
+  useContacts,
+  useGroups,
+  useUserInfo,
+  useGroupMembers,
+  useGroupAdmins,
+  useGroupMembersAttributes,
+};

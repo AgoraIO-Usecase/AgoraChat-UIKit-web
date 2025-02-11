@@ -1,42 +1,57 @@
 import { action, makeAutoObservable, makeObservable, observable } from 'mobx';
 import { observer } from 'mobx-react-lite';
 // import client from './agoraChatConfig';
-import MessageStore from './MessageStore';
-import ConversationStore from './ConversationStore';
-import AddressStore from './AddressStore';
-import { AgoraChat } from 'agora-chat';
-import { string } from 'prop-types';
-export interface InitConfig {
-  appKey: string;
-}
-export class RootStore {
+import MessageStore, { Message, SelectedMessage, Typing } from './MessageStore';
+import ConversationStore, {
+  AT_TYPE,
+  Conversation,
+  CurrentConversation,
+  ById,
+} from './ConversationStore';
+import AddressStore, { MemberRole, MemberItem, GroupItem, AppUserInfo } from './AddressStore';
+import ThreadStore, { ThreadData, CurrentThread } from './ThreadStore';
+import PinnedMessagesStore from './PinnedMessagesStore';
+import { ChatSDK } from 'module/SDK';
+import { clearPageNum } from '../hooks/useConversation';
+import { clearPageNum as chatroomClearPageNum } from '../hooks/useChatroomMember';
+import { ProviderProps } from '../store/Provider';
+type InitConfig =
+  | {
+      appKey: string;
+      appId?: string;
+    }
+  | {
+      appKey?: string;
+      appId: string;
+    };
+class RootStore {
   messageStore;
   conversationStore;
   addressStore;
-  client: AgoraChat.Connection;
+  threadStore;
+  pinnedMessagesStore;
+  client: ChatSDK.Connection;
   loginState = false;
-  initConfig = { appKey: '' };
+  initConfig: ProviderProps['initConfig'] = { appKey: '' };
   constructor() {
-    this.client = {} as AgoraChat.Connection;
+    this.client = {} as ChatSDK.Connection;
     this.messageStore = new MessageStore(this);
     this.conversationStore = new ConversationStore(this);
-    this.addressStore = new AddressStore(this);
-    // makeAutoObservable(this);
-
+    this.addressStore = new AddressStore();
+    this.threadStore = new ThreadStore(this);
+    this.pinnedMessagesStore = new PinnedMessagesStore();
     makeObservable(this, {
       client: observable,
       loginState: observable,
-      messageStore: observable,
-      conversationStore: observable,
-      addressStore: observable,
       setLoginState: action,
       setClient: action,
       initConfig: observable,
       setInitConfig: action,
+      clear: action,
     });
   }
 
-  setClient(client: AgoraChat.Connection) {
+  setClient(client: ChatSDK.Connection) {
     this.client = client;
   }
 
@@ -47,6 +62,15 @@ export class RootStore {
   setInitConfig(initConfig: InitConfig) {
     this.initConfig = initConfig;
   }
+  clear() {
+    this.messageStore.clear();
+    this.addressStore.clear();
+    this.conversationStore.clear();
+    this.threadStore.clear();
+    this.pinnedMessagesStore.clear();
+    clearPageNum();
+    chatroomClearPageNum();
+  }
 }
 let store: RootStore;
 export function getStore() {
@@ -56,5 +80,28 @@ export function getStore() {
   return store;
 }
 
-const store2 = getStore();
-export default store2;
+const rootStore = getStore();
+
+export type {
+  RootStore,
+  InitConfig,
+  MessageStore,
+  Message,
+  SelectedMessage,
+  Typing,
+  ConversationStore,
+  AT_TYPE,
+  Conversation,
+  CurrentConversation,
+  ById,
+  AddressStore,
+  MemberRole,
+  MemberItem,
+  GroupItem,
+  AppUserInfo,
+  ThreadStore,
+  ThreadData,
+  CurrentThread,
+};
+
+export default rootStore;

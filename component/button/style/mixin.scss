@@ -68,15 +68,15 @@
     border-radius: $border-radius;
 }
 
-@mixin button-variant-primary($color, $background, $backgroundHover: yellow, $backgroundActive: yellow) {
-    @include button-color($color, $background, $background);
+@mixin button-variant-primary($color, $background, $backgroundHover: yellow, $backgroundActive: yellow, $theme: light) {
+    @include button-color($color, $background, $backgroundHover);
     text-shadow: $btn-text-shadow;
     box-shadow: $btn-primary-shadow;
 
     &:hover,
     &:focus {
         @if $theme ==dark {
-            @include button-color($color, $blue-7, $blue-7)
+            @include button-color($blue-6, $gray-1, $blue-6)
         }
         @else if $theme == light {
             @include button-color($color, $blue-7, $blue-7)
@@ -85,14 +85,14 @@
 
     &:active {
         @if $theme ==dark {
-            @include button-color($color, $blue-5, $blue-5)
+            @include button-color($gray-98, $blue-2, $blue-6)
         }
         @else if $theme == light {
             @include button-color($color, $blue-5, $blue-5)
         }
     }
 
-    @include button-disabled()
+    @include button-disabled($theme)
 }
 
 
@@ -120,15 +120,17 @@
     @include button-variant-other($btn-ghost-bg, unset, $btn-ghost-bg);
     text-align: center;
     padding: 6px;
+    box-shadow: none!important;
+    border: none;
     &:hover,
     &:focus{
         background: $gray-95;
-        border: 1px solid transparent;
+        // border: 1px solid transparent;
     };
     &:active {
         text-decoration: none;
         background: $gray-9;
-        border: 1px solid transparent;
+        // border: 1px solid transparent;
     }
 }
 
@@ -141,7 +143,7 @@
     }
 }
 
-@mixin button-disabled($color: $btn-disable-color, $background: $btn-disable-bg, $border: $btn-disable-border) {
+@mixin button-disabled($theme: light, $color: $btn-disable-color, $background: $btn-disable-bg, $border: $btn-disable-border) {
     &[disabled] {
         @if $theme == light {
             &,
@@ -191,16 +193,16 @@
 }
 
 @mixin btn-round($btnClassName: btn) {
-    @include button-size($btn-circle-size, calc($btn-circle-size / 2), $font-size-base, $btn-circle-size);
+    @include button-size($btn-circle-size, $btn-padding-horizontal-base, $font-size-base, $btn-circle-size);
 
     &.#{$btnClassName}-large {
         @include button-size(
-          $btn-circle-size-lg, calc($btn-circle-size-lg / 2), $btn-font-size-lg, $btn-circle-size-lg
+          $btn-circle-size-lg, $btn-padding-horizontal-lg, $btn-font-size-lg, $btn-circle-size-lg
         );
     }
     &.#{$btnClassName}-small {
         @include button-size(
-          $btn-circle-size-sm, calc($btn-circle-size-sm / 2), $font-size-base, $btn-circle-size-sm
+          $btn-circle-size-sm, $btn-padding-horizontal-sm, $font-size-base, $btn-circle-size-sm
         );
     }
 }
@@ -223,4 +225,34 @@
     }
 }
 
+@mixin btn-dark() {
+    @include button-variant-primary($gray-95, $gray-1, $gray-4, $primary-color-active, dark);
+}
+
+@mixin btn-primary-dark(){
+    @include button-variant-primary($gray-95, $blue-6,$blue-6, $blue-7, dark);
+    &:hover,
+    &:focus {
+            @include button-color($gray-95, $blue-7, $blue-7)
+    }
+
+    &:active {
+        @include button-color($gray-98, $blue-5, $blue-5)
+    }
+    
+}
+
+@mixin btn-text-dark(){
+    @include button-variant-other($blue-6, unset, $btn-ghost-bg);
+    &:hover,
+    &:focus{
+        background: $blue-1;
+        // border: 1px solid transparent;
+    };
+    &:active {
+        text-decoration: none;
+        background: $blue-2;
+        // border: 1px solid transparent;
+    }
+}
 @import '~/common/style/index.scss';
