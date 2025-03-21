@@ -237,6 +237,7 @@ let MoreAction = (props: MoreActionProps) => {
         (sendMsg as any).url = data.url;
         messageStore.modifyMessage(imageMessage.id, sendMsg);
       },
+      isGif: file.filename.endsWith('.gif'),
     } as ChatSDK.CreateImgMsgParameters;
     const imageMessage = chatSDK.message.create(option);
 
