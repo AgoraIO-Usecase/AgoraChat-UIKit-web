@@ -80,7 +80,7 @@ const AudioMessage = (props: AudioMessageProps) => {
     className,
   );
 
-  const [sourceUrl, setUrl] = useState('');
+  const [sourceUrl, setUrl] = useState<string | null>(null);
   useEffect(() => {
     if (!audioMessage.url) return;
     const options = {

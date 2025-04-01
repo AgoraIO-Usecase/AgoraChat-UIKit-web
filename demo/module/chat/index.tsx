@@ -315,7 +315,7 @@ const ChatApp: FC<any> = () => {
                 }}
                 headerProps={{
                   moreAction: {
-                    visible: false,
+                    visible: true,
                     actions: [{ content: '' }],
                   },
                   suffixIcon: [

@@ -28,7 +28,7 @@ export interface AvatarProps {
     text?: string;
     icon?: HTMLImageElement | string;
   };
-  onClick?: (e?: React.MouseEvent<HTMLElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
   /* callback when img load error */
   /* return false to prevent Avatar show default fallback behavior, then you can do fallback by your self */
   onError?: () => boolean;
