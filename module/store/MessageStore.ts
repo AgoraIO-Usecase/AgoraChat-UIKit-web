@@ -548,9 +548,21 @@ class MessageStore {
         const conversationId = getCvsIdFromMessage(msg as BaseMessageType);
         // @ts-ignore
         msg.status = status;
+        let i: number;
         // @ts-ignore
-        const i = this.message[msg.chatType][conversationId]?.indexOf(msg); // 聊天室没发送成功的消息不会存，会找不到这个会话或消息
-        if (typeof i === 'undefined' || i == -1) return;
+        const hasMsg = this.message[msg.chatType][conversationId]?.find((item, index) => {
+          // @ts-ignore
+          if (item.id == msgId || item.mid == msgId) {
+            i = index;
+            return true;
+          }
+        });
+        if (!hasMsg) {
+          return;
+        }
+        // @ts-ignore
+        // const i = this.message[msg.chatType][conversationId]?.indexOf(msg); // 聊天室没发送成功的消息不会存，会找不到这个会话或消息
+        // if (typeof i === 'undefined' || i == -1) return;
         // @ts-ignore
         this.message[msg.chatType][conversationId].splice(i, 1, msg);
         // this.message[chatType][to][i] = msg;
