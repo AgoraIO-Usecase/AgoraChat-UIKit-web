@@ -500,10 +500,12 @@ let Chat = forwardRef((props: ChatProps, ref) => {
   const handleInvite = async (data: { channel: string; type: number; callerIMName: string }) => {
     if (!getRTCToken) return console.error('need getRTCToken method to get token');
     rtcConfig?.onRing?.(data);
-    const { agoraUid, accessToken } = await getRTCToken({
-      channel: data.channel,
-      chatUserId: rootStore.client.user,
-    });
+    const { agoraUid, accessToken } =
+      (await getRTCToken({
+        channel: data.channel,
+        chatUserId: rootStore.client.user,
+      })) || {};
+    if (!accessToken) return;
     // --- 单人音视频被邀请方接听页面显示对方信息 --
     const idMap =
       (await rtcConfig?.getIdMap?.({
@@ -540,11 +542,12 @@ let Chat = forwardRef((props: ChatProps, ref) => {
   const startVideoCall = async (type: 'video' | 'audio') => {
     if (!getRTCToken) return console.error('need getRTCToken method to get token');
     const channel = String(Math.ceil(Math.random() * 100000000));
-    const { agoraUid, accessToken } = await getRTCToken({
-      channel: channel,
-      chatUserId: rootStore.client.user,
-    });
-
+    const { agoraUid, accessToken } =
+      (await getRTCToken({
+        channel: channel,
+        chatUserId: rootStore.client.user,
+      })) || {};
+    if (!accessToken) return;
     if (type == 'video') {
       onVideoCall?.({
         channel,

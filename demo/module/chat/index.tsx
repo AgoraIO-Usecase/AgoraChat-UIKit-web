@@ -424,8 +424,8 @@ ReactDOM.createRoot(document.getElementById('chatRoot') as Element).render(
     <Provider
       initConfig={{
         appKey: appKey || 'easemob#easeim',
-        userId: userId || 'sttest',
-        password: password || '123',
+        userId: userId || 'zd1',
+        password: password || '1',
         useUserInfo: true,
         maxMessages: 100,
       }}

@@ -992,7 +992,7 @@ class MessageStore {
         modifiedMessage: msg,
       })
       .then(res => {
-        this.modifyLocalMessage(messageId, res.message);
+        this.modifyLocalMessage(messageId, res.message as ChatSDK.ExcludeAckMessageBody);
         eventHandler.dispatchSuccess('modifyMessage');
       })
       .catch(err => {

@@ -136,6 +136,8 @@ const Provider: React.FC<ProviderProps> = props => {
     useReplacedMessageContents,
     isFixedDeviceId,
     useOwnUploadFun,
+    //@ts-ignore
+    uikitVersion: '1.6.0',
   };
 
   if (appKey) {
