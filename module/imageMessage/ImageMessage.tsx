@@ -374,6 +374,7 @@ const ImageMessage = (props: ImageMessageProps) => {
             src={imgUrl}
             alt={message.file?.filename}
             onClick={() => handleClickImg(message.url || renderImgUrl)}
+            crossOrigin="anonymous"
             {...imgProps}
           />
         </div>
