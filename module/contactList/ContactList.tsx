@@ -277,17 +277,21 @@ let ContactList: FC<ContactListProps> = props => {
         );
       }
       if (!contacts) return <div key="no"></div>;
+      let itemCount = 0;
+      if (menuItem == 'contacts') {
+        itemCount = addressStore.contacts.length;
+      } else if (menuItem == 'groups') {
+        itemCount = addressStore.groups.length;
+      } else {
+        itemCount = renderData[menuItem as 'contacts' | 'groups']?.length;
+      }
 
       return (
         <ContactGroup
           title={t(menuItem) as string}
           key={menuItem}
-          unreadCount={
-            menuItem == 'contacts' ? addressStore.contacts.length : addressStore.groups.length
-          }
-          itemCount={
-            menuItem == 'contacts' ? addressStore.contacts.length : addressStore.groups.length
-          }
+          unreadCount={itemCount}
+          itemCount={itemCount}
           itemHeight={74}
           hasMenu={hasMenu || menu.length !== 1}
         >
