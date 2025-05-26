@@ -360,8 +360,8 @@ const ImageMessage = (props: ImageMessageProps) => {
           {/* {img.current} */}
           <img
             ref={imgRef}
-            // width={75}
-            // height={75}
+            width={message.width}
+            height={message.height}
             onError={function () {
               //@ts-ignore
               setImgUrl(defaultImg);
