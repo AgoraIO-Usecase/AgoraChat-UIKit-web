@@ -66,7 +66,7 @@ export function getCvsIdFromMessage(message: BaseMessageType | NoticeMessageBody
 }
 
 export function getEmojiHtml({ src = '', dataKey = '', alt = '' }) {
-  return `<span><img  src=${src} data-key=${dataKey} alt=${alt} width="20" height="20" style="vertical-align: middle" /></span>`;
+  return `<span><img  crossOrigin="anonymous" src=${src} data-key=${dataKey} alt=${alt} width="20" height="20" style="vertical-align: middle" /></span>`;
 }
 
 export const renderHtml = (txt: string): string => {

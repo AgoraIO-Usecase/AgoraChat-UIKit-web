@@ -132,7 +132,7 @@ const MessageInput = (props: MessageInputProps) => {
       i.focus(),
         // @ts-ignore
         (n = document.selection.createRange()).pasteHTML(
-          '<img class="emoj-insert" draggable="false" data-key="' +
+          '<img class="emoj-insert" crossOrigin="anonymous" draggable="false" data-key="' +
             e +
             '" title="' +
             e.replace('[', '').replace(']', '') +

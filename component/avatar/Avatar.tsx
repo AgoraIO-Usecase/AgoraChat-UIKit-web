@@ -67,7 +67,7 @@ export const InternalAvatar = (props: any, ref: any) => {
     alt,
     children,
     draggable,
-    crossOrigin,
+    crossOrigin = 'anonymous',
     srcSet,
     isOnline,
     presence,
@@ -203,7 +203,7 @@ export const InternalAvatar = (props: any, ref: any) => {
             {React.isValidElement(presence.icon) ? (
               presence.icon
             ) : (
-              <img alt={presence.text} src={presence.icon} />
+              <img alt={presence.text} src={presence.icon} crossOrigin={crossOrigin} />
             )}
           </div>
         </Tooltip>
