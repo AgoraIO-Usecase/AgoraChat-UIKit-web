@@ -308,6 +308,10 @@ const ChatApp: FC<any> = () => {
                     formatDateTime: (time: number) => {
                       return new Date(time).toLocaleString();
                     },
+                    onClick: msg => {
+                      console.log('msg', msg);
+                      return false; // preventDefault: false, Do not block default behavior
+                    },
                   },
                 }}
                 messageInputProps={{

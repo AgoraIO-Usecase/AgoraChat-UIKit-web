@@ -88,6 +88,7 @@ export interface BaseMessageProps {
   onClickThreadTitle?: () => void;
   reactionConfig?: ReactionMessageProps['reactionConfig'];
   formatDateTime?: (time: number) => string;
+  onClick?: (message: ChatSDK.MessageBody) => boolean; // 点击时是否阻止默认事件
 }
 
 const msgSenderIsCurrentUser = (message: BaseMessageType) => {

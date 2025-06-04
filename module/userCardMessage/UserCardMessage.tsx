@@ -22,7 +22,7 @@ export interface UserCardMessageProps extends BaseMessageProps {
   style?: React.CSSProperties;
   className?: string;
   type?: 'primary' | 'secondly';
-  onClick?: (url: string) => void;
+  // onClick?: (url: string) => void;
   bubbleClass?: string;
   nickName?: string;
   renderUserProfile?: (props: renderUserProfileProps) => React.ReactNode;
