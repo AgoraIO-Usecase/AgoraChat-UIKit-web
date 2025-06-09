@@ -502,7 +502,7 @@ class MessageStore {
     }
 
     // 更新最后一条消息，置顶
-    const lastTime = cvs.lastMessage.time;
+    const lastTime = cvs.lastMessage?.time || 0;
     // @ts-ignore
     if (lastTime < message.time && !isCurrentCvs) {
       cvs.unreadCount = cvs.unreadCount + 1;
