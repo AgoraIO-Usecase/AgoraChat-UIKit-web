@@ -167,7 +167,7 @@ const MessageInput = (props: MessageInputProps) => {
     const src = new URL(`/module/assets/reactions/${emoji.map[emojiString]}`, import.meta.url).href;
     insertCustomHtml(src, emojiString);
 
-    // setInputHaveValue(false);
+    setInputHaveValue(true);
   };
   const {
     actions = defaultActions,
