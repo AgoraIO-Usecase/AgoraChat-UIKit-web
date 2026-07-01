@@ -20,6 +20,7 @@ import Custom from '../assets/presence/custom2.png';
 
 export interface ProviderProps {
   initConfig: {
+    appKey: string;
     userId?: string;
     token?: string;
     password?: string;
@@ -33,16 +34,7 @@ export interface ProviderProps {
     maxMessages?: number; // 单个会话显示最大消息数，超出后会自动清除，默认200，清除的消息可通过拉取更多消息获取
     isFixedDeviceId?: boolean;
     useOwnUploadFun?: boolean;
-  } & (
-    | {
-        appKey: string;
-        appId?: string;
-      }
-    | {
-        appKey?: string;
-        appId: string;
-      }
-  );
+  };
   local?: {
     fallbackLng?: string;
     lng?: string;
@@ -125,7 +117,6 @@ const Provider: React.FC<ProviderProps> = props => {
   const { initConfig, local, features, reactionConfig, theme, presenceMap } = props;
   const {
     appKey,
-    appId,
     msyncUrl,
     restUrl,
     isHttpDNS = true,
@@ -145,18 +136,17 @@ const Provider: React.FC<ProviderProps> = props => {
     useReplacedMessageContents,
     isFixedDeviceId,
     useOwnUploadFun,
+    //@ts-ignore
+    uikitVersion: '1.6.0',
   };
 
   if (appKey) {
     initOptions.appKey = appKey;
-  } else if (appId) {
-    //@ts-ignore
-    initOptions.appId = appId;
   }
 
   const client = useMemo(() => {
     return new chatSDK.connection(initOptions);
-  }, [appKey, appId]);
+  }, [appKey]);
 
   rootStore.setClient(client);
   rootStore.setInitConfig(initConfig);

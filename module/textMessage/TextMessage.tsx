@@ -44,7 +44,11 @@ export interface TextMessageProps extends BaseMessageProps {
   showEditedTag?: boolean;
 }
 
-export const renderTxt = (txt: string | undefined | null, parseUrl: boolean = true) => {
+export const renderTxt = (
+  txt: string | undefined | null,
+  parseUrl: boolean = true,
+  onClick: (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void,
+) => {
   const urlRegex = /(https?:\/\/\S+)/gi;
   if (txt === undefined || txt === null) {
     return [];
@@ -73,6 +77,7 @@ export const renderTxt = (txt: string | undefined | null, parseUrl: boolean = tr
           style={{
             verticalAlign: 'text-top',
           }}
+          crossOrigin="anonymous"
         />,
       );
     } else {
@@ -86,6 +91,7 @@ export const renderTxt = (txt: string | undefined | null, parseUrl: boolean = tr
       if (urlRegex.test(text!.toString())) {
         const replacedText = reactStringReplace(text?.toString() || '', urlRegex, (match, i) => (
           <a
+            onClick={onClick}
             key={match + i}
             target="_blank"
             rel="noopener noreferrer"
@@ -158,6 +164,7 @@ let TextMessage = (props: TextMessageProps) => {
     onlyContent = false,
     onOpenThreadPanel,
     showEditedTag = true,
+    onClick,
     ...others
   } = props;
   if (!textMessage.chatType) return null;
@@ -490,11 +497,17 @@ let TextMessage = (props: TextMessageProps) => {
     onOpenThreadPanel?.(textMessage.chatThreadOverview?.id || '');
   };
   const [currentIndex, setCurrentIndex] = useState(0);
+  const handleClickUrl = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    const preventDefault = onClick?.(textMessage);
+    if (preventDefault === true) {
+      e.preventDefault();
+    }
+  };
   useEffect(() => {
     if ((textMessage as any).printed != false) {
       return;
     }
-    const msgArr = renderTxt(msg, true);
+    const msgArr = renderTxt(msg, true, handleClickUrl);
     const message = (msgArr.length > 1 ? msgArr : msgArr[0] || '') as string[] | string;
     if (currentIndex >= message.length) {
       return;
@@ -517,7 +530,7 @@ let TextMessage = (props: TextMessageProps) => {
     <>
       {onlyContent ? (
         <div className={urlData?.title || urlData?.description ? `${prefixCls}-url-container` : ''}>
-          <span className={classString}>{renderTxt(msg, true)}</span>
+          <span className={classString}>{renderTxt(msg, true, handleClickUrl)}</span>
           {(urlData?.title || urlData?.description) && (
             <UrlMessage {...urlData} isLoading={isFetching}></UrlMessage>
           )}
@@ -535,7 +548,7 @@ let TextMessage = (props: TextMessageProps) => {
                 <span className={`${transPrefix}-text`}>
                   {
                     // @ts-ignore
-                    renderTxt(textMessage.translations?.[0]?.text, true)
+                    renderTxt(textMessage.translations?.[0]?.text, true, handleClickUrl)
                   }
                 </span>
                 <div className={`${transPrefix}-action`}>
@@ -583,7 +596,9 @@ let TextMessage = (props: TextMessageProps) => {
               className={urlData?.title || urlData?.description ? `${prefixCls}-url-container` : ''}
             >
               <span className={classString} style={{ ...style }}>
-                {(textMessage as any).printed == false ? text : renderTxt(msg, true)}
+                {(textMessage as any).printed == false
+                  ? text
+                  : renderTxt(msg, true, handleClickUrl)}
               </span>
               {(urlData?.title || urlData?.description) && (
                 <UrlMessage {...urlData} isLoading={isFetching}></UrlMessage>
@@ -601,7 +616,7 @@ let TextMessage = (props: TextMessageProps) => {
                     <span className={`${transPrefix}-text`}>
                       {
                         // @ts-ignore
-                        renderTxt(textMessage.translations?.[0]?.text, true)
+                        renderTxt(textMessage.translations?.[0]?.text, true, handleClickUrl)
                       }
                     </span>
                     <div className={`${transPrefix}-action`}>

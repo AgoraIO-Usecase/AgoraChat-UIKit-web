@@ -38,6 +38,7 @@ const AudioMessage = (props: AudioMessageProps) => {
     thread,
     onlyContent = false,
     bubbleClass,
+    onClick,
     ...others
   } = props;
 
@@ -80,7 +81,7 @@ const AudioMessage = (props: AudioMessageProps) => {
     className,
   );
 
-  const [sourceUrl, setUrl] = useState('');
+  const [sourceUrl, setUrl] = useState<string | null>(null);
   useEffect(() => {
     if (!audioMessage.url) return;
     const options = {
@@ -97,6 +98,8 @@ const AudioMessage = (props: AudioMessageProps) => {
     chatSDK.utils.download.call(rootStore.client, options);
   }, [audioMessage.url]);
   const playAudio = () => {
+    const preventDefault = onClick && onClick(audioMessage);
+    if (preventDefault === true) return;
     setPlayStatus(true);
     console.log('audioRef', audioRef.current);
     (audioRef as unknown as React.MutableRefObject<HTMLAudioElement>).current.play().catch(err => {

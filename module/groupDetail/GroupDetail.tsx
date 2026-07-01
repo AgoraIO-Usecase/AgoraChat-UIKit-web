@@ -40,7 +40,6 @@ export interface GroupDetailProps {
   groupMemberProps?: GroupMemberProps;
   onLeaveGroup?: () => void;
   onDestroyGroup?: () => void;
-  // 是否显示群成员列表
   onGroupMemberVisibleChange?: (visible: boolean) => void;
 }
 

@@ -18,7 +18,7 @@ import { getUsersInfo } from '../utils/index';
 import Modal from '../../component/modal';
 import Checkbox from '../../component/checkbox';
 import { ChatroomInfo } from '../store/AddressStore';
-import { TextMessageType } from 'chatuim2/types/module/types/messageType';
+import type { TextMessageType } from '../types/messageType';
 import { eventHandler } from '../../eventHandler';
 import PinnedTextMessage from '../pinnedTextMessage';
 import { usePinnedMessage } from '../hooks/usePinnedMessage';

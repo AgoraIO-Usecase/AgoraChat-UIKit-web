@@ -11,14 +11,14 @@ import List from '../../../component/list';
 
 class Test extends React.Component {
   state: { num: { a: number } };
-  constructor(props) {
+  constructor(props: any) {
     super(props);
     this.state = {
       num: { a: 1 },
     };
   }
   handleClick() {
-    let num2 = this.state.num;
+    const num2 = this.state.num;
     num2.a++;
     this.setState({
       num: num2,
@@ -37,7 +37,7 @@ class Test extends React.Component {
 
 ReactDOM.createRoot(document.getElementById('msgListRoot') as Element).render(
   <div className="container">
-    <TextMessage textMessage={{}}>asda ad adasddq ad das daq asd sdfdsf23f fw f</TextMessage>
+    <TextMessage>asda ad adasddq ad das daq asd sdfdsf23f fw f</TextMessage>
     <Test></Test>
     <List height={150} itemCount={100} itemSize={30}>
       {List.Row}

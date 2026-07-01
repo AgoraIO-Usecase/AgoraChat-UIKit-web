@@ -1,37 +1,35 @@
-/* eslint-disable no-var */
-// @ts-nocheck
 function hexToRgb(hex: string) {
   // 判断颜色值是否符合对应格式
-  const reg = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
-  const result = reg.exec(hex);
+  var reg = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
+  var result = reg.exec(hex);
   if (!result) {
     return null;
   }
 
   // 将颜色值转化为RGB颜色值
-  const r = parseInt(result[1], 16);
-  const g = parseInt(result[2], 16);
-  const b = parseInt(result[3], 16);
+  var r = parseInt(result[1], 16);
+  var g = parseInt(result[2], 16);
+  var b = parseInt(result[3], 16);
 
   return [r, g, b];
 }
 
 function rgbToHsla(rgb: number[]) {
   // 将RGB值转化为0-1之间的比例值
-  const r = rgb[0] / 255;
-  const g = rgb[1] / 255;
-  const b = rgb[2] / 255;
+  var r = rgb[0] / 255;
+  var g = rgb[1] / 255;
+  var b = rgb[2] / 255;
 
   // 计算最大、最小颜色分量值和亮度值
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
+  var max = Math.max(r, g, b);
+  var min = Math.min(r, g, b);
   var h,
     s,
     l = (max + min) / 2;
 
   // 计算饱和度值
   var s: any = 0;
-  let d = 0;
+  var d = 0;
   if (max !== min) {
     d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
@@ -55,14 +53,14 @@ function rgbToHsla(rgb: number[]) {
   }
 
   // 计算透明度值，默认为1（不透明）
-  const a = 1;
+  var a = 1;
   // 转换hsl为hsla
   const hsla = `hsla(${Math.round(h * 360)},${Math.round(s * 100)}%,${Math.round(l * 100)}%,1)`;
   return hsla; //[h, s, l, a];
 }
 
 function hexToHsla(hex: string) {
-  const rgb = hexToRgb(hex);
+  var rgb = hexToRgb(hex);
   if (rgb === null) {
     return null;
   }
@@ -71,20 +69,20 @@ function hexToHsla(hex: string) {
 }
 
 // console.log(hexToHsla('#ffffff'));
-// [0, 1, 0.5, 1]
+//  [0, 1, 0.5, 1]
 
 function generateColors(
   baseColor: string,
   lights: number[] = [-50, -40, -30, -20, -10, 0, 10, 20, 30, 35, 38, 40],
 ) {
-  const colorArr = baseColor.split(',');
-  const lightness = parseInt(colorArr[2]);
-  const colors = [];
+  var colorArr = baseColor.split(',');
+  var lightness = parseInt(colorArr[2]);
+  var colors = [];
 
-  for (let i = 0; i < lights.length; i++) {
-    const light = lightness + lights[i];
+  for (var i = 0; i < lights.length; i++) {
+    var light = lightness + lights[i];
     colorArr[2] = light + '%';
-    const color = colorArr.join(',');
+    var color = colorArr.join(',');
     colors.push(color);
   }
   setGlobalColors(colors);

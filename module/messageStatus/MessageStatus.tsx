@@ -45,7 +45,11 @@ const MessageStatus = (props: MessageStatusProps) => {
   switch (status) {
     case 'sending':
       statusNode =
-        type == 'icon' ? <img alt="sending" src={sending as unknown as string}></img> : '发送中';
+        type == 'icon' ? (
+          <img alt="sending" src={sending as unknown as string} crossOrigin="anonymous"></img>
+        ) : (
+          '发送中'
+        );
       break;
     case 'sent':
       statusNode = type == 'icon' ? <Icon type="CHECK" width={20} height={20}></Icon> : '已发送';
