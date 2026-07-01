@@ -55,7 +55,6 @@ const PinnedTextMessage = (props: PinnedTextMessageProps) => {
       const lineHeight = parseInt(window.getComputedStyle(textRef.current).lineHeight, 10);
       const maxHeight = lineHeight * 2; // 两行的最大高度
       const actualHeight = textRef.current.scrollHeight; // 实际内容高度
-      console.log('actualHeight', actualHeight, 'maxHeight', maxHeight);
       if (actualHeight > maxHeight) {
         setIsOverflowing(true); // 内容超过两行, 显示展开按钮
         setIsEllipsis(true); // 默认显示省略号
@@ -80,7 +79,6 @@ const PinnedTextMessage = (props: PinnedTextMessageProps) => {
     });
 
   const handleUnpinMessage = () => {
-    console.log('unpin message', props.message);
     // @ts-ignore
     unpinMessage(props.message.message.mid || props.message.message.id);
     clearPinnedMessages();

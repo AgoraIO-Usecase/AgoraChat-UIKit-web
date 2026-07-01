@@ -156,7 +156,6 @@ let Chatroom = (props: ChatroomProps) => {
         // rootStore.client
         //   .getChatRoomAdmin({ chatRoomId: chatroomId })
         //   .then(res => {
-        //     console.log('聊天室管理员', res);
         //     rootStore.addressStore.setChatroomAdmins(chatroomId, res.data || []);
         //   })
         // 加入之后再获取详情， 防止获取到的人数没有包含自己

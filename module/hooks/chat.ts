@@ -326,14 +326,11 @@ const useEventHandler = (props: ProviderProps) => {
         }
       },
       onContactDeleted: message => {
-        console.log('onContactDeleted', message);
         const { addressStore } = rootStore;
         addressStore.deleteContactFromContactList(message.from);
         // addressStore.removeContact(message.from);
       },
       onContactAdded: message => {
-        console.log('onContactAdded', message);
-
         const { addressStore } = rootStore;
         const presence = features?.conversationList?.item?.presence ?? false;
         addressStore.addContactToContactList(message.from, presence);
@@ -345,7 +342,6 @@ const useEventHandler = (props: ProviderProps) => {
         addressStore.addContactToContactList(message.from, presence);
       },
       onMultiDeviceEvent: message => {
-        console.log('onMultiDeviceEvent', message);
         if (message.operation === 'setSilentModeForConversation') {
           rootStore.conversationStore.setSilentModeForConversationSync(
             {

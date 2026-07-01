@@ -1,3 +1,3 @@
-import easemobChat, { EasemobChat } from 'easemob-websdk';
+import agoraChat, { AgoraChat } from 'agora-chat';
 
-export { easemobChat as chatSDK, EasemobChat as ChatSDK };
+export { agoraChat as chatSDK, AgoraChat as ChatSDK };

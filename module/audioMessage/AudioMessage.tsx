@@ -101,7 +101,6 @@ const AudioMessage = (props: AudioMessageProps) => {
     const preventDefault = onClick && onClick(audioMessage);
     if (preventDefault === true) return;
     setPlayStatus(true);
-    console.log('audioRef', audioRef.current);
     (audioRef as unknown as React.MutableRefObject<HTMLAudioElement>).current.play().catch(err => {
       console.error('err', err);
       setPlayStatus(false);

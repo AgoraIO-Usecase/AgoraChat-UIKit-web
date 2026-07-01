@@ -14,7 +14,7 @@ import Avatar from '../../component/avatar';
 import Icon from '../../component/icon';
 import { MessageList } from '../../module/chat/MessageList';
 import MessageEditor from '../../module/messageInput';
-import TextMessage from '../../module/textMessage';
+import { TextMessage } from '../../module/textMessage';
 import './index.css';
 import { useSDK } from '../../module/hooks/useSDK';
 
@@ -25,8 +25,8 @@ const ChatApp = () => {
     client &&
       client
         .open({
-          user: '13681272809',
-          pwd: '272809',
+          user: 'zd1',
+          pwd: '1',
         })
         .then(res => {
           console.log('获取token成功', res, rootStore.client);
@@ -121,7 +121,7 @@ ReactDOM.createRoot(document.getElementById('chatRoot') as Element).render(
   <div className="container">
     <Provider
       initConfig={{
-        appKey: 'easemob#easeim',
+        appKey: 'easemob-demo#chatdemoui',
       }}
     >
       <ChatApp></ChatApp>

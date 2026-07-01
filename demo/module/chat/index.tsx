@@ -427,7 +427,7 @@ ReactDOM.createRoot(document.getElementById('chatRoot') as Element).render(
   >
     <Provider
       initConfig={{
-        appKey: appKey || 'easemob#easeim',
+        appKey: appKey || 'easemob-demo#chatdemoui',
         userId: userId || 'zd1',
         password: password || '1',
         useUserInfo: true,

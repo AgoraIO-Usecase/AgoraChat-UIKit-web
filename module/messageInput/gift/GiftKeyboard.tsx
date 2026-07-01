@@ -81,7 +81,6 @@ const GiftKeyboard = (props: GiftKeyboardProps) => {
     giftPrice: string;
     giftCount: number;
   }) => {
-    console.log('conversation', conversation);
     if (!currentConversation) {
       throw new Error('currentConversation is null');
     }
@@ -103,7 +102,6 @@ const GiftKeyboard = (props: GiftKeyboardProps) => {
 
   const [selectedIndex, setIndex] = useState<string | number>('');
   const handleClick = (giftId: string | number) => {
-    console.log('e', giftId);
     setIndex(giftId);
     // sendGiftMessage(giftId as string);
   };

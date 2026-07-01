@@ -629,7 +629,6 @@ class MessageStore {
     };
     // delete local message
     if (localMsgIds.length > 0) {
-      // console.log('删本地');
       return _deleteMessage(localMsgIds);
     }
     // delete server message
@@ -640,7 +639,6 @@ class MessageStore {
         messageIds: msgIds,
       })
       .then(() => {
-        // console.log('删服务器');
         _deleteMessage(msgIds);
         const conversation: Conversation = this.rootStore.conversationStore.getConversation(
           // @ts-ignore

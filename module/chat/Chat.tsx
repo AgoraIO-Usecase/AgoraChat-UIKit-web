@@ -488,7 +488,6 @@ let Chat = forwardRef((props: ChatProps, ref) => {
         //   };
         // });
         // if (idMap && Object.keys(idMap).length > 0) {
-        //   console.log('有人加入时设置', idMap, userInfo);
         //   CallKit.setUserIdMap(idMap);
         //   CallKit.setUserInfo(userInfo);
         // }
